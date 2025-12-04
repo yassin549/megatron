@@ -659,4 +659,742 @@ datasource db {
 }
 ```
 
-**(Continue in next section...)**
+**Complete Prisma Schema** (see masterplan.txt Section 7 for field descriptions):
+
+Key tables:
+- `User`: Auth + wallets (hot/cold balance)
+- `Asset`: Metadata + pricing params + status  
+- `LiquidityPool`: LP capital tracking
+- `LPShare`: LP ownership + vesting
+- `Trade`: All transactions
+- `Position`: User holdings per asset
+- `Ledger`: Immutable audit log
+- `PriceTick`: Time-series price data
+- `OracleLog`: LLM analysis history
+
+**Indexes**: Foreign keys, timestamps, composite (userId+assetId)
+
+### Task 1.2: Database Client Setup
+
+**Create Client Export** (`packages/database/src/client.ts`):
+```typescript
+import { PrismaClient } from '@prisma/client';
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const db = globalForPrisma.prisma || new PrismaClient({
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+});
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
+```
+
+**Package.json** (`packages/database/package.json`):
+```json
+{
+  "name": "@megatron/database",
+  "version": "1.0.0",
+  "main": "./src/client.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.7.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.7.0"
+  }
+}
+```
+
+### Task 1.3: Seed Data (Dev Only)
+
+**Seed Script** (`packages/database/prisma/seed.ts`):
+```typescript
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
+
+const prisma = new PrismaClient();
+
+async function main() {
+  // Admin user
+  const admin = await prisma.user.upsert({
+    where: { email: 'admin@megatron.dev' },
+    update: {},
+    create: {
+      email: 'admin@megatron.dev',
+      passwordHash: await bcrypt.hash('admin123', 10),
+      isAdmin: true,
+      walletHotBalance: 100000 // Test balance
+    }
+  });
+  
+  // Test users
+  for (let i = 1; i <= 5; i++) {
+    await prisma.user.upsert({
+      where: { email: `user${i}@test.com` },
+      update: {},
+      create: {
+        email: `user${i}@test.com`,
+        passwordHash: await bcrypt.hash('password123', 10),
+        walletHotBalance: 10000
+      }
+    });
+  }
+  
+  console.log('✅ Seed data created');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
+```
+
+**Run seed**:
+```bash
+npx prisma db seed
+```
+
+## Acceptance Criteria (Milestone 1)
+
+✅ **Schema**:
+- [ ] All 12+ tables created in Neon
+- [ ] Migrations run successfully
+- [ ] Indexes created on all foreign keys
+
+✅ **Testing**:
+- [ ] Can create/read User via Prisma client
+- [ ] Can create Asset with valid pricing params
+- [ ] Seed script populates test data
+
+✅ **Documentation**:
+- [ ] Schema documented in README
+- [ ] Entity relationship diagram created
+
+---
+
+# MILESTONE 2 — Authentication & Basic API
+
+**Duration**: 2-3 days  
+**Goal**: Users can signup/login, view balance, see deposit address
+
+## Reference
+See masterplan.txt Section 8 for API endpoint specifications.
+
+## Tasks
+
+### Task 2.1: NextAuth Setup
+
+**Install Dependencies** (`apps/web`):
+```bash
+pnpm add next-auth bcryptjs
+pnpm add -D @types/bcryptjs
+```
+
+**NextAuth Config** (`app/api/auth/[...nextauth]/route.ts`):
+```typescript
+import NextAuth from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { db } from '@megatron/database';
+import * as bcrypt from 'bcryptjs';
+
+const handler = NextAuth({
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        const user = await db.user.findUnique({
+          where: { email: credentials.email }
+        });
+        
+        if (!user) return null;
+        if (user.isBlacklisted) return null;
+        
+        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+        if (!isValid) return null;
+        
+        return {
+          id: user.id,
+          email: user.email,
+          isAdmin: user.isAdmin
+        };
+      }
+    })
+  ],
+  session: {
+    strategy: 'jwt',
+  },
+  pages: {
+    signIn: '/login',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.isAdmin = user.isAdmin;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.sub!;
+        session.user.isAdmin = token.isAdmin as boolean;
+      }
+      return session;
+    }
+  }
+});
+
+export { handler as GET, handler as POST };
+```
+
+### Task 2.2: API Routes
+
+**User Info** (`app/api/user/me/route.ts`):
+```typescript
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { db } from '@megatron/database';
+
+export async function GET(req: Request) {
+  const session = await getServerSession();
+  
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      email: true,
+      walletHotBalance: true,
+      walletColdBalance: true,
+      depositAddress: true,
+      isBlacklisted: true
+    }
+  });
+  
+  if (!user || user.isBlacklisted) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+  
+  return NextResponse.json(user);
+}
+```
+
+**Signup** (`app/api/auth/signup/route.ts`):
+```typescript
+import { NextResponse } from 'next/server';
+import { db } from '@megatron/database';
+import * as bcrypt from 'bcryptjs';
+
+export async function POST(req: Request) {
+  const { email, password } = await req.json();
+  
+  // Validation
+  if (!email || !password || password.length < 8) {
+    return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+  }
+  
+  // Check existing
+  const existing = await db.user.findUnique({ where: { email } });
+  if (existing) {
+    return NextResponse.json({ error: 'Email already exists' }, { status: 409 });
+  }
+  
+  // Create user
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await db.user.create({
+    data: {
+      email,
+      passwordHash: hashedPassword,
+      depositAddress: await generateDepositAddress(email) // Placeholder
+    },
+    select: {
+      id: true,
+      email: true
+    }
+  });
+  
+  return NextResponse.json({ user }, { status: 201 });
+}
+
+async function generateDepositAddress(email: string): Promise<string> {
+  // TODO: Implement in Milestone 5
+  // For now, return placeholder
+  return `0x${Buffer.from(email).toString('hex').substring(0, 40)}`;
+}
+```
+
+## Acceptance Criteria (Milestone 2)
+
+✅ **Auth**:
+- [ ] Signup creates user with hashed password
+- [ ] Login returns session
+- [ ] Protected routes require auth
+
+✅ **API**:
+- [ ] GET /api/user/me returns user data
+- [ ] Blacklisted users cannot login
+
+---
+
+# MILESTONE 3 — Bonding Curve Exchange
+
+**Duration**: 4-5 days  
+**Goal**: Atomic buy/sell execution with fee distribution
+
+## Reference
+See masterplan.txt Section 6 for bonding curve formulas.
+
+## Tasks
+
+### Task 3.1: Bonding Curve Module
+
+**Implementation** (`packages/lib-common/src/bondingCurve.ts`):
+```typescript
+export function solveDeltaShares(
+  P0: number,
+  k: number,
+  S: number,
+  A: number
+): number {
+  if (k === 0) {
+    return A / P0;
+  }
+  
+  const a = k / 2;
+  const b = P0 + k * S;
+  const c = -A;
+  
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    throw new Error('Invalid parameters');
+  }
+  
+  const deltaS = (-b + Math.sqrt(discriminant)) / (2 * a);
+  
+  if (deltaS <= 0) {
+    throw new Error('Non-positive shares');
+  }
+  
+  return deltaS;
+}
+
+export function marginalPrice(P0: number, k: number, S: number): number {
+  return P0 + k * S;
+}
+
+export function calculateSellRevenue(
+  P0: number,
+  k: number,
+  S: number,
+  deltaS: number
+): number {
+  if (deltaS > S) {
+    throw new Error('Cannot sell more than supply');
+  }
+  
+  const avgPrice = P0 + k * (S - deltaS / 2);
+  return avgPrice * deltaS;
+}
+```
+
+**Tests** (`packages/lib-common/tests/bondingCurve.test.ts`):
+```typescript
+import { solveDeltaShares, marginalPrice, calculateSellRevenue } from '../src/bondingCurve';
+
+describe('bondingCurve', () => {
+  test('solveDeltaShares calculates correctly', () => {
+    const shares = solveDeltaShares(1, 0.01, 1000, 100);
+    expect(shares).toBeCloseTo(9.05, 2);
+  });
+  
+  test('marginalPrice increases with supply', () => {
+    expect(marginalPrice(1, 0.01, 0)).toBe(1);
+    expect(marginalPrice(1, 0.01, 1000)).toBe(11);
+  });
+  
+  test('calculateSellRevenue', () => {
+    const revenue = calculateSellRevenue(1, 0.01, 1000, 5);
+    expect(revenue).toBeCloseTo(55.25, 2);
+  });
+});
+```
+
+### Task 3.2: Exchange Worker Module
+
+**Buy Logic** (`apps/worker/src/modules/exchange.ts`):
+```typescript
+import { db } from '@megatron/database';
+import { solveDeltaShares, marginalPrice } from '@megatron/lib-common';
+import { redis } from '../lib/redis';
+
+export async function executeBuy(
+  userId: string,
+  assetId: string,
+  amount: number
+): Promise<Trade> {
+  return await db.$transaction(async (tx) => {
+    // 1. Lock and fetch
+    const [user, asset] = await Promise.all([
+      tx.user.findUnique({ where: { id: userId } }),
+      tx.asset.findUnique({ where: { id: assetId } })
+    ]);
+    
+    if (!user || !asset) throw new Error('Not found');
+    if (user.isBlacklisted) throw new Error('Blacklisted');
+    if (asset.status !== 'active') throw new Error('Asset not active');
+    if (user.walletHotBalance < amount) throw new Error('Insufficient funds');
+    
+    // 2. Calculate shares
+    const { P0, k } = asset.pricingParams as { P0: number; k: number };
+    const deltaShares = solveDeltaShares(P0, k, Number(asset.totalSupply), amount);
+    const price = marginalPrice(P0, k, Number(asset.totalSupply) + deltaShares / 2);
+    const fee = amount * 0.005;
+    
+    // 3. Update state
+    await tx.user.update({
+      where: { id: userId },
+      data: { walletHotBalance: { decrement: amount } }
+    });
+    
+    await tx.asset.update({
+      where: { id: assetId },
+      data: { totalSupply: { increment: deltaShares } }
+    });
+    
+    await tx.liquidityPool.update({
+      where: { assetId },
+      data: { totalUsdc: { increment: amount - fee } }
+    });
+    
+    // 4. Create records
+    const trade = await tx.trade.create({
+      data: {
+        assetId,
+        buyerId: userId,
+        price,
+        quantity: deltaShares,
+        fee,
+        side: 'buy'
+      }
+    });
+    
+    await tx.position.upsert({
+      where: { userId_assetId: { userId, assetId } },
+      create: {
+        userId,
+        assetId,
+        shares: deltaShares,
+        avgPrice: price
+      },
+      update: {
+        shares: { increment: deltaShares },
+        avgPrice: { /* weighted average logic */ }
+      }
+    });
+    
+    await tx.ledger.create({
+      data: {
+        userId,
+        deltaAmount: -amount,
+        currency: 'USDC',
+        reason: 'trade',
+        refId: trade.id
+      }
+    });
+    
+    // 5. Distribute fees to LPs
+    await distributeSwapFees(tx, assetId, fee);
+    
+    // 6. Emit event
+    await redis.publish('megatron:events', JSON.stringify({
+      type: 'trade',
+      assetId,
+      tradeId: trade.id,
+      price,
+      quantity: deltaShares,
+      buyerId: userId,
+      timestamp: Date.now()
+    }));
+    
+    return trade;
+  }, {
+    isolationLevel: 'Serializable',
+    timeout: 5000
+  });
+}
+
+async function distributeSwapFees(tx: any, assetId: string, fee: number) {
+  const lpPortion = fee * 0.9;
+  const platformFee = fee * 0.1;
+  
+  const pool = await tx.liquidityPool.findUnique({ where: { assetId } });
+  const lps = await tx.lpShare.findMany({ where: { poolId: pool.id } });
+  
+  for (const lp of lps) {
+    const share = Number(lp.lpShares) / Number(pool.totalLPShares);
+    const reward = lpPortion * share;
+    
+    await tx.lpShare.update({
+      where: { id: lp.id },
+      data: { unclaimedRewards: { increment: reward } }
+    });
+  }
+  
+  // Platform fee (tracked separately)
+  await tx.platformConfig.upsert({
+    where: { key: 'treasury_balance' },
+    update: { value: String(Number(current.value) + platformFee) },
+    create: { key: 'treasury_balance', value: String(platformFee) }
+  });
+}
+```
+
+## Acceptance Criteria (Milestone 3)
+
+✅ **Bonding Curve**:
+- [ ] Unit tests pass (>95% coverage)
+- [ ] Handles edge cases (k=0, large amounts)
+
+✅ **Exchange**:
+- [ ] Buy execution is atomic
+- [ ] Balances update correctly
+- [ ] Fees distributed to LPs
+- [ ] TradeEvent published to Redis
+
+---
+
+*(Milestones 4-12 follow similar detailed format with full code, schemas, and acceptance criteria. See masterplan.txt for complete specifications.)*
+
+---
+
+# SUMMARY OF REMAINING MILESTONES
+
+## MILESTONE 4 — LP Funding & LP Token Mechanics
+**Duration**: 3-4 days  
+**Key Deliverables**:
+- LP contribution API endpoint
+- Vesting schedule creation
+- Withdrawal queue processor
+- Asset activation logic
+- Funding deadline checker
+
+**Reference**: masterplan.txt Section 5 (LP Funding Model)
+
+## MILESTONE 5 — Blockchain Monitor & Custody
+**Duration**: 4-5 days  
+**Key Deliverables**:
+- Alchemy integration (deposit monitor)
+- Deposit address generation
+- Withdrawal batch processor
+- Hot/cold wallet management
+
+**Reference**: masterplan.txt Section 11 (Integration Specifications)
+
+## MILESTONE 6 — Price Engine & LLM Pipeline
+**Duration**: 5-6 days  
+**Key Deliverables**:
+- Price Engine (M + F → D)
+- LLM pipeline (Serper + flan-t5)
+- BullMQ job scheduler
+- Ably price tick publishing
+- EMA smoothing implementation
+
+**Reference**: masterplan.txt Section 6 (Pricing Model), Section 9 (Backend Workers)
+
+## MILESTONE 7 — Frontend UI & Admin
+**Duration**: 5-7 days  
+**Key Deliverables**:
+- Asset pages with Lightweight Charts
+- Trade panel (buy/sell)
+- LP contribution UI
+- Admin approval workflow
+- Admin metrics dashboard
+
+**Reference**: masterplan.txt Section 10 (Frontend Architecture)
+
+## MILESTONE 8 — Anti-Abuse, Monitoring & Observability
+**Duration**: 3-4 days  
+**Key Deliverables**:
+- Rate limiting (Upstash)
+- Wash trade detection
+- Circuit breakers
+- Reserve health monitoring
+- Alert system
+
+**Reference**: masterplan.txt Section 14 (Security)
+
+## MILESTONE 9 — Testing & Simulation
+**Duration**: 4-5 days  
+**Key Deliverables**:
+- Jest unit tests (>80% coverage)
+- Playwright E2E tests
+- Simulation harness
+- Load testing
+
+**Reference**: masterplan.txt Section 16 (Testing Strategy)
+
+## MILESTONE 10 — Staging & Testnet Launch
+**Duration**: 3-4 days  
+**Key Deliverables**:
+- Deploy to Vercel (frontend)
+- Deploy to Render (worker)
+- Arbitrum Sepolia integration
+- Beta tester onboarding
+
+**Reference**: masterplan.txt Section 17 (Deployment Plan)
+
+## MILESTONE 11 — Mainnet Preparation
+**Duration**: 5-7 days  
+**Key Deliverables**:
+- Security audit
+- Legal/compliance review
+- Production infrastructure
+- Hot wallet HSM setup
+
+## MILESTONE 12 — Mainnet Launch
+**Duration**: Ongoing  
+**Key Deliverables**:
+- Launch first 3 assets
+- 24/7 monitoring
+- Incident response procedures
+- Community support
+
+---
+
+# CRITICAL CONFIGURATION DEFAULTS
+
+```env
+# Trading
+DEFAULT_SWAP_FEE=0.005               # 0.5%
+LP_FEE_SHARE=0.9                      # 90% to LPs
+PLATFORM_FEE_SHARE=0.1                # 10% to platform
+
+# LP Funding
+SOFT_CAP_DEFAULT=2500                 # Min USDC to activate
+HARD_CAP_DEFAULT=25000                # Max USDC allowed
+FUNDING_DEADLINE_DAYS=7               # LP window duration
+
+# Pricing
+DEFAULT_P0=1                          # Base price (USDC)
+DEFAULT_K=0.01                        # Bonding curve slope
+FUNDAMENTAL_EMA_BETA=0.2              # Smoothing factor
+V0_VOLUME_TUNING=1000                 # Adaptive weight tuning
+
+# LLM
+LLM_CADENCE_MS=600000                 # 10 minutes
+LLM_CONFIDENCE_MIN=0.4                # Reject if lower
+LLM_DELTA_MAX=30                      # Clamp to ±30%
+
+# Safety
+RESERVE_RATIO_TARGET=0.10             # 10% minimum
+MAX_INSTANT_WITHDRAWAL_PCT=0.25       # 25% of vested
+DAILY_POOL_WITHDRAWAL_PCT=0.10        # 10% per day
+CIRCUIT_BREAKER_PCT=0.15              # 15% in 60s triggers halt
+CIRCUIT_BREAKER_DURATION_SEC=300      # 5 min cooldown
+```
+
+---
+
+# RISK MITIGATION MATRIX
+
+| Risk | Severity | Mitigation | Monitoring |
+|------|----------|------------|------------|
+| **Reserve drain** | HIGH | LP vesting + withdrawal queue + circuit breakers | Reserve ratio dashboard |
+| **LLM hallucination** | MEDIUM | Confidence thresholds + sanity checks + EMA smoothing | Oracle log review |
+| **Wash trading** | MEDIUM | IP tracking + pattern detection + position limits | Flagged trade alerts |
+| **Flash crash** | HIGH | Circuit breakers (auto-halt 15% in 60s) | Price movement alerts |
+| **Sybil attacks** | MEDIUM | Device fingerprinting + rate limits | Account creation metrics |
+| **Blockchain downtime** | MEDIUM | Retry logic + fallback RPC | Deposit success rate |
+| **Database failure** | HIGH | Neon auto-backups + connection pooling | Query latency monitoring |
+| **LLM quota exhausted** | LOW | Graceful degradation + cache results | API usage tracking |
+
+---
+
+# IMPLEMENTATION CHECKLIST
+
+**Milestone 0: Setup**
+- [ ] Monorepo structure
+- [ ] CI/CD pipeline
+- [ ] All accounts provisioned
+
+**Milestone 1: Database**
+- [ ] Prisma schema
+- [ ] Migrations run
+- [ ] Seed data created
+
+**Milestone 2: Auth**
+- [ ] NextAuth configured
+- [ ] Signup/login working
+- [ ] Protected routes
+
+**Milestone 3: Trading**
+- [ ] Bonding curve module
+- [ ] Buy/sell execution
+- [ ] Fee distribution
+
+**Milestone 4: LP System**
+- [ ] LP contributions
+- [ ] Vesting schedules
+- [ ] Withdrawal queue
+
+**Milestone 5: Blockchain**
+- [ ] Deposit monitor
+- [ ] Withdrawal processor
+- [ ] Address generation
+
+**Milestone 6: Price & LLM**
+- [ ] Price Engine
+- [ ] LLM pipeline
+- [ ] Ably integration
+
+**Milestone 7: Frontend**
+- [ ] Asset pages
+- [ ] Charts
+- [ ] Admin dashboard
+
+**Milestone 8: Security**
+- [ ] Rate limiting
+- [ ] Anti-abuse
+- [ ] Monitoring
+
+**Milestone 9: Testing**
+- [ ] Unit tests (>80%)
+- [ ] E2E tests
+- [ ] Simulation
+
+**Milestone 10: Testnet**
+- [ ] Deploy staging
+- [ ] Beta testing
+- [ ] Iterate
+
+**Milestone 11: Mainnet Prep**
+- [ ] Security audit
+- [ ] Legal review
+- [ ] Prod infra
+
+**Milestone 12: Launch**
+- [ ] Go live
+- [ ] Monitor 24/7
+- [ ] Support users
+
+---
+
+**END OF IMPLEMENTATION PLAN**
+
+For complete technical specifications, API schemas, and architectural details, refer to `masterplan.txt`.
