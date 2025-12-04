@@ -1,0 +1,328 @@
+# Megatron — Masterplan Architecture (v1)
+
+**Purpose:** single canonical masterplan for building *Megatron* — a crypto-only market where users trade stocks/indexes that track real-world variables. This document summarizes architecture, responsibilities, data model, pricing, LLM pipeline, liquidity strategy, deployment (free-first), file layout, security, and next steps.
+
+---
+
+# 1. Goals & Constraints
+
+* **Primary product:** allow users to trade assets (stocks/indexes) that reflect real-world variables.
+* **No KYC / minimal friction:** signup via email/password (NextAuth) only.
+* **Crypto-only funds:** users deposit USDC/USDT on a single chosen chain (minimize multi-chain complexity).
+* **Free-first deployment:** use free tiers / pay-per-tx providers where possible (Vercel, Neon, Upstash, Ably, Hugging Face, Serper API limited use).
+* **Admin control:** asset creation by admin only (requests from users go to approval queue). Admin login via `/admin/login` using password in `.env`.
+* **Two-tier price architecture:** separate *Exchange* (market-side trading & ledger) from *Price Engine* (publishes display price + chart ticks by combining market pressure and LLM/Serper fundamental signals).
+* **Liquidity guarantee:** users can always sell to AMM-backed reserve (subject to limits) to avoid paper gains being illiquid.
+
+---
+
+# 2. Actors
+
+* **Users:** sign up, deposit stablecoins, trade, view charts, request new assets.
+* **Admin:** reviews/approves/creates assets, manages emergency overrides, and funds initial reserves as needed.
+* **Exchange Service:** executes trades against bonding curves (AMM-style) and maintains ledger.
+* **Price Engine:** consumes trade events + oracle signals → computes M (market price), F (fundamental price), publishes D (display price).
+* **LLM + Serper pipeline:** fetches and extracts structured signals from internet search results.
+* **Blockchain Monitor:** watches deposits/withdrawals on-chain and credits ledger.
+* **Liquidity Providers (optional):** third-party or admin deposits to increase pool reserves and earn fees.
+
+---
+
+# 3. High-Level Architecture
+
+```
+[Next.js Frontend] <--> [Unified Backend / API] <--> [Neon Postgres]
+                       |                  ^
+                       v                  |
+                 [Exchange Service]       |
+                       | emits events     |
+                       v                  |
+                 [Event Bus - Upstash Redis]
+                       |
+               [Price Engine Worker] <--- [LLM+Serper Pipeline]
+                       |
+                   publishes via Ably
+                       |
+                [Frontend subscribes to Ably]
+```
+
+* **Single monorepo** (Next.js app + workers). Back-end can be implemented as Next.js API routes for user-facing endpoints + separate Node workers for exchange & price engine.
+* **Event bus:** Upstash Redis streams or Redis pub/sub to decouple workers.
+* **Realtime:** Ably for publishing ticks and trades to the UI.
+* **Storage:** Neon Postgres as source of truth. Vercel Blob for assets & logs. Pinecone (optional) for embedding storage of LLM evidence.
+
+---
+
+# 4. Component Responsibilities
+
+## Frontend (Next.js + chadcn UI)
+
+* Sign-up / login (NextAuth Email+Password)
+* Deposit UI (on-chain address & status)
+* Asset pages (real-time chart, buy/sell UI, volume bar)
+* Admin pages: `/admin/login`, asset request queue and create page
+* Subscribes to Ably channels for live ticks
+
+## Unified Backend / API
+
+* Auth endpoints
+* Deposit webhooks & on-chain reconciliation endpoints
+* Trade submission endpoints (buy/sell)
+* Ledger & reconciliation API
+
+## Exchange Service (matching & settlement)
+
+* Implements bonding-curve AMM per asset
+* Atomic DB transactions for buys/sells (debit/credit ledger, mint/burn shares)
+* Emits `TradeEvent` with volume, trade price, supply
+* Fee collection & reserve updates
+
+## Price Engine Worker
+
+* Subscribes to `TradeEvent` and `OracleEvent`
+* Maintains `M` (market) and `F` (fundamental smoothed by EMA)
+* Adaptive weighting `w_market` based on recent volume
+* Publishes display price `D` and chart ticks to Ably
+* Persists ticks into time-series table in Postgres
+
+## LLM + Serper Pipeline Worker
+
+* Per-asset canonical queries
+* Serper search (top N results) → feed to Hugging Face LLM
+* LLM JSON outputs: `{ delta_percent, suggested_price | null, confidence, summary, source_urls }`
+* Sanity checks (max delta, confidence threshold)
+* Emits `OracleEvent` to Price Engine
+* Stores raw evidence & LLM output for audit
+
+## Blockchain Monitor
+
+* One-chain support (pick 1 chain for MVP)
+* Detects ERC20 (USDC/USDT) deposits, confirms `N` blocks, credits ledger
+* Handles withdrawals batching and watching tx status
+
+---
+
+# 5. Price Model (Merging Market + Oracle)
+
+## Market-side (AMM / linear bonding curve)
+
+* Price function: `M(S) = P0 + k * S` (marginal price)
+* Cost to buy ΔS: `Cost = P0*ΔS + 0.5*k*((S+ΔS)^2 - S^2)`
+* Solve quadratic for ΔS given buy amount `A`
+* Fees: e.g., 0.5% per trade that flows to `reserve`
+
+## Fundamental (LLM) price `F`
+
+* LLM outputs `delta_percent` or `suggested_price` + `confidence`
+* Apply EMA smoothing: `F_t = β*new + (1-β)*F_{t-1}` (β default 0.2)
+
+## Combined display price `D`
+
+* `w_market = clamp(0.5 + 0.5*(vol_recent/(vol_recent+V0)), 0.2, 0.95)`
+* `D = w_market * M + (1 - w_market) * F`
+* Publish `D` as chart tick; volume bars reflect *actual trades only* (no fake volume from oracle events)
+
+---
+
+# 6. Liquidity Strategy (guaranteed redemption + LPs)
+
+**Problem**: Paper gains require counterparties to cash out.
+
+**Solutions (combine the following):**
+
+### A — AMM-backed redemption (platform reserve)
+
+* Platform maintains per-asset reserve `R` (USDC) to buy back shares from users.
+* Reserve funded by trading fees and initial seeding.
+* Limits: max instant redemption per account/day, reserve ratio target.
+
+### B — Incentivized Liquidity Providers (LP)
+
+* LPs deposit USDC into pools and earn fees.
+* LP tokens track share; deposits increase reserve and fee share.
+
+### C — Withdrawal batching & cooldowns
+
+* Large withdrawals are queued & batched to smooth drain on reserve.
+* Small withdrawals instant (below threshold).
+
+### D — Orderbook overlay (advanced)
+
+* Add an orderbook overlay later for P2P matching; AMM acts as price floor/ceiling.
+
+### Reserve health monitoring
+
+* `Liabilities = sum(user_cash_balances) + market_value_of_outstanding_shares`
+* Target `reserve_ratio = reserve / liabilities` (e.g., 0.10)
+* Admin alerts and emergency pause triggers if reserve dips below thresholds
+
+---
+
+# 7. Data Model (core tables - simplified)
+
+```
+users (id, email, password_hash, created_at, hot_balance, cold_balance, flags)
+asset_requests (id, requester_id, payload_json, status, admin_notes, created_at)
+assets (id, name, type, oracle_config_json, pricing_model, pricing_params_json, total_supply, reserve_balance, status, created_at)
+orders (id, user_id, asset_id, side, type, price_limit, quantity, status, created_at)
+trades (id, asset_id, buyer_id, seller_id|null, price, quantity, fee, timestamp)
+positions (id, user_id, asset_id, shares, avg_price)
+ledger (id, user_id, delta_amount, currency, reason, ref_id, created_at)
+oracle_logs (id, asset_id, delta_percent, suggested_price, confidence, evidence_json, created_at)
+price_ticks (id, asset_id, timestamp, price_D, price_M, price_F, w_market, vol)
+```
+
+---
+
+# 8. Events & API Contracts (summary)
+
+**Events**
+
+* `TradeEvent { asset_id, trade_id, price, quantity, buyer_id, seller_id|null, timestamp }`
+* `OracleEvent { asset_id, suggested_price|null, delta_percent|null, confidence, source_urls, timestamp }`
+* `PriceTick { asset_id, price_D, price_M, price_F, w_market, timestamp }`
+
+**API Endpoints (examples)**
+
+* `POST /api/auth/signup` — email/password sign-up
+* `POST /api/trades/buy` — submit buy with `amount` or `shares`
+* `POST /api/trades/sell` — submit sell specifying `shares`
+* `GET /api/assets/:id` — asset metadata
+* `POST /api/admin/login` — admin password check (compare hashed .env value)
+* `POST /api/deposits/webhook` — deposit notifications from Blockchain Monitor
+* `GET /api/chart/:assetId?interval=...` — historical ticks
+
+---
+
+# 9. Repo & File Structure (recommended)
+
+```
+/megatron
+├─ /apps
+│  ├─ /web                # Next.js frontend + API routes
+│  └─ /worker             # Node workers: exchange, price-engine, llm-pipeline, blockchain-monitor
+├─ /packages
+│  ├─ /lib-common         # bonding curve math, types
+│  ├─ /lib-db             # database models (Prisma/Knex) & migrations
+│  └─ /lib-crypto         # ethers.js helpers
+├─ /migrations
+├─ docker-compose.yml
+└─ .env
+```
+
+---
+
+# 10. Deployment & Free-First Choices
+
+* **Frontend & API (Next.js):** Vercel (Hobby / Free)
+* **Postgres:** Neon (use existing Neon DB)
+* **Redis & queues:** Upstash (free tier)
+* **Realtime:** Ably (free tier)
+* **LLM inference:** Hugging Face (free limits, manage cadence; cache results)
+* **Web search:** Serper API (provided in .env) — control rate and cache
+* **Workers:** Fly.io / Render / Railway free tiers for background workers OR run as serverless on Vercel with careful design (workers recommended for low-latency exchange operations)
+* **RPC provider:** Infura/Alchemy (free tier) or rely on user-paid gas for withdrawals
+
+**Note:** Some services have limited free quotas (LLM calls, Serper calls) — throttle and cache aggressively to control costs.
+
+---
+
+# 11. Security & Anti-Abuse (no KYC)
+
+* **Rate limiting** (per-IP & per-account) via Redis
+* **Per-account deposit/withdrawal caps** and position limits per asset
+* **Wash-trade detection** (heuristics: repeated circular trades, identical amounts, same IPs/wallets) → flag & freeze
+* **Withdrawal cooldowns & batching** for large amounts
+* **Device/IP fingerprinting** and block known TOR/proxy IPs
+* **Admin emergency actions:** freeze asset, freeze account, manual price correction (with audit log)
+
+---
+
+# 12. Monitoring, KPIs & Observability
+
+Important metrics & alerts:
+
+* Trades/sec, avg trade latency
+* Reserve ratio per asset & overall
+* Active users, deposits / withdrawals per day
+* LLM/Serper success rate & confidence distribution
+* Error rate (API, workers), queue lengths
+* Anomaly alerts: big price moves, reserve dips, wash-trade patterns
+
+Suggested tools: Prometheus/Grafana (or provider metrics), Sentry for errors, and DB reconciliation jobs.
+
+---
+
+# 13. Default Parameters (MVP seeds)
+
+* `P0 = 1 USDC`, `k = 0.005` (tame slope) for new assets
+* Trading fee = `0.5%` per trade (flows to reserve)
+* EMA β for LLM smoothing = `0.2`
+* LLM cadence = `5-15 minutes` per active asset (lower for quiet assets)
+* Reserve_ratio_target = `0.10` (10%)
+* Max instant withdrawal per account = `2,000 USDC` first 24h (increase over time)
+
+---
+
+# 14. Roadmap & Next Steps (short-term)
+
+**Phase 0 (spec)**
+
+* Finalize allowed asset types & canonical search queries per asset. Legal check for target markets.
+
+**Phase 1 (MVP)**
+
+* Implement Next.js frontend with NextAuth
+* Implement Neon Postgres schema + migrations
+* Build Exchange worker (bonding curve buys/sells + ledger) and connect DB
+* Implement Blockchain Monitor for deposits (single chain)
+* Implement Price Engine (consume trade events, simple LLM stub for `F`)
+* Basic admin dashboard to create assets and set oracle queries
+
+**Phase 2 (stability & liquidity)**
+
+* Seed platform reserve & implement LP interface
+* Implement monitoring & reserve health alerts
+* Harden anti-abuse heuristics
+
+**Phase 3 (growth & advanced features)**
+
+* Orderbook overlay
+* More advanced oracle aggregation (multi-source + TWAP)
+* Add mobile app / UX improvements
+
+---
+
+# 15. Admin Ops & Emergency Procedures
+
+* **Emergency pause** per asset (stop trading and display notice)
+* **Manual oracle override** with audit logs
+* **Account freeze** for suspected abuse
+* **Reserve replenishment** workflow (admin deposits to pool)
+* **Reconciliation & forensic logs** stored and searchable for audits
+
+---
+
+# Appendix A — .env keys (used by plan)
+
+* `NEON_DATABASE_URL` — Postgres
+* `UPSTASH_REST_URL`, `UPSTASH_REST_TOKEN` — Redis & queues
+* `SERPER_API_KEY` — web search
+* `HUGGINGFACE_API_KEY`, `HUGGINGFACE_API_URL` — LLM inference
+* `PINECONE_API_KEY` (optional) — vector store for evidence embeddings
+* `BLOB_READ_WRITE_TOKEN` — Vercel Blob for storage
+* `ABLY_API_KEY` — realtime publish
+* `NEXTAUTH_SECRET` — NextAuth secret
+* Admin password is stored in `.env` (store hashed value and compare against bcrypt)
+
+---
+
+# Closing notes
+
+This masterplan is intentionally practical and prescriptive: it emphasizes a free-first deployment, a separation of concerns between exchange and price engine, and an AMM-based liquidity guarantee to solve the liquidity problem. The next concrete deliverable I suggest is one of:
+
+* Full SQL schema + migration file, or
+* TypeScript bonding-curve module + exchange worker pseudocode, or
+* Full Price Engine worker implementation pseudocode (with Ably publish and event handling).
+
+Tell me which of the three you want first and I will produce it immediately.
