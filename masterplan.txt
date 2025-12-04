@@ -1,328 +1,1140 @@
-# Megatron — Masterplan Architecture (v1)
+# MEGATRON — COMPLETE PLATFORM MASTERPLAN v3.0
 
-**Purpose:** single canonical masterplan for building *Megatron* — a crypto-only market where users trade stocks/indexes that track real-world variables. This document summarizes architecture, responsibilities, data model, pricing, LLM pipeline, liquidity strategy, deployment (free-first), file layout, security, and next steps.
-
----
-
-# 1. Goals & Constraints
-
-* **Primary product:** allow users to trade assets (stocks/indexes) that reflect real-world variables.
-* **No KYC / minimal friction:** signup via email/password (NextAuth) only.
-* **Crypto-only funds:** users deposit USDC/USDT on a single chosen chain (minimize multi-chain complexity).
-* **Free-first deployment:** use free tiers / pay-per-tx providers where possible (Vercel, Neon, Upstash, Ably, Hugging Face, Serper API limited use).
-* **Admin control:** asset creation by admin only (requests from users go to approval queue). Admin login via `/admin/login` using password in `.env`.
-* **Two-tier price architecture:** separate *Exchange* (market-side trading & ledger) from *Price Engine* (publishes display price + chart ticks by combining market pressure and LLM/Serper fundamental signals).
-* **Liquidity guarantee:** users can always sell to AMM-backed reserve (subject to limits) to avoid paper gains being illiquid.
+**Last Updated**: 2025-12-04  
+**Status**: Final specification - Complete encyclopedia  
+**Changes from v2.0**: Added detailed API schemas, backend module interactions, data flow principles, integration specs, and finalized architecture decisions
 
 ---
 
-# 2. Actors
+# TABLE OF CONTENTS
 
-* **Users:** sign up, deposit stablecoins, trade, view charts, request new assets.
-* **Admin:** reviews/approves/creates assets, manages emergency overrides, and funds initial reserves as needed.
-* **Exchange Service:** executes trades against bonding curves (AMM-style) and maintains ledger.
-* **Price Engine:** consumes trade events + oracle signals → computes M (market price), F (fundamental price), publishes D (display price).
-* **LLM + Serper pipeline:** fetches and extracts structured signals from internet search results.
-* **Blockchain Monitor:** watches deposits/withdrawals on-chain and credits ledger.
-* **Liquidity Providers (optional):** third-party or admin deposits to increase pool reserves and earn fees.
+1. [Executive Summary](#1-executive-summary)
+2. [Platform Concept](#2-platform-concept)
+3. [Actors & Responsibilities](#3-actors--responsibilities)
+4. [Architecture Overview](#4-architecture-overview)
+5. [LP Funding Model (Economic Engine)](#5-lp-funding-model-economic-engine)
+6. [Pricing Model (Dual-Price System)](#6-pricing-model-dual-price-system)
+7. [Database Schema](#7-database-schema)
+8. [API Specifications](#8-api-specifications)
+9. [Backend Worker Modules](#9-backend-worker-modules)
+10. [Frontend Architecture](#10-frontend-architecture)
+11. [Integration Specifications](#11-integration-specifications)
+12. [Data Flow Principles](#12-data-flow-principles)
+13. [Governance & Admin](#13-governance--admin)
+14. [Security & Anti-Abuse](#14-security--anti-abuse)
+15. [Technology Stack](#15-technology-stack)
+16. [Testing Strategy](#16-testing-strategy)
+17. [Deployment Plan](#17-deployment-plan)
+18. [Monitoring & Metrics](#18-monitoring--metrics)
+19. [Implementation Roadmap](#19-implementation-roadmap)
 
 ---
 
-# 3. High-Level Architecture
+# 1. EXECUTIVE SUMMARY
+
+**Megatron** is a crypto-only trading platform where users trade synthetic stocks/indexes tracking real-world variables (social metrics, sports, economics). The platform uses **community-funded liquidity** (Liquidity Providers) eliminating platform capital requirements. Prices combine **AMM bonding curve mechanics** with **LLM-powered fundamental analysis**.
+
+## Key Innovations
+
+- **LP-Funded Liquidity**: Zero platform capital required
+- **Dual-Price Model**: Market (M) + Fundamental (F) → Display (D)
+- **No KYC**: Email/password only (NextAuth)
+- **Crypto-Only**: USDC on Arbitrum
+- **Algorithmic Governance**: No admin trading pauses or price overrides
+- **6-Month LP Vesting**: Prevents rug pulls, ensures stability
+
+## Economic Model
 
 ```
-[Next.js Frontend] <--> [Unified Backend / API] <--> [Neon Postgres]
-                       |                  ^
-                       v                  |
-                 [Exchange Service]       |
-                       | emits events     |
-                       v                  |
-                 [Event Bus - Upstash Redis]
-                       |
-               [Price Engine Worker] <--- [LLM+Serper Pipeline]
-                       |
-                   publishes via Ably
-                       |
-                [Frontend subscribes to Ably]
-```
-
-* **Single monorepo** (Next.js app + workers). Back-end can be implemented as Next.js API routes for user-facing endpoints + separate Node workers for exchange & price engine.
-* **Event bus:** Upstash Redis streams or Redis pub/sub to decouple workers.
-* **Realtime:** Ably for publishing ticks and trades to the UI.
-* **Storage:** Neon Postgres as source of truth. Vercel Blob for assets & logs. Pinecone (optional) for embedding storage of LLM evidence.
-
----
-
-# 4. Component Responsibilities
-
-## Frontend (Next.js + chadcn UI)
-
-* Sign-up / login (NextAuth Email+Password)
-* Deposit UI (on-chain address & status)
-* Asset pages (real-time chart, buy/sell UI, volume bar)
-* Admin pages: `/admin/login`, asset request queue and create page
-* Subscribes to Ably channels for live ticks
-
-## Unified Backend / API
-
-* Auth endpoints
-* Deposit webhooks & on-chain reconciliation endpoints
-* Trade submission endpoints (buy/sell)
-* Ledger & reconciliation API
-
-## Exchange Service (matching & settlement)
-
-* Implements bonding-curve AMM per asset
-* Atomic DB transactions for buys/sells (debit/credit ledger, mint/burn shares)
-* Emits `TradeEvent` with volume, trade price, supply
-* Fee collection & reserve updates
-
-## Price Engine Worker
-
-* Subscribes to `TradeEvent` and `OracleEvent`
-* Maintains `M` (market) and `F` (fundamental smoothed by EMA)
-* Adaptive weighting `w_market` based on recent volume
-* Publishes display price `D` and chart ticks to Ably
-* Persists ticks into time-series table in Postgres
-
-## LLM + Serper Pipeline Worker
-
-* Per-asset canonical queries
-* Serper search (top N results) → feed to Hugging Face LLM
-* LLM JSON outputs: `{ delta_percent, suggested_price | null, confidence, summary, source_urls }`
-* Sanity checks (max delta, confidence threshold)
-* Emits `OracleEvent` to Price Engine
-* Stores raw evidence & LLM output for audit
-
-## Blockchain Monitor
-
-* One-chain support (pick 1 chain for MVP)
-* Detects ERC20 (USDC/USDT) deposits, confirms `N` blocks, credits ledger
-* Handles withdrawals batching and watching tx status
-
----
-
-# 5. Price Model (Merging Market + Oracle)
-
-## Market-side (AMM / linear bonding curve)
-
-* Price function: `M(S) = P0 + k * S` (marginal price)
-* Cost to buy ΔS: `Cost = P0*ΔS + 0.5*k*((S+ΔS)^2 - S^2)`
-* Solve quadratic for ΔS given buy amount `A`
-* Fees: e.g., 0.5% per trade that flows to `reserve`
-
-## Fundamental (LLM) price `F`
-
-* LLM outputs `delta_percent` or `suggested_price` + `confidence`
-* Apply EMA smoothing: `F_t = β*new + (1-β)*F_{t-1}` (β default 0.2)
-
-## Combined display price `D`
-
-* `w_market = clamp(0.5 + 0.5*(vol_recent/(vol_recent+V0)), 0.2, 0.95)`
-* `D = w_market * M + (1 - w_market) * F`
-* Publish `D` as chart tick; volume bars reflect *actual trades only* (no fake volume from oracle events)
-
----
-
-# 6. Liquidity Strategy (guaranteed redemption + LPs)
-
-**Problem**: Paper gains require counterparties to cash out.
-
-**Solutions (combine the following):**
-
-### A — AMM-backed redemption (platform reserve)
-
-* Platform maintains per-asset reserve `R` (USDC) to buy back shares from users.
-* Reserve funded by trading fees and initial seeding.
-* Limits: max instant redemption per account/day, reserve ratio target.
-
-### B — Incentivized Liquidity Providers (LP)
-
-* LPs deposit USDC into pools and earn fees.
-* LP tokens track share; deposits increase reserve and fee share.
-
-### C — Withdrawal batching & cooldowns
-
-* Large withdrawals are queued & batched to smooth drain on reserve.
-* Small withdrawals instant (below threshold).
-
-### D — Orderbook overlay (advanced)
-
-* Add an orderbook overlay later for P2P matching; AMM acts as price floor/ceiling.
-
-### Reserve health monitoring
-
-* `Liabilities = sum(user_cash_balances) + market_value_of_outstanding_shares`
-* Target `reserve_ratio = reserve / liabilities` (e.g., 0.10)
-* Admin alerts and emergency pause triggers if reserve dips below thresholds
-
----
-
-# 7. Data Model (core tables - simplified)
-
-```
-users (id, email, password_hash, created_at, hot_balance, cold_balance, flags)
-asset_requests (id, requester_id, payload_json, status, admin_notes, created_at)
-assets (id, name, type, oracle_config_json, pricing_model, pricing_params_json, total_supply, reserve_balance, status, created_at)
-orders (id, user_id, asset_id, side, type, price_limit, quantity, status, created_at)
-trades (id, asset_id, buyer_id, seller_id|null, price, quantity, fee, timestamp)
-positions (id, user_id, asset_id, shares, avg_price)
-ledger (id, user_id, delta_amount, currency, reason, ref_id, created_at)
-oracle_logs (id, asset_id, delta_percent, suggested_price, confidence, evidence_json, created_at)
-price_ticks (id, asset_id, timestamp, price_D, price_M, price_F, w_market, vol)
+User requests asset ($100 LP) → Admin approves → LP funding window (7 days)
+    ↓
+Other LPs contribute USDC (soft cap: $2,500 min)
+    ↓
+Soft cap reached → Asset activates → Trading begins
+    ↓
+Each trade: 0.5% fee → 90% to LPs, 10% to platform
+    ↓
+LPs withdraw vested amounts (25% week 1 → 100% month 6)
 ```
 
 ---
 
-# 8. Events & API Contracts (summary)
+# 2. PLATFORM CONCEPT
 
-**Events**
+## What Users Trade
 
-* `TradeEvent { asset_id, trade_id, price, quantity, buyer_id, seller_id|null, timestamp }`
-* `OracleEvent { asset_id, suggested_price|null, delta_percent|null, confidence, source_urls, timestamp }`
-* `PriceTick { asset_id, price_D, price_M, price_F, w_market, timestamp }`
+Synthetic assets representing **continuously measurable** real-world variables:
 
-**API Endpoints (examples)**
+| Category | Examples |
+|----------|----------|
+| **Social** | Twitter sentiment, Reddit activity, Google Trends volume |
+| **Sports** | NBA championship odds, player performance indices |
+| **Economics** | US inflation rate, unemployment rate, GDP growth |
+| **Weather** | Global temperature anomaly, hurricane count |
+| **Technology** | GitHub commits for major projects, npm download trends |
 
-* `POST /api/auth/signup` — email/password sign-up
-* `POST /api/trades/buy` — submit buy with `amount` or `shares`
-* `POST /api/trades/sell` — submit sell specifying `shares`
-* `GET /api/assets/:id` — asset metadata
-* `POST /api/admin/login` — admin password check (compare hashed .env value)
-* `POST /api/deposits/webhook` — deposit notifications from Blockchain Monitor
-* `GET /api/chart/:assetId?interval=...` — historical ticks
+**Key Principle**: Any variable the LLM can reason about via web search (Serper API) is tradable.
+
+## How Price Moves
+
+Price is determined by **two independent forces**:
+
+1. **Supply/Demand (Market Price M)**  
+   - Users buy → supply increases → price rises (bonding curve)
+   - Users sell → supply decreases → price falls
+
+2. **Real-World Events (Fundamental Price F)**  
+   - LLM analyzes Serper search results every 10 minutes
+   - Positive news → F increases
+   - Negative news → F decreases
+
+3. **Display Price (D)**  
+   - Weighted average: `D = w × M + (1-w) × F`
+   - High trading volume → trust M more (w → 0.95)
+   - Low trading volume → trust F more (w → 0.2)
+
+**Example**: "US Inflation Rate" asset
+
+```
+Day 1:
+- Market price M = $10 (from trading)
+- Fundamental F = $9.50 (LLM sees "inflation decreasing")
+- Volume = low (500 USDC/5min)
+- Weight w_market = 0.3
+- Display D = 0.3×10 + 0.7×9.50 = $9.65
+
+Day 2 (after viral tweet):
+- M = $12 (heavy buying)
+- F = $9.80 (LLM still cautious)
+- Volume = high (5000 USDC/5min)
+- w_market = 0.85
+- D = 0.85×12 + 0.15×9.80 = $11.67
+```
+
+## User Journey
+
+```mermaid
+graph TD
+    A[User signs up] --> B[Deposit USDC via Arbitrum]
+    B --> C{Action?}
+    C -->|Trade| D[Browse active assets]
+    C -->|Request| E[Submit new asset request + $100 LP]
+    D --> F[Buy/sell shares]
+    E --> G[Admin reviews]
+    G -->|Approved| H[Asset enters LP funding mode]
+    H --> I[LPs contribute USDC]
+    I -->|Soft cap met| J[Asset activated]
+    J --> D
+    F --> K[Earn/lose on price changes]
+    K --> L[Withdraw USDC anytime]
+```
 
 ---
 
-# 9. Repo & File Structure (recommended)
+# 3. ACTORS & RESPONSIBILITIES
+
+## Human Actors
+
+### Users
+**Role**: Trade assets, earn profits, lose capital  
+**Powers**:
+- Sign up (email/password, no KYC)
+- Deposit USDC (Arbitrum address provided)
+- Buy/sell shares of active assets
+- Request new assets ($100 min LP contribution)
+- Withdraw USDC (subject to daily limits)
+
+**Cannot Do**:
+- Trade while blacklisted
+- Withdraw more than daily limit (5000 USDC initially)
+- Manipulate prices (anti-abuse detection)
+
+### Liquidity Providers (LPs)
+**Role**: Fund new assets, earn passive income  
+**Powers**:
+- Contribute USDC to asset LP pools
+- Earn 90% of all swap fees proportionally
+- Withdraw vested amounts (graduated schedule)
+
+**Constraints**:
+- Vesting schedule: 25% (week 1) → 50% (month 1) → 75% (month 3) → 100% (month 6)
+- Large withdrawals (>25% of vested) enter 24h queue
+- Max 10% of pool withdrawable per day (prevents runs)
+
+### Admin
+**Role**: Asset curation, user moderation, system health monitoring  
+**Powers**:
+- Approve/reject asset requests
+- Configure asset parameters (P0, k, caps, oracle queries)
+- Blacklist abusive users
+- Adjust platform fee (0.3% - 2.0%)
+- View metrics dashboard (reserve health, flagged trades)
+
+**Explicitly Cannot Do** (governance constraints):
+- ❌ Pause trading (not even in emergencies)
+- ❌ Override prices manually
+- ❌ Confiscate user funds
+- ❌ Reverse trades
+- ❌ Modify LP vesting mid-flight
+
+## System Actors (Workers)
+
+### Exchange Engine
+**Role**: Execute all trades atomically  
+**Responsibilities**:
+- Calculate ΔS (shares to mint/burn) via bonding curve
+- Execute atomic Postgres transactions
+- Distribute swap fees (90% LP, 10% platform)
+- Emit `TradeEvent` to Redis
+
+### Price Engine
+**Role**: Compute and publish display price  
+**Responsibilities**:
+- Subscribe to `TradeEvent` and `OracleEvent` (Redis)
+- Calculate M from bonding curve + current supply
+- Maintain F via EMA smoothing
+- Calculate adaptive w_market from volume
+- Publish `PriceTick` to Ably + Postgres
+
+### LLM Pipeline
+**Role**: Extract fundamental signals from web  
+**Responsibilities**:
+- Run cron jobs (every 10 min per active asset)
+- Query Serper API with oracle_queries
+- Send top 5 results to flan-t5-base (HuggingFace)
+- Extract structured JSON (delta%, confidence, summary)
+- Validate (±30% delta max, 0.4 confidence min)
+- Emit `OracleEvent` to Redis
+
+### Blockchain Monitor
+**Role**: Watch Arbitrum for USDC movements  
+**Responsibilities**:
+- Poll Alchemy every 15 seconds for ERC20 Transfer events
+- Filter for platform deposit addresses
+- Wait 12 confirmations (~2.5 min on Arbitrum)
+- Credit user ledger atomically
+- Process withdrawal queue and execute on-chain txs
+
+### LP Manager
+**Role**: Handle LP lifecycle  
+**Responsibilities**:
+- Update vesting schedules daily
+- Process withdrawal queue (FIFO, 10% daily limit)
+- Calculate LP token NAV in real-time
+- Handle refunds if funding deadline missed
+
+### Job Scheduler
+**Role**: Coordinate all background tasks  
+**Responsibilities**:
+- Schedule LLM jobs via BullMQ (10 min intervals)
+- Trigger vesting updates (daily midnight)
+- Run withdrawal queue processor (every 24h)
+- Check funding deadlines (hourly)
+- Monitor reserve health (every 5 min)
+
+---
+
+# 4. ARCHITECTURE OVERVIEW
+
+## System Diagram
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    VERCEL (Free Tier)                        │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │         Next.js 14 Frontend + API Routes               │  │
+│  │  • NextAuth (credentials provider)                     │  │
+│  │  • 12 pages: auth, dashboard, assets, admin            │  │
+│  │  • 15 API routes: trades, LP, assets, admin, user      │  │
+│  │  • 8 UI components + chadcn/ui                         │  │
+│  │  • Lightweight Charts (TradingView) integration        │  │
+│  └────────────────────────────────────────────────────────┘  │
+└─────────────────────────┬────────────────────────────────────┘
+                          │
+                          ▼ (HTTP)
+            ┌─────────────────────────────┐
+            │   NEON POSTGRES (Free)      │
+            │  • 12 tables (users → ticks)│
+            │  • ACID transactions        │
+            │  • Materialized views       │
+            └─────────────────────────────┘
+                          ▲
+                          │
+            ┌─────────────┴─────────────┐
+            │                           │
+┌───────────▼─────────────┐  ┌──────────▼──────────────┐
+│ RENDER / FLY.IO (Free)  │  │ UPSTASH REDIS (Free)    │
+│  Unified Backend Worker │  │  • BullMQ job queues    │
+│  ┌────────────────────┐ │  │  • Rate limiting cache  │
+│  │ 6 Modules (1 proc):│ │  │  • Event streams        │
+│  │ • Exchange Engine  │ │  │    - TradeEvent         │
+│  │ • Price Engine     │◄┼──┤    - OracleEvent        │
+│  │ • LLM Pipeline     │ │  │  • Pub/Sub channels     │
+│  │ • Blockchain Mon.  │ │  └─────────────────────────┘
+│  │ • LP Manager       │ │
+│  │ • Job Scheduler    │ │
+│  └────────────────────┘ │
+└─────────────────────────┘
+         │             │
+         ▼             ▼
+┌─────────────┐  ┌──────────────────┐
+│ ABLY (Free) │  │ ARBITRUM L2      │
+│ • Price push│  │ • USDC deposits  │
+│ • Trades    │  │ • Withdrawals    │
+│ • Balances  │  │ via Alchemy RPC  │
+└─────────────┘  └──────────────────┘
+         │
+         ▼
+    [Frontend]
+  (real-time UI)
+
+External APIs:
+→ SERPER (web search)
+→ HUGGINGFACE (flan-t5-base LLM)
+```
+
+## Communication Patterns
+
+### 1. User → Frontend → API → Database
+**Synchronous** request/response for user actions:
+```
+User clicks "Buy" 
+  → POST /api/trades/buy {assetId, amount}
+  → API validates session (NextAuth)
+  → API writes to DB (pending_trade)
+  → API responds immediately {tradeId, status: "pending"}
+  → Worker picks up and executes
+```
+
+### 2. Worker → Redis → Worker
+**Asynchronous** event-driven for system actions:
+```
+Exchange executes trade
+  → Writes to DB (atomic transaction)
+  → redis.publish('megatron:events', TradeEvent)
+  → Price Engine subscribed → calculates new D
+  → Publishes to Ably
+```
+
+### 3. Worker → Ably → Frontend
+**Real-time** push for live updates:
+```
+Price Engine calculates tick
+  → ably.channels.get('asset:123:price').publish('tick', {price, time})
+  → Frontend subscribed → chart updates instantly
+```
+
+### 4. Worker → External API → Worker
+**Request/response** for external data:
+```
+LLM Pipeline cron triggers
+  → fetch('https://google.serper.dev/search', {queries})
+  → response = top 5 results
+  → POST to HuggingFace flan-t5-base {prompt, context}
+  → Extract structured JSON
+  → Emit OracleEvent
+```
+
+## Deployment Architecture
+
+### Monorepo Structure (Turborepo + pnpm)
 
 ```
 /megatron
-├─ /apps
-│  ├─ /web                # Next.js frontend + API routes
-│  └─ /worker             # Node workers: exchange, price-engine, llm-pipeline, blockchain-monitor
-├─ /packages
-│  ├─ /lib-common         # bonding curve math, types
-│  ├─ /lib-db             # database models (Prisma/Knex) & migrations
-│  └─ /lib-crypto         # ethers.js helpers
-├─ /migrations
-├─ docker-compose.yml
-└─ .env
+├── turbo.json                    # Turborepo config
+├── pnpm-workspace.yaml           # Workspace definition
+├── package.json                  # Root scripts
+│
+├── /apps
+│   ├── /web                      # Next.js (deploy to Vercel)
+│   │   ├── package.json
+│   │   ├── next.config.js
+│   │   ├── /app                  # App Router (Next.js 14)
+│   │   ├── /components
+│   │   └── /lib
+│   │
+│   └── /worker                   # Node.js worker (deploy to Render)
+│       ├── package.json
+│       ├── Dockerfile
+│       ├── /src
+│       │   ├── index.ts          # Entry point
+│       │   ├── /modules          # 6 worker modules
+│       │   └── /jobs             # BullMQ handlers
+│       └── /tests
+│
+├── /packages                     # Shared libraries
+│   ├── /database                 # Prisma ORM
+│   │   ├── prisma/schema.prisma
+│   │   └── /migrations
+│   ├── /lib-common               # Business logic
+│   │   ├── bondingCurve.ts
+│   │   ├── priceEngine.ts
+│   │   └── types.ts
+│   ├── /lib-crypto               # Blockchain
+│   │   ├── depositMonitor.ts
+│   │   └── withdrawalBatcher.ts
+│   └── /lib-integrations         # External APIs
+│       ├── serper.ts
+│       ├── huggingface.ts
+│       ├── ably.ts
+│       └── alchemy.ts
+│
+└── /tests
+    └── /e2e                      # Playwright tests
+```
+
+**Build Command**:
+```bash
+pnpm install              # Install all workspaces
+pnpm build                # Turborepo builds all packages
+pnpm dev                  # Runs all dev servers in parallel
+pnpm test                 # Jest + Playwright
 ```
 
 ---
 
-# 10. Deployment & Free-First Choices
+# 5. LP FUNDING MODEL (ECONOMIC ENGINE)
 
-* **Frontend & API (Next.js):** Vercel (Hobby / Free)
-* **Postgres:** Neon (use existing Neon DB)
-* **Redis & queues:** Upstash (free tier)
-* **Realtime:** Ably (free tier)
-* **LLM inference:** Hugging Face (free limits, manage cadence; cache results)
-* **Web search:** Serper API (provided in .env) — control rate and cache
-* **Workers:** Fly.io / Render / Railway free tiers for background workers OR run as serverless on Vercel with careful design (workers recommended for low-latency exchange operations)
-* **RPC provider:** Infura/Alchemy (free tier) or rely on user-paid gas for withdrawals
+## Lifecycle (3 Stages)
 
-**Note:** Some services have limited free quotas (LLM calls, Serper calls) — throttle and cache aggressively to control costs.
+### STAGE 1: LP Funding Mode (7-Day Window)
+
+**Trigger**: Admin approves user's asset request
+
+**Process**:
+1. Asset created with `status = "funding"`
+2. Liquidity pool created with:
+   - `soft_cap` (min to activate, default $2,500)
+   - `hard_cap` (max allowed, default $25,000)
+   - `funding_deadline` (7 days from now)
+3. User's initial $100 contribution counted toward soft cap
+4. Other users can contribute USDC via `/api/lp/contribute`
+
+**Outcomes**:
+- **Success** (soft cap reached): Asset status → "active", Stage 2 begins
+- **Failure** (deadline expires, soft cap not met): Auto-refund all LPs, asset status → "cancelled"
+
+**Database State**:
+```sql
+-- Asset
+{status: "funding", soft_cap: 2500, hard_cap: 25000, funding_deadline: "2025-12-11T21:00:00Z"}
+
+-- Liquidity Pool
+{total_usdc: 1500, status: "funding"} -- Example: halfway to soft cap
+
+-- LP Shares (multiple users)
+User A: {lp_shares: "500000000000000000000", contributed_usdc: 500}
+User B: {lp_shares: "1000000000000000000000", contributed_usdc: 1000}
+```
+
+### STAGE 2: Live Trading
+
+**Trigger**: Soft cap reached
+
+**Activation Logic** (`activateAsset` function):
+```typescript
+async function activateAsset(assetId: string) {
+  await db.$transaction(async (tx) => {
+    // 1. Update asset status
+    await tx.assets.update({
+      where: { id: assetId },
+      data: { 
+        status: 'active',
+        activatedAt: new Date()
+      }
+    });
+    
+    // 2. Update pool status
+    await tx.liquidityPool.update({
+      where: { assetId },
+      data: { status: 'active' }
+    });
+    
+    // 3. Schedule LLM jobs
+    await llmQueue.add('fetch-signals', { assetId }, {
+      repeat: { every: 600000 } // 10 min
+    });
+    
+    // 4. Emit activation event
+    await redis.publish('megatron:events', JSON.stringify({
+      type: 'asset_activated',
+      assetId,
+      timestamp: Date.now()
+    }));
+  });
+}
+```
+
+**Trading Mechanics**:
+- Every buy/sell trade generates **0.5% swap fee**
+- Fee distribution:
+  ```
+  Total fee = trade_amount × 0.005
+  LP portion = fee × 0.9 (90%)
+  Platform portion = fee × 0.1 (10%)
+  ```
+
+**Fee Distribution Algorithm**:
+```typescript
+async function distributeSwapFees(assetId: string, swapFee: number) {
+  const lpPortion = swapFee * 0.9;
+  const platformFee = swapFee * 0.1;
+  
+  const pool = await db.liquidityPool.findUnique({ where: { assetId } });
+  const lps = await db.lpShares.findMany({ where: { poolId: pool.id } });
+  
+  for (const lp of lps) {
+    const lpShare = lp.lpShares / pool.totalLpShares; // Percentage ownership
+    const reward = lpPortion * lpShare;
+    
+    await db.lpShares.update({
+      where: { id: lp.id },
+      data: { unclaimedRewards: { increment: reward } }
+    });
+  }
+  
+  // Platform fee goes to treasury
+  await db.platformTreasury.update({
+    data: { balance: { increment: platformFee } }
+  });
+}
+```
+
+### STAGE 3: LP Vesting & Rewards
+
+**Vesting Schedule** (standardized across platform):
+
+| Time Elapsed | Unlocked % | Cumulative |
+|--------------|-----------|------------|
+| 1 week       | +25%      | 25%        |
+| 1 month      | +25%      | 50%        |
+| 3 months     | +25%      | 75%        |
+| 6 months     | +25%      | 100%       |
+
+**Vesting Creation** (when LP contributes):
+```typescript
+async function createVestingSchedule(lpShareId: string, contributionDate: Date) {
+  const schedules = [
+    { days: 7, percentage: 25 },
+    { days: 30, percentage: 50 },
+    { days: 90, percentage: 75 },
+    { days: 180, percentage: 100 }
+  ];
+  
+  for (const { days, percentage } of schedules) {
+    await db.lpUnlockSchedule.create({
+      data: {
+        lpShareId,
+        unlockDate: addDays(contributionDate, days),
+        unlockPercentage: percentage,
+        unlocked: false
+      }
+    });
+  }
+}
+```
+
+**Vested Amount Calculation**:
+```typescript
+function calculateVestedAmount(lpShare: LPShare, schedule: LPUnlockSchedule[]): number {
+  const now = new Date();
+  const totalContribution = lpShare.contributedUsdc;
+  
+  // Find highest unlocked percentage
+  let maxUnlockedPct = 0;
+  for (const unlock of schedule) {
+    if (now >= unlock.unlockDate) {
+      maxUnlockedPct = Math.max(maxUnlockedPct, unlock.unlockPercentage);
+    }
+  }
+  
+  return totalContribution * (maxUnlockedPct / 100);
+}
+```
+
+**Withdrawal Rules**:
+
+1. **Instant Withdrawal** (≤ 25% of vested amount):
+```typescript
+async function instantWithdraw(lpShareId: string, amount: number) {
+  const lp = await db.lpShares.findUnique({ where: { id: lpShareId } });
+  const vestedAmount = calculateVestedAmount(lp, lp.unlockSchedule);
+  const instantLimit = vestedAmount * 0.25;
+  
+  if (amount > instantLimit) {
+    throw new Error('Exceeds instant withdrawal limit');
+  }
+  
+  // Execute immediately
+  await db.$transaction(async (tx) => {
+    // Burn LP shares proportionally
+    const sharesToBurn = (amount / lp.contributedUsdc) * lp.lpShares;
+    
+    await tx.lpShares.update({
+      where: { id: lpShareId },
+      data: {
+        lpShares: { decrement: sharesToBurn },
+        contributedUsdc: { decrement: amount }
+      }
+    });
+    
+    // Credit user balance
+    await tx.users.update({
+      where: { id: lp.userId },
+      data: { walletHotBalance: { increment: amount } }
+    });
+  });
+}
+```
+
+2. **Queued Withdrawal** (> 25% of vested amount):
+```typescript
+async function queueWithdrawal(lpShareId: string, amount: number) {
+  const lp = await db.lpShares.findUnique({ where: { id: lpShareId } });
+  const vestedAmount = calculateVestedAmount(lp, lp.unlockSchedule);
+  
+  if (amount > vestedAmount) {
+    throw new Error('Exceeds vested amount');
+  }
+  
+  // Add to queue
+  await db.withdrawalQueue.create({
+    data: {
+      lpShareId,
+      amountUsdc: amount,
+      status: 'pending'
+    }
+  });
+}
+```
+
+**Daily Queue Processing** (max 10% of pool per day):
+```typescript
+async function processWithdrawalQueue() {
+  const pools = await db.liquidityPool.findMany({ where: { status: 'active' } });
+  
+  for (const pool of pools) {
+    const maxDaily = pool.totalUsdc * 0.10; // 10% limit
+    let processedToday = 0;
+    
+    const pending = await db.withdrawalQueue.findMany({
+      where: { 
+        status: 'pending',
+        lpShareId: { in: (await db.lpShares.findMany({ where: { poolId: pool.id } })).map(lp => lp.id) }
+      },
+      orderBy: { requestedAt: 'asc' } // FIFO
+    });
+    
+    for (const withdrawal of pending) {
+      if (processedToday + withdrawal.amountUsdc > maxDaily) {
+        break; // Hit daily limit, stop processing
+      }
+      
+      await executeWithdrawal(withdrawal);
+      processedToday += withdrawal.amountUsdc;
+    }
+  }
+}
+```
+
+## LP Token Economics
+
+**LP Share Minting Formula**:
+```
+When first LP contributes to empty pool:
+  lp_shares = contribution_amount × 1e18
+
+When subsequent LPs contribute:
+  lp_shares = (contribution / total_pool_usdc) × total_lp_shares
+```
+
+**Example**:
+```
+Pool state: total_usdc = $10,000, total_lp_shares = 10,000 × 10^18
+
+New LP contributes $2,000:
+  lp_shares = (2000 / 10000) × (10,000 × 10^18)
+            = 0.2 × 10,000 × 10^18
+            = 2,000 × 10^18
+            = 20% ownership
+
+After contribution:
+  total_usdc = $12,000
+  total_lp_shares = 12,000 × 10^18
+```
+
+**LP Token Value (NAV)**:
+```
+NAV per LP token = (pool_reserve + unrealized_pnl) / total_lp_shares
+
+Where:
+  pool_reserve = USDC held in liquidity pool
+  unrealized_pnl = Sum of (outstanding_shares × current_market_price) for all positions
+```
+
+**Fee Accumulation**:
+```typescript
+After each trade:
+  swap_fee = 0.5% of trade_amount
+  lp_portion = swap_fee × 0.9
+  
+  For each LP with ownership_pct:
+    lp.unclaimed_rewards += lp_portion × ownership_pct
+```
+
+**Claiming Fees** (anytime, no vesting):
+```typescript
+async function claimFees(lpShareId: string) {
+  const lp = await db.lpShares.findUnique({ where: { id: lpShareId } });
+  
+  if (lp.unclaimedRewards === 0) {
+    throw new Error('No fees to claim');
+  }
+  
+  await db.$transaction(async (tx) => {
+    await tx.users.update({
+      where: { id: lp.userId },
+      data: { walletHotBalance: { increment: lp.unclaimedRewards } }
+    });
+    
+    await tx.lpShares.update({
+      where: { id: lpShareId },
+      data: { unclaimedRewards: 0 }
+    });
+  });
+}
+```
 
 ---
 
-# 11. Security & Anti-Abuse (no KYC)
+# 6. PRICING MODEL (DUAL-PRICE SYSTEM)
 
-* **Rate limiting** (per-IP & per-account) via Redis
-* **Per-account deposit/withdrawal caps** and position limits per asset
-* **Wash-trade detection** (heuristics: repeated circular trades, identical amounts, same IPs/wallets) → flag & freeze
-* **Withdrawal cooldowns & batching** for large amounts
-* **Device/IP fingerprinting** and block known TOR/proxy IPs
-* **Admin emergency actions:** freeze asset, freeze account, manual price correction (with audit log)
+## Market Price (M) — Bonding Curve
+
+### Linear Bonding Curve Formula
+
+**Marginal Price** (price to buy next infinitesimal share):
+```
+M(S) = P0 + k × S
+```
+
+Where:
+- `P0` = base price (default: 1 USDC, configurable per asset)
+- `k` = slope (default: 0.01, configurable per asset)
+- `S` = current total supply of shares
+
+**Cost to Buy ΔS Shares**:
+```
+Cost = ∫[S to S+ΔS] (P0 + k×x) dx
+     = P0×ΔS + ½×k×((S+ΔS)² - S²)
+     = P0×ΔS + ½×k×(2S×ΔS + ΔS²)
+     = P0×ΔS + k×S×ΔS + ½×k×ΔS²
+```
+
+**Solving for ΔS Given Buy Amount A** (user wants to spend $A):
+```
+Set Cost = A:
+  P0×ΔS + k×S×ΔS + ½×k×ΔS² = A
+  ½×k×ΔS² + (P0 + k×S)×ΔS - A = 0
+
+Quadratic formula:
+  a = ½×k
+  b = P0 + k×S
+  c = -A
+  
+  ΔS = (-b + √(b² - 4ac)) / 2a  (take positive root)
+```
+
+**TypeScript Implementation**:
+```typescript
+export function solveDeltaShares(
+  P0: number,
+  k: number,
+  S: number,
+  A: number
+): number {
+  if (k === 0) {
+    // Linear pricing: M(S) = P0
+    return A / P0;
+  }
+  
+  const a = k / 2;
+  const b = P0 + k * S;
+  const c = -A;
+  
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    throw new Error('Invalid parameters: negative discriminant');
+  }
+  
+  const sqrt = Math.sqrt(discriminant);
+  const deltaS = (-b + sqrt) / (2 * a);
+  
+  if (deltaS <= 0) {
+    throw new Error('Invalid result: non-positive shares');
+  }
+  
+  return deltaS;
+}
+
+export function marginalPrice(P0: number, k: number, S: number): number {
+  return P0 + k * S;
+}
+```
+
+**Concrete Example**:
+```
+Asset: "Bitcoin Price Index"
+Parameters: P0 = 1, k = 0.01, current S = 1000
+
+Current marginal price:
+  M(1000) = 1 + 0.01×1000 = $11
+
+User wants to buy with $100:
+  a = 0.005
+  b = 1 + 0.01×1000 = 11
+  c = -100
+  
+  discriminant = 121 + 2 = 123
+  sqrt = 11.0905
+  
+  ΔS = (-11 + 11.0905) / 0.01
+     = 0.0905 / 0.01
+     ≈ 9.05 shares
+  
+New supply = 1009.05
+New marginal price = 1 + 0.01×1009.05 ≈ $11.09
+```
+
+### Sell Mechanics (AMM Buyback)
+
+When user sells shares, the AMM **buys them back** using the pool reserve.
+
+**Revenue from Selling ΔS Shares**:
+```
+Revenue = ∫[S-ΔS to S] (P0 + k×x) dx
+        = Cost function evaluated in reverse
+        = P0×ΔS + k×(S-ΔS)×ΔS + ½×k×ΔS²
+```
+
+**Simplified** (user specifies shares to sell):
+```typescript
+export function calculateSellRevenue(
+  P0: number,
+  k: number,
+  S: number,
+  deltaS: number
+): number {
+  if (deltaS > S) {
+    throw new Error('Cannot sell more shares than supply');
+  }
+  
+  // Revenue is the area under the curve from (S-ΔS) to S
+  const avgPrice = P0 + k * (S - deltaS / 2);
+  return avgPrice * deltaS;
+}
+```
+
+**Example**:
+```
+Current supply S = 1009.05
+User wants to sell 5 shares
+  
+  avgPrice = 1 + 0.01×(1009.05 - 2.5)
+           = 1 + 10.0655
+           = $11.0655
+  
+  Revenue = 11.0655 × 5 ≈ $55.33
+  
+After sale:
+  New supply = 1004.05
+  New marginal price = 1 + 0.01×1004.05 ≈ $11.04
+```
+
+## Fundamental Price (F) — LLM Analysis
+
+### LLM Pipeline Workflow
+
+**Cron Trigger** (every 10 minutes for active assets):
+```typescript
+async function fetchSignalForAsset(assetId: string): Promise<OracleSignal | null> {
+  const asset = await db.assets.findUnique({ where: { id: assetId } });
+  const queries = asset.oracleQueries as string[];
+  
+  // Step 1: Search web via Serper
+  const searchResults = await querySerper(queries);
+  
+  // Step 2: Analyze with LLM
+  const llmOutput = await analyzeLLM(searchResults);
+  
+  // Step 3: Validate output
+  if (!validateSignal(llmOutput)) {
+    console.warn(`Invalid signal for ${assetId}, skipping`);
+    return null;
+  }
+  
+  // Step 4: Log for audit
+  await db.oracleLog.create({
+    data: {
+      assetId,
+      deltaPercent: llmOutput.delta_percent,
+      confidence: llmOutput.confidence,
+      summary: llmOutput.summary,
+      sourceUrls: llmOutput.source_urls,
+      llmResponse: llmOutput
+    }
+  });
+  
+  return llmOutput;
+}
+```
+
+**Serper API Call**:
+```typescript
+async function querySerper(queries: string[]): Promise<SearchResult[]> {
+  const results: SearchResult[] = [];
+  
+  for (const query of queries) {
+    const response = await fetch('https://google.serper.dev/search', {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': process.env.SERPER_API_KEY!,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        q: query,
+        num: 5 // Top 5 results
+      })
+    });
+    
+    const data = await response.json();
+    results.push(...data.organic.slice(0, 5));
+  }
+  
+  return results;
+}
+```
+
+**LLM Analysis (flan-t5-base)**:
+```typescript
+async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutput> {
+  const context = searchResults.map(r => 
+    `${r.title}\n${r.snippet}\nSource: ${r.link}`
+  ).join('\n\n');
+  
+  const prompt = `
+Analyze the following news articles and determine the impact on the asset price.
+Return a JSON object with these fields:
+- delta_percent: number (percentage change, can be negative)
+- confidence: number (0 to 1, how confident you are)
+- summary: string (one sentence explaining the impact)
+- source_urls: array of relevant URLs
+
+Context:
+${context}
+
+JSON:`;
+
+  const response = await fetch(
+    'https://api-inference.huggingface.co/models/google/flan-t5-base',
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 200,
+          temperature: 0.3 // Lower temp for more deterministic output
+        }
+      })
+    }
+  );
+  
+  const data = await response.json();
+  const generated = data[0].generated_text;
+  
+  // Parse JSON (with error handling)
+  try {
+    return JSON.parse(generated);
+  } catch (e) {
+    throw new Error('LLM did not return valid JSON');
+  }
+}
+```
+
+**Validation & Sanity Checks**:
+```typescript
+function validateSignal(signal: LLMOutput): boolean {
+  // Check 1: Required fields present
+  if (signal.delta_percent === undefined || signal.confidence === undefined) {
+    return false;
+  }
+  
+  // Check 2: Confidence threshold
+  if (signal.confidence < 0.4) {
+    console.log('Signal confidence too low:', signal.confidence);
+    return false;
+  }
+  
+  // Check 3: Delta within bounds (±30%)
+  if (Math.abs(signal.delta_percent) > 30) {
+    console.log('Delta too extreme, clamping:', signal.delta_percent);
+    signal.delta_percent = Math.sign(signal.delta_percent) * 30;
+  }
+  
+  return true;
+}
+```
+
+### EMA Smoothing
+
+To prevent wild price swings from single noisy signals, apply **Exponential Moving Average**:
+
+```
+F_t = β × F_new + (1 - β) × F_{t-1}
+```
+
+Where:
+- `β` = smoothing factor (default: 0.2)
+- `F_new` = new suggested price from LLM
+- `F_{t-1}` = previous fundamental price
+
+**Calculation**:
+```typescript
+export function applyEMA(current: number, newValue: number, beta: number = 0.2): number {
+  return beta * newValue + (1 - beta) * current;
+}
+```
+
+**If LLM returns delta_percent instead of absolute price**:
+```typescript
+function updateFundamentalPrice(
+  F_prev: number,
+  delta_percent: number,
+  beta: number = 0.2
+): number {
+  const F_new = F_prev * (1 + delta_percent / 100);
+  return applyEMA(F_prev, F_new, beta);
+}
+```
+
+**Example**:
+```
+Current F = $10
+LLM returns: delta_percent = +5%, confidence = 0.8
+
+F_new = 10 × (1 + 0.05) = $10.50
+F_t = 0.2×$10.50 + 0.8×$10
+    = $2.10 + $8.00
+    = $10.10 (smoothed, not full jump to $10.50)
+```
+
+## Display Price (D) — Weighted Combination
+
+### Adaptive Weighting Formula
+
+```
+w_market = clamp(0.5 + 0.5 × (vol_recent / (vol_recent + V0)), 0.2, 0.95)
+
+D = w_market × M + (1 - w_market) × F
+```
+
+Where:
+- `vol_recent` = trading volume in last 5-15 minutes (USDC)
+- `V0` = tuning constant (default: 1000 USDC)
+- `clamp(x, min, max)` = constrain x to [min, max]
+
+**Rationale**:
+- **High volume** → Users are actively trading → Trust market price more
+- **Low volume** → Thin trading → Rely more on fundamental analysis
+
+**TypeScript Implementation**:
+```typescript
+export function combinePrice(
+  M: number,
+  F: number,
+  volRecent: number,
+  V0: number = 1000
+): { D: number; w_market: number } {
+  // Calculate adaptive weight
+  let w_market = 0.5 + 0.5 * (volRecent / (volRecent + V0));
+  
+  // Clamp to [0.2, 0.95]
+  w_market = Math.max(0.2, Math.min(0.95, w_market));
+  
+  // Weighted average
+  const D = w_market * M + (1 - w_market) * F;
+  
+  return { D, w_market };
+}
+```
+
+**Example Scenarios**:
+
+```
+Scenario A: High Trading Volume
+  M = $12 (market buying heavily)
+  F = $10 (fundamental cautious)
+  vol_recent = $5,000 USDC
+  V0 = $1,000
+  
+  w_market = 0.5 + 0.5×(5000/(5000+1000))
+           = 0.5 + 0.5×0.833
+           = 0.917 (capped at 0.95)
+           = 0.95
+  
+  D = 0.95×$12 + 0.05×$10
+    = $11.40 + $0.50
+    = $11.90 (close to market price)
+
+Scenario B: Low Trading Volume
+  M = $12
+  F = $10
+  vol_recent = $100 USDC
+  V0 = $1,000
+  
+  w_market = 0.5 + 0.5×(100/(100+1000))
+           = 0.5 + 0.5×0.091
+           = 0.545
+  
+  D = 0.545×$12 + 0.455×$10
+    = $6.54 + $4.55
+    = $11.09 (more balanced)
+
+Scenario C: Zero Trading Volume
+  M = $12
+  F = $10
+  vol_recent = $0
+  
+  w_market = 0.5 + 0 = 0.5 (actually goes to min 0.2)
+  w_market = 0.2
+  
+  D = 0.2×$12 + 0.8×$10
+    = $2.40 + $8.00
+    = $10.40 (heavily favors fundamental)
+```
+
+### Volume Calculation
+
+```typescript
+async function calculateRecentVolume(assetId: string, minutesBack: number = 5): Promise<number> {
+  const cutoff = new Date(Date.now() - minutesBack * 60 * 1000);
+  
+  const trades = await db.trades.findMany({
+    where: {
+      assetId,
+      timestamp: { gte: cutoff }
+    }
+  });
+  
+  const volume = trades.reduce((sum, trade) => sum + trade.price * trade.quantity, 0);
+  return volume;
+}
+```
 
 ---
 
-# 12. Monitoring, KPIs & Observability
-
-Important metrics & alerts:
-
-* Trades/sec, avg trade latency
-* Reserve ratio per asset & overall
-* Active users, deposits / withdrawals per day
-* LLM/Serper success rate & confidence distribution
-* Error rate (API, workers), queue lengths
-* Anomaly alerts: big price moves, reserve dips, wash-trade patterns
-
-Suggested tools: Prometheus/Grafana (or provider metrics), Sentry for errors, and DB reconciliation jobs.
-
----
-
-# 13. Default Parameters (MVP seeds)
-
-* `P0 = 1 USDC`, `k = 0.005` (tame slope) for new assets
-* Trading fee = `0.5%` per trade (flows to reserve)
-* EMA β for LLM smoothing = `0.2`
-* LLM cadence = `5-15 minutes` per active asset (lower for quiet assets)
-* Reserve_ratio_target = `0.10` (10%)
-* Max instant withdrawal per account = `2,000 USDC` first 24h (increase over time)
-
----
-
-# 14. Roadmap & Next Steps (short-term)
-
-**Phase 0 (spec)**
-
-* Finalize allowed asset types & canonical search queries per asset. Legal check for target markets.
-
-**Phase 1 (MVP)**
-
-* Implement Next.js frontend with NextAuth
-* Implement Neon Postgres schema + migrations
-* Build Exchange worker (bonding curve buys/sells + ledger) and connect DB
-* Implement Blockchain Monitor for deposits (single chain)
-* Implement Price Engine (consume trade events, simple LLM stub for `F`)
-* Basic admin dashboard to create assets and set oracle queries
-
-**Phase 2 (stability & liquidity)**
-
-* Seed platform reserve & implement LP interface
-* Implement monitoring & reserve health alerts
-* Harden anti-abuse heuristics
-
-**Phase 3 (growth & advanced features)**
-
-* Orderbook overlay
-* More advanced oracle aggregation (multi-source + TWAP)
-* Add mobile app / UX improvements
-
----
-
-# 15. Admin Ops & Emergency Procedures
-
-* **Emergency pause** per asset (stop trading and display notice)
-* **Manual oracle override** with audit logs
-* **Account freeze** for suspected abuse
-* **Reserve replenishment** workflow (admin deposits to pool)
-* **Reconciliation & forensic logs** stored and searchable for audits
-
----
-
-# Appendix A — .env keys (used by plan)
-
-* `NEON_DATABASE_URL` — Postgres
-* `UPSTASH_REST_URL`, `UPSTASH_REST_TOKEN` — Redis & queues
-* `SERPER_API_KEY` — web search
-* `HUGGINGFACE_API_KEY`, `HUGGINGFACE_API_URL` — LLM inference
-* `PINECONE_API_KEY` (optional) — vector store for evidence embeddings
-* `BLOB_READ_WRITE_TOKEN` — Vercel Blob for storage
-* `ABLY_API_KEY` — realtime publish
-* `NEXTAUTH_SECRET` — NextAuth secret
-* Admin password is stored in `.env` (store hashed value and compare against bcrypt)
-
----
-
-# Closing notes
-
-This masterplan is intentionally practical and prescriptive: it emphasizes a free-first deployment, a separation of concerns between exchange and price engine, and an AMM-based liquidity guarantee to solve the liquidity problem. The next concrete deliverable I suggest is one of:
-
-* Full SQL schema + migration file, or
-* TypeScript bonding-curve module + exchange worker pseudocode, or
-* Full Price Engine worker implementation pseudocode (with Ably publish and event handling).
-
-Tell me which of the three you want first and I will produce it immediately.
+*(Continuing in next message due to length...)*
