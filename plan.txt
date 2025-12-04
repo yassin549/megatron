@@ -1,0 +1,662 @@
+# MEGATRON — IMPLEMENTATION PLAN
+# Build-from-Scratch Guide with Detailed Architectures, Schemas & Principles
+
+**Version**: 1.0  
+**Last Updated**: 2025-12-04  
+**Purpose**: Complete implementation roadmap with technical details, acceptance criteria, and architectural schemas
+
+---
+
+# TABLE OF CONTENTS
+
+1. [How to Use This Plan](#how-to-use-this-plan)
+2. [Critical Principles & Architecture Patterns](#critical-principles--architecture-patterns)
+3. [Milestone 0: Project Setup & Repo](#milestone-0--project-setup--repo)
+4. [Milestone 1: Data Model & Core DB](#milestone-1--data-model--core-db)
+5. [Milestone 2: Authentication & Basic API](#milestone-2--authentication--basic-api)
+6. [Milestone 3: Bonding Curve Exchange](#milestone-3--bonding-curve-exchange)
+7. [Milestone 4: LP Funding & LP Token Mechanics](#milestone-4--lp-funding--lp-token-mechanics)
+8. [Milestone 5: Blockchain Monitor & Custody](#milestone-5--blockchain-monitor--custody)
+9. [Milestone 6: Price Engine & LLM Pipeline](#milestone-6--price-engine--llm-pipeline)
+10. [Milestone 7: Frontend UI & Admin](#milestone-7--frontend-ui--admin)
+11. [Milestone 8: Anti-Abuse, Monitoring & Observability](#milestone-8--anti-abuse-monitoring--observability)
+12. [Milestone 9: Testing & Simulation](#milestone-9--testing--simulation)
+13. [Milestone 10: Staging & Testnet Launch](#milestone-10--staging--testnet-launch)
+14. [Milestone 11: Mainnet Preparation & Operational Steps](#milestone-11--mainnet-preparation--operational-steps)
+15. [Milestone 12: Mainnet Launch & Post-Launch Ops](#milestone-12--mainnet-launch--post-launch-ops)
+16. [Critical Configuration Defaults](#critical-configuration-defaults)
+17. [Risk Mitigation Matrix](#risk-mitigation-matrix)
+
+---
+
+# How to Use This Plan
+
+## Execution Strategy
+
+* **Sequential Milestones**: Follow milestones 0→12 in order. Each milestone builds on previous foundations.
+* **Parallel Tasks**: Within a milestone, tasks can be done in parallel if no dependencies exist.
+* **Team Sizing**:
+  - **Solo**: Complete tasks sequentially within each milestone
+  - **2-3 people**: Split by area (backend/frontend/infra)
+  - **Team**: Assign milestones to sub-teams
+
+## Acceptance Criteria (AC)
+
+Each task has **Acceptance Criteria** that define "done":
+- ✅ Unit tests pass
+- ✅ Integration tests pass
+- ✅ Manual QA checklist completed
+- ✅ Code reviewed and merged to develop branch
+
+## Version Control Strategy
+
+```
+main (production)
+  ↑
+develop (staging)
+  ↑
+feature/milestone-N-task-X
+```
+
+**Branching**:
+- Create feature branch from `develop`
+- PR to `develop` with tests passing
+- Weekly deploy `develop` → `main` after manual testing
+
+---
+
+# Critical Principles & Architecture Patterns
+
+## 1. Atomic Transaction Pattern
+
+**Principle**: All state-changing operations MUST be atomic (all-or-nothing).
+
+**Example - Trade Execution**:
+```typescript
+await db.$transaction(async (tx) => {
+  // 1. Lock resources (SELECT FOR UPDATE)
+  const asset = await tx.assets.findUnique({ 
+    where: { id: assetId }, 
+    lock: 'forUpdate' 
+  });
+  
+  const user = await tx.users.findUnique({ 
+    where: { id: userId }, 
+    lock: 'forUpdate' 
+  });
+  
+  // 2. Validate
+  if (user.walletHotBalance < amount) throw new Error('Insufficient funds');
+  if (asset.status !== 'active') throw new Error('Asset not active');
+  
+  // 3. Calculate
+  const deltaShares = solveDeltaShares(P0, k, asset.totalSupply, amount);
+  const fee = amount * 0.005;
+  
+  // 4. Update all state atomically
+  await tx.users.update({ where: { id: userId }, data: { walletHotBalance: { decrement: amount }}});
+  await tx.assets.update({ where: { id: assetId }, data: { totalSupply: { increment: deltaShares }}});
+  await tx.liquidityPool.update({ where: { assetId }, data: { totalUsdc: { increment: amount - fee }}});
+  await tx.trades.create({ data: { ... } });
+  
+  // 5. Return result
+  return { trade, deltaShares };
+}, {
+  isolationLevel: 'Serializable', // Strongest isolation
+  timeout: 5000
+});
+```
+
+**Why**:
+- Prevents race conditions (two users buying simultaneously)
+- Guarantees consistency (balance always matches ledger)
+- Prevents partial updates (all steps succeed or all fail)
+
+## 2. Event-Driven Architecture
+
+**Principle**: Workers communicate via asynchronous events, not direct calls.
+
+**Data Flow**:
+```
+[Exchange] --TradeEvent--> [Redis Pub/Sub] ---> [Price Engine]
+                                           ---> [Fee Distributor]
+                                           ---> [Chart Updater]
+
+[LLM Pipeline] --OracleEvent--> [Redis] ---> [Price Engine]
+```
+
+**Event Schemas**:
+```typescript
+interface TradeEvent {
+  type: 'trade';
+  assetId: string;
+  tradeId: string;
+  price: number;
+  quantity: number;
+  buyerId: string;
+  sellerId?: string;
+  timestamp: number;
+  volume5m: number; // Updated rolling volume
+}
+
+interface OracleEvent {
+  type: 'oracle';
+  assetId: string;
+  deltaPercent?: number;
+  suggestedPrice?: number;
+  confidence: number;
+  summary: string;
+  sourceUrls: string[];
+  timestamp: number;
+}
+```
+
+**Publisher (Exchange Worker)**:
+```typescript
+async function emitTradeEvent(trade: Trade) {
+  const event: TradeEvent = {
+    type: 'trade',
+    assetId: trade.assetId,
+    tradeId: trade.id,
+    price: trade.price,
+    quantity: trade.quantity,
+    buyerId: trade.buyerId,
+    sellerId: trade.sellerId,
+    timestamp: Date.now(),
+    volume5m: await calculateRecentVolume(trade.assetId, 5)
+  };
+  
+  await redis.publish('megatron:events', JSON.stringify(event));
+}
+```
+
+**Subscriber (Price Engine)**:
+```typescript
+redis.subscribe('megatron:events', async (channel, message) => {
+  const event = JSON.parse(message);
+  
+  if (event.type === 'trade') {
+    await handleTradeEvent(event as TradeEvent);
+  } else if (event.type === 'oracle') {
+    await handleOracleEvent(event as OracleEvent);
+  }
+});
+```
+
+**Why**:
+- Decoupling: Workers don't need to know about each other
+- Scalability: Can add new subscribers without changing publishers
+- Resilience: If Price Engine fails, trades still execute
+- Debugging: Events logged in Redis for troubleshooting
+
+## 3. Idempotency Pattern
+
+**Principle**: Operations can be retried safely without duplicating effects.
+
+**Example - Deposit Processing**:
+```typescript
+async function processDeposit(txHash: string, userId: string, amount: number) {
+  // Check if already processed (idempotency key)
+  const existing = await db.ledger.findFirst({
+    where: { 
+      reason: 'deposit',
+      refId: txHash 
+    }
+  });
+  
+  if (existing) {
+    console.log('Deposit already processed:', txHash);
+    return existing;
+  }
+  
+  // Process deposit
+  await db.$transaction(async (tx) => {
+    await tx.users.update({
+      where: { id: userId },
+      data: { walletHotBalance: { increment: amount } }
+    });
+    
+    await tx.ledger.create({
+      data: {
+        userId,
+        deltaAmount: amount,
+        currency: 'USDC',
+        reason: 'deposit',
+        refId: txHash, // Blockchain tx hash (unique)
+        createdAt: new Date()
+      }
+    });
+  });
+}
+```
+
+**Why**:
+- Network failures can cause retries
+- Blockchain confirmations can arrive multiple times
+- Prevents double-crediting user accounts
+
+## 4. Circuit Breaker Pattern
+
+**Principle**: Automatically halt risky operations when thresholds exceeded.
+
+**Example - Price Movement Circuit Breaker**:
+```typescript
+async function checkCircuitBreaker(assetId: string, newPrice: number) {
+  const recent = await db.priceTicks.findFirst({
+    where: { assetId },
+    orderBy: { timestamp: 'desc' }
+  });
+  
+  if (!recent) return; // First tick, no comparison
+  
+  const priceChange = Math.abs((newPrice - recent.priceDisplay) / recent.priceDisplay);
+  const timeDiff = (Date.now() - recent.timestamp.getTime()) / 1000; // seconds
+  
+  // Trigger: >15% change in <60 seconds
+  if (priceChange > 0.15 && timeDiff < 60) {
+    await redis.set(`circuit:${assetId}`, '1', 'EX', 300); // Halt for 5 min
+    
+    await sendAlert('CIRCUIT_BREAKER_TRIGGERED', {
+      assetId,
+      priceChange: priceChange * 100,
+      timeDiff,
+      oldPrice: recent.priceDisplay,
+      newPrice
+    });
+    
+    throw new Error('Circuit breaker triggered: extreme price movement');
+  }
+}
+```
+
+**Why**:
+- Prevents flash crashes from exploits
+- Gives admin time to investigate
+- Auto-resumes after cooldown (no manual admin pause needed)
+
+## 5. Graceful Degradation
+
+**Principle**: System continues operating with reduced functionality when components fail.
+
+**Example - LLM Failure Handling**:
+```typescript
+async function fetchLLMSignal(assetId: string): Promise<OracleSignal | null> {
+  let attempt = 0;
+  const maxRetries = 3;
+  
+  while (attempt < maxRetries) {
+    try {
+      const searchResults = await serper.search(asset.oracleQueries);
+      const llmOutput = await huggingface.analyze(searchResults);
+      
+      if (validateSignal(llmOutput)) {
+        return llmOutput;
+      }
+    } catch (error) {
+      attempt++;
+      console.error(`LLM fetch failed (attempt ${attempt}):`, error);
+      await sleep(2000 * attempt); // Exponential backoff
+    }
+  }
+  
+  // Graceful degradation: keep last known F, increase w_market
+  console.warn(`LLM failed for ${assetId}, using last F with higher market weight`);
+  
+  // Temporarily boost market weight for this asset
+  await redis.set(`degrade:${assetId}`, '0.95', 'EX', 3600); // Use w=0.95 for 1h
+  
+  return null; // Price Engine will handle null gracefully
+}
+```
+
+**Why**:
+- HuggingFace API can be unreliable
+- Serper quota can be exhausted
+- Platform remains functional even without LLM signals
+
+---
+
+# MILESTONE 0 — Project Setup & Repo
+
+**Duration**: 1-2 days  
+**Goal**: Production-ready monorepo with CI/CD, all accounts provisioned
+
+## Tasks
+
+### Task 0.1: Create Monorepo Structure
+
+**Detailed Steps**:
+
+1. **Initialize Root**:
+```bash
+mkdir megatron && cd megatron
+pnpm init
+pnpm add -D turbo typescript @types/node
+```
+
+2. **Create Workspace Config** (`pnpm-workspace.yaml`):
+```yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+```
+
+3. **Create Directory Structure**:
+```bash
+mkdir -p apps/web apps/worker
+mkdir -p packages/database packages/lib-common packages/lib-crypto packages/lib-integrations
+mkdir -p tests/e2e scripts
+```
+
+4. **Root `package.json`**:
+```json
+{
+  "name": "megatron",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "lint": "turbo run lint"
+  },
+  "workspaces": ["apps/*", "packages/*"],
+  "devDependencies": {
+    "turbo": "^1.11.0",
+    "typescript": "^5.3.0",
+    "@types/node": "^20.0.0",
+    "prettier": "^3.1.0",
+    "eslint": "^8.55.0"
+  }
+}
+```
+
+5. **Turborepo Config** (`turbo.json`):
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "dist/**", "build/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "lint": {
+      "outputs": []
+    }
+  }
+}
+```
+
+6. **TypeScript Config** (`tsconfig.json` - root):
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": ["ES2022"],
+    "jsx": "preserve",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@megatron/*": ["packages/*/src"]
+    }
+  }
+}
+```
+
+**File Tree After Task 0.1**:
+```
+megatron/
+├── package.json
+├── pnpm-workspace.yaml
+├── turbo.json
+├── tsconfig.json
+├── .gitignore
+├── README.md
+├── apps/
+│   ├── web/
+│   └── worker/
+├── packages/
+│   ├── database/
+│   ├── lib-common/
+│   ├── lib-crypto/
+│   └── lib-integrations/
+├── tests/
+│   └── e2e/
+└── scripts/
+```
+
+### Task 0.2: Environment Configuration
+
+**Create `.env.example`**:
+```bash
+# Database
+NEON_DATABASE_URL=postgresql://user:pass@host.neon.tech/megatron?sslmode=require
+
+# Redis
+UPSTASH_REST_URL=https://your-redis.upstash.io
+UPSTASH_REST_TOKEN=your_token_here
+
+# External APIs
+SERPER_API_KEY=your_serper_key
+HUGGINGFACE_API_KEY=hf_your_key
+HUGGINGFACE_API_URL=https://api-inference.huggingface.co/models/google/flan-t5-base
+ABLY_API_KEY=your_ably_key
+
+# Blockchain
+ARBITRUM_RPC_URL=https://arb-sepolia.g.alchemy.com/v2/YOUR_KEY
+ARBITRUM_CHAIN_ID=421614
+USDC_CONTRACT_ADDRESS=0x... # Testnet USDC
+HOT_WALLET_PRIVATE_KEY=0x...
+
+# Auth
+NEXTAUTH_SECRET=your_secret_here
+NEXTAUTH_URL=http://localhost:3000
+ADMIN_PASSWORD_HASH=$2b$10$... # bcrypt hash
+
+# Platform Config
+PLATFORM_FEE_PERCENT=10
+DEFAULT_SWAP_FEE=0.005
+DEFAULT_EMA_BETA=0.2
+DEFAULT_V0=1000
+SOFT_CAP_DEFAULT=2500
+HARD_CAP_DEFAULT=25000
+
+# Feature Flags
+NODE_ENV=development
+SANDBOX_MODE=true
+```
+
+**Create `.env`** (copy from `.env.example` and fill in real values)
+
+**Update `.gitignore`**:
+```
+.env
+.env.local
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+*.log
+.DS_Store
+```
+
+### Task 0.3: GitHub Repository & CI
+
+**Initialize Git**:
+```bash
+git init
+git add .
+git commit -m "Initial monorepo setup"
+```
+
+**Create GitHub Repo**:
+- Go to github.com → New repository
+- Name: `megatron`
+- Push local repo:
+```bash
+git remote add origin git@github.com:your-org/megatron.git
+git branch -M main
+git push -u origin main
+```
+
+**Branch Protection** (GitHub Settings):
+- Require PR reviews before merging to `main`
+- Require status checks (CI must pass)
+- Require branches to be up to date
+
+**GitHub Actions** (`.github/workflows/ci.yml`):
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Lint
+        run: pnpm lint
+      
+      - name: Build
+        run: pnpm build
+      
+      - name: Unit Tests
+        run: pnpm test
+      
+      - name: Install Playwright
+        run: pnpm --filter web exec playwright install --with-deps
+      
+      - name: E2E Tests
+        run: pnpm test:e2e
+        env:
+          NEON_DATABASE_URL: ${{ secrets.TEST_DB_URL }}
+          NEXTAUTH_SECRET: test_secret
+```
+
+### Task 0.4: Provision Free-Tier Accounts
+
+**Checklist**:
+
+- [ ] **Vercel**: Sign up at vercel.com, create team
+- [ ] **Neon**: neon.tech → Create PostgreSQL database
+  - Copy connection string to `.env`
+- [ ] **Upstash**: upstash.com → Create Redis database
+  - Copy REST URL + TOKEN to `.env`
+- [ ] **Ably**: ably.com → Create app, get API key
+- [ ] **HuggingFace**: huggingface.co → Create account, get API token
+- [ ] **Serper**: serper.dev → Already have key (provided in `.env`)
+- [ ] **Alchemy**: alchemy.com → Create app on Arbitrum Sepolia
+  - Copy RPC URL to `.env`
+
+**Document All Credentials** in password manager (1Password, Bitwarden, etc.)
+
+## Acceptance Criteria (Milestone 0)
+
+✅ **Monorepo Structure**:
+- [ ] `pnpm install` completes without errors
+- [ ] `pnpm build` runs (even if packages empty)
+- [ ] Directory structure matches spec
+
+✅ **CI/CD**:
+- [ ] GitHub Actions workflow runs on PR
+- [ ] Lint step passes
+- [ ] Build step passes (currently no-op)
+
+✅ **Environment**:
+- [ ] `.env.example` committed
+- [ ] `.env` created locally (not committed)
+- [ ] All service accounts created and credentials stored
+
+✅ **Documentation**:
+- [ ] README.md explains project structure
+- [ ] Setup instructions documented
+
+---
+
+# MILESTONE 1 — Data Model & Core DB
+
+**Duration**: 3-4 days  
+**Goal**: Complete Postgres schema with migrations, Prisma ORM setup
+
+## Database Design Principles
+
+### 1. Normalization
+- No redundant data (e.g., don't store `userName` in `trades`, use `userId` foreign key)
+- Use lookup tables for enums (optional: can use Postgres ENUMs)
+
+### 2. Indexing Strategy
+- Index all foreign keys
+- Composite indexes for common queries (e.g., `userId` + `assetId`)
+- Timestamp indexes for time-series queries
+
+### 3. Decimal Precision
+- Use `DECIMAL(18,6)` for USDC amounts (6 decimals)
+- Use `DECIMAL(27,18)` for LP shares (18 decimals like ERC20)
+
+### 4. Audit Trail
+- All state-changing tables have `createdAt` timestamp
+- Immutable `ledger` table for all balance changes
+
+## Tasks
+
+### Task 1.1: Prisma Setup
+
+**Install Prisma**:
+```bash
+cd packages/database
+pnpm init
+pnpm add @prisma/client
+pnpm add -D prisma
+npx prisma init
+```
+
+**Configure Prisma** (`prisma/schema.prisma`):
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEON_DATABASE_URL")
+}
+```
+
+**(Continue in next section...)**
