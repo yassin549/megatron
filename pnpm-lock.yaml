@@ -56,6 +56,9 @@ importers:
       dotenv:
         specifier: ^16.6.1
         version: 16.6.1
+      ioredis:
+        specifier: ^5.8.2
+        version: 5.8.2
       lightweight-charts:
         specifier: ^4.1.1
         version: 4.2.3

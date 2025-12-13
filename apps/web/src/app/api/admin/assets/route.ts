@@ -40,6 +40,7 @@ export async function POST(request: Request) {
                 hardCap,
                 imageUrl,
                 status: 'funding',
+                oracleQueries: [], // Default empty queries
                 pricingParams: { P0: 10, k: 0.1 }, // Defaults
                 pool: {
                     create: {

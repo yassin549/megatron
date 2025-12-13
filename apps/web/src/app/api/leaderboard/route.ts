@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@megatron/database';
+import { db as prisma } from '@megatron/database';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,11 +20,6 @@ export async function GET() {
                         shares: true,
                         asset: {
                             select: {
-                                price: true, // Use lastMarketPrice from view/logic if available, but for now we assume this field exists or we mapped it. 
-                                // schema says Asset has lastMarketPrice. But typical Prisma query might need to be specific.
-                                // Actually Asset model in schema has `lastMarketPrice`.
-                                // Wait, the schema I read had `lastMarketPrice`.
-                                // Let's check schema again? Yes: lastMarketPrice Decimal?
                                 lastMarketPrice: true
                             }
                         }
