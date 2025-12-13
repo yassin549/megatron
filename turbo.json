@@ -1,7 +1,25 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [
-    ".env"
+    ".env",
+    "NEON_DATABASE_URL",
+    "UPSTASH_REST_URL",
+    "UPSTASH_REST_TOKEN",
+    "REDIS_URL",
+    "NEXTAUTH_URL",
+    "NEXTAUTH_SECRET",
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "BLOB_READ_WRITE_TOKEN",
+    "ABLY_API_KEY",
+    "REALTIME_PROVIDER",
+    "REALTIME_PROVIDER_KEY",
+    "PLATFORM_XPUB",
+    "USDC_CONTRACT_ADDRESS",
+    "NODE_ENV",
+    "LOG_LEVEL"
   ],
   "tasks": {
     "build": {
