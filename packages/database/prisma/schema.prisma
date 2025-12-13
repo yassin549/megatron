@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+ url      = env("NEON_DATABASE_URL")
+}
+
+// ===== USERS & AUTH =====
+
+model User {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  passwordHash      String
+  walletHotBalance  Decimal  @default(0) @db.Decimal(18, 6)
+  walletColdBalance Decimal  @default(0) @db.Decimal(18, 6)
+  depositAddress    String?  @unique
+  addressIndex      Int?     @unique
+  isAdmin           Boolean  @default(false)
+  isBlacklisted     Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  // Relations
+  positions         Position[]
+  trades            Trade[]         @relation("BuyerTrades")
+  lpShares          LPShare[]
+  ledgerEntries     Ledger[]
+  assetRequests     AssetRequest[]
+  withdrawalRequests WithdrawalRequest[]
+  pendingDeposits    PendingDeposit[]
+  bookmarks          Bookmark[]
+  
+  @@index([email])
+}
+
+// ... (Asset models unchanged)
+
+model WithdrawalRequest {
+  id          String    @id @default(uuid())
+  userId      String
+  amount      Decimal   @db.Decimal(18, 6)
+  toAddress   String
+  status      String    @default("pending") // pending, completed, failed
+  txHash      String?
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+  error       String?
+
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@index([status])
+  @@index([userId])
+}
+
+// ===== ASSETS =====
+
+model Asset {
+  id                 String    @id @default(uuid())
+  name               String
+  description        String?
+  type               String    // 'social', 'sports', 'economics', etc.
+  oracleQueries      Json      // string[]
+  imageUrl           String?   // Asset logo/image URL (NEW)
+  oracleIntervalMs   Int       @default(600000) // 10 minutes
+  pricingModel       String    @default("linear_bonding")
+  pricingParams      Json      // {P0: number, k: number}
+  totalSupply        Decimal   @default(0) @db.Decimal(18, 6)
+  status             String    @default("funding") // funding, active, paused, cancelled
+  softCap            Decimal   @db.Decimal(18, 6)
+  hardCap            Decimal   @db.Decimal(18, 6)
+  fundingDeadline    DateTime?
+  createdAt          DateTime  @default(now())
+  activatedAt        DateTime?
+  
+  // Current prices (cached for quick access)
+  lastMarketPrice    Decimal?  @db.Decimal(18, 6)
+  lastFundamental    Decimal?  @db.Decimal(18, 6)
+  lastDisplayPrice   Decimal?  @db.Decimal(18, 6)
+  
+  // Relations
+  pool               LiquidityPool?
+  trades             Trade[]
+  positions          Position[]
+  priceTicks         PriceTick[]
+  oracleLogs         OracleLog[]
+  bookmarks          Bookmark[]
+  
+  @@index([status])
+  @@index([type])
+}
+
+model AssetRequest {
+  id                      String    @id @default(uuid())
+  userId                  String
+  variableName            String
+  description             String?
+  suggestedQueries        Json      // string[]
+  initialLPContribution   Decimal   @db.Decimal(18, 6)
+  status                  String    @default("submitted") // submitted, approved, rejected, cancelled
+  adminNotes              String?
+  createdAt               DateTime  @default(now())
+  reviewedAt              DateTime?
+  
+  user                    User @relation(fields: [userId], references: [id])
+  
+  @@index([userId])
+  @@index([status])
+}
+
+// ===== LIQUIDITY POOLS =====
+
+model LiquidityPool {
+  id             String   @id @default(uuid())
+  assetId        String   @unique
+  totalUsdc      Decimal  @default(0) @db.Decimal(18, 6)
+  totalLPShares  Decimal  @default(0) @db.Decimal(27, 18)
+  unclaimedFees  Decimal  @default(0) @db.Decimal(18, 6)
+  status         String   @default("funding") // funding, active, failed
+  createdAt      DateTime @default(now())
+  
+  asset          Asset      @relation(fields: [assetId], references: [id])
+  lpShares       LPShare[]
+}
+
+model LPShare {
+  id                String   @id @default(uuid())
+  poolId            String
+  userId            String
+  lpShares          Decimal  @db.Decimal(27, 18)
+  contributedUsdc   Decimal  @db.Decimal(18, 6)
+  unclaimedRewards  Decimal  @default(0) @db.Decimal(18, 6)
+  createdAt         DateTime @default(now())
+  
+  pool              LiquidityPool       @relation(fields: [poolId], references: [id])
+  user              User                @relation(fields: [userId], references: [id])
+  unlockSchedule    LPUnlockSchedule[]
+  withdrawalQueue   WithdrawalQueue[]
+  
+  @@unique([poolId, userId])
+  @@index([userId])
+}
+
+model LPUnlockSchedule {
+  id                String   @id @default(uuid())
+  lpShareId         String
+  unlockDate        DateTime
+  unlockPercentage  Decimal  @db.Decimal(5, 2)
+  unlocked          Boolean  @default(false)
+  
+  lpShare           LPShare @relation(fields: [lpShareId], references: [id])
+  
+  @@index([lpShareId, unlockDate])
+}
+
+model WithdrawalQueue {
+  id            String    @id @default(uuid())
+  lpShareId     String
+  amountUsdc    Decimal   @db.Decimal(18, 6)
+  status        String    @default("pending") // pending, processed, cancelled
+  requestedAt   DateTime  @default(now())
+  processedAt   DateTime?
+  
+  lpShare       LPShare @relation(fields: [lpShareId], references: [id])
+  
+  @@index([status, requestedAt])
+}
+
+// ===== TRADING =====
+
+model Trade {
+  id        String   @id @default(uuid())
+  assetId   String
+  buyerId   String
+  sellerId  String?  // NULL for AMM sells
+  price     Decimal  @db.Decimal(18, 6)
+  quantity  Decimal  @db.Decimal(18, 6)
+  fee       Decimal  @db.Decimal(18, 6)
+  side      String   // 'buy' or 'sell'
+  timestamp DateTime @default(now())
+  
+  asset     Asset @relation(fields: [assetId], references: [id])
+  buyer     User @relation(name: "BuyerTrades", fields: [buyerId], references: [id])
+  
+  @@index([assetId, timestamp])
+  @@index([buyerId])
+}
+
+model Position {
+  id        String  @id @default(uuid())
+  userId    String
+  assetId   String
+  shares    Decimal @db.Decimal(18, 6)
+  avgPrice  Decimal @db.Decimal(18, 6)
+  updatedAt DateTime @updatedAt
+  
+  user      User   @relation(fields: [userId], references: [id])
+  asset     Asset  @relation(fields: [assetId], references: [id])
+  
+  @@unique([userId, assetId])
+  @@index([userId])
+}
+
+// ===== LEDGER & AUDIT =====
+
+model Ledger {
+  id          String   @id @default(uuid())
+  userId      String
+  deltaAmount Decimal  @db.Decimal(18, 6)
+  currency    String   // 'USDC'
+  reason      String   // 'deposit', 'trade', 'lp_reward', 'withdrawal', 'fee'
+  refId       String?  // Reference to trade/deposit/etc
+  metadata    Json?    // Additional context
+  createdAt   DateTime @default(now())
+  
+  user        User @relation(fields: [userId], references: [id])
+  
+  @@index([userId, createdAt])
+  @@index([refId])
+}
+
+// ===== ORACLE & PRICING =====
+
+model OracleLog {
+  id            String   @id @default(uuid())
+  assetId       String
+  deltaPercent  Decimal  @db.Decimal(10, 4)
+  confidence    Decimal  @db.Decimal(5, 4)
+  summary       String?
+  sourceUrls    Json     // string[]
+  llmResponse   Json     // Full raw response
+  createdAt     DateTime @default(now())
+  
+  asset         Asset @relation(fields: [assetId], references: [id])
+  
+  @@index([assetId, createdAt])
+}
+
+model PriceTick {
+  id                BigInt   @id @default(autoincrement())
+  assetId           String
+  timestamp         DateTime
+  priceDisplay      Decimal  @db.Decimal(18, 6)
+  priceMarket       Decimal  @db.Decimal(18, 6)
+  priceFundamental  Decimal  @db.Decimal(18, 6)
+  weightMarket      Decimal  @db.Decimal(5, 4)
+  volume5m          Decimal  @db.Decimal(18, 6)
+  supply            Decimal  @db.Decimal(18, 6)
+  
+  asset             Asset @relation(fields: [assetId], references: [id])
+  
+  @@index([assetId, timestamp(sort: Desc)])
+}
+
+// ===== PLATFORM =====
+
+model PlatformConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model PlatformTreasury {
+  id        String   @id @default("treasury")
+  balance   Decimal  @default(0) @db.Decimal(18, 6)
+  updatedAt DateTime @updatedAt
+}
+
+model AdminAction {
+  id          String   @id @default(uuid())
+  adminEmail  String
+  action      String   // 'approve_asset', 'reject_asset', 'blacklist_user', 'adjust_fee'
+  targetId    String?
+  reason      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  @@index([adminEmail, createdAt])
+}
+
+// ===== PENDING DEPOSITS (Block Confirmation Tracking) =====
+
+model PendingDeposit {
+  id              String   @id @default(uuid())
+  userId          String
+  txHash          String   @unique
+  amount          Decimal  @db.Decimal(18, 6)
+  blockNumber     Int
+  confirmations   Int      @default(0)
+  status          String   @default("pending") // pending, confirmed, failed
+  createdAt       DateTime @default(now())
+  confirmedAt     DateTime?
+
+  user            User @relation(fields: [userId], references: [id])
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Bookmark {
+  id        String   @id @default(uuid())
+  userId    String
+  assetId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+  asset     Asset    @relation(fields: [assetId], references: [id])
+
+  @@unique([userId, assetId])
+  @@index([userId])
+}

@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "@megatron/database": [
+        "../../packages/database/src"
+      ],
+      "@megatron/lib-common": [
+        "../../packages/lib-common/src"
+      ],
+      "@megatron/lib-crypto": [
+        "../../packages/lib-crypto/src"
+      ],
+      "@megatron/lib-integrations": [
+        "../../packages/lib-integrations/src"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

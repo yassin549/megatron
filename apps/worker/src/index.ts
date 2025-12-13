@@ -1,0 +1,59 @@
+// Load environment FIRST - before any other imports
+import './preload';
+
+import { Worker } from 'bullmq';
+import { db } from '@megatron/database';
+import { checkDeposits, confirmPendingDeposits } from './modules/blockchain-monitor';
+import { processUserWithdrawals } from './jobs/withdrawal-processor';
+import { processWithdrawalQueue, checkFundingDeadlines } from './jobs/lp-jobs';
+import { startLlmScheduler } from './modules/llm-pipeline';
+import { startPriceEngine } from './modules/price-engine';
+
+console.log('Starting Megatron Worker...');
+
+async function startWorker() {
+    console.log('Worker started successfully');
+
+    // 0. Analytics & Pricing modules
+    startLlmScheduler();
+    startPriceEngine().catch(err => console.error('Price engine failed to start:', err));
+
+    // 1. Blockchain Monitor (Every 15s)
+    setInterval(() => {
+        checkDeposits().catch(err => console.error('Deposit check error:', err));
+    }, 15000);
+
+    // 1b. Confirm Pending Deposits (Every 30s) - Two-phase confirmation
+    setInterval(() => {
+        confirmPendingDeposits().catch(err => console.error('Deposit confirmation error:', err));
+    }, 30000);
+
+    // 2. Withdrawal Processor (Every 30s)
+    setInterval(() => {
+        processUserWithdrawals().catch(err => console.error('Withdrawal process error:', err));
+    }, 30000);
+
+    // 3. LP Jobs - Withdrawal Queue (Daily)
+    setInterval(() => {
+        processWithdrawalQueue().catch(console.error);
+    }, 24 * 60 * 60 * 1000);
+
+    // Funding Deadlines (Hourly)
+    setInterval(() => {
+        checkFundingDeadlines().catch(console.error);
+    }, 60 * 60 * 1000);
+
+    // Initial run
+    checkDeposits().catch(console.error);
+    confirmPendingDeposits().catch(console.error);
+    processWithdrawalQueue().catch(console.error);
+
+    // Keep process alive
+    process.on('SIGTERM', async () => {
+        console.log('Shutting down worker...');
+        await db.$disconnect();
+        process.exit(0);
+    });
+}
+
+startWorker().catch(console.error);

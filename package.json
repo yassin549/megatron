@@ -1,0 +1,31 @@
+{
+  "name": "megatron",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Megatron - LP-funded synthetic asset trading platform",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "playwright test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "eslint": "9.39.1",
+    "prettier": "3.7.4",
+    "tsx": "^4.21.0",
+    "turbo": "2.6.3",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@10.14.0"
+}

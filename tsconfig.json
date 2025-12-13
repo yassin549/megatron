@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "commonjs",
+        "lib": [
+            "ES2022",
+            "DOM"
+        ],
+        "jsx": "preserve",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "incremental": true,
+        "baseUrl": ".",
+        "paths": {
+            "@megatron/database": [
+                "./packages/database/src"
+            ],
+            "@megatron/lib-common": [
+                "./packages/lib-common/dist"
+            ],
+            "@megatron/lib-crypto": [
+                "./packages/lib-crypto/dist"
+            ],
+            "@megatron/lib-integrations": [
+                "./packages/lib-integrations/src"
+            ]
+        }
+    },
+    "exclude": [
+        "node_modules",
+        ".next",
+        "dist",
+        "build"
+    ]
+}
