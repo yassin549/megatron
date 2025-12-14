@@ -1,7 +1,6 @@
 
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import 'dotenv/config';
+import { db as prisma } from '@megatron/database';
 
 // Static map to ensure good looking images for demo
 const STATIC_IMAGES: Record<string, string> = {

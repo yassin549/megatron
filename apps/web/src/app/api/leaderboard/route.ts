@@ -39,16 +39,16 @@ export async function GET() {
         // 2. Calculate Return % for each user
         const leaderboard = users.map(user => {
             // A. Calculate Portfolio Value
-            const cash = Number(user.walletHotBalance);
+            const cash = user.walletHotBalance.toNumber();
             const investments = user.positions.reduce((acc, pos) => {
-                const price = Number(pos.asset.lastMarketPrice || 0); // specific fallback
-                return acc + (Number(pos.shares) * price);
+                const price = pos.asset.lastMarketPrice?.toNumber() ?? 0;
+                return acc + (pos.shares.toNumber() * price);
             }, 0);
             const totalValue = cash + investments;
 
             // B. Calculate Total Deposited
             const totalDeposited = user.ledgerEntries.reduce((acc, entry) => {
-                return acc + Number(entry.deltaAmount);
+                return acc + entry.deltaAmount.toNumber();
             }, 0);
 
             // C. Calculate Return %
