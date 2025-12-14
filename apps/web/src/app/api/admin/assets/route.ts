@@ -117,7 +117,7 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ success: true, message: 'Asset marked as cancelled (has trades)' });
         } else {
             // Safe to fully delete relational data in transaction
-            await db.$transaction(async (tx) => {
+            await db.$transaction(async (tx: any) => {
                 // Delete related records first to avoid foreign key constraints (bookmarks, etc)
                 await tx.bookmark.deleteMany({ where: { assetId: id } });
                 await tx.liquidityPool.delete({ where: { assetId: id } });
