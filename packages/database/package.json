@@ -1,12 +1,12 @@
 {
     "name": "@megatron/database",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "private": true,
     "main": "./src/client.ts",
     "types": "./src/client.ts",
     "scripts": {
         "generate": "prisma generate",
-        "build": "prisma generate",
+        "build": "echo 'Building DB...' && prisma generate",
         "migrate": "prisma migrate dev",
         "studio": "prisma studio",
         "seed": "tsx prisma/seed.ts"
