@@ -21,6 +21,7 @@ WORKDIR /app
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY tsconfig.json tsconfig.json
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm
