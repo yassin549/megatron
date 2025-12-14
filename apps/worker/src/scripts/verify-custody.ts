@@ -66,7 +66,7 @@ async function main() {
     const withdrawAmount = 50;
     const toAddress = "0x0000000000000000000000000000000000000001";
 
-    const request = await db.$transaction(async (tx) => {
+    const request = await db.$transaction(async (tx: any) => {
         await tx.user.update({
             where: { id: userId },
             data: { walletHotBalance: { decrement: withdrawAmount } }
