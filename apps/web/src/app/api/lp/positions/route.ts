@@ -35,7 +35,7 @@ export async function GET(): Promise<NextResponse> {
         });
 
         // Calculate earnings and vesting info
-        const enrichedPositions = lpShares.map((share) => {
+        const enrichedPositions = lpShares.map((share: any) => {
             const contributed = share.contributedUsdc.toNumber();
             const poolTotalUsdc = share.pool.totalUsdc.toNumber();
             const poolTotalShares = share.pool.totalLPShares.toNumber();
@@ -52,7 +52,7 @@ export async function GET(): Promise<NextResponse> {
                 : 0;
 
             // Find next unlock date
-            const nextUnlock = share.unlockSchedule.find(s => !s.unlocked);
+            const nextUnlock = share.unlockSchedule.find((s: any) => !s.unlocked);
             const vestingEnd = nextUnlock?.unlockDate.toISOString().split('T')[0] ?? 'Fully vested';
 
             return {

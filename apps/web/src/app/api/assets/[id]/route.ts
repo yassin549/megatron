@@ -145,7 +145,7 @@ export async function GET(
                 low24h,
                 high24h,
             },
-            oracleLogs: oracleLogs.map((log) => ({
+            oracleLogs: oracleLogs.map((log: any) => ({
                 id: log.id,
                 deltaPercent: log.deltaPercent.toNumber(),
                 confidence: log.confidence.toNumber(),
@@ -153,7 +153,7 @@ export async function GET(
                 sourceUrls: log.sourceUrls as string[],
                 createdAt: log.createdAt.toISOString(),
             })),
-            priceHistory: priceHistory.reverse().map((tick) => ({
+            priceHistory: priceHistory.reverse().map((tick: any) => ({
                 timestamp: tick.timestamp.toISOString(),
                 price: tick.priceDisplay.toNumber(),
                 priceMarket: tick.priceMarket.toNumber(),
