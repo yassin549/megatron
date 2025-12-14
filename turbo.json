@@ -1,7 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [
-    ".env",
+    ".env"
+  ],
+  "globalPassThroughEnv": [
     "NEON_DATABASE_URL",
     "UPSTASH_REST_URL",
     "UPSTASH_REST_TOKEN",
