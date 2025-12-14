@@ -20,10 +20,10 @@
                 "./packages/database/src"
             ],
             "@megatron/lib-common": [
-                "./packages/lib-common/dist"
+                "./packages/lib-common/src"
             ],
             "@megatron/lib-crypto": [
-                "./packages/lib-crypto/dist"
+                "./packages/lib-crypto/src"
             ],
             "@megatron/lib-integrations": [
                 "./packages/lib-integrations/src"
