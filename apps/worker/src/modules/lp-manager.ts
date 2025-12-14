@@ -7,7 +7,7 @@ import {
     DEFAULT_CONFIG,
     TradeEvent
 } from '@megatron/lib-common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 import { redis, CHANNELS } from '../lib/redis';
 import { checkAndTrackDailyLimit } from './lp-limits';
 
@@ -22,7 +22,7 @@ import { checkAndTrackDailyLimit } from './lp-limits';
 export async function contributeToPool(userId: string, assetId: string, amountUsdc: number) {
     if (amountUsdc <= 0) throw new Error('Contribution must be positive');
 
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // 1. Fetch Asset & Pool
         const asset = await tx.asset.findUnique({
             where: { id: assetId },
@@ -175,7 +175,7 @@ export async function contributeToPool(userId: string, assetId: string, amountUs
  * Claim accumulated fees
  */
 export async function claimFees(userId: string, assetId: string) {
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         const asset = await tx.asset.findUnique({
             where: { id: assetId },
             include: { pool: true }
@@ -229,7 +229,7 @@ export async function claimFees(userId: string, assetId: string) {
 export async function withdrawLiquidityInstant(userId: string, assetId: string, amountUsdc: number) {
     if (amountUsdc <= 0) throw new Error("Amount must be positive");
 
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // 1. Fetch & Validate
         const asset = await tx.asset.findUnique({
             where: { id: assetId },
@@ -335,7 +335,7 @@ export async function withdrawLiquidityInstant(userId: string, assetId: string, 
 export async function requestWithdrawal(userId: string, assetId: string, amountUsdc: number) {
     if (amountUsdc <= 0) throw new Error("Amount must be positive");
 
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         const asset = await tx.asset.findUnique({
             where: { id: assetId },
             include: { pool: true }

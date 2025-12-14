@@ -1,6 +1,6 @@
 
 import { db } from '@megatron/database';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 import { DEFAULT_CONFIG } from '@megatron/lib-common';
 import { checkAndTrackDailyLimit } from '../modules/lp-limits';
 
@@ -50,7 +50,7 @@ export async function processWithdrawalQueue() {
 
             try {
                 // Execute Withdrawal (Atomic)
-                await db.$transaction(async (tx) => {
+                await db.$transaction(async (tx: Prisma.TransactionClient) => {
                     // Update Request Status
                     await tx.withdrawalQueue.update({
                         where: { id: req.id },
@@ -155,7 +155,7 @@ export async function checkFundingDeadlines() {
                 where: { poolId: asset.pool.id }
             });
 
-            await db.$transaction(async (tx) => {
+            await db.$transaction(async (tx: Prisma.TransactionClient) => {
                 for (const lp of lps) {
                     const refundAmount = lp.contributedUsdc.toNumber();
 

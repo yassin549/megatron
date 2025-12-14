@@ -1,7 +1,7 @@
 import { db } from '@megatron/database';
 import { deriveAddress, derivePrivateKey, isValidAddress, getXpubFromMnemonic } from '@megatron/lib-crypto';
 import { randomUUID } from 'node:crypto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 import { ethers } from 'ethers';
 
 // Mock Env

@@ -2,7 +2,7 @@
 import { db } from '@megatron/database';
 import { solveDeltaShares, calculateSellRevenue, TradeEvent } from '@megatron/lib-common';
 import { publishTradeEvent } from '../lib/redis';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 
 const CONFIG = {
     SWAP_FEE: 0.005,
@@ -22,7 +22,7 @@ export async function executeBuy(userId: string, assetId: string, amountUsdc: nu
     if (amountUsdc <= 0) throw new Error('Amount must be positive');
 
     // Use a transaction with Serializable isolation to prevent race conditions
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // 1. Fetch Asset and User with locking (simulated by finding distinct row first or relying on isolation level)
         // Prisma 'Serializable' should handle the isolation, but explicit row locking is better if supported.
         // Since simple 'findUnique' doesn't support 'lock' in standard Client yet without raw query, we rely on isolation.
@@ -255,7 +255,7 @@ export async function executeBuyAndPublish(userId: string, assetId: string, amou
 export async function executeSell(userId: string, assetId: string, sharesToSell: number, minUsdcOut: number = 0) {
     if (sharesToSell <= 0) throw new Error('Shares must be positive');
 
-    return await db.$transaction(async (tx) => {
+    return await db.$transaction(async (tx: Prisma.TransactionClient) => {
         // 1. Fetch Asset & User & Position
         const asset = await tx.asset.findUnique({
             where: { id: assetId },

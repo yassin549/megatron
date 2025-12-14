@@ -1,7 +1,7 @@
 import { db } from '@megatron/database';
 import { DEFAULT_CONFIG, type LLMOutput, type OracleEvent } from '@megatron/lib-common';
 import { querySerper, analyzeLLM } from '@megatron/lib-integrations';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 import { publishOracleEvent } from '../lib/redis';
 
 const DEFAULT_CADENCE_MS = (() => {

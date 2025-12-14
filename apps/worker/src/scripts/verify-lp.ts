@@ -3,7 +3,7 @@ import { db } from '@megatron/database';
 import { contributeToPool, claimFees, withdrawLiquidityInstant } from '../modules/lp-manager';
 import { executeBuyAndPublish } from '../modules/exchange';
 import { randomUUID } from 'node:crypto';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 
 async function main() {
     try {

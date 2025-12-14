@@ -1,7 +1,7 @@
 import { db } from '@megatron/database';
 import { USDC_ABI } from '@megatron/lib-crypto';
 import { ethers } from 'ethers';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@megatron/database';
 
 // Configuration
 const REQUIRED_CONFIRMATIONS = process.env.REQUIRED_CONFIRMATIONS ? parseInt(process.env.REQUIRED_CONFIRMATIONS) : 12;
