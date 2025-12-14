@@ -26,12 +26,12 @@ COPY tsconfig.json tsconfig.json
 # Install pnpm and dependencies
 RUN npm install -g pnpm
 RUN pnpm install --frozen-lockfile
-# FIX: Explicitly generate Prisma Client since postinstall scripts might be skipped
-RUN pnpm run generate --filter=@megatron/database
-
 # Copy the full source code from the prune step
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
+
+# FIX: Explicitly generate Prisma Client since postinstall scripts might be skipped
+RUN pnpm run generate --filter=@megatron/database
 
 # Build the project
 RUN pnpm run build --filter=@megatron/worker...
