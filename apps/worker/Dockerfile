@@ -32,7 +32,7 @@ COPY turbo.json turbo.json
 
 # FIX: Explicitly generate Prisma Client since postinstall scripts might be skipped
 RUN cat packages/database/package.json
-RUN pnpm run generate --filter=@megatron/database
+RUN cd packages/database && pnpm run generate
 
 # Build the project
 RUN pnpm run build --filter=@megatron/worker...
