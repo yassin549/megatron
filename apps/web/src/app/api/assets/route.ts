@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { db } from '@megatron/database';
-import { Prisma } from '@prisma/client';
+import { db, Prisma } from '@megatron/database';
 
 export const dynamic = 'force-dynamic';
 
