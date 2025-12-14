@@ -34,7 +34,7 @@ export async function GET(req: Request) {
 
     // 2. Assign new address
     try {
-        const address = await db.$transaction(async (tx) => {
+        const address = await db.$transaction(async (tx: any) => {
             // Get next index
             // We use PlatformConfig to track the counter. Key: 'next_address_index'
             let config = await tx.platformConfig.findUnique({

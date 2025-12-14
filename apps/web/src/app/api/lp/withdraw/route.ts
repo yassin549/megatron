@@ -21,7 +21,7 @@ export async function POST(req: Request) {
         }
 
         if (type === 'instant') {
-            const result = await db.$transaction(async (tx) => {
+            const result = await db.$transaction(async (tx: any) => {
                 const asset = await tx.asset.findUnique({
                     where: { id: assetId },
                     include: { pool: true }
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
                 if (!lpShare) throw new Error("LP not found");
 
                 // Calculate Vested
-                const schedule = lpShare.unlockSchedule.map(s => ({
+                const schedule = lpShare.unlockSchedule.map((s: any) => ({
                     percentage: s.unlockPercentage.toNumber(),
                     unlockDate: s.unlockDate
                 }));
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
             return NextResponse.json(result);
 
         } else if (type === 'queue') {
-            const result = await db.$transaction(async (tx) => {
+            const result = await db.$transaction(async (tx: any) => {
                 const asset = await tx.asset.findUnique({ where: { id: assetId }, include: { pool: true } });
                 if (!asset || !asset.pool) throw new Error("Asset not found");
 
@@ -107,7 +107,7 @@ export async function POST(req: Request) {
                 if (!lpShare) throw new Error("LP not found");
 
                 // Calculate Vested
-                const schedule = lpShare.unlockSchedule.map(s => ({
+                const schedule = lpShare.unlockSchedule.map((s: any) => ({
                     percentage: s.unlockPercentage.toNumber(),
                     unlockDate: s.unlockDate
                 }));

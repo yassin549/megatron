@@ -18,7 +18,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Asset ID required" }, { status: 400 });
         }
 
-        const result = await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx: any) => {
             const asset = await tx.asset.findUnique({
                 where: { id: assetId },
                 include: { pool: true }

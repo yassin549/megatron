@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     const tradeAmount = parseFloat(amount);
 
     try {
-        const result = await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx: any) => {
             // 1. Fetch Asset
             const asset = await tx.asset.findUnique({
                 where: { id: assetId },

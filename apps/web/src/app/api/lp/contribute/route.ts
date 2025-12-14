@@ -51,7 +51,7 @@ export async function POST(req: Request) {
 
         // --- REUSE LOGIC FROM LP MANAGER (Web Version) ---
         // (Ideally this is in a shared package)
-        const result = await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx: any) => {
             // 1. Fetch Asset & Pool
             const asset = await tx.asset.findUnique({
                 where: { id: assetId },

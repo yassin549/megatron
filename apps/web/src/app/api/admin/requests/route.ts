@@ -57,7 +57,7 @@ export async function PUT(request: Request) {
 
         // If approving, we need to create the Asset and Pool
         if (status === 'approved') {
-            await db.$transaction(async (tx) => {
+            await db.$transaction(async (tx: any) => {
                 // 1. Create Asset
                 const asset = await tx.asset.create({
                     data: {

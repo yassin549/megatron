@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     try {
-        const result = await db.$transaction(async (tx) => {
+        const result = await db.$transaction(async (tx: any) => {
             // 2. Check Balance
             const user = await tx.user.findUnique({ where: { id: userId } });
             if (!user) throw new Error("User not found");
