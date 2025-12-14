@@ -56,4 +56,21 @@ async function startWorker() {
     });
 }
 
-startWorker().catch(console.error);
+import http from 'http';
+
+// Create a simple server for Render health checks
+const server = http.createServer((req, res) => {
+    if (req.url === '/healthz' || req.url === '/') {
+        res.writeHead(200);
+        res.end('OK');
+    } else {
+        res.writeHead(404);
+        res.end('Not Found');
+    }
+});
+
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
+    console.log(`Health check server listening on port ${port}`);
+    startWorker().catch(console.error);
+});

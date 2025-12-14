@@ -1,4 +1,4 @@
-import { VestingSchedule } from './types';
+import { PricingParams, DEFAULT_CONFIG, VestingSchedule } from './definitions';
 
 /**
  * Calculates the total vested amount (principal) accessible based on time elapsed.
