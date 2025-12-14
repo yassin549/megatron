@@ -3,7 +3,7 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    transpilePackages: ['@megatron/database', '@megatron/lib-common'],
+    transpilePackages: ['@megatron/database', '@megatron/lib-common', '@megatron/lib-crypto'],
     images: {
         domains: ['avatars.githubusercontent.com'],
     },
