@@ -17,18 +17,7 @@
       "node",
       "jest"
     ],
-    "baseUrl": ".",
-    "paths": {
-      "@megatron/lib-common": [
-        "../../packages/lib-common/dist"
-      ],
-      "@megatron/lib-crypto": [
-        "../../packages/lib-crypto/dist"
-      ],
-      "@megatron/lib-integrations": [
-        "../../packages/lib-integrations/dist"
-      ]
-    }
+    "moduleResolution": "node"
   },
   "include": [
     "src/**/*"
