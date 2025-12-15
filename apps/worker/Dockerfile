@@ -4,7 +4,7 @@ FROM node:20-alpine AS base
 # Command: docker build -f apps/worker/Dockerfile .
 
 FROM base AS builder
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl11-compat openssl
 WORKDIR /app
 # Install turbo globally
 RUN npm install turbo --global
@@ -14,7 +14,7 @@ RUN turbo prune --scope=@megatron/worker --docker
 
 # Installer stage
 FROM base AS installer
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl11-compat openssl
 WORKDIR /app
 
 # Install dependencies based on the pruned lockfile
@@ -40,6 +40,7 @@ RUN pnpm run build --filter=@megatron/worker...
 # Runner stage
 FROM base AS runner
 WORKDIR /app
+RUN apk add --no-cache libc6-compat openssl11-compat openssl
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
