@@ -1,5 +1,12 @@
-import type { LLMOutput } from '@megatron/lib-common';
 import type { SearchResult } from './serper';
+
+// LLMOutput interface defined locally to avoid cross-package type resolution issues during Docker builds
+export interface LLMOutput {
+    delta_percent: number;
+    confidence: number;
+    summary: string;
+    source_urls: string[];
+}
 
 // FIX #8: Add retry logic with exponential backoff
 const MAX_RETRIES = 3;
