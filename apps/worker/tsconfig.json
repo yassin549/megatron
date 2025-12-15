@@ -1,23 +1,23 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "lib": [
+      "ES2022"
+    ],
     "outDir": "dist",
-    "types": ["node", "jest"],
-    "baseUrl": ".",
-    "paths": {
-      "@megatron/database": [
-        "../../packages/database/src"
-      ],
-      "@megatron/lib-common": [
-        "../../packages/lib-common/src"
-      ],
-      "@megatron/lib-crypto": [
-        "../../packages/lib-crypto/src"
-      ],
-      "@megatron/lib-integrations": [
-        "../../packages/lib-integrations/src"
-      ]
-    }
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "types": [
+      "node",
+      "jest"
+    ]
   },
   "include": [
     "src/**/*"

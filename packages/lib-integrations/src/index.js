@@ -17,3 +17,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./redis"), exports);
 __exportStar(require("./ably"), exports);
 // Serper implementation can be added later when needed
+__exportStar(require("./serper"), exports);
+__exportStar(require("./huggingface"), exports);
