@@ -5,7 +5,7 @@ FROM node:20-alpine AS base
 
 FROM base AS builder
 RUN apk add --no-cache libc6-compat openssl && \
-    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.17/main openssl1.1-compat
+    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.16/main libssl1.1
 WORKDIR /app
 # Install turbo globally
 RUN npm install turbo --global
@@ -16,7 +16,7 @@ RUN turbo prune --scope=@megatron/worker --docker
 # Installer stage
 FROM base AS installer
 RUN apk add --no-cache libc6-compat openssl && \
-    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.17/main openssl1.1-compat
+    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.16/main libssl1.1
 WORKDIR /app
 
 # Install dependencies based on the pruned lockfile
