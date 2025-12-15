@@ -17,7 +17,7 @@
         "baseUrl": ".",
         "paths": {
             "@megatron/database": [
-                "./packages/database/src"
+                "./packages/database/dist"
             ],
             "@megatron/lib-common": [
                 "./packages/lib-common/dist"
@@ -26,7 +26,7 @@
                 "./packages/lib-crypto/dist"
             ],
             "@megatron/lib-integrations": [
-                "./packages/lib-integrations/src"
+                "./packages/lib-integrations/dist"
             ]
         }
     },
