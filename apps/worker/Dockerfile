@@ -43,7 +43,7 @@ RUN pnpm run build --filter=@megatron/worker...
 FROM base AS runner
 WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl && \
-    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.17/main openssl1.1-compat
+    apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.16/main libssl1.1
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
