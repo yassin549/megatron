@@ -7,6 +7,7 @@ interface OracleLog {
     deltaPercent: number;
     confidence: number;
     summary: string | null;
+    reasoning?: string | null;
     sourceUrls: string[];
     createdAt: string;
 }
@@ -38,45 +39,56 @@ export function AITerminal({ logs }: AITerminalProps) {
                         Waiting for initial analysis stream...
                     </div>
                 ) : (
-                    logs.map((log, i) => (
-                        <div key={log.id} className="border-l-2 border-white/10 pl-4 py-1 animate-in slide-in-from-left-2 fade-in duration-300">
-                            {/* Metadata */}
-                            <div className="flex items-center gap-3 mb-1 text-xs">
-                                <span className="text-gray-500">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
-                                <span className={`font-bold ${log.deltaPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    IMPACT: {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
-                                </span>
-                                <div className="flex items-center gap-1 text-blue-400">
-                                    <Shield className="w-3 h-3" />
-                                    <span>CONF: {(log.confidence * 100).toFixed(0)}%</span>
+                    logs.map((log, i) => {
+                        console.log('Rendering log:', log.id, 'Reasoning present:', !!log.reasoning, log.reasoning);
+                        return (
+                            <div key={log.id} className="border-l-2 border-white/10 pl-4 py-1 animate-in slide-in-from-left-2 fade-in duration-300">
+
+                                {/* Metadata */}
+                                <div className="flex items-center gap-3 mb-1 text-xs">
+                                    <span className="text-gray-500">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                                    <span className={`font-bold ${log.deltaPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                        IMPACT: {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
+                                    </span>
+                                    <div className="flex items-center gap-1 text-blue-400">
+                                        <Shield className="w-3 h-3" />
+                                        <span>CONF: {(log.confidence * 100).toFixed(0)}%</span>
+                                    </div>
                                 </div>
+
+                                {/* Summary & Reasoning */}
+                                <div className="mb-2 space-y-2">
+                                    <p className="text-white font-medium">
+                                        <span className="text-blue-500 mr-2">$</span>
+                                        {log.summary}
+                                    </p>
+                                    {log.reasoning && (
+                                        <div className="text-xs text-gray-400 pl-4 border-l border-white/10 italic">
+                                            "{log.reasoning}"
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sources */}
+                                {log.sourceUrls.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {log.sourceUrls.slice(0, 3).map((url, idx) => (
+                                            <a
+                                                key={idx}
+                                                href={url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="inline-flex items-center gap-1 text-[10px] text-gray-500 hover:text-white transition-colors bg-white/5 px-2 py-0.5 rounded border border-white/5 hover:border-white/20"
+                                            >
+                                                <ExternalLink className="w-2.5 h-2.5" />
+                                                SOURCE_{idx + 1}
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-
-                            {/* Summary */}
-                            <p className="text-gray-300 leading-relaxed mb-2">
-                                <span className="text-blue-500 mr-2">$</span>
-                                {log.summary}
-                            </p>
-
-                            {/* Sources */}
-                            {log.sourceUrls.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {log.sourceUrls.slice(0, 3).map((url, idx) => (
-                                        <a
-                                            key={idx}
-                                            href={url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="inline-flex items-center gap-1 text-[10px] text-gray-500 hover:text-white transition-colors bg-white/5 px-2 py-0.5 rounded border border-white/5 hover:border-white/20"
-                                        >
-                                            <ExternalLink className="w-2.5 h-2.5" />
-                                            SOURCE_{idx + 1}
-                                        </a>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
         </div>

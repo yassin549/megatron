@@ -145,14 +145,24 @@ export async function GET(
                 low24h,
                 high24h,
             },
-            oracleLogs: oracleLogs.map((log: any) => ({
-                id: log.id,
-                deltaPercent: log.deltaPercent.toNumber(),
-                confidence: log.confidence.toNumber(),
-                summary: log.summary,
-                sourceUrls: log.sourceUrls as string[],
-                createdAt: log.createdAt.toISOString(),
-            })),
+            oracleLogs: oracleLogs.map((log: any) => {
+                let reasoning = null;
+                // Safely extract reasoning from the JSON blob
+                if (log.llmResponse && typeof log.llmResponse === 'object') {
+                    // Try to get reasoning from top level or within a 'reasoning' field if structured differently
+                    reasoning = (log.llmResponse as any).reasoning || null;
+                }
+
+                return {
+                    id: log.id,
+                    deltaPercent: log.deltaPercent.toNumber(),
+                    confidence: log.confidence.toNumber(),
+                    summary: log.summary,
+                    reasoning: reasoning, // Explicitly return reasoning
+                    sourceUrls: log.sourceUrls as string[],
+                    createdAt: log.createdAt.toISOString(),
+                };
+            }),
             priceHistory: priceHistory.reverse().map((tick: any) => ({
                 timestamp: tick.timestamp.toISOString(),
                 price: tick.priceDisplay.toNumber(),

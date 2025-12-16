@@ -196,4 +196,36 @@ export async function startPriceEngine(): Promise<void> {
 
     await subscriber.subscribe(CHANNELS.EVENTS);
     console.log('Price Engine: subscribed to', CHANNELS.EVENTS);
+
+    // FIX #12: Heartbeat loop to ensure 1-minute chart candles even with zero volume
+    setInterval(async () => {
+        try {
+            const assets = await db.asset.findMany({
+                where: {
+                    status: { in: ['active', 'funding'] }
+                },
+                select: { id: true }
+            });
+
+            const now = Date.now();
+
+            for (const asset of assets) {
+                // Check last tick time
+                const lastTick = await db.priceTick.findFirst({
+                    where: { assetId: asset.id },
+                    orderBy: { timestamp: 'desc' },
+                    select: { timestamp: true }
+                });
+
+                // If no tick in last 60s, force a "stagnation" tick
+                // We use 65s to allow for slight drift/processing time so we don't double-tick immediately after an event
+                if (!lastTick || now - lastTick.timestamp.getTime() > 65000) {
+                    // console.log(`[PriceEngine] Heartbeat tick for ${asset.id}`);
+                    await recomputePrice(asset.id, {});
+                }
+            }
+        } catch (error) {
+            console.error('[PriceEngine] Heartbeat error:', error);
+        }
+    }, 60000); // Check every minute
 }

@@ -69,7 +69,7 @@ const server = http.createServer((req, res) => {
     }
 });
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 server.listen(port, () => {
     console.log(`Health check server listening on port ${port}`);
     startWorker().catch(console.error);

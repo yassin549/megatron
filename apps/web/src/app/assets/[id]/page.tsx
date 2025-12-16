@@ -59,8 +59,10 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                 const res = await fetch(`/api/assets/${params.id}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setAsset(data.asset);
-                    setOracleLogs(data.oracleLogs || []);
+
+                    // Only update if data has changed (simple check)
+                    setAsset(prev => JSON.stringify(prev) !== JSON.stringify(data.asset) ? data.asset : prev);
+                    setOracleLogs(prev => prev.length !== (data.oracleLogs || []).length ? data.oracleLogs : prev);
                     setPriceHistory(data.priceHistory || []);
                 }
             } catch (error) {
@@ -69,7 +71,10 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                 setLoading(false);
             }
         }
+
         fetchAsset();
+        const interval = setInterval(fetchAsset, 10000); // Poll every 10 seconds
+        return () => clearInterval(interval);
     }, [params.id]);
 
     if (loading) {
@@ -89,10 +94,26 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         );
     }
 
-    const chartData = priceHistory.map(p => ({
-        time: new Date(p.timestamp).toISOString().split('T')[0], // Lightweight charts likes YYYY-MM-DD for simpler handling or unix timestamp
-        value: p.price
-    }));
+    const chartData = priceHistory
+        .map(p => ({
+            time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any, // Remove manual offset, rely on browser localization
+            value: p.price
+        }))
+        .sort((a, b) => (a.time as number) - (b.time as number))
+        .filter((item, index, self) =>
+            // Unique timestamps only
+            index === 0 || item.time !== self[index - 1].time
+        );
+
+    // Stagnation logic: If the last price point is older than 2 minutes,
+    // add a "current" point to draw a flat line to "now".
+    if (chartData.length > 0) {
+        const lastPoint = chartData[chartData.length - 1];
+        const now = Math.floor(Date.now() / 1000);
+        if (now - (lastPoint.time as number) > 60) {
+            chartData.push({ time: now as any, value: lastPoint.value });
+        }
+    }
 
     return (
         <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
@@ -152,16 +173,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
                         {/* Chart Container */}
                         <div className="h-[500px] bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden relative group shadow-2xl">
-                            <div className="absolute top-4 left-4 z-10 flex gap-2">
-                                {['1H', '24H', '7D', 'ALL'].map(time => (
-                                    <button
-                                        key={time}
-                                        className="px-3 py-1.5 bg-black/40 hover:bg-white/10 text-xs font-medium text-zinc-400 hover:text-white rounded-lg border border-white/5 transition-all backdrop-blur-md"
-                                    >
-                                        {time}
-                                    </button>
-                                ))}
-                            </div>
                             {chartData.length > 0 ? (
                                 <AssetChart
                                     data={chartData}
@@ -170,6 +181,11 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
                                         areaBottomColor: 'rgba(0, 0, 0, 0)',
                                         textColor: '#71717a',
+                                    }}
+                                    onTimeframeChange={(tf) => {
+                                        console.log('Fetching data for timeframe:', tf);
+                                        // TODO: Implement actual API fetch with ?interval=${tf}
+                                        // For now we just log it as a stub
                                     }}
                                 />
                             ) : (

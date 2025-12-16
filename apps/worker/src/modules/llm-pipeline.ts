@@ -41,10 +41,25 @@ export async function runLlmCycleForAsset(assetId: string): Promise<void> {
     });
 
     if (!asset) return;
-    if (asset.status !== 'active') return;
+    if (asset.status !== 'active' && asset.status !== 'funding') return;
+
+    // FIX #13: Source Diversity - Append randomized suffixes to queries
+    const variations = [
+        'latest news',
+        'market analysis',
+        'breaking news today',
+        'financial outlook',
+        'investment sentiment',
+        'regulatory updates',
+        'technology trends',
+        'future predictions'
+    ];
+
+    // Pick a random variation
+    const suffix = variations[Math.floor(Math.random() * variations.length)];
 
     const queries = Array.isArray(asset.oracleQueries)
-        ? (asset.oracleQueries as unknown as string[])
+        ? (asset.oracleQueries as unknown as string[]).map(q => `${q} ${suffix}`) // Append suffix
         : [];
 
     if (!queries.length) return;
@@ -102,7 +117,9 @@ export function startLlmScheduler(): void {
         try {
             const now = Date.now();
             const assets = await db.asset.findMany({
-                where: { status: 'active' },
+                where: {
+                    status: { in: ['active', 'funding'] }
+                },
                 select: {
                     id: true,
                     oracleIntervalMs: true,

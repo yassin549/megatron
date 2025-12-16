@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -15,6 +15,16 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
     const [type, setType] = useState<'buy' | 'sell'>('buy');
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
+    const [userBalance, setUserBalance] = useState(0);
+
+    // Fetch balance on mount/session load
+    useEffect(() => {
+        if (status === 'authenticated') {
+            fetch('/api/user/me').then(res => res.json()).then(data => {
+                if (data.user) setUserBalance(data.user.walletHotBalance);
+            });
+        }
+    }, [status]);
 
     const isBuy = type === 'buy';
     const estimatedShares = amount ? parseFloat(amount) / assetPrice : 0;
@@ -84,7 +94,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
             <div className="mb-6">
                 <div className="flex justify-between text-xs text-zinc-500 mb-2 font-mono uppercase tracking-wider font-semibold">
                     <span>{isBuy ? 'Amount (USDC)' : 'Shares to Sell'}</span>
-                    <span>Bal: <span className="text-zinc-300">$1,250.00</span></span>
+                    <span>Balance: <span className="text-zinc-300">${userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
                 </div>
                 <div className="relative group">
                     <input
@@ -103,7 +113,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                     {['100', '500', '1000', 'MAX'].map((val) => (
                         <button
                             key={val}
-                            onClick={() => setAmount(val === 'MAX' ? '1250' : val)}
+                            onClick={() => setAmount(val === 'MAX' ? userBalance.toString() : val)}
                             className="flex-1 py-1.5 text-[10px] font-mono font-medium border border-white/5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-all hover:scale-105 active:scale-95"
                         >
                             {val}
