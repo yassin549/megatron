@@ -22,11 +22,34 @@ export interface TradeEvent {
     volume5m: number;
 }
 
+export interface OracleEvent {
+    type: 'oracle';
+    assetId: string;
+    deltaPercent: number;
+    suggestedPrice?: number;
+    confidence: number;
+    summary: string;
+    sourceUrls: string[];
+    timestamp: number;
+}
+
+export interface LLMOutput {
+    delta_percent: number;
+    confidence: number;
+    summary: string;
+    source_urls: string[];
+}
+
 // --- CONSTANTS ---
 
 export const DEFAULT_CONFIG = {
     // Legacy config, keeping for compatibility if utilized elsewhere
     MAX_INSTANT_WITHDRAWAL_PCT: 0.25,
+    LLM_CONFIDENCE_MIN: 0.6,
+    LLM_DELTA_MAX: 0.5,
+    EMA_BETA: 0.1,
+    V0: 1000,
+    DAILY_POOL_WITHDRAWAL_PCT: 0.1,
 };
 
 export const MONETARY_CONFIG = {

@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, Prisma } from '@megatron/database';
-import { db, Prisma } from '@megatron/database';
 import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG } from '@megatron/lib-common';
 import { Redis } from 'ioredis';
 
