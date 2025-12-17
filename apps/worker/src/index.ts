@@ -6,6 +6,7 @@ import { db } from '@megatron/database';
 import { checkDeposits, confirmPendingDeposits } from './modules/blockchain-monitor';
 import { processUserWithdrawals } from './jobs/withdrawal-processor';
 import { processWithdrawalQueue, checkFundingDeadlines } from './jobs/lp-jobs';
+import { runSweeper } from './jobs/sweeper';
 import { startLlmScheduler } from './modules/llm-pipeline';
 import { startPriceEngine } from './modules/price-engine';
 
@@ -42,6 +43,12 @@ async function startWorker() {
     setInterval(() => {
         checkFundingDeadlines().catch(console.error);
     }, 60 * 60 * 1000);
+
+    // 4. Sweeper (Every 10 minutes)
+    // Consolidates funds from deposit addresses to Hot Wallet
+    setInterval(() => {
+        runSweeper().catch(err => console.error('Sweeper error:', err));
+    }, 10 * 60 * 1000);
 
     // Initial run
     checkDeposits().catch(console.error);

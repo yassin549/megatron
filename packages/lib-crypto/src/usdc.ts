@@ -34,6 +34,27 @@ export async function sendUsdc(
 }
 
 /**
+ * Send ETH (Native Currency)
+ */
+export async function sendEth(
+    privateKey: string,
+    toAddress: string,
+    amountEth: string,
+    rpcUrl: string
+): Promise<string> {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const wallet = new ethers.Wallet(privateKey, provider);
+
+    const tx = await wallet.sendTransaction({
+        to: toAddress,
+        value: ethers.parseEther(amountEth)
+    });
+
+    await tx.wait();
+    return tx.hash;
+}
+
+/**
  * Get ETH balance (for Gas check)
  */
 export async function getEthBalance(address: string, rpcUrl: string): Promise<bigint> {
