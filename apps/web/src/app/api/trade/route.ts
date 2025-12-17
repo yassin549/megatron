@@ -2,18 +2,15 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, Prisma } from '@megatron/database';
-import { solveDeltaShares, calculateSellRevenue, TradeEvent } from '@megatron/lib-common';
+import { db, Prisma } from '@megatron/database';
+import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG } from '@megatron/lib-common';
 import { Redis } from 'ioredis';
 
 // Initialize Redis for publishing events
 // We use the same URL as the worker to ensure they talk on the same channel
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
-const CONFIG = {
-    SWAP_FEE: 0.005,
-    LP_SHARE: 0.9,
-    PLATFORM_SHARE: 0.1,
-};
+const CONFIG = MONETARY_CONFIG;
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);

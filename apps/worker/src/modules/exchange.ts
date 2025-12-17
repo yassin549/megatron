@@ -1,14 +1,10 @@
 
 import { db } from '@megatron/database';
-import { solveDeltaShares, calculateSellRevenue, TradeEvent } from '@megatron/lib-common';
+import { MONETARY_CONFIG, solveDeltaShares, calculateSellRevenue, TradeEvent } from '@megatron/lib-common';
 import { publishTradeEvent } from '../lib/redis';
 import { Prisma } from '@megatron/database';
 
-const CONFIG = {
-    SWAP_FEE: 0.005,
-    LP_SHARE: 0.9,
-    PLATFORM_SHARE: 0.1,
-};
+const CONFIG = MONETARY_CONFIG;
 
 /**
  * Execute a buy order for an asset.
@@ -210,7 +206,7 @@ export async function executeBuy(userId: string, assetId: string, amountUsdc: nu
     }, {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         maxWait: 5000, // Wait for lock
-        timeout: 10000, // Max transaction time
+        timeout: 60000, // Max transaction time
     });
 }
 
@@ -392,7 +388,7 @@ export async function executeSell(userId: string, assetId: string, sharesToSell:
     }, {
         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
         maxWait: 5000,
-        timeout: 10000,
+        timeout: 60000,
     });
 }
 

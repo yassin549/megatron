@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { db } from "@megatron/database";
-import { DEFAULT_CONFIG } from "@megatron/lib-common";
+import { DEFAULT_CONFIG, MONETARY_CONFIG } from "@megatron/lib-common";
 import { Prisma } from "@prisma/client";
 
 export async function POST(req: Request) {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
 
                 const totalContributed = lpShare.contributedUsdc.toNumber();
                 const vestedPrincipal = totalContributed * (maxUnlockedPct / 100);
-                const instantLimit = vestedPrincipal * DEFAULT_CONFIG.MAX_INSTANT_WITHDRAWAL_PCT;
+                const instantLimit = vestedPrincipal * MONETARY_CONFIG.MAX_INSTANT_WITHDRAWAL_PCT;
 
                 if (amount > instantLimit) {
                     throw new Error(`Exceeds instant limit (${instantLimit.toFixed(2)} USDC)`);

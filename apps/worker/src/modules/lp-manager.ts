@@ -5,6 +5,7 @@ import {
     calculateVestedAmount,
     PricingParams,
     DEFAULT_CONFIG,
+    MONETARY_CONFIG,
     TradeEvent
 } from '@megatron/lib-common';
 import { Prisma } from '@megatron/database';
@@ -168,7 +169,7 @@ export async function contributeToPool(userId: string, assetId: string, amountUs
 
         return { lpShareId, newShares, activated: (asset.status === 'funding' && finalPoolUsdc >= softCap) };
 
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 60000, maxWait: 20000 });
 }
 
 /**
@@ -278,7 +279,7 @@ export async function withdrawLiquidityInstant(userId: string, assetId: string, 
 
         const totalContributed = lpShare.contributedUsdc.toNumber();
         const vestedPrincipal = totalContributed * (maxUnlockedPct / 100);
-        const instantLimit = vestedPrincipal * DEFAULT_CONFIG.MAX_INSTANT_WITHDRAWAL_PCT;
+        const instantLimit = vestedPrincipal * MONETARY_CONFIG.MAX_INSTANT_WITHDRAWAL_PCT;
 
         if (amountUsdc > instantLimit) {
             throw new Error(`Exceeds instant limit (${instantLimit.toFixed(2)} USDC)`);
