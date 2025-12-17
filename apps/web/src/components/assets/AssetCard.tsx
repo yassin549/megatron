@@ -116,8 +116,8 @@ export function AssetCard({
     const [error, setError] = useState(false);
 
     // Typing Logic
-    // Fix: Remove 'undefined' strings anywhere and ensure fallback
-    const rawDescription = aiSummary || description || "AI analysis pending for this asset...";
+    // Fix: Show static description (what the asset measures) first, AI summary as fallback
+    const rawDescription = description || aiSummary || "AI analysis pending for this asset...";
     // Robust removal of "undefined" using split/join to capture all instances safely
     const fullDescription = rawDescription.split('undefined').join('').trim();
 
