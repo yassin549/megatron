@@ -32,7 +32,8 @@ async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES): Promis
 export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutput> {
     // FIX #7: Read env vars at call time, not module load time
     const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
-    const HUGGINGFACE_API_URL = process.env.HUGGINGFACE_API_URL || 'https://api-inference.huggingface.co/models/';
+    // New HuggingFace Inference Providers API (OpenAI-compatible)
+    const HUGGINGFACE_API_URL = process.env.HUGGINGFACE_API_URL || 'https://router.huggingface.co/v1/chat/completions';
 
     if (!HUGGINGFACE_API_KEY) {
         throw new Error('HUGGINGFACE_API_KEY is not defined');
@@ -42,18 +43,24 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
         .map(r => `${r.title}\n${r.snippet}\nSource: ${r.link}`)
         .join('\n\n');
 
-    const prompt = `Analyze the following news articles and determine the impact on the asset price.\nReturn a JSON object with these fields:\n- delta_percent: number (percentage change, can be negative)\n- confidence: number (0 to 1, how confident you are)\n- summary: string (one sentence headline)\n- reasoning: string (detailed explanation of why this conclusion was reached, citing specific signals)\n- source_urls: array of relevant URLs\n\nContext:\n${context}\n\nJSON:`;
+    const systemPrompt = `You are a financial analyst AI. Analyze news articles and return ONLY a valid JSON object (no markdown, no explanation) with these exact fields:
+- delta_percent: number (percentage change, can be negative)
+- confidence: number (0 to 1, how confident you are)
+- summary: string (one sentence headline)
+- reasoning: string (detailed explanation of why this conclusion was reached, citing specific signals)
+- source_urls: array of relevant URLs`;
 
-    // FIX #8: Wrap in retry logic
-    const modelId = 'microsoft/Phi-3-mini-4k-instruct';
-    const url = `${HUGGINGFACE_API_URL.replace(/\/$/, '')}/${modelId}`;
+    const userPrompt = `Analyze the following news articles and determine the impact on the asset price.\n\nContext:\n${context}\n\nReturn ONLY the JSON object, nothing else.`;
+
+    // Using Llama via HuggingFace Inference Providers (confirmed working)
+    const modelId = 'meta-llama/Llama-3.2-1B-Instruct';
     console.log(`[HUGGINGFACE] Calling model: ${modelId}`);
 
     let response;
     try {
         response = await withRetry(() =>
             fetch(
-                url,
+                HUGGINGFACE_API_URL,
                 {
                     method: 'POST',
                     headers: {
@@ -61,12 +68,13 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        inputs: `<|user|>\n${prompt}<|end|>\n<|assistant|>\n`,
-                        parameters: {
-                            max_new_tokens: 500,
-                            temperature: 0.3,
-                            return_full_text: false,
-                        },
+                        model: modelId,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: userPrompt }
+                        ],
+                        max_tokens: 500,
+                        temperature: 0.3,
                     }),
                 },
             )
@@ -151,13 +159,12 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
         throw new Error(`HuggingFace API error: ${response.status}`);
     }
 
+    // Parse OpenAI-compatible chat completions response
     const data = await response.json() as any;
-    const generated = Array.isArray(data) && data[0] && typeof data[0].generated_text === 'string'
-        ? data[0].generated_text
-        : '';
+    const generated = data?.choices?.[0]?.message?.content || '';
 
     if (!generated) {
-        throw new Error('HuggingFace response missing generated_text');
+        throw new Error('HuggingFace response missing message content');
     }
 
     // Fuzzy JSON extraction - handles markdown blocks, embedded JSON, etc.

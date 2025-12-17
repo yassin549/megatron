@@ -72,6 +72,7 @@ export async function GET(
                 summary: true,
                 sourceUrls: true,
                 createdAt: true,
+                llmResponse: true, // Include to extract reasoning field
             },
         });
 
