@@ -9,27 +9,54 @@ export default function WalletPage() {
     const router = useRouter();
     const [withdrawAmount, setWithdrawAmount] = useState('');
     const [withdrawAddress, setWithdrawAddress] = useState('');
+    const [walletData, setWalletData] = useState({
+        hotBalance: 0,
+        coldBalance: 0,
+        depositAddress: '',
+        loading: true,
+    });
 
+    // Fetch real wallet data from API
+    useEffect(() => {
+        if (status === 'authenticated') {
+            const fetchWalletData = async () => {
+                try {
+                    const res = await fetch('/api/user/me');
+                    if (res.ok) {
+                        const data = await res.json();
+                        setWalletData({
+                            hotBalance: parseFloat(data.walletHotBalance || '0'),
+                            coldBalance: parseFloat(data.walletColdBalance || '0'),
+                            depositAddress: data.depositAddress || '',
+                            loading: false,
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch wallet data:', error);
+                    setWalletData(prev => ({ ...prev, loading: false }));
+                }
+            };
+            fetchWalletData();
+            // Poll every 15 seconds for real-time updates
+            const interval = setInterval(fetchWalletData, 15000);
+            return () => clearInterval(interval);
+        }
+    }, [status]);
+
+    // Redirect to login if not authenticated
     useEffect(() => {
         if (status === 'unauthenticated') {
             router.push('/login');
         }
     }, [status, router]);
 
-    if (status === 'loading') {
+    if (status === 'loading' || walletData.loading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-foreground">Loading...</div>
             </div>
         );
     }
-
-    // Mock wallet data
-    const walletData = {
-        hotBalance: 0,
-        coldBalance: 0,
-        depositAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0Ab3d',
-    };
 
     return (
         <div className="min-h-screen bg-background">
