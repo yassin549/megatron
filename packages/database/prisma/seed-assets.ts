@@ -95,19 +95,17 @@ export async function seedAssets(): Promise<void> {
     fundingDeadline.setDate(fundingDeadline.getDate() + 30);
 
     for (const assetData of INITIAL_ASSETS) {
-        // Check if asset already exists
-        const existing = await prisma.asset.findFirst({
-            where: { name: assetData.name },
-        });
+        console.log(`  🔄 Processing: ${assetData.name} (${assetData.type})`);
 
-        if (existing) {
-            console.log(`  ⏭️  Skipping existing: ${assetData.name}`);
-            continue;
-        }
-
-        // Create asset with funding status
-        const asset = await prisma.asset.create({
-            data: {
+        // Use upsert to create or update asset and its initial price/status
+        const asset = await prisma.asset.upsert({
+            where: { id: assetData.name.toLowerCase().replace(/\s+/g, '-') }, // Deterministic ID for upsert
+            update: {
+                type: assetData.type,
+                description: assetData.description,
+            },
+            create: {
+                id: assetData.name.toLowerCase().replace(/\s+/g, '-'),
                 name: assetData.name,
                 description: assetData.description,
                 type: assetData.type,
@@ -125,9 +123,11 @@ export async function seedAssets(): Promise<void> {
             },
         });
 
-        // Create associated liquidity pool
-        await prisma.liquidityPool.create({
-            data: {
+        // Upsert associated liquidity pool
+        await prisma.liquidityPool.upsert({
+            where: { assetId: asset.id },
+            update: {},
+            create: {
                 assetId: asset.id,
                 totalUsdc: new Prisma.Decimal(0),
                 totalLPShares: new Prisma.Decimal(0),
@@ -136,7 +136,7 @@ export async function seedAssets(): Promise<void> {
             },
         });
 
-        console.log(`  ✅ Created: ${assetData.name} (${assetData.type})`);
+        console.log(`  ✅ Synced: ${asset.name}`);
     }
 
     console.log('✅ Asset seeding complete!');
