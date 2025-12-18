@@ -221,11 +221,18 @@ export function Navbar() {
                 </div>
 
                 {/* 4. Mobile Toggle */}
-                <div className="md:hidden flex items-center gap-4">
-                    {status === 'authenticated' && <UserStats isMobile={true} />}
+                <div className="md:hidden flex items-center gap-3">
+                    {status === 'authenticated' && (
+                        <div
+                            className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg cursor-pointer"
+                            onClick={() => setIsProfileOpen(!isProfileOpen)} // Optional: Navigate or open drawer
+                        >
+                            U
+                        </div>
+                    )}
                     <button
                         onClick={() => setIsMobileMenuOpen(true)}
-                        className="p-3 text-muted-foreground hover:text-white"
+                        className="p-2 text-muted-foreground hover:text-white"
                     >
                         <Menu className="w-6 h-6" />
                     </button>
@@ -234,9 +241,9 @@ export function Navbar() {
 
             {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-50 md:hidden bg-background">
+                <div className="fixed inset-0 z-[100] md:hidden bg-zinc-950">
                     {/* Header */}
-                    <div className="h-16 flex items-center justify-between px-4 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+                    <div className="h-16 flex items-center justify-between px-4 border-b border-white/5 bg-zinc-950">
                         <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="font-bold text-2xl text-white tracking-tighter">
                             MEGATRON
                         </Link>
@@ -258,7 +265,7 @@ export function Navbar() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search markets..."
-                                className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-white/5 rounded-xl text-base text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             />
                         </form>
 

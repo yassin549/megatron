@@ -49,7 +49,7 @@ export function SubNavbar() {
             <div className="max-w-[1400px] mx-auto px-4">
                 <div
                     ref={scrollRef}
-                    className="relative flex items-center justify-center gap-10 overflow-x-auto no-scrollbar py-0 mask-fade-right h-14"
+                    className="relative flex items-center gap-4 md:gap-8 overflow-x-auto no-scrollbar py-0 mask-fade-right h-12 md:h-14 px-2 md:px-0"
                 >
                     {CATEGORIES.map((category) => {
                         const isActive = currentCategory === category.id;
@@ -58,9 +58,9 @@ export function SubNavbar() {
                                 key={category.id}
                                 href={`/?category=${category.id}`}
                                 data-active={isActive}
-                                className={`flex items-center gap-2 px-6 py-4 border-b-[3px] transition-all duration-200 text-sm font-medium whitespace-nowrap ${isActive
-                                        ? 'border-blue-500 text-white shadow-[0_4px_12px_-2px_rgba(59,130,246,0.5)]'
-                                        : 'border-transparent text-gray-400 hover:text-white hover:border-gray-700'
+                                className={`flex items-center gap-2 px-4 py-2.5 md:px-6 md:py-4 border-b-[3px] transition-all duration-200 text-sm font-medium whitespace-nowrap ${isActive
+                                    ? 'border-blue-500 text-white shadow-[0_4px_12px_-2px_rgba(59,130,246,0.5)]'
+                                    : 'border-transparent text-gray-400 hover:text-white hover:border-gray-700'
                                     }`}
                             >
                                 {category.name}
