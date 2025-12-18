@@ -12,6 +12,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 10.0, k: 0.001 },
         softCap: 5000,
         hardCap: 25000,
+        imageUrl: '/assets/market-images/bitcoin_sentiment_art_1766049298594.png',
     },
     {
         name: 'US Unemployment Rate',
@@ -21,6 +22,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 8.0, k: 0.0008 },
         softCap: 10000,
         hardCap: 50000,
+        imageUrl: '/assets/market-images/us_unemployment_art_1766049317205.png',
     },
     {
         name: 'Premier League Champion',
@@ -30,6 +32,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 15.0, k: 0.0012 },
         softCap: 8000,
         hardCap: 40000,
+        imageUrl: '/assets/market-images/premier_league_art_1766049339610.png',
     },
     {
         name: 'Global Temperature Anomaly',
@@ -39,6 +42,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 6.0, k: 0.0005 },
         softCap: 3000,
         hardCap: 15000,
+        imageUrl: '/assets/market-images/global_temp_art_1766049359120.png',
     },
     {
         name: 'ETH Gas Price Index',
@@ -48,6 +52,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 20.0, k: 0.0015 },
         softCap: 7500,
         hardCap: 35000,
+        imageUrl: '/assets/market-images/eth_gas_art_1766049379493.png',
     },
     {
         name: 'AI Hype Index',
@@ -57,6 +62,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 18.0, k: 0.001 },
         softCap: 6000,
         hardCap: 30000,
+        imageUrl: '/assets/market-images/ai_hype_art_1766049397389.png',
     },
     {
         name: 'GTA VI Release Date Sentiment',
@@ -103,6 +109,7 @@ export async function seedAssets(): Promise<void> {
             update: {
                 type: assetData.type,
                 description: assetData.description,
+                imageUrl: (assetData as any).imageUrl,
             },
             create: {
                 id: assetData.name.toLowerCase().replace(/\s+/g, '-'),
@@ -110,6 +117,7 @@ export async function seedAssets(): Promise<void> {
                 description: assetData.description,
                 type: assetData.type,
                 oracleQueries: assetData.oracleQueries,
+                imageUrl: (assetData as any).imageUrl,
                 pricingModel: 'linear_bonding',
                 pricingParams: assetData.pricingParams as unknown as Prisma.JsonObject,
                 status: 'funding',
