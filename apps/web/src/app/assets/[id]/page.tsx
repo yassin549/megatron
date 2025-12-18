@@ -131,7 +131,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* Header */}
-                        <div className="flex items-start justify-between">
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-3 mb-2">
                                     {asset.imageUrl && (
@@ -140,8 +140,8 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                             <img src={asset.imageUrl} alt={asset.name} className="w-full h-full object-cover" />
                                         </div>
                                     )}
-                                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">{asset.name}</h1>
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider border ${asset.status === 'active'
+                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider border whitespace-nowrap ${asset.status === 'active'
                                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                         : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                                         }`}>
@@ -159,12 +159,12 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                     </span>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className="text-4xl font-bold text-white tracking-tighter mb-1 flex items-center justify-end gap-2">
+                            <div className="text-left md:text-right">
+                                <div className="text-4xl font-bold text-white tracking-tighter mb-1 flex items-center md:justify-end gap-2">
                                     ${(asset.status === 'funding' ? 0 : asset.price).toFixed(2)}
                                     {asset.status === 'funding' && <span className="text-lg text-yellow-500 font-normal">(Funding Phase)</span>}
                                 </div>
-                                <div className={`text-base font-medium flex items-center justify-end gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                <div className={`text-base font-medium flex items-center md:justify-end gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {asset.change24h >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingUp className="w-4 h-4 rotate-180" />}
                                     {asset.status === 'funding' ? '0.00' : (asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
                                 </div>
@@ -172,7 +172,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
 
                         {/* Chart Container */}
-                        <div className="h-[500px] bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden relative group shadow-2xl">
+                        <div className="h-[300px] md:h-[400px] lg:h-[500px] bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden relative group shadow-2xl">
                             {chartData.length > 0 ? (
                                 <AssetChart
                                     data={chartData}

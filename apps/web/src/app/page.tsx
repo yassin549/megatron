@@ -92,12 +92,12 @@ export default function HomePage() {
             <main className="max-w-[1240px] mx-auto px-6 py-8">
                 {/* Guest Welcome Banner - Only for non-auth */}
                 {!isAuthenticated && !searchParam && categoryParam === 'all' && (
-                    <div className="mb-10 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-white/5 rounded-2xl p-8 text-center relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div className="mb-6 md:mb-10 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-white/5 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
                         <div className="relative z-10">
-                            <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+                            <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
                                 when world variables became investable assets
                             </h1>
-                            <p className="text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+                            <p className="text-base md:text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
                                 Trade, invest, earn from anything: real world variables tracked by LLM analysis and institutional-grade tools.
                             </p>
                             <Link
@@ -116,7 +116,7 @@ export default function HomePage() {
                 )}
 
                 {/* Markets Title */}
-                <div className="flex items-center justify-between mb-6 animate-in fade-in duration-500 delay-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 animate-in fade-in duration-500 delay-100">
                     <h2 className="text-xl font-bold text-white capitalize flex items-center gap-2">
                         {searchParam ? (
                             <>Results for "<span className="text-blue-400">{searchParam}</span>"</>
@@ -124,7 +124,7 @@ export default function HomePage() {
                             <>{categoryParam === 'all' ? 'All Markets' : `${categoryParam} Markets`}</>
                         )}
                     </h2>
-                    <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded">
+                    <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded w-fit">
                         {filteredAssets.length} RESULTS
                     </span>
                 </div>

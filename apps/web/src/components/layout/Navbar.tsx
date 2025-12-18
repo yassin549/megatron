@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
-import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText } from 'lucide-react';
+import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, Wallet, LogOut, LayoutGrid } from 'lucide-react';
 
 export function Navbar() {
     const { status } = useSession();
@@ -15,6 +15,7 @@ export function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [bookmarks, setBookmarks] = useState<any[]>([]);
     const [loadingBookmarks, setLoadingBookmarks] = useState(false);
 
@@ -105,8 +106,8 @@ export function Navbar() {
                     </form>
                 </div>
 
-                {/* 3. Right Section */}
-                <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+                {/* 3. Right Section (Desktop) */}
+                <div className="hidden md:flex items-center gap-3 md:gap-4 flex-shrink-0">
                     {status === 'authenticated' ? (
                         <>
                             <UserStats />
@@ -218,7 +219,106 @@ export function Navbar() {
                         </div>
                     )}
                 </div>
+
+                {/* 4. Mobile Toggle */}
+                <div className="md:hidden flex items-center gap-4">
+                    {status === 'authenticated' && <UserStats isMobile={true} />}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-3 text-muted-foreground hover:text-white"
+                    >
+                        <Menu className="w-6 h-6" />
+                    </button>
+                </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            {isMobileMenuOpen && (
+                <div className="fixed inset-0 z-50 md:hidden bg-background">
+                    {/* Header */}
+                    <div className="h-16 flex items-center justify-between px-4 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+                        <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="font-bold text-2xl text-white tracking-tighter">
+                            MEGATRON
+                        </Link>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-2 text-muted-foreground hover:text-white"
+                        >
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 space-y-6 overflow-y-auto h-[calc(100vh-64px)] pb-10">
+                        {/* Search */}
+                        <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
+                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search markets..."
+                                className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            />
+                        </form>
+
+                        {/* Navigation Links */}
+                        <div className="space-y-4">
+                            {status === 'authenticated' ? (
+                                <>
+                                    <div className="p-4 bg-secondary/30 rounded-xl border border-white/5 space-y-4">
+                                        <div className="flex items-center gap-3 mb-4 border-b border-white/5 pb-4">
+                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                U
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-white">My Account</p>
+                                                <p className="text-xs text-muted-foreground">Logged in</p>
+                                            </div>
+                                        </div>
+
+                                        <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
+                                            <LayoutGrid className="w-4 h-4" /> Dashboard
+                                        </Link>
+                                        <Link href="/wallet" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
+                                            <Wallet className="w-4 h-4" /> Wallet
+                                        </Link>
+                                        <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
+                                            <Users className="w-4 h-4" /> Profile Settings
+                                        </Link>
+                                        <Link href="/api/auth/signout" className="flex items-center gap-3 text-sm text-red-400 hover:text-red-300 pt-2">
+                                            <LogOut className="w-4 h-4" /> Sign Out
+                                        </Link>
+                                    </div>
+
+                                    {/* Mobile Bookmarks */}
+                                    <div>
+                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Bookmarks</h3>
+                                        <div className="space-y-2">
+                                            {bookmarks.slice(0, 5).map(bm => (
+                                                <Link key={bm.id} href={`/assets/${bm.id}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg border border-white/5">
+                                                    <span className="text-sm font-medium text-white">{bm.name}</span>
+                                                    <span className={`text-xs font-mono ${bm.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{bm.change > 0 ? '+' : ''}{bm.change.toFixed(2)}%</span>
+                                                </Link>
+                                            ))}
+                                            {bookmarks.length === 0 && <p className="text-xs text-muted-foreground">No bookmarks yet</p>}
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center py-3 rounded-lg border border-border font-medium text-sm hover:bg-secondary">
+                                        Log In
+                                    </Link>
+                                    <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center py-3 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary/90 shadow-lg shadow-primary/20">
+                                        Get Started
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }

@@ -10,7 +10,11 @@ interface UserStats {
     isLoading: boolean;
 }
 
-export function UserStats() {
+interface UserStatsProps {
+    isMobile?: boolean; // New prop for mobile rendering
+}
+
+export function UserStats({ isMobile = false }: UserStatsProps) {
     const { status } = useSession();
     const [stats, setStats] = useState<UserStats>({
         portfolioValue: '0.00',
@@ -49,7 +53,20 @@ export function UserStats() {
         return (
             <div className="flex items-center gap-6 animate-pulse">
                 <div className="h-4 w-24 bg-secondary/50 rounded" />
-                <div className="h-4 w-20 bg-secondary/50 rounded" />
+                {!isMobile && <div className="h-4 w-20 bg-secondary/50 rounded" />}
+            </div>
+        );
+    }
+
+    if (isMobile) {
+        return (
+            <div className="flex items-center gap-2 mr-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-white/5">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Cash
+                </span>
+                <span className="text-sm font-bold text-green-500">
+                    ${parseFloat(stats.walletHotBalance).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                </span>
             </div>
         );
     }

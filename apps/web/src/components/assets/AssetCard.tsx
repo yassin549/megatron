@@ -270,7 +270,7 @@ export function AssetCard({
             </Link>
 
             {/* Flying Tooltip - Portalled to body to escape parent transforms */}
-            {isHovering && hasMouseMoved && (typeof document !== 'undefined') && createPortal(
+            {isHovering && hasMouseMoved && (typeof window !== 'undefined' && window.innerWidth >= 768) && (typeof document !== 'undefined') && createPortal(
                 <div
                     className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl shadow-blue-500/10 animate-in fade-in zoom-in-95 duration-150"
                     style={tooltipStyle}
