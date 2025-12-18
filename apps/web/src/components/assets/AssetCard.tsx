@@ -174,7 +174,7 @@ export function AssetCard({
 
     return (
         <div
-            className="relative group h-[180px]"
+            className="relative group h-[170px] md:h-[185px]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onMouseMove={handleMouseMove}
@@ -195,7 +195,7 @@ export function AssetCard({
 
             <Link
                 href={`/assets/${id}`}
-                className="block h-full bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-blue-500/30 rounded-xl p-4 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 backdrop-blur-md flex flex-col justify-between"
+                className="block h-full bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-blue-500/30 rounded-2xl p-3.5 md:p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 backdrop-blur-md flex flex-col justify-between"
             >
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-4">
@@ -225,17 +225,17 @@ export function AssetCard({
                 {/* Data Row */}
                 <div className="grid grid-cols-2 gap-2 mt-2">
                     {/* Price Box */}
-                    <div className="bg-black/20 rounded-lg px-3 py-2 border border-white/5 group-hover:border-white/10 transition-colors">
-                        <span className="block text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">Price</span>
-                        <div className="text-sm font-bold text-zinc-100 tabular-nums">
+                    <div className="bg-black/20 rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
+                        <span className="block text-[9px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">Price</span>
+                        <div className="text-xs md:text-sm font-bold text-zinc-100 tabular-nums">
                             ${displayPrice.toFixed(2)}
                             {isFunding && <span className="text-[10px] ml-1 text-yellow-500 font-normal">{(fundingProgress || 0).toFixed(0)}% Funded</span>}
                         </div>
                     </div>
                     {/* Change Box */}
-                    <div className="bg-black/20 rounded-lg px-3 py-2 border border-white/5 group-hover:border-white/10 transition-colors">
-                        <span className="block text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">24h Change</span>
-                        <div className={`text-sm font-bold tabular-nums flex items-center gap-1 ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <div className="bg-black/20 rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
+                        <span className="block text-[9px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">24h Change</span>
+                        <div className={`text-xs md:text-sm font-bold tabular-nums flex items-center gap-1 ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(displayChange).toFixed(2)}%
                         </div>
