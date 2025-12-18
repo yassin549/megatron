@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
     Activity,
     Users,
@@ -268,8 +269,8 @@ export function AssetCard({
                 </div>
             </Link>
 
-            {/* Flying Tooltip */}
-            {isHovering && hasMouseMoved && (
+            {/* Flying Tooltip - Portalled to body to escape parent transforms */}
+            {isHovering && hasMouseMoved && (typeof document !== 'undefined') && createPortal(
                 <div
                     className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl shadow-blue-500/10 animate-in fade-in zoom-in-95 duration-150"
                     style={tooltipStyle}
@@ -284,7 +285,8 @@ export function AssetCard({
                             </p>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
