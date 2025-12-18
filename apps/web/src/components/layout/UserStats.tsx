@@ -60,7 +60,7 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
 
     if (isMobile) {
         return (
-            <div className="flex items-center gap-2 mr-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-white/5">
+            <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-white/5">
                 <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                     Cash
                 </span>

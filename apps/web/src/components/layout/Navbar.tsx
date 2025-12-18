@@ -249,7 +249,7 @@ export function Navbar() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 space-y-6 overflow-y-auto h-[calc(100vh-64px)] pb-10">
+                    <div className="p-4 space-y-6 overflow-y-auto h-[calc(100dvh-64px)] pb-10">
                         {/* Search */}
                         <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
