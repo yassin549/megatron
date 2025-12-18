@@ -18,20 +18,25 @@ async function cleanup() {
     for (const [name, ids] of nameMap.entries()) {
         if (ids.length > 1) {
             console.log(`⚠️ Found duplicate for "${name}": ${ids.join(', ')}`);
-            // Keep the slug-based ID if it exists, otherwise keep the first one
-            const slugId = ids.find(id => id.includes('-'));
-            const toDelete = ids.filter(id => id !== (slugId || ids[0]));
+
+            // The "canonical" ID should be the slug-based one
+            const canonicalId = name.toLowerCase().replace(/\s+/g, '-');
+
+            // If the canonical ID exists in the list, keep it. Otherwise keep the first slug-like one.
+            const targetId = ids.includes(canonicalId) ? canonicalId : ids.find(id => !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) || ids[0];
+
+            const toDelete = ids.filter(id => id !== targetId);
 
             for (const delId of toDelete) {
-                console.log(`  🗑️ Deleting ${delId}...`);
+                console.log(`  🗑️ Deleting duplicate ${delId} for "${name}"...`);
                 try {
-                    // Delete associated records first if not handled by cascade
-                    await prisma.liquidityPool.deleteMany({ where: { assetId: delId } });
+                    // Manual deletion of dependent records to avoid constraint errors
                     await prisma.trade.deleteMany({ where: { assetId: delId } });
                     await prisma.position.deleteMany({ where: { assetId: delId } });
                     await prisma.priceTick.deleteMany({ where: { assetId: delId } });
                     await prisma.oracleLog.deleteMany({ where: { assetId: delId } });
                     await prisma.bookmark.deleteMany({ where: { assetId: delId } });
+                    await prisma.liquidityPool.deleteMany({ where: { assetId: delId } });
 
                     await prisma.asset.delete({ where: { id: delId } });
                     console.log(`  ✅ Deleted ${delId}`);
