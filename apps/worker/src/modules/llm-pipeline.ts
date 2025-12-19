@@ -35,6 +35,7 @@ export async function runLlmCycleForAsset(assetId: string): Promise<void> {
         where: { id: assetId },
         select: {
             id: true,
+            name: true,
             status: true,
             oracleQueries: true,
         },
