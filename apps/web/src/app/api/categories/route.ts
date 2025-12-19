@@ -3,20 +3,19 @@ import { db } from '@megatron/database';
 
 export const dynamic = 'force-dynamic';
 
+const ALL_CATEGORIES = [
+    'AI', 'Startups', 'Venture', 'Technology', 'Innovation', 'Markets', 'Trading',
+    'Macro', 'Economics', 'Politics', 'Geopolitics', 'Society', 'Social', 'Culture',
+    'Sentiment', 'Crypto', 'Web3', 'Energy', 'Climate', 'Resources', 'Labor',
+    'Employment', 'Media', 'Narratives', 'Attention', 'Risk', 'Volatility',
+    'Liquidity', 'Regulation', 'Security', 'Defense', 'Health', 'Demographics',
+    'Consumer', 'Lifestyle', 'Mobility', 'Education', 'Science'
+];
+
 export async function GET() {
     try {
-        // Fetch unique types from the Asset table
-        const types = await db.asset.findMany({
-            select: { type: true },
-            distinct: ['type'],
-        });
-
-        const categoryList = types.map(t => t.type);
-
-        // Map internal types to display names and ensure basic defaults exist
-        // This allows the UI to handle categories elegantly
         return NextResponse.json({
-            categories: categoryList
+            categories: ALL_CATEGORIES
         });
     } catch (error) {
         console.error('[API/categories] Error:', error);

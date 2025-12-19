@@ -19,8 +19,8 @@ export function SubNavbar() {
                 if (res.ok) {
                     const data = await res.json();
                     const dynamicCats = data.categories.map((cat: string) => ({
-                        id: cat,
-                        name: cat.charAt(0).toUpperCase() + cat.slice(1),
+                        id: cat.toLowerCase(),
+                        name: cat,
                     }));
 
                     const filteredDynamic = dynamicCats.filter((c: any) => c.id !== 'all');
@@ -53,7 +53,7 @@ export function SubNavbar() {
             <div className="max-w-[1400px] mx-auto px-4">
                 <div
                     ref={scrollRef}
-                    className="relative flex items-center justify-center gap-6 md:gap-14 overflow-x-auto no-scrollbar py-0 mask-fade-right h-12 md:h-14 px-2 md:px-0"
+                    className="relative flex items-center justify-start md:justify-start gap-3 md:gap-8 overflow-x-auto no-scrollbar py-0 mask-fade-right h-12 md:h-14 px-2 md:px-0 scroll-smooth"
                 >
                     {categories.map((category) => {
                         const isActive = currentCategory === category.id;

@@ -222,12 +222,10 @@ export default function AdminAssetsPage() {
                     }}
                     onSuccess={() => {
                         setIsCreateModalOpen(false);
-                        setEditingAsset(null); // Clear editing asset on success
-                        // Quick hack: force refresh or re-fetch would be better
-                        // For now just alert or reload logic.
-                        // Better: re-fetch assets
+                        setEditingAsset(null);
+                        // Refresh asset list
                         fetch('/api/assets').then(res => res.json()).then(data => setAssets(data.assets));
-                        alert(editingAsset ? 'Asset updated successfully' : 'Asset created successfully');
+                        alert(editingAsset ? 'Market updated successfully' : 'Market created successfully');
                     }}
                     initialData={editingAsset}
                 />

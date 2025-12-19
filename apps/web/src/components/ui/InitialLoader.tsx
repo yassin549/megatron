@@ -49,7 +49,7 @@ export function InitialLoader() {
 
                 {/* Tagline */}
                 <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
-                    When world variables became stocks
+                    When world variables become stocks
                 </p>
 
                 {/* Progress Bar Container */}
