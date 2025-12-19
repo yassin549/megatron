@@ -12,7 +12,7 @@ export function MobileBottomNav() {
         { name: 'Assets', href: '/assets', icon: Home },
         { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
         { name: 'Wallet', href: '/wallet', icon: Wallet },
-        { name: 'Liquidity', href: '/lp', icon: Layers }, // Using Layers for LP
+        { name: 'LP Pools', href: '/lp', icon: Layers }, // Using Layers for LP
     ];
 
     // Hide on login/signup pages
