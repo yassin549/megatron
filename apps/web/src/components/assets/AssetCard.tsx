@@ -199,7 +199,7 @@ export function AssetCard({
 
             <Link
                 href={`/assets/${id}`}
-                className="block h-full bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-blue-500/30 rounded-2xl p-3.5 md:p-5 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-900/10 backdrop-blur-md flex flex-col justify-between hover:scale-[1.02] transform"
+                className="block h-full glass-card rounded-xl p-3.5 md:p-5 flex flex-col justify-between hover:scale-[1.02] transform"
             >
                 {/* Header Row */}
                 <div className="flex items-start justify-between gap-4">

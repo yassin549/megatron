@@ -250,7 +250,7 @@ export function Navbar() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md md:hidden"
+                            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm md:hidden"
                         />
 
                         {/* Drawer */}
@@ -259,7 +259,7 @@ export function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed right-0 top-0 bottom-0 z-[101] w-[300px] bg-zinc-950/80 backdrop-blur-2xl border-l border-white/5 md:hidden flex flex-col shadow-2xl"
+                            className="fixed right-0 top-0 bottom-0 z-[101] w-[300px] glass-panel border-l border-white/5 md:hidden flex flex-col shadow-2xl"
                         >
                             {/* Header */}
                             <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
@@ -294,44 +294,22 @@ export function Navbar() {
                                         <>
                                             {/* Account Summary */}
                                             <div className="relative group p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-white/5">
-                                                <div className="flex items-center gap-4 mb-4">
-                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary/10">
-                                                        U
+                                                <div className="flex items-center gap-4 mb-2">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg ring-2 ring-primary/10">
+                                                        {session?.user?.email?.[0].toUpperCase()}
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-bold text-white truncate text-base">{session?.user?.email}</p>
-                                                        <p className="text-xs text-primary font-medium">Active Member</p>
+                                                        <p className="font-bold text-white truncate text-sm">{session?.user?.email}</p>
+                                                        <p className="text-[10px] text-primary font-medium uppercase tracking-wider">Verified Trader</p>
                                                     </div>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 gap-2 pt-4 border-t border-white/5">
-                                                    <Link
-                                                        href="/dashboard"
-                                                        onClick={() => setIsMobileMenuOpen(false)}
-                                                        className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                                                    >
-                                                        <LayoutGrid className="w-5 h-5 text-primary" />
-                                                        <span className="text-xs font-medium">Stats</span>
-                                                    </Link>
-                                                    <Link
-                                                        href="/wallet"
-                                                        onClick={() => setIsMobileMenuOpen(false)}
-                                                        className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
-                                                    >
-                                                        <Wallet className="w-5 h-5 text-emerald-500" />
-                                                        <span className="text-xs font-medium">Funds</span>
-                                                    </Link>
                                                 </div>
                                             </div>
 
-                                            {/* Quick Links */}
+                                            {/* Quick Links (Secondary) */}
                                             <div className="space-y-1">
-                                                <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-2 mb-2">Explore</h3>
-                                                <Link href="/lp" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
-                                                    <Activity className="w-4 h-4 text-blue-400" /> Liquidity Pools
-                                                </Link>
+                                                <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-2 mb-2">More</h3>
                                                 <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
-                                                    <TrendingUp className="w-4 h-4 text-purple-400" /> Portfolio
+                                                    <TrendingUp className="w-4 h-4 text-purple-400" /> Portfolio Analysis
                                                 </Link>
                                                 <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
                                                     <Users className="w-4 h-4 text-amber-400" /> Leaderboard
@@ -393,6 +371,7 @@ export function Navbar() {
                     </>
                 )}
             </AnimatePresence>
+            <nav className="glass-nav md:hidden"></nav>
         </nav>
     );
 }

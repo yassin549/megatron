@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/layout/Navbar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { InitialLoader } from "@/components/ui/InitialLoader";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -25,6 +26,7 @@ export default function RootLayout({
                     <div className="min-h-screen bg-background text-foreground">
                         <Navbar />
                         {children}
+                        <MobileBottomNav />
                     </div>
                 </Providers>
             </body>

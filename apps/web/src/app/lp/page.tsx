@@ -156,20 +156,21 @@ export default function LPDashboardPage() {
                 </div>
 
                 {/* LP Positions */}
-                <div className="bg-card border border-border rounded-xl overflow-hidden">
-                    <div className="px-6 py-4 border-b border-border">
+                <div className="glass-panel rounded-xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-white/5">
                         <h2 className="font-semibold text-foreground">Your LP Positions</h2>
                     </div>
 
                     {positions.length > 0 ? (
-                        <div className="divide-y divide-border">
+                        <div className="divide-y divide-white/5">
                             {positions.map((position) => (
-                                <div key={position.id} className="p-6 hover:bg-secondary/30 transition-colors">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div>
+                                <div key={position.id} className="p-4 md:p-6 hover:bg-white/5 transition-colors">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        {/* Asset Info */}
+                                        <div className="flex-shrink-0">
                                             <Link
                                                 href={`/assets/${position.assetId}`}
-                                                className="font-semibold text-foreground hover:text-primary transition-colors"
+                                                className="text-lg font-semibold text-foreground hover:text-primary transition-colors"
                                             >
                                                 {position.assetName}
                                             </Link>
@@ -177,36 +178,41 @@ export default function LPDashboardPage() {
                                                 {position.lpTokens.toFixed(2)} LP Tokens
                                             </p>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="font-semibold text-foreground">
-                                                ${position.currentValue.toLocaleString()}
-                                            </p>
-                                            <p className="text-sm text-green-500">
-                                                +${position.earnings.toLocaleString()} earned
-                                            </p>
+
+                                        {/* Stats Grid - Mobile Friendly */}
+                                        <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-2 md:mt-0">
+                                            <div>
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Contributed</p>
+                                                <p className="text-foreground font-medium">
+                                                    ${position.contributed.toLocaleString()}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Current Value</p>
+                                                <p className="font-semibold text-foreground">
+                                                    ${position.currentValue.toLocaleString()}
+                                                </p>
+                                                <p className="text-xs text-green-500">
+                                                    +${position.earnings.toLocaleString()} earned
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">APY</p>
+                                                <p className="text-green-500 font-bold">
+                                                    {position.apy}%
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider">Vesting Ends</p>
+                                                <p className="text-foreground font-medium">
+                                                    {position.vestingEnd}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-4 text-sm">
-                                        <div>
-                                            <p className="text-muted-foreground">Contributed</p>
-                                            <p className="text-foreground font-medium">
-                                                ${position.contributed.toLocaleString()}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground">APY</p>
-                                            <p className="text-green-500 font-medium">
-                                                {position.apy}%
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground">Vesting Ends</p>
-                                            <p className="text-foreground font-medium">
-                                                {position.vestingEnd}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <button className="text-sm text-primary hover:underline">
+
+                                        {/* Actions */}
+                                        <div className="mt-4 md:mt-0 md:text-right">
+                                            <button className="w-full md:w-auto px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg text-primary transition-colors">
                                                 Withdraw
                                             </button>
                                         </div>

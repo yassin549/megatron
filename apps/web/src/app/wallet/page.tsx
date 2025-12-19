@@ -72,34 +72,36 @@ export default function WalletPage() {
 
                 {/* Balance Cards */}
                 <div className="grid md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="glass-card rounded-xl p-6 relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-4 relative z-10">
                             <span className="text-sm text-muted-foreground">Hot Wallet</span>
-                            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-500 rounded-full">
+                            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
                                 Available
                             </span>
                         </div>
-                        <p className="text-4xl font-bold text-foreground">
+                        <p className="text-4xl font-bold text-foreground relative z-10">
                             ${walletData.hotBalance.toFixed(2)}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-sm text-muted-foreground mt-2 relative z-10">
                             Ready for trading and withdrawal
                         </p>
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-green-500/10 rounded-full blur-3xl z-0" />
                     </div>
 
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
+                    <div className="glass-card rounded-xl p-6 relative overflow-hidden">
+                        <div className="flex items-center justify-between mb-4 relative z-10">
                             <span className="text-sm text-muted-foreground">Cold Wallet</span>
-                            <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded-full">
+                            <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded-full border border-yellow-500/20">
                                 Locked
                             </span>
                         </div>
-                        <p className="text-4xl font-bold text-foreground">
+                        <p className="text-4xl font-bold text-foreground relative z-10">
                             ${walletData.coldBalance.toFixed(2)}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-2">
+                        <p className="text-sm text-muted-foreground mt-2 relative z-10">
                             LP contributions (vesting)
                         </p>
+                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl z-0" />
                     </div>
                 </div>
 

@@ -96,14 +96,15 @@ export default function DashboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
                     {/* Total Balance Card */}
-                    <div className="bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 rounded-xl p-6">
-                        <h2 className="text-sm font-medium text-muted-foreground mb-2">
+                    <div className="glass-card rounded-xl p-6 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <h2 className="text-sm font-medium text-muted-foreground mb-2 relative z-10">
                             Total Balance
                         </h2>
-                        <p className="text-4xl font-bold text-foreground">
+                        <p className="text-4xl font-bold text-foreground relative z-10">
                             ${totalBalance.toFixed(2)}
                         </p>
-                        <div className="mt-4 pt-4 border-t border-primary/20 space-y-2">
+                        <div className="mt-4 pt-4 border-t border-white/5 space-y-2 relative z-10">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Available</span>
                                 <span className="text-foreground font-medium">
@@ -120,26 +121,26 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Quick Actions Card */}
-                    <div className="bg-card border border-border rounded-xl p-6">
+                    <div className="glass-card rounded-xl p-6">
                         <h2 className="text-lg font-semibold text-foreground mb-4">
                             Quick Actions
                         </h2>
                         <div className="space-y-3">
                             <Link
                                 href="/assets"
-                                className="block w-full py-3 px-4 bg-primary text-primary-foreground font-medium rounded-lg text-center hover:bg-primary/90 transition-colors"
+                                className="block w-full py-3 px-4 bg-primary/90 text-primary-foreground font-medium rounded-lg text-center hover:bg-primary transition-all shadow-lg hover:shadow-primary/20 hover:scale-[1.02] active:scale-95"
                             >
                                 Trade Assets
                             </Link>
                             <Link
                                 href="/lp"
-                                className="block w-full py-3 px-4 bg-secondary text-foreground font-medium rounded-lg border border-border text-center hover:bg-secondary/80 transition-colors"
+                                className="block w-full py-3 px-4 bg-white/5 text-foreground font-medium rounded-lg border border-white/5 text-center hover:bg-white/10 transition-all active:scale-95"
                             >
                                 Provide Liquidity
                             </Link>
                             <Link
                                 href="/wallet"
-                                className="block w-full py-3 px-4 bg-secondary text-foreground font-medium rounded-lg border border-border text-center hover:bg-secondary/80 transition-colors"
+                                className="block w-full py-3 px-4 bg-white/5 text-foreground font-medium rounded-lg border border-white/5 text-center hover:bg-white/10 transition-all active:scale-95"
                             >
                                 Withdraw
                             </Link>

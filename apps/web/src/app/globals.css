@@ -79,17 +79,25 @@
   }
 
   .glass-panel {
-    @apply bg-card/80 backdrop-blur-xl border border-white/5 shadow-2xl;
+    @apply bg-card/60 backdrop-blur-2xl border border-white/10 shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-xl border border-white/5 shadow-lg transition-all duration-300 hover:bg-card/60 hover:border-white/10;
+  }
+
+  .glass-nav {
+    @apply bg-background/80 backdrop-blur-2xl border-t border-white/10;
   }
 
   .animate-in {
-    animation: animate-in 0.2s ease-out;
+    animation: animate-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes animate-in {
     from {
       opacity: 0;
-      transform: translateY(4px) scale(0.98);
+      transform: translateY(8px) scale(0.98);
     }
 
     to {

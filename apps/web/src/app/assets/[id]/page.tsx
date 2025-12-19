@@ -172,7 +172,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
 
                         {/* Chart Container */}
-                        <div className="h-[300px] md:h-[400px] lg:h-[500px] bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl overflow-hidden relative group shadow-2xl">
+                        <div className="h-[300px] md:h-[400px] lg:h-[500px] glass-panel rounded-2xl overflow-hidden relative group shadow-2xl">
                             {chartData.length > 0 ? (
                                 <AssetChart
                                     data={chartData}
@@ -184,8 +184,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                     }}
                                     onTimeframeChange={(tf) => {
                                         console.log('Fetching data for timeframe:', tf);
-                                        // TODO: Implement actual API fetch with ?interval=${tf}
-                                        // For now we just log it as a stub
                                     }}
                                 />
                             ) : (
@@ -197,19 +195,19 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
                         {/* Asset Stats Grid (Moved from Right Col) */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-900/80 transition-colors">
+                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
                                 <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
                                 <span className="text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
                             </div>
-                            <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-900/80 transition-colors">
+                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
                                 <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
                                 <span className="text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
                             </div>
-                            <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-900/80 transition-colors">
+                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
                                 <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Total Supply</span>
                                 <span className="text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
                             </div>
-                            <div className="bg-zinc-900/50 border border-white/5 p-4 rounded-xl hover:bg-zinc-900/80 transition-colors">
+                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
                                 <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">24h Range</span>
                                 <span className="text-sm font-bold text-white font-mono">
                                     {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(2)} - $${asset.high24h.toFixed(2)}` : '-- / --'}
@@ -219,7 +217,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
                         {/* Description (Moved from Right Col) */}
                         {asset.description && (
-                            <div className="bg-zinc-900/50 border border-white/5 p-6 rounded-xl">
+                            <div className="glass-panel p-6 rounded-xl">
                                 <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
                                     About this Market
                                 </h4>

@@ -92,7 +92,7 @@ export default function HomePage() {
             <main className="max-w-[1240px] mx-auto px-6 py-8">
                 {/* Guest Welcome Banner - Only for non-auth */}
                 {!isAuthenticated && !searchParam && categoryParam === 'all' && (
-                    <div className="mb-6 md:mb-12 bg-gradient-to-br from-blue-900/20 via-background to-purple-900/20 border border-white/5 rounded-3xl p-5 md:p-12 text-center relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div className="mb-6 md:mb-12 glass-panel rounded-3xl p-5 md:p-12 text-center relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700">
                         <div className="relative z-10">
                             <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
                                 when world variables become investable assets
@@ -131,7 +131,7 @@ export default function HomePage() {
 
                 {/* Assets Grid */}
                 {filteredAssets.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         {filteredAssets.map((asset, index) => (
                             <div
                                 key={asset.id}
