@@ -85,8 +85,7 @@ export async function checkDeposits() {
             const users = await db.user.findMany({
                 where: {
                     depositAddress: {
-                        in: addresses,
-                        mode: 'insensitive' // Case-insensitive matching
+                        in: addresses
                     }
                 },
                 select: { id: true, depositAddress: true }

@@ -46,7 +46,7 @@ export const DEFAULT_CONFIG = {
     // Legacy config, keeping for compatibility if utilized elsewhere
     MAX_INSTANT_WITHDRAWAL_PCT: 0.25,
     LLM_CONFIDENCE_MIN: 0.6,
-    LLM_DELTA_MAX: 0.5,
+    LLM_DELTA_MAX: 10.0,
     EMA_BETA: 0.1,
     V0: 1000,
     DAILY_POOL_WITHDRAWAL_PCT: 0.1,
