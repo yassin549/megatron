@@ -31,6 +31,14 @@ export async function POST(request: Request) {
 
         // Create Asset + Pool + Initial Price logic could go here
         // For simplicity, just creating Asset and Pool
+        const finalQueries = Array.isArray(body.oracleQueries) && body.oracleQueries.length > 0
+            ? body.oracleQueries
+            : [
+                `${name} latest developments and news`,
+                `${name} market sentiment and analysis`,
+                `${name} ecosystem growth and indicators`
+            ];
+
         const asset = await db.asset.create({
             data: {
                 name,
@@ -40,8 +48,8 @@ export async function POST(request: Request) {
                 hardCap,
                 imageUrl,
                 status: 'funding',
-                oracleQueries: [], // Default empty queries
-                pricingParams: { P0: 10, k: 0.1 }, // Defaults
+                oracleQueries: finalQueries,
+                pricingParams: { P0: 18, k: 0.1 }, // Default to 18.00 as requested/seen in UI
                 pool: {
                     create: {
                         totalUsdc: 0,

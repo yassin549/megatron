@@ -58,13 +58,22 @@ export async function runLlmCycleForAsset(assetId: string): Promise<void> {
     // Pick a random variation
     const suffix = variations[Math.floor(Math.random() * variations.length)];
 
-    const queries = Array.isArray(asset.oracleQueries)
-        ? (asset.oracleQueries as unknown as string[]).map(q => `${q} ${suffix}`) // Append suffix
+    let queries = Array.isArray(asset.oracleQueries)
+        ? (asset.oracleQueries as unknown as string[])
         : [];
 
-    if (!queries.length) return;
+    if (!queries.length) {
+        // Failsafe: Generate default queries if empty
+        queries = [
+            `${asset.name} latest updates`,
+            `${asset.name} market sentiment`,
+            `${asset.name} price analysis`
+        ];
+    }
 
-    const searchResults = await querySerper(queries);
+    const queriesWithSuffix = queries.map(q => `${q} ${suffix}`);
+
+    const searchResults = await querySerper(queriesWithSuffix);
     if (!searchResults.length) return;
 
     const output = await analyzeLLM(searchResults);
@@ -127,7 +136,7 @@ export function startLlmScheduler(): void {
             });
 
             for (const asset of assets) {
-                const interval = asset.oracleIntervalMs ?? DEFAULT_CADENCE_MS;
+                const interval = asset.oracleIntervalMs ?? 180000; // 3 minutes default
 
                 const last = await db.oracleLog.findFirst({
                     where: { assetId: asset.id },
@@ -135,6 +144,7 @@ export function startLlmScheduler(): void {
                     select: { createdAt: true },
                 });
 
+                // If no logs exist OR interval has passed, run it
                 if (last && now - last.createdAt.getTime() < interval) {
                     continue;
                 }

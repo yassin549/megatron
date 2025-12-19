@@ -168,9 +168,9 @@ export function AssetCard({
 
     // Pricing Logic
     const isFunding = status?.toLowerCase() === 'funding';
-    // During funding, price starts at 0 and moves to listing price (P0) as funding fills
-    const displayPrice = isFunding ? (price * (fundingProgress || 0) / 100) : price;
-    const displayChange = isFunding ? 0 : change24h;
+    // During funding, price starts at P0 (or actual price from DB)
+    const displayPrice = price;
+    const displayChange = change24h;
 
     return (
         <div

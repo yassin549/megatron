@@ -161,12 +161,12 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                             </div>
                             <div className="text-left md:text-right">
                                 <div className="text-4xl font-bold text-white tracking-tighter mb-1 flex items-center md:justify-end gap-2">
-                                    ${(asset.status === 'funding' ? 0 : asset.price).toFixed(2)}
+                                    ${asset.price.toFixed(2)}
                                     {asset.status === 'funding' && <span className="text-lg text-yellow-500 font-normal">(Funding Phase)</span>}
                                 </div>
                                 <div className={`text-base font-medium flex items-center md:justify-end gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                     {asset.change24h >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingUp className="w-4 h-4 rotate-180" />}
-                                    {asset.status === 'funding' ? '0.00' : (asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
+                                    {(asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
                                 </div>
                             </div>
                         </div>
