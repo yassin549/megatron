@@ -10,7 +10,7 @@ import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
 import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, Wallet, LogOut, LayoutGrid } from 'lucide-react';
 
 export function Navbar() {
-    const { status } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
     const [searchQuery, setSearchQuery] = useState('');
     const [isProfileOpen, setIsProfileOpen] = useState(false);
