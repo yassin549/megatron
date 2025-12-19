@@ -66,6 +66,18 @@ export function Navbar() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
+    // Lock body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMobileMenuOpen]);
+
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
@@ -259,7 +271,8 @@ export function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed inset-0 z-[101] w-full bg-zinc-950 md:hidden flex flex-col"
+                            // FIX: Use bg-black to ensure 100% opacity, prevent transparency issues
+                            className="fixed inset-0 z-[101] w-full h-[100dvh] bg-black md:hidden flex flex-col"
                         >
                             {/* Header */}
                             <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
