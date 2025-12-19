@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export function SubNavbar() {
     const searchParams = useSearchParams();
@@ -55,27 +56,33 @@ export function SubNavbar() {
                     ref={scrollRef}
                     className="relative flex items-center justify-start md:justify-start gap-3 md:gap-8 overflow-x-auto no-scrollbar py-0 mask-fade-right h-12 md:h-14 px-2 md:px-0 scroll-smooth"
                 >
-                    {categories.map((category) => {
+                    {categories.map((category, index) => {
                         const isActive = currentCategory === category.id;
                         return (
-                            <Link
+                            <motion.div
                                 key={category.id}
-                                href={`/?category=${category.id}`}
-                                data-active={isActive}
-                                className={`group flex items-center px-4 py-2.5 md:px-6 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
-                                    ? 'border-blue-500 text-white'
-                                    : 'border-transparent text-gray-500 hover:text-gray-200'
-                                    }`}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
                             >
-                                <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-110 inline-block pointer-events-none">
-                                    {category.name}
-                                </span>
+                                <Link
+                                    href={`/?category=${category.id}`}
+                                    data-active={isActive}
+                                    className={`group flex items-center px-4 py-2.5 md:px-6 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
+                                        ? 'border-blue-500 text-white'
+                                        : 'border-transparent text-gray-500 hover:text-gray-200'
+                                        }`}
+                                >
+                                    <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-110 inline-block pointer-events-none">
+                                        {category.name}
+                                    </span>
 
-                                {/* Animated underline for non-active items */}
-                                {!isActive && (
-                                    <div className="absolute inset-x-4 bottom-0 h-[2px] bg-blue-500/0 group-hover:bg-blue-500/40 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
-                                )}
-                            </Link>
+                                    {/* Animated underline for non-active items */}
+                                    {!isActive && (
+                                        <div className="absolute inset-x-4 bottom-0 h-[2px] bg-blue-500/0 group-hover:bg-blue-500/40 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                    )}
+                                </Link>
+                            </motion.div>
                         );
                     })}
                 </div>

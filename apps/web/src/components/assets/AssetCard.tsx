@@ -17,6 +17,7 @@ import {
     ArrowDownRight,
     Bookmark
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface AssetCardProps {
     id: string;
@@ -173,7 +174,10 @@ export function AssetCard({
     const displayChange = change24h;
 
     return (
-        <div
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             className="relative group h-[170px] md:h-[185px]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
@@ -288,6 +292,6 @@ export function AssetCard({
                 </div>,
                 document.body
             )}
-        </div>
+        </motion.div>
     );
 }

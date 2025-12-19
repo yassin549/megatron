@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
 import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, Wallet, LogOut, LayoutGrid } from 'lucide-react';
@@ -240,92 +241,158 @@ export function Navbar() {
             </div>
 
             {/* Mobile Menu Overlay */}
-            {isMobileMenuOpen && (
-                <div className="fixed inset-0 z-[100] md:hidden bg-zinc-950">
-                    {/* Header */}
-                    <div className="h-16 flex items-center justify-between px-4 border-b border-white/5 bg-zinc-950">
-                        <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="font-bold text-2xl text-white tracking-tighter">
-                            MEGATRON
-                        </Link>
-                        <button
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="p-2 text-muted-foreground hover:text-white"
+                            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md md:hidden"
+                        />
+
+                        {/* Drawer */}
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed right-0 top-0 bottom-0 z-[101] w-[300px] bg-zinc-950/80 backdrop-blur-2xl border-l border-white/5 md:hidden flex flex-col shadow-2xl"
                         >
-                            <X className="w-6 h-6" />
-                        </button>
-                    </div>
+                            {/* Header */}
+                            <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
+                                <span className="font-bold text-xl text-white tracking-tighter">
+                                    MENU
+                                </span>
+                                <button
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="p-2 -mr-2 text-muted-foreground hover:text-white transition-colors"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
 
-                    {/* Content */}
-                    <div className="p-4 space-y-6 overflow-y-auto h-[calc(100dvh-64px)] pb-10">
-                        {/* Search */}
-                        <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
-                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search markets..."
-                                className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-white/5 rounded-xl text-base text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                        </form>
+                            {/* Content */}
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-24">
+                                {/* Search */}
+                                <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                    <input
+                                        type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        placeholder="Search markets..."
+                                        className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+                                    />
+                                </form>
 
-                        {/* Navigation Links */}
-                        <div className="space-y-4">
-                            {status === 'authenticated' ? (
-                                <>
-                                    <div className="p-4 bg-secondary/30 rounded-xl border border-white/5 space-y-4">
-                                        <div className="flex items-center gap-3 mb-4 border-b border-white/5 pb-4">
-                                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                                U
+                                {/* Navigation Context */}
+                                <div className="space-y-6">
+                                    {status === 'authenticated' ? (
+                                        <>
+                                            {/* Account Summary */}
+                                            <div className="relative group p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-white/5">
+                                                <div className="flex items-center gap-4 mb-4">
+                                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-4 ring-primary/10">
+                                                        U
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-bold text-white truncate text-base">{session?.user?.email}</p>
+                                                        <p className="text-xs text-primary font-medium">Active Member</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2 pt-4 border-t border-white/5">
+                                                    <Link
+                                                        href="/dashboard"
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                        className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                                    >
+                                                        <LayoutGrid className="w-5 h-5 text-primary" />
+                                                        <span className="text-xs font-medium">Stats</span>
+                                                    </Link>
+                                                    <Link
+                                                        href="/wallet"
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                        className="flex flex-col items-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
+                                                    >
+                                                        <Wallet className="w-5 h-5 text-emerald-500" />
+                                                        <span className="text-xs font-medium">Funds</span>
+                                                    </Link>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="font-medium text-white">My Account</p>
-                                                <p className="text-xs text-muted-foreground">Logged in</p>
-                                            </div>
-                                        </div>
 
-                                        <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
-                                            <LayoutGrid className="w-4 h-4" /> Dashboard
-                                        </Link>
-                                        <Link href="/wallet" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
-                                            <Wallet className="w-4 h-4" /> Wallet
-                                        </Link>
-                                        <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 text-sm text-gray-300 hover:text-white">
-                                            <Users className="w-4 h-4" /> Profile Settings
-                                        </Link>
-                                        <Link href="/api/auth/signout" className="flex items-center gap-3 text-sm text-red-400 hover:text-red-300 pt-2">
-                                            <LogOut className="w-4 h-4" /> Sign Out
-                                        </Link>
-                                    </div>
-
-                                    {/* Mobile Bookmarks */}
-                                    <div>
-                                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Bookmarks</h3>
-                                        <div className="space-y-2">
-                                            {bookmarks.slice(0, 5).map(bm => (
-                                                <Link key={bm.id} href={`/assets/${bm.id}`} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between p-3 bg-secondary/20 rounded-lg border border-white/5">
-                                                    <span className="text-sm font-medium text-white">{bm.name}</span>
-                                                    <span className={`text-xs font-mono ${bm.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>{bm.change > 0 ? '+' : ''}{bm.change.toFixed(2)}%</span>
+                                            {/* Quick Links */}
+                                            <div className="space-y-1">
+                                                <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-2 mb-2">Explore</h3>
+                                                <Link href="/lp" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
+                                                    <Activity className="w-4 h-4 text-blue-400" /> Liquidity Pools
                                                 </Link>
-                                            ))}
-                                            {bookmarks.length === 0 && <p className="text-xs text-muted-foreground">No bookmarks yet</p>}
+                                                <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
+                                                    <TrendingUp className="w-4 h-4 text-purple-400" /> Portfolio
+                                                </Link>
+                                                <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-white/5 transition-all text-sm font-medium text-gray-300 hover:text-white hover:pl-4">
+                                                    <Users className="w-4 h-4 text-amber-400" /> Leaderboard
+                                                </Link>
+                                            </div>
+
+                                            {/* Bookmarks */}
+                                            {bookmarks.length > 0 && (
+                                                <div className="space-y-3">
+                                                    <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] px-2">Watchlist</h3>
+                                                    <div className="space-y-2">
+                                                        {bookmarks.slice(0, 3).map(bm => (
+                                                            <Link
+                                                                key={bm.id}
+                                                                href={`/assets/${bm.id}`}
+                                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                                className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 active:scale-95 transition-transform"
+                                                            >
+                                                                <span className="text-xs font-medium text-white truncate mr-2">{bm.name}</span>
+                                                                <div className="flex flex-col items-end">
+                                                                    <span className="text-[10px] font-mono font-bold text-white">${bm.price.toFixed(2)}</span>
+                                                                    <span className={`text-[10px] font-mono ${bm.change >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                        {bm.change > 0 ? '+' : ''}{bm.change.toFixed(2)}%
+                                                                    </span>
+                                                                </div>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="pt-4 mt-4 border-t border-white/5">
+                                                <Link href="/api/auth/signout" className="flex items-center gap-3 w-full p-3 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition-colors">
+                                                    <LogOut className="w-4 h-4" /> Sign Out
+                                                </Link>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col gap-3">
+                                            <Link
+                                                href="/login"
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="w-full flex items-center justify-center py-4 rounded-xl border border-white/10 font-bold text-sm hover:bg-white/5 active:scale-95 transition-all"
+                                            >
+                                                Log In
+                                            </Link>
+                                            <Link
+                                                href="/signup"
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="w-full flex items-center justify-center py-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 shadow-xl shadow-primary/20 active:scale-95 transition-all"
+                                            >
+                                                Get Started
+                                            </Link>
                                         </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center py-3 rounded-lg border border-border font-medium text-sm hover:bg-secondary">
-                                        Log In
-                                    </Link>
-                                    <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center py-3 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary/90 shadow-lg shadow-primary/20">
-                                        Get Started
-                                    </Link>
+                                    )}
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </nav>
     );
 }

@@ -18,6 +18,7 @@
         "bcryptjs": "^2.4.3",
         "clsx": "^2.1.0",
         "dotenv": "^16.6.1",
+        "framer-motion": "^12.23.26",
         "ioredis": "^5.8.2",
         "lightweight-charts": "^4.1.1",
         "lucide-react": "^0.560.0",
