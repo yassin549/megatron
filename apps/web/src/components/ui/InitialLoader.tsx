@@ -42,8 +42,19 @@ export function InitialLoader() {
                 }`}
         >
             <div className="text-center space-y-6">
+                {/* Logo */}
+                <div className="flex justify-center mb-6 overflow-visible">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-1000">
+                        <img
+                            src="/images/megatron-logo.jpg"
+                            alt="Megatron Logo"
+                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                        />
+                    </div>
+                </div>
+
                 {/* Title */}
-                <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter animate-in fade-in zoom-in duration-700">
+                <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter animate-in fade-in zoom-in duration-700 delay-100">
                     MEGATRON
                 </h1>
 
