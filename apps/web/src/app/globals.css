@@ -131,6 +131,22 @@
       opacity: 0;
     }
   }
+
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(0.95);
+    }
+  }
 }
 
 @layer base {

@@ -6,8 +6,6 @@ export function InitialLoader() {
     const [progress, setProgress] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const [shouldRender, setShouldRender] = useState(true);
-    const [displayText, setDisplayText] = useState('');
-    const fullText = "MEGATRON";
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -22,24 +20,6 @@ export function InitialLoader() {
         }, 150);
 
         return () => clearInterval(timer);
-    }, []);
-
-    useEffect(() => {
-        // Start typing after a short delay to allow logo to appear
-        const startDelay = setTimeout(() => {
-            let currentIndex = 0;
-            const typingInterval = setInterval(() => {
-                if (currentIndex <= fullText.length) {
-                    setDisplayText(fullText.slice(0, currentIndex));
-                    currentIndex++;
-                } else {
-                    clearInterval(typingInterval);
-                }
-            }, 100); // Typing speed
-            return () => clearInterval(typingInterval);
-        }, 500);
-
-        return () => clearTimeout(startDelay);
     }, []);
 
     useEffect(() => {
@@ -74,11 +54,10 @@ export function InitialLoader() {
                     </div>
                 </div>
 
-                {/* Title with Typewriter Effect */}
+                {/* Title with Zoom/Breathe Effect */}
                 <div className="h-20 flex items-center justify-center">
-                    <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
-                        {displayText}
-                        <span className="animate-blink inline-block w-1 md:w-2 h-12 md:h-20 bg-primary ml-1 align-middle"></span>
+                    <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter animate-breathe">
+                        MEGATRON
                     </h1>
                 </div>
 
