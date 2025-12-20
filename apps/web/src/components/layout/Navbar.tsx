@@ -247,9 +247,9 @@ export function Navbar() {
                     {status === 'authenticated' && (
                         <div
                             className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg cursor-pointer"
-                            onClick={() => setIsProfileOpen(!isProfileOpen)} // Optional: Navigate or open drawer
+                            onClick={() => setIsMobileMenuOpen(true)}
                         >
-                            U
+                            {session?.user?.email?.[0].toUpperCase() || 'U'}
                         </div>
                     )}
                     <button
