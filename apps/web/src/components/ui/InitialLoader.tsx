@@ -6,6 +6,8 @@ export function InitialLoader() {
     const [progress, setProgress] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const [shouldRender, setShouldRender] = useState(true);
+    const [displayText, setDisplayText] = useState('');
+    const fullText = "MEGATRON";
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -23,13 +25,31 @@ export function InitialLoader() {
     }, []);
 
     useEffect(() => {
+        // Start typing after a short delay to allow logo to appear
+        const startDelay = setTimeout(() => {
+            let currentIndex = 0;
+            const typingInterval = setInterval(() => {
+                if (currentIndex <= fullText.length) {
+                    setDisplayText(fullText.slice(0, currentIndex));
+                    currentIndex++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, 100); // Typing speed
+            return () => clearInterval(typingInterval);
+        }, 500);
+
+        return () => clearTimeout(startDelay);
+    }, []);
+
+    useEffect(() => {
         if (progress === 100) {
             // Wait a bit at 100% before fading out
             const timer = setTimeout(() => {
                 setIsVisible(false);
                 // Remove from DOM after fade out animation
                 setTimeout(() => setShouldRender(false), 500);
-            }, 500);
+            }, 800); // Slightly longer pause to read text
             return () => clearTimeout(timer);
         }
     }, [progress]);
@@ -41,25 +61,29 @@ export function InitialLoader() {
             className={`fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
         >
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-8">
                 {/* Logo */}
-                <div className="flex justify-center mb-6 overflow-visible">
+                <div className="flex justify-center mb-2 overflow-visible">
                     <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-1000">
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
-                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 animate-pulse"
+                            style={{ animationDuration: '3s' }}
                         />
                     </div>
                 </div>
 
-                {/* Title */}
-                <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter animate-in fade-in zoom-in duration-700 delay-100">
-                    MEGATRON
-                </h1>
+                {/* Title with Typewriter Effect */}
+                <div className="h-20 flex items-center justify-center">
+                    <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter">
+                        {displayText}
+                        <span className="animate-blink inline-block w-1 md:w-2 h-12 md:h-20 bg-primary ml-1 align-middle"></span>
+                    </h1>
+                </div>
 
                 {/* Tagline */}
-                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-1000">
                     When world variables become stocks
                 </p>
 
@@ -70,11 +94,6 @@ export function InitialLoader() {
                         className="h-full bg-white transition-all duration-200 ease-out"
                         style={{ width: `${progress}%` }}
                     />
-                </div>
-
-                {/* Percentage Text (Optional, keeps it cleaner without) */}
-                <div className="text-xs text-gray-600 font-mono">
-                    {Math.min(100, Math.round(progress))}%
                 </div>
             </div>
         </div>
