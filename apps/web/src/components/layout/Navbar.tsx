@@ -265,19 +265,18 @@ export function Navbar() {
                             className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm md:hidden"
                         />
 
-                        {/* Drawer */}
+                        {/* Drawer / Card */}
                         <motion.div
-                            initial={{ x: '100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            // FIX: Use bg-black to ensure 100% opacity, prevent transparency issues
-                            className="fixed inset-0 z-[101] w-full h-[100dvh] bg-black md:hidden flex flex-col"
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="fixed top-20 right-4 z-[101] w-[calc(100vw-2rem)] max-w-sm rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden"
                         >
                             {/* Header */}
                             <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
-                                <span className="font-bold text-xl text-white tracking-tighter">
-                                    MENU
+                                <span className="font-bold text-2xl text-white tracking-tighter">
+                                    MEGATRON
                                 </span>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
