@@ -166,8 +166,8 @@ export function AssetChart({ data, colors, onTimeframeChange }: ChartProps) {
                 <button
                     onClick={() => setChartType('area')}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${chartType === 'area'
-                            ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                            : 'bg-black/40 text-gray-400 border-white/10 hover:text-white'
+                        ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+                        : 'bg-black/40 text-gray-400 border-white/10 hover:text-white'
                         }`}
                 >
                     Line
@@ -175,8 +175,8 @@ export function AssetChart({ data, colors, onTimeframeChange }: ChartProps) {
                 <button
                     onClick={() => setChartType('candlestick')}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${chartType === 'candlestick'
-                            ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
-                            : 'bg-black/40 text-gray-400 border-white/10 hover:text-white'
+                        ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
+                        : 'bg-black/40 text-gray-400 border-white/10 hover:text-white'
                         }`}
                 >
                     Candles

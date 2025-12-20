@@ -89,13 +89,22 @@ export function Navbar() {
         <nav className="border-b border-border/50 bg-background/80 backdrop-blur-xl sticky top-0 z-50 h-16 transition-all duration-300">
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section (Text Only) */}
-                <Link href="/" className="flex items-center flex-shrink-0 group">
-                    <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-300">
-                        MEGATRON
-                    </span>
-                    <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
-                        BETA
-                    </span>
+                <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
+                    <div className="relative w-8 h-8 md:w-10 md:h-10">
+                        <img
+                            src="/images/megatron-logo.jpg"
+                            alt="Megatron Logo"
+                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125"
+                        />
+                    </div>
+                    <div className="flex items-center">
+                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-300">
+                            MEGATRON
+                        </span>
+                        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                            BETA
+                        </span>
+                    </div>
                 </Link>
 
                 {/* 2. Search Section */}
@@ -275,9 +284,18 @@ export function Navbar() {
                         >
                             {/* Header */}
                             <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
-                                <span className="font-bold text-2xl text-white tracking-tighter">
-                                    MEGATRON
-                                </span>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative w-8 h-8">
+                                        <img
+                                            src="/images/megatron-logo.jpg"
+                                            alt="Megatron Logo"
+                                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125"
+                                        />
+                                    </div>
+                                    <span className="font-bold text-2xl text-white tracking-tighter">
+                                        MEGATRON
+                                    </span>
+                                </div>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
                                     className="p-2 -mr-2 text-muted-foreground hover:text-white transition-colors"

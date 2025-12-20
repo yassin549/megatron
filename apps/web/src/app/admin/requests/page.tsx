@@ -147,8 +147,8 @@ export default function AdminRequestsPage() {
                                     )}
                                 </div>
                                 <span className={`px-3 py-1 text-xs rounded-full capitalize ${request.status === 'submitted' || request.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                                        request.status === 'approved' ? 'bg-green-500/10 text-green-500' :
-                                            'bg-red-500/10 text-red-500'
+                                    request.status === 'approved' ? 'bg-green-500/10 text-green-500' :
+                                        'bg-red-500/10 text-red-500'
                                     }`}>
                                     {request.status}
                                 </span>
