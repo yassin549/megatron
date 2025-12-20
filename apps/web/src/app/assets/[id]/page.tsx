@@ -119,7 +119,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
             <SubNavbar />
 
-            <main className="max-w-[1400px] mx-auto px-4 py-8">
+            <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
                 {/* Back Link */}
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-8 transition-colors group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
