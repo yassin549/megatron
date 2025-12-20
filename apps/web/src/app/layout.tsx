@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Navbar } from "@/components/layout/Navbar";
@@ -28,6 +29,7 @@ export default function RootLayout({
                         {children}
                         <MobileBottomNav />
                     </div>
+                    <Analytics />
                 </Providers>
             </body>
         </html>
