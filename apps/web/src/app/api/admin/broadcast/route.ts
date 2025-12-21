@@ -18,6 +18,10 @@ async function isAdmin() {
 
 export async function POST(request: Request) {
     try {
+        if (!process.env.RESEND_API_KEY) {
+            return NextResponse.json({ error: 'RESEND_API_KEY is not configured' }, { status: 500 });
+        }
+
         if (!await isAdmin()) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
@@ -55,6 +59,9 @@ export async function POST(request: Request) {
         });
     } catch (error) {
         console.error('Broadcast error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : String(error)
+        }, { status: 500 });
     }
 }

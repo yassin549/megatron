@@ -25,7 +25,7 @@ export default function AdminUsersPage() {
     const [broadcastSubject, setBroadcastSubject] = useState('');
     const [broadcastContent, setBroadcastContent] = useState('');
     const [isBroadcasting, setIsBroadcasting] = useState(false);
-    const [broadcastStatus, setBroadcastStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+    const [broadcastStatus, setBroadcastStatus] = useState<{ success?: boolean; message?: string; details?: any } | null>(null);
 
     const router = useRouter();
 
@@ -83,10 +83,18 @@ export default function AdminUsersPage() {
                 setBroadcastContent('');
                 setTimeout(() => setIsBroadcastModalOpen(false), 2000);
             } else {
-                setBroadcastStatus({ success: false, message: data.error || 'Failed to send broadcast' });
+                setBroadcastStatus({
+                    success: false,
+                    message: data.error || 'Failed to send broadcast',
+                    details: data.details
+                });
             }
         } catch (err) {
-            setBroadcastStatus({ success: false, message: 'An error occurred while sending broadcast.' });
+            setBroadcastStatus({
+                success: false,
+                message: 'An error occurred while sending broadcast.',
+                details: err instanceof Error ? err.message : String(err)
+            });
         } finally {
             setIsBroadcasting(false);
         }
@@ -299,6 +307,13 @@ export default function AdminUsersPage() {
                                     : 'bg-destructive/10 border-destructive/20 text-destructive'
                                     }`}>
                                     {broadcastStatus.message}
+                                    {broadcastStatus.details && (
+                                        <div className="mt-2 text-xs opacity-80 break-words font-mono">
+                                            {typeof broadcastStatus.details === 'string'
+                                                ? broadcastStatus.details
+                                                : JSON.stringify(broadcastStatus.details, null, 2)}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
