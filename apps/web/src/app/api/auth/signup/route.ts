@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@megatron/database';
 import * as bcrypt from 'bcryptjs';
+import { sendWelcomeEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
     try {
@@ -44,6 +45,11 @@ export async function POST(request: Request) {
                 id: true,
                 email: true,
             },
+        });
+
+        // Send welcome email (non-blocking)
+        sendWelcomeEmail(email).catch(err => {
+            console.error('Failed to send welcome email:', err);
         });
 
         return NextResponse.json(
