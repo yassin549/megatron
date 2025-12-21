@@ -1,12 +1,14 @@
 import { Resend } from 'resend';
 import { WelcomeEmail } from '../components/emails/WelcomeEmail';
+import { CustomEmail } from '../components/emails/CustomEmail';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendWelcomeEmail(to: string) {
     try {
         const { data, error } = await resend.emails.send({
-            from: 'Megatron <welcome@megatron-beta.vercel.app>',
+            from: 'Megatron <onboarding@resend.dev>',
+            replyTo: 'khoualdiyassin26@gmail.com',
             to: [to],
             subject: 'Hey, Welcome to Megatron!',
             react: WelcomeEmail({ userEmail: to }),
@@ -20,6 +22,31 @@ export async function sendWelcomeEmail(to: string) {
         return { success: true, data };
     } catch (error) {
         console.error('Unexpected error sending welcome email:', error);
+        return { success: false, error };
+    }
+}
+
+export async function broadcastCustomEmail(users: { email: string }[], subject: string, content: string) {
+    try {
+        const batchRequests = users.map(user => ({
+            from: 'Megatron <onboarding@resend.dev>',
+            replyTo: 'khoualdiyassin26@gmail.com',
+            to: [user.email],
+            subject: subject,
+            react: CustomEmail({ userEmail: user.email, content }),
+        }));
+
+        // Resend batch limit is 100 per request
+        const batches = [];
+        for (let i = 0; i < batchRequests.length; i += 100) {
+            batches.push(batchRequests.slice(i, i + 100));
+        }
+
+        const results = await Promise.all(batches.map(batch => resend.batch.send(batch)));
+
+        return { success: true, results };
+    } catch (error) {
+        console.error('Error broadcasting custom email:', error);
         return { success: false, error };
     }
 }

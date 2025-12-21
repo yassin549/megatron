@@ -19,6 +19,14 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+
+    // Broadcast Modal State
+    const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+    const [broadcastSubject, setBroadcastSubject] = useState('');
+    const [broadcastContent, setBroadcastContent] = useState('');
+    const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [broadcastStatus, setBroadcastStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -49,6 +57,38 @@ export default function AdminUsersPage() {
             setError('An error occurred while fetching users.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleBroadcast = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsBroadcasting(true);
+        setBroadcastStatus(null);
+
+        try {
+            const res = await fetch('/api/admin/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject: broadcastSubject,
+                    content: broadcastContent,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setBroadcastStatus({ success: true, message: data.message });
+                setBroadcastSubject('');
+                setBroadcastContent('');
+                setTimeout(() => setIsBroadcastModalOpen(false), 2000);
+            } else {
+                setBroadcastStatus({ success: false, message: data.error || 'Failed to send broadcast' });
+            }
+        } catch (err) {
+            setBroadcastStatus({ success: false, message: 'An error occurred while sending broadcast.' });
+        } finally {
+            setIsBroadcasting(false);
         }
     };
 
@@ -110,6 +150,15 @@ export default function AdminUsersPage() {
                         <p className="text-muted-foreground">{users.length} total users</p>
                     </div>
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsBroadcastModalOpen(true)}
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors flex items-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Broadcast Email
+                        </button>
                         <input
                             type="text"
                             placeholder="Search by email..."
@@ -197,6 +246,88 @@ export default function AdminUsersPage() {
                     </table>
                 </div>
             </main>
+
+            {/* Broadcast Modal */}
+            {isBroadcastModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-card border border-border rounded-xl w-full max-w-2xl shadow-2xl overflow-hidden">
+                        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-secondary/20">
+                            <h2 className="text-xl font-bold text-foreground">Broadcast Email</h2>
+                            <button
+                                onClick={() => setIsBroadcastModalOpen(false)}
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleBroadcast} className="p-6 space-y-4">
+                            {broadcastStatus && (
+                                <div className={`p-4 rounded-lg border ${broadcastStatus.success
+                                        ? 'bg-green-500/10 border-green-500/20 text-green-500'
+                                        : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                    }`}>
+                                    {broadcastStatus.message}
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-2">Subject</label>
+                                <input
+                                    value={broadcastSubject}
+                                    onChange={(e) => setBroadcastSubject(e.target.value)}
+                                    placeholder="e.g. New Feature Announcement!"
+                                    className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-foreground mb-2">Message Content</label>
+                                <textarea
+                                    value={broadcastContent}
+                                    onChange={(e) => setBroadcastContent(e.target.value)}
+                                    placeholder="Write your message here... Note: It will be preceded by 'Hey [User],'"
+                                    className="w-full px-4 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary h-64 resize-none"
+                                    required
+                                />
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    This will be sent to <strong>{users.filter(u => !u.isBlacklisted).length}</strong> active users via Resend Batch API.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsBroadcastModalOpen(false)}
+                                    className="flex-1 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium hover:bg-secondary/80 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isBroadcasting}
+                                    className="flex-[2] px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                                >
+                                    {isBroadcasting ? (
+                                        <>
+                                            <svg className="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        'Send Broadcast'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
