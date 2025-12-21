@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -15,6 +17,17 @@ interface UserData {
     createdAt: string;
 }
 
+interface Position {
+    assetId: string;
+    assetName: string;
+    shares: number;
+    avgPrice: number;
+    currentPrice: number;
+    value: number;
+    returnPercent: number;
+    returnAbs: number;
+}
+
 interface PortfolioStats {
     totalValue: number;
     cashBalance: number;
@@ -23,6 +36,7 @@ interface PortfolioStats {
     totalReturnPercent: number;
     realizedPnL: number;
     winRate: number;
+    positions: Position[];
 }
 
 interface EquityPoint {
@@ -245,7 +259,7 @@ export default function DashboardPage() {
 
                     {portfolioStats && portfolioStats.positions.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {portfolioStats.positions.map((pos, i) => (
+                            {portfolioStats.positions.map((pos: Position, i: number) => (
                                 <motion.div
                                     key={pos.assetId}
                                     initial={{ opacity: 0, scale: 0.95 }}
