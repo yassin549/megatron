@@ -42,7 +42,11 @@ export async function POST(request: Request) {
         const result = await broadcastCustomEmail(users, subject, content);
 
         if (!result.success) {
-            return NextResponse.json({ error: 'Failed to send broadcast' }, { status: 500 });
+            console.error('Broadcast failed:', result.errors || result.error);
+            return NextResponse.json({
+                error: 'Failed to send broadcast',
+                details: result.errors || result.error
+            }, { status: 500 });
         }
 
         return NextResponse.json({

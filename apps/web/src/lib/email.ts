@@ -1,3 +1,4 @@
+import React from 'react';
 import { Resend } from 'resend';
 import { WelcomeEmail } from '../components/emails/WelcomeEmail';
 import { CustomEmail } from '../components/emails/CustomEmail';
@@ -11,7 +12,7 @@ export async function sendWelcomeEmail(to: string) {
             replyTo: 'khoualdiyassin26@gmail.com',
             to: [to],
             subject: 'Hey, Welcome to Megatron!',
-            react: WelcomeEmail({ userEmail: to }),
+            react: React.createElement(WelcomeEmail, { userEmail: to }),
         });
 
         if (error) {
@@ -33,7 +34,7 @@ export async function broadcastCustomEmail(users: { email: string }[], subject: 
             replyTo: 'khoualdiyassin26@gmail.com',
             to: [user.email],
             subject: subject,
-            react: CustomEmail({ userEmail: user.email, content }),
+            react: React.createElement(CustomEmail, { userEmail: user.email, content }),
         }));
 
         // Resend batch limit is 100 per request
@@ -43,6 +44,13 @@ export async function broadcastCustomEmail(users: { email: string }[], subject: 
         }
 
         const results = await Promise.all(batches.map(batch => resend.batch.send(batch)));
+
+        // Check for errors in any batch
+        const errors = results.filter(r => r.error);
+        if (errors.length > 0) {
+            console.error('Errors in broadcast batches:', errors);
+            return { success: false, errors };
+        }
 
         return { success: true, results };
     } catch (error) {
