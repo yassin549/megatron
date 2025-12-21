@@ -3,6 +3,19 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {
+    Users,
+    BarChart3,
+    Activity,
+    Database,
+    Zap,
+    Server,
+    ChevronRight,
+    ExternalLink,
+    LayoutDashboard,
+    Database as DatabaseIcon,
+    Loader2
+} from 'lucide-react';
 
 export default function AdminDashboardPage() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -275,78 +288,3 @@ export default function AdminDashboardPage() {
     );
 }
 
-// Minimal imports needed for the refined UI
-import {
-    Users,
-    BarChart3,
-    Activity,
-    Database,
-    Zap,
-    Server,
-    ChevronRight,
-    ExternalLink,
-    LayoutDashboard,
-    Database as DatabaseIcon,
-    Loader2
-} from 'lucide-react';
-
-{/* System Health */ }
-<div className="bg-card border border-border rounded-lg p-6">
-    <h2 className="text-lg font-semibold text-foreground mb-4">
-        System Health
-    </h2>
-    <div className="space-y-2">
-        <div className="flex justify-between items-center py-2 border-b border-border">
-            <span className="text-muted-foreground">
-                Database
-            </span>
-            <span className="text-green-500 font-medium">
-                ● Connected
-            </span>
-        </div>
-        <div className="flex justify-between items-center py-2 border-b border-border">
-            <span className="text-muted-foreground">
-                Redis
-            </span>
-            <span className="text-muted-foreground">
-                ○ Not configured
-            </span>
-        </div>
-        <div className="flex justify-between items-center py-2">
-            <span className="text-muted-foreground">
-                Worker
-            </span>
-            <span className="text-muted-foreground">
-                ○ Not running
-            </span>
-        </div>
-    </div>
-</div>
-
-{/* Quick Links */ }
-<div className="bg-card border border-border rounded-lg p-6">
-    <h2 className="text-lg font-semibold text-foreground mb-4">
-        Quick Links
-    </h2>
-    <div className="space-y-3">
-        <Link
-            href="/dashboard"
-            className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
-        >
-            View User Dashboard
-        </Link>
-        <a
-            href="https://console.neon.tech"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
-        >
-            Neon Database Console ↗
-        </a>
-    </div>
-</div>
-                </div >
-            </main >
-        </div >
-    );
-}

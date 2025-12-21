@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CreateAssetModal } from '@/components/admin/CreateAssetModal';
 import Link from 'next/link';
+import {
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    BarChart3,
+    Loader2
+} from 'lucide-react';
 
 // Mock data
 const mockAssets = [
@@ -17,7 +25,8 @@ export default function AdminAssetsPage() {
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [assets, setAssets] = useState<any[]>([]);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Placeholder for modal
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingAsset, setEditingAsset] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
@@ -291,35 +300,3 @@ export default function AdminAssetsPage() {
     );
 }
 
-import {
-    Search,
-    Plus,
-    Edit2,
-    Trash2,
-    BarChart3,
-    Loader2
-} from 'lucide-react';
-            </main >
-
-    {/* Create/Edit Asset Modal */ }
-{
-    isCreateModalOpen && (
-        <CreateAssetModal
-            onClose={() => {
-                setIsCreateModalOpen(false);
-                setEditingAsset(null); // Clear editing asset on close
-            }}
-            onSuccess={() => {
-                setIsCreateModalOpen(false);
-                setEditingAsset(null);
-                // Refresh asset list
-                fetch('/api/assets').then(res => res.json()).then(data => setAssets(data.assets));
-                alert(editingAsset ? 'Market updated successfully' : 'Market created successfully');
-            }}
-            initialData={editingAsset}
-        />
-    )
-}
-        </div >
-    );
-}
