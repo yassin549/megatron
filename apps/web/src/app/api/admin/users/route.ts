@@ -54,3 +54,40 @@ export async function GET() {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
+
+export async function PUT(request: Request) {
+    try {
+        if (!await isAdmin()) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { userId, isBlacklisted } = await request.json();
+
+        if (!userId) {
+            return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+        }
+
+        const user = await db.user.update({
+            where: { id: userId },
+            data: { isBlacklisted },
+            select: { id: true, isBlacklisted: true }
+        });
+
+        // Log admin action
+        const session = await getServerSession(authOptions);
+        await db.adminAction.create({
+            data: {
+                adminEmail: session?.user?.email || 'unknown',
+                action: 'toggle_blacklist',
+                targetId: userId,
+                reason: isBlacklisted ? 'Manual blacklist' : 'Manual unblacklist',
+                metadata: { isBlacklisted }
+            }
+        });
+
+        return NextResponse.json({ success: true, user });
+    } catch (error) {
+        console.error('Failed to update user:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}

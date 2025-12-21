@@ -9,46 +9,71 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    const [usersCount, setUsersCount] = useState<number | null>(null);
+
+    const [stats, setStats] = useState<any>(null);
+    const [health, setHealth] = useState<any>(null);
+
     useEffect(() => {
-        // Check admin session
         const adminSession = localStorage.getItem('megatron_admin');
         if (adminSession !== 'true') {
             router.push('/admin/login');
             return;
         }
         setIsAdmin(true);
-        setLoading(false);
+        fetchDashboardData();
+
+        // Refresh every 30 seconds
+        const interval = setInterval(fetchDashboardData, 30000);
+        return () => clearInterval(interval);
     }, [router]);
+
+    const fetchDashboardData = async () => {
+        try {
+            const res = await fetch('/api/admin/stats');
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data.stats);
+                setHealth(data.health);
+            } else if (res.status === 401) {
+                localStorage.removeItem('megatron_admin');
+                router.push('/admin/login');
+            }
+        } catch (err) {
+            console.error('Failed to fetch dashboard data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('megatron_admin');
         router.push('/admin/login');
     };
 
-    if (loading) {
+    if (loading && !stats) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-foreground">Loading...</div>
+                <div className="text-foreground flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading dashboard...
+                </div>
             </div>
         );
     }
 
-    if (!isAdmin) {
-        return null;
-    }
-
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
             {/* Header */}
-            <header className="border-b border-border bg-card">
+            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                        <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
                             <span className="text-primary-foreground font-bold text-sm">
                                 M
                             </span>
                         </div>
-                        <h1 className="text-xl font-bold text-foreground">
+                        <h1 className="text-xl font-bold">
                             Megatron Admin
                         </h1>
                     </div>
@@ -65,153 +90,263 @@ export default function AdminDashboardPage() {
             <main className="max-w-7xl mx-auto px-4 py-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <p className="text-sm text-muted-foreground">
+                    <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
+                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Total Users
                         </p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
-                            --
+                        <p className="text-3xl font-bold mt-1">
+                            {stats?.totalUsers ?? '--'}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                            Coming soon
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            Live from database
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <p className="text-sm text-muted-foreground">
+                    <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
+                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Active Assets
                         </p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
-                            --
+                        <p className="text-3xl font-bold mt-1">
+                            {stats?.activeAssets ?? '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                            Coming soon
+                            Markets currently trading
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <p className="text-sm text-muted-foreground">
+                    <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
+                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Total Volume (24h)
                         </p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
-                            $--
+                        <p className="text-3xl font-bold mt-1">
+                            ${stats?.totalVolume24h?.toLocaleString() ?? '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                            Coming soon
+                            Global trade volume
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <p className="text-sm text-muted-foreground">
-                            Platform Fees
+                    <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
+                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                            Platform Revenue
                         </p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
-                            $--
+                        <p className="text-3xl font-bold mt-1">
+                            ${stats?.platformFees?.toLocaleString() ?? '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
-                            Coming soon
+                            Cumulative treasury balance
                         </p>
                     </div>
                 </div>
 
                 {/* Admin Actions */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Asset Management */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">
-                            Asset Management
-                        </h2>
-                        <div className="space-y-3">
+                    {/* User Management */}
+                    <div className="bg-card border border-border rounded-xl p-8 flex flex-col">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                                <Users className="w-5 h-5 text-blue-500" />
+                            </div>
+                            <h2 className="text-xl font-bold">User Management</h2>
+                        </div>
+                        <div className="space-y-4 flex-1">
                             <Link
-                                href="/admin/requests"
-                                className="block w-full py-2 px-4 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors text-center"
+                                href="/admin/users"
+                                className="flex items-center justify-between p-4 bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all text-left group"
                             >
-                                Review Asset Requests
+                                <div>
+                                    <p className="font-bold text-foreground">View All Users & Email Control</p>
+                                    <p className="text-sm text-muted-foreground">Manage accounts, broadcast announcements, and check balances.</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </Link>
                             <Link
-                                href="/admin/assets"
-                                className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-center"
+                                href="/admin/users"
+                                className="flex items-center justify-between p-4 bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all text-left group"
                             >
-                                Manage Assets (Create/Delete)
+                                <div>
+                                    <p className="font-bold text-foreground">Blacklist & Status Management</p>
+                                    <p className="text-sm text-muted-foreground">Enforce platform security and manage user restrictions.</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </Link>
                         </div>
                     </div>
 
-                    {/* User Management */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">
-                            User Management
-                        </h2>
-                        <div className="space-y-3">
-                            <button
-                                disabled
-                                className="w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border opacity-50 cursor-not-allowed text-left"
+                    {/* Asset Management */}
+                    <div className="bg-card border border-border rounded-xl p-8 flex flex-col">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                                <BarChart3 className="w-5 h-5 text-purple-500" />
+                            </div>
+                            <h2 className="text-xl font-bold">Asset Management</h2>
+                        </div>
+                        <div className="space-y-4 flex-1">
+                            <Link
+                                href="/admin/requests"
+                                className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-all text-left group"
                             >
-                                View All Users (Milestone 7)
-                            </button>
-                            <button
-                                disabled
-                                className="w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border opacity-50 cursor-not-allowed text-left"
+                                <div>
+                                    <p className="font-bold text-primary">Review Asset Requests</p>
+                                    <p className="text-sm text-muted-foreground">Approve or reject new market suggestions from users.</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-primary" />
+                            </Link>
+                            <Link
+                                href="/admin/assets"
+                                className="flex items-center justify-between p-4 bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all text-left group"
                             >
-                                Blacklist Management (Milestone 8)
-                            </button>
+                                <div>
+                                    <p className="font-bold text-foreground">Manage Assets (Create/Delete)</p>
+                                    <p className="text-sm text-muted-foreground">Directly modify markets, update pricing, or resolve outcomes.</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </Link>
                         </div>
                     </div>
 
                     {/* System Health */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">
-                            System Health
-                        </h2>
+                    <div className="bg-card border border-border rounded-xl p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                                <Activity className="w-5 h-5 text-green-500" />
+                            </div>
+                            <h2 className="text-xl font-bold">System Health</h2>
+                        </div>
                         <div className="space-y-2">
-                            <div className="flex justify-between items-center py-2 border-b border-border">
-                                <span className="text-muted-foreground">
-                                    Database
+                            <div className="flex justify-between items-center py-3 border-b border-border">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                    <Database className="w-4 h-4" /> Database
                                 </span>
-                                <span className="text-green-500 font-medium">
-                                    ● Connected
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center py-2 border-b border-border">
-                                <span className="text-muted-foreground">
-                                    Redis
-                                </span>
-                                <span className="text-muted-foreground">
-                                    ○ Not configured
+                                <span className={`font-bold flex items-center gap-1.5 ${health?.database === 'Connected' ? 'text-green-500' : 'text-red-500'}`}>
+                                    <span className="w-2 h-2 rounded-full bg-current" />
+                                    {health?.database || 'Checking...'}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center py-2">
-                                <span className="text-muted-foreground">
-                                    Worker
+                            <div className="flex justify-between items-center py-3 border-b border-border">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                    <Zap className="w-4 h-4" /> Redis Cache
                                 </span>
-                                <span className="text-muted-foreground">
-                                    ○ Not running
+                                <span className={`font-bold flex items-center gap-1.5 ${health?.redis === 'Connected' ? 'text-green-500' : 'text-red-500'}`}>
+                                    <span className="w-2 h-2 rounded-full bg-current" />
+                                    {health?.redis || 'Checking...'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-3">
+                                <span className="text-muted-foreground flex items-center gap-2">
+                                    <Server className="w-4 h-4" /> Worker Engine
+                                </span>
+                                <span className={`font-bold flex items-center gap-1.5 ${health?.worker === 'Active' ? 'text-green-500' : 'text-zinc-500'}`}>
+                                    <span className="w-2 h-2 rounded-full bg-current" />
+                                    {health?.worker || 'Checking...'}
                                 </span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Quick Links */}
-                    <div className="bg-card border border-border rounded-lg p-6">
-                        <h2 className="text-lg font-semibold text-foreground mb-4">
-                            Quick Links
-                        </h2>
-                        <div className="space-y-3">
+                    {/* Quick Access */}
+                    <div className="bg-card border border-border rounded-xl p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-10 h-10 bg-zinc-500/10 rounded-lg flex items-center justify-center">
+                                <ExternalLink className="w-5 h-5 text-zinc-400" />
+                            </div>
+                            <h2 className="text-xl font-bold">Platform Quick Links</h2>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
                             <Link
                                 href="/dashboard"
-                                className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
+                                className="flex flex-col items-center gap-2 p-4 bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all text-center"
                             >
-                                View User Dashboard
+                                <LayoutDashboard className="w-6 h-6 text-muted-foreground" />
+                                <span className="text-sm font-bold">User View</span>
                             </Link>
                             <a
                                 href="https://console.neon.tech"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
+                                className="flex flex-col items-center gap-2 p-4 bg-secondary/50 border border-border rounded-xl hover:bg-secondary hover:border-primary/30 transition-all text-center"
                             >
-                                Neon Database Console ↗
+                                <DatabaseIcon className="w-6 h-6 text-muted-foreground" />
+                                <span className="text-sm font-bold">Neon SQL</span>
                             </a>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
+    );
+}
+
+// Minimal imports needed for the refined UI
+import {
+    Users,
+    BarChart3,
+    Activity,
+    Database,
+    Zap,
+    Server,
+    ChevronRight,
+    ExternalLink,
+    LayoutDashboard,
+    Database as DatabaseIcon,
+    Loader2
+} from 'lucide-react';
+
+{/* System Health */ }
+<div className="bg-card border border-border rounded-lg p-6">
+    <h2 className="text-lg font-semibold text-foreground mb-4">
+        System Health
+    </h2>
+    <div className="space-y-2">
+        <div className="flex justify-between items-center py-2 border-b border-border">
+            <span className="text-muted-foreground">
+                Database
+            </span>
+            <span className="text-green-500 font-medium">
+                ● Connected
+            </span>
+        </div>
+        <div className="flex justify-between items-center py-2 border-b border-border">
+            <span className="text-muted-foreground">
+                Redis
+            </span>
+            <span className="text-muted-foreground">
+                ○ Not configured
+            </span>
+        </div>
+        <div className="flex justify-between items-center py-2">
+            <span className="text-muted-foreground">
+                Worker
+            </span>
+            <span className="text-muted-foreground">
+                ○ Not running
+            </span>
+        </div>
+    </div>
+</div>
+
+{/* Quick Links */ }
+<div className="bg-card border border-border rounded-lg p-6">
+    <h2 className="text-lg font-semibold text-foreground mb-4">
+        Quick Links
+    </h2>
+    <div className="space-y-3">
+        <Link
+            href="/dashboard"
+            className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
+        >
+            View User Dashboard
+        </Link>
+        <a
+            href="https://console.neon.tech"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-2 px-4 bg-secondary text-secondary-foreground font-medium rounded-lg border border-border hover:bg-secondary/80 transition-colors text-left"
+        >
+            Neon Database Console ↗
+        </a>
+    </div>
+</div>
+                </div >
+            </main >
+        </div >
     );
 }

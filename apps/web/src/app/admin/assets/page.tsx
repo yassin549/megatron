@@ -18,21 +18,19 @@ export default function AdminAssetsPage() {
     const [loading, setLoading] = useState(true);
     const [assets, setAssets] = useState<any[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // Placeholder for modal
-    const [editingAsset, setEditingAsset] = useState<any>(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
     useEffect(() => {
         const checkAdmin = async () => {
-            // Basic localStorage check first
             const adminSession = localStorage.getItem('megatron_admin');
             if (adminSession !== 'true') {
                 router.push('/admin/login');
                 return;
             }
 
-            // Then fetch data
             try {
-                const res = await fetch('/api/assets'); // Use public asset API for list
+                const res = await fetch('/api/assets');
                 if (res.ok) {
                     const data = await res.json();
                     setAssets(data.assets || []);
@@ -47,6 +45,21 @@ export default function AdminAssetsPage() {
         checkAdmin();
     }, [router]);
 
+    const fetchAssets = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch('/api/assets');
+            if (res.ok) {
+                const data = await res.json();
+                setAssets(data.assets || []);
+            }
+        } catch (err) {
+            console.error('Failed to refresh assets:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleDelete = async (id: string, name: string) => {
         if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) return;
 
@@ -56,7 +69,6 @@ export default function AdminAssetsPage() {
             });
 
             if (res.ok) {
-                // Optimistic Update
                 setAssets(prev => prev.filter(a => a.id !== id));
                 alert('Asset deleted successfully');
             } else {
@@ -79,37 +91,45 @@ export default function AdminAssetsPage() {
         setIsCreateModalOpen(true);
     };
 
-    if (loading) {
+    if (loading && assets.length === 0) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-foreground animate-pulse">Checking Admin Privileges...</div>
+                <div className="text-foreground flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Checking Admin Privileges...
+                </div>
             </div>
         );
     }
 
+    const filteredAssets = assets.filter(asset =>
+        asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.type.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
             {/* Admin Header */}
-            <header className="border-b border-border bg-card">
+            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin/dashboard" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                            <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
                                 <span className="text-primary-foreground font-bold text-sm">M</span>
                             </div>
-                            <span className="font-bold text-foreground">Admin</span>
+                            <span className="font-bold">Admin</span>
                         </Link>
                         <nav className="flex items-center gap-4 ml-8">
-                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Dashboard
                             </Link>
-                            <Link href="/admin/assets" className="text-sm text-primary font-medium">
+                            <Link href="/admin/assets" className="text-sm text-primary font-bold">
                                 Assets
                             </Link>
-                            <Link href="/admin/requests" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/requests" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Requests
                             </Link>
-                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Users
                             </Link>
                         </nav>
@@ -119,7 +139,7 @@ export default function AdminAssetsPage() {
                             localStorage.removeItem('megatron_admin');
                             router.push('/admin/login');
                         }}
-                        className="text-sm text-muted-foreground hover:text-foreground"
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Logout
                     </button>
@@ -127,89 +147,128 @@ export default function AdminAssetsPage() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Assets</h1>
-                        <p className="text-muted-foreground">Manage all platform assets</p>
+                        <h1 className="text-2xl font-bold">Assets</h1>
+                        <p className="text-muted-foreground">Manage and monitor all platform prediction markets</p>
                     </div>
-                    <button
-                        onClick={handleCreate}
-                        className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                    >
-                        Create Asset
-                    </button>
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        <div className="relative group">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search markets..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-full sm:w-64 transition-all"
+                            />
+                        </div>
+                        <button
+                            onClick={handleCreate}
+                            className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create Asset
+                        </button>
+                    </div>
                 </div>
 
-                <div className="bg-card border border-border rounded-xl overflow-hidden">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="text-left text-sm text-muted-foreground border-b border-border">
-                                <th className="px-6 py-4 font-medium">Name</th>
-                                <th className="px-6 py-4 font-medium">Type</th>
-                                <th className="px-6 py-4 font-medium">Status</th>
-                                <th className="px-6 py-4 font-medium text-right">Liquidity</th>
-                                <th className="px-6 py-4 font-medium text-right">24h Volume</th>
-                                <th className="px-6 py-4 font-medium">Wait Time</th>
-                                <th className="px-6 py-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {assets.length === 0 && (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
-                                        No assets found.
-                                    </td>
+                <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="text-left text-sm text-muted-foreground bg-secondary/30">
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Asset Details</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Type</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider text-right">Liquidity</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider text-right">24h Volume</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider text-right">Actions</th>
                                 </tr>
-                            )}
-                            {assets.map((asset) => (
-                                <tr key={asset.id} className="border-b border-border last:border-0 hover:bg-secondary/30">
-                                    <td className="px-6 py-4">
-                                        <button
-                                            onClick={() => handleEdit(asset)}
-                                            className="font-medium text-foreground hover:text-primary block truncate max-w-[200px] text-left"
-                                        >
-                                            {asset.name}
-                                        </button>
-                                    </td>
-                                    <td className="px-6 py-4 text-muted-foreground capitalize">
-                                        {asset.type}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 text-xs rounded-full ${asset.status === 'active' ? 'bg-green-500/10 text-green-500' :
-                                            asset.status === 'funding' ? 'bg-yellow-500/10 text-yellow-500' :
-                                                asset.status === 'paused' ? 'bg-orange-500/10 text-orange-500' :
-                                                    'bg-muted text-muted-foreground'
-                                            }`}>
-                                            {asset.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-right text-foreground font-mono text-sm">
-                                        ${(asset.poolLiquidity || 0).toLocaleString()}
-                                    </td>
-                                    <td className="px-6 py-4 text-right text-foreground font-mono text-sm">
-                                        ${(asset.volume24h || 0).toLocaleString()}
-                                    </td>
-                                    <td className="px-6 py-4 text-muted-foreground text-sm">
-                                        {asset.fundingDeadline ? new Date(asset.fundingDeadline).toLocaleDateString() : '-'}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => handleEdit(asset)}
-                                            className="text-sm text-primary hover:text-primary/80 hover:underline mr-4"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(asset.id, asset.name)}
-                                            className="text-sm text-red-500 hover:text-red-400 hover:underline"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {filteredAssets.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-16 text-center text-muted-foreground">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                                                    <Search className="w-6 h-6 opacity-20" />
+                                                </div>
+                                                <p>No matching assets found.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredAssets.map((asset) => (
+                                    <tr key={asset.id} className="hover:bg-primary/5 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                {asset.imageUrl ? (
+                                                    <img src={asset.imageUrl} alt="" className="w-10 h-10 rounded-lg object-cover bg-secondary" />
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center">
+                                                        <BarChart3 className="w-5 h-5 opacity-40" />
+                                                    </div>
+                                                )}
+                                                <div className="max-w-[220px]">
+                                                    <button
+                                                        onClick={() => handleEdit(asset)}
+                                                        className="font-bold text-foreground hover:text-primary transition-colors text-left block truncate"
+                                                        title={asset.name}
+                                                    >
+                                                        {asset.name}
+                                                    </button>
+                                                    <p className="text-xs text-muted-foreground truncate">{asset.id}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="px-2.5 py-1 text-xs font-bold uppercase rounded-md bg-secondary text-secondary-foreground border border-border">
+                                                {asset.type}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-md border ${asset.status === 'active' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                asset.status === 'funding' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                                    asset.status === 'paused' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                                                        'bg-muted text-muted-foreground border-border'
+                                                }`}>
+                                                {asset.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="text-foreground font-bold font-mono">
+                                                ${(asset.poolLiquidity || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="text-foreground font-bold font-mono">
+                                                ${(asset.volume24h || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => handleEdit(asset)}
+                                                    className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                                                    title="Edit Asset"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(asset.id, asset.name)}
+                                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    title="Delete Asset"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
 
@@ -218,18 +277,49 @@ export default function AdminAssetsPage() {
                 <CreateAssetModal
                     onClose={() => {
                         setIsCreateModalOpen(false);
-                        setEditingAsset(null); // Clear editing asset on close
+                        setEditingAsset(null);
                     }}
                     onSuccess={() => {
                         setIsCreateModalOpen(false);
                         setEditingAsset(null);
-                        // Refresh asset list
-                        fetch('/api/assets').then(res => res.json()).then(data => setAssets(data.assets));
-                        alert(editingAsset ? 'Market updated successfully' : 'Market created successfully');
+                        fetchAssets();
                     }}
                     initialData={editingAsset}
                 />
             )}
         </div>
+    );
+}
+
+import {
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    BarChart3,
+    Loader2
+} from 'lucide-react';
+            </main >
+
+    {/* Create/Edit Asset Modal */ }
+{
+    isCreateModalOpen && (
+        <CreateAssetModal
+            onClose={() => {
+                setIsCreateModalOpen(false);
+                setEditingAsset(null); // Clear editing asset on close
+            }}
+            onSuccess={() => {
+                setIsCreateModalOpen(false);
+                setEditingAsset(null);
+                // Refresh asset list
+                fetch('/api/assets').then(res => res.json()).then(data => setAssets(data.assets));
+                alert(editingAsset ? 'Market updated successfully' : 'Market created successfully');
+            }}
+            initialData={editingAsset}
+        />
+    )
+}
+        </div >
     );
 }

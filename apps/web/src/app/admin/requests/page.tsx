@@ -3,40 +3,34 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-// Mock data
-const mockRequests = [
-    { id: '1', name: 'Reddit Wallstreetbets Activity', type: 'social', status: 'pending', requestedBy: 'user@test.com', createdAt: '2024-12-05' },
-    { id: '2', name: 'Super Bowl Winner 2025', type: 'sports', status: 'pending', requestedBy: 'trader@example.com', createdAt: '2024-12-04' },
-    { id: '3', name: 'Amazon Stock Split Likelihood', type: 'economics', status: 'approved', requestedBy: 'investor@mail.com', createdAt: '2024-12-03' },
-    { id: '4', name: 'US Election 2028', type: 'social', status: 'rejected', requestedBy: 'politico@test.com', createdAt: '2024-12-02' },
-];
+import {
+    Search,
+    Check,
+    X,
+    Loader2
+} from 'lucide-react';
 
 export default function AdminRequestsPage() {
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
     useEffect(() => {
         const checkAdmin = async () => {
-            // Basic localStorage check first (fast)
             const adminSession = localStorage.getItem('megatron_admin');
             if (adminSession !== 'true') {
                 router.push('/admin/login');
                 return;
             }
 
-            // Then fetch data (which validates auth on server)
             try {
                 const res = await fetch('/api/admin/requests');
-                if (res.status === 401) {
-                    localStorage.removeItem('megatron_admin');
-                    router.push('/admin/login');
-                    return;
+                if (res.ok) {
+                    const data = await res.json();
+                    setRequests(data.requests || []);
                 }
-                const data = await res.json();
-                setRequests(data.requests || []);
                 setIsAdmin(true);
             } catch (error) {
                 console.error('Failed to load requests:', error);
@@ -47,61 +41,68 @@ export default function AdminRequestsPage() {
         checkAdmin();
     }, [router]);
 
-    const handleUpdateStatus = async (requestId: string, status: 'approved' | 'rejected') => {
+    const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
+        if (!confirm(`Are you sure you want to ${status} this request?`)) return;
+
         try {
             const res = await fetch('/api/admin/requests', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId, status, adminNotes: `Manually ${status} by admin` })
+                body: JSON.stringify({ requestId: id, status }),
             });
 
             if (res.ok) {
-                // Optimistic Update
-                setRequests(prev => prev.map(r =>
-                    r.id === requestId ? { ...r, status } : r
-                ));
+                setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+                alert(`Request ${status} successfully`);
             } else {
-                alert('Failed to update request status');
+                const data = await res.json();
+                alert(data.error || `Failed to ${status} request`);
             }
         } catch (error) {
-            console.error('Error updating status:', error);
-            alert('Error updating status');
+            console.error(`Error updating request status:`, error);
+            alert(`Error updating request`);
         }
     };
 
-    if (loading) {
+    if (loading && requests.length === 0) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-foreground animate-pulse">Checking Admin Privileges...</div>
+                <div className="text-foreground flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Checking Admin Privileges...
+                </div>
             </div>
         );
     }
 
-    const pendingCount = requests.filter(r => r.status === 'submitted' || r.status === 'pending').length;
+    const filteredRequests = requests.filter(req =>
+        req.variableName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        req.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
             {/* Admin Header */}
-            <header className="border-b border-border bg-card">
+            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Link href="/admin/dashboard" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
+                            <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
                                 <span className="text-primary-foreground font-bold text-sm">M</span>
                             </div>
-                            <span className="font-bold text-foreground">Admin</span>
+                            <span className="font-bold">Admin</span>
                         </Link>
                         <nav className="flex items-center gap-4 ml-8">
-                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Dashboard
                             </Link>
-                            <Link href="/admin/assets" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/assets" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Assets
                             </Link>
-                            <Link href="/admin/requests" className="text-sm text-primary font-medium">
+                            <Link href="/admin/requests" className="text-sm text-primary font-bold">
                                 Requests
                             </Link>
-                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground">
+                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                                 Users
                             </Link>
                         </nav>
@@ -111,7 +112,7 @@ export default function AdminRequestsPage() {
                             localStorage.removeItem('megatron_admin');
                             router.push('/admin/login');
                         }}
-                        className="text-sm text-muted-foreground hover:text-foreground"
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                         Logout
                     </button>
@@ -119,59 +120,100 @@ export default function AdminRequestsPage() {
             </header>
 
             <main className="max-w-7xl mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Asset Requests</h1>
-                        <p className="text-muted-foreground">
-                            {pendingCount} pending request{pendingCount !== 1 ? 's' : ''}
-                        </p>
+                        <h1 className="text-2xl font-bold">Asset Requests</h1>
+                        <p className="text-muted-foreground">Review and manage community asset proposals</p>
+                    </div>
+                    <div className="relative group w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="text"
+                            placeholder="Search requests..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 w-full transition-all"
+                        />
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    {requests.length === 0 && (
-                        <div className="text-center py-12 text-muted-foreground">
-                            No requests found.
-                        </div>
-                    )}
-                    {requests.map((request) => (
-                        <div key={request.id} className="bg-card border border-border rounded-xl p-6">
-                            <div className="flex items-start justify-between mb-4">
-                                <div>
-                                    <h3 className="font-semibold text-foreground">{request.variableName}</h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Type: Generated • Requested by {request.user?.email || 'Unknown'}
-                                    </p>
-                                    {request.description && (
-                                        <p className="text-sm text-zinc-500 mt-2 italic">{request.description}</p>
-                                    )}
-                                </div>
-                                <span className={`px-3 py-1 text-xs rounded-full capitalize ${request.status === 'submitted' || request.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                                    request.status === 'approved' ? 'bg-green-500/10 text-green-500' :
-                                        'bg-red-500/10 text-red-500'
-                                    }`}>
-                                    {request.status}
-                                </span>
-                            </div>
-
-                            {(request.status === 'submitted' || request.status === 'pending') && (
-                                <div className="flex items-center gap-3 pt-4 border-t border-border">
-                                    <button
-                                        onClick={() => handleUpdateStatus(request.id, 'approved')}
-                                        className="px-4 py-2 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 transition-colors"
-                                    >
-                                        Approve
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(request.id, 'rejected')}
-                                        className="px-4 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition-colors"
-                                    >
-                                        Reject
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="text-left text-sm text-muted-foreground bg-secondary/30">
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Proposal</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">User</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Date</th>
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border">
+                                {filteredRequests.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="px-6 py-16 text-center text-muted-foreground">
+                                            <div className="flex flex-col items-center gap-2">
+                                                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                                                    <Search className="w-6 h-6 opacity-20" />
+                                                </div>
+                                                <p>No matching requests found.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                                {filteredRequests.map((request) => (
+                                    <tr key={request.id} className="hover:bg-primary/5 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <div className="max-w-[300px]">
+                                                <div className="font-bold text-foreground">{request.variableName}</div>
+                                                <p className="text-sm text-muted-foreground line-clamp-1" title={request.description}>
+                                                    {request.description}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium">
+                                            {request.userEmail}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-md border ${request.status === 'pending' || request.status === 'submitted' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                                    request.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                                }`}>
+                                                {request.status}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                                            {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '-'}
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            {(request.status === 'pending' || request.status === 'submitted') && (
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => handleUpdateStatus(request.id, 'approved')}
+                                                        className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 flex items-center gap-1.5"
+                                                    >
+                                                        <Check className="w-3.5 h-3.5" />
+                                                        Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUpdateStatus(request.id, 'rejected')}
+                                                        className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 flex items-center gap-1.5"
+                                                    >
+                                                        <X className="w-3.5 h-3.5" />
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {request.status !== 'pending' && request.status !== 'submitted' && (
+                                                <span className="text-xs text-muted-foreground italic">Processed</span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </main>
         </div>

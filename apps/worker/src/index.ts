@@ -10,7 +10,18 @@ import { runSweeper } from './jobs/sweeper';
 import { startLlmScheduler } from './modules/llm-pipeline';
 import { startPriceEngine } from './modules/price-engine';
 
+import { getRedisClient } from '@megatron/lib-integrations';
+
 console.log('Starting Megatron Worker...');
+
+async function sendHeartbeat() {
+    try {
+        const redis = getRedisClient();
+        await redis.set('worker_heartbeat', Date.now().toString(), 'EX', 60);
+    } catch (err) {
+        console.error('Failed to send heartbeat:', err);
+    }
+}
 
 async function startWorker() {
     console.log('Worker started successfully');
@@ -45,12 +56,15 @@ async function startWorker() {
     }, 60 * 60 * 1000);
 
     // 4. Sweeper (Every 10 minutes)
-    // Consolidates funds from deposit addresses to Hot Wallet
     setInterval(() => {
         runSweeper().catch(err => console.error('Sweeper error:', err));
     }, 10 * 60 * 1000);
 
+    // 5. Heartbeat (Every 30s)
+    setInterval(sendHeartbeat, 30000);
+
     // Initial run
+    sendHeartbeat().catch(console.error);
     checkDeposits().catch(console.error);
     confirmPendingDeposits().catch(console.error);
     processWithdrawalQueue().catch(console.error);

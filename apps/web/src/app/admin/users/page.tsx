@@ -92,6 +92,30 @@ export default function AdminUsersPage() {
         }
     };
 
+    const handleBlacklist = async (userId: string, currentStatus: boolean) => {
+        const action = currentStatus ? 'unblock' : 'block';
+        if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, isBlacklisted: !currentStatus }),
+            });
+
+            if (res.ok) {
+                setUsers(prev => prev.map(u =>
+                    u.id === userId ? { ...u, isBlacklisted: !currentStatus } : u
+                ));
+            } else {
+                alert(`Failed to ${action} user`);
+            }
+        } catch (err) {
+            console.error(`Error during ${action}:`, err);
+            alert(`Error during ${action}`);
+        }
+    };
+
     if (loading && users.length === 0) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
@@ -223,12 +247,17 @@ export default function AdminUsersPage() {
                                             {user.createdAt}
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button className="text-sm text-primary hover:underline mr-4">
+                                            <button
+                                                className="text-sm text-primary hover:underline mr-4"
+                                                onClick={() => router.push(`/admin/users/${user.id}`)}
+                                            >
                                                 View
                                             </button>
                                             {!user.isAdmin && (
-                                                <button className={`text-sm hover:underline ${user.isBlacklisted ? 'text-green-500' : 'text-red-500'
-                                                    }`}>
+                                                <button
+                                                    onClick={() => handleBlacklist(user.id, user.isBlacklisted)}
+                                                    className={`text-sm hover:underline ${user.isBlacklisted ? 'text-green-500' : 'text-red-500'
+                                                        }`}>
                                                     {user.isBlacklisted ? 'Unblock' : 'Block'}
                                                 </button>
                                             )}
@@ -266,8 +295,8 @@ export default function AdminUsersPage() {
                         <form onSubmit={handleBroadcast} className="p-6 space-y-4">
                             {broadcastStatus && (
                                 <div className={`p-4 rounded-lg border ${broadcastStatus.success
-                                        ? 'bg-green-500/10 border-green-500/20 text-green-500'
-                                        : 'bg-destructive/10 border-destructive/20 text-destructive'
+                                    ? 'bg-green-500/10 border-green-500/20 text-green-500'
+                                    : 'bg-destructive/10 border-destructive/20 text-destructive'
                                     }`}>
                                     {broadcastStatus.message}
                                 </div>
