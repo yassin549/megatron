@@ -70,38 +70,62 @@ export default function WalletPage() {
                     </p>
                 </div>
 
-                {/* Balance Cards */}
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                    <div className="glass-card rounded-xl p-6 relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                            <span className="text-sm text-muted-foreground">Hot Wallet</span>
-                            <span className="text-xs px-2 py-1 bg-green-500/10 text-green-500 rounded-full border border-green-500/20">
-                                Available
+                {/* Balance Cards - Compact Mobile Design */}
+                <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-6 mb-8">
+                    {/* Hot Wallet */}
+                    <div className="glass-card rounded-xl p-4 md:p-6 relative overflow-hidden">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-5 h-5 md:w-6 md:h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs md:text-sm text-muted-foreground">Hot Wallet</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 hidden md:inline">
+                                            Available
+                                        </span>
+                                    </div>
+                                    <p className="text-xl md:text-3xl font-bold text-foreground font-mono">
+                                        ${walletData.hotBalance.toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-[10px] px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full border border-emerald-500/20 md:hidden flex-shrink-0">
+                                Ready
                             </span>
                         </div>
-                        <p className="text-4xl font-bold text-foreground relative z-10">
-                            ${walletData.hotBalance.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2 relative z-10">
-                            Ready for trading and withdrawal
-                        </p>
-                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-green-500/10 rounded-full blur-3xl z-0" />
+                        <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl z-0" />
                     </div>
 
-                    <div className="glass-card rounded-xl p-6 relative overflow-hidden">
-                        <div className="flex items-center justify-between mb-4 relative z-10">
-                            <span className="text-sm text-muted-foreground">Cold Wallet</span>
-                            <span className="text-xs px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded-full border border-yellow-500/20">
+                    {/* Cold Wallet */}
+                    <div className="glass-card rounded-xl p-4 md:p-6 relative overflow-hidden">
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg className="w-5 h-5 md:w-6 md:h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs md:text-sm text-muted-foreground">Cold Wallet</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 hidden md:inline">
+                                            Vesting
+                                        </span>
+                                    </div>
+                                    <p className="text-xl md:text-3xl font-bold text-foreground font-mono">
+                                        ${walletData.coldBalance.toFixed(2)}
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="text-[10px] px-2 py-1 bg-amber-500/10 text-amber-400 rounded-full border border-amber-500/20 md:hidden flex-shrink-0">
                                 Locked
                             </span>
                         </div>
-                        <p className="text-4xl font-bold text-foreground relative z-10">
-                            ${walletData.coldBalance.toFixed(2)}
-                        </p>
-                        <p className="text-sm text-muted-foreground mt-2 relative z-10">
-                            LP contributions (vesting)
-                        </p>
-                        <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-yellow-500/10 rounded-full blur-3xl z-0" />
+                        <div className="absolute -bottom-8 -right-8 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl z-0" />
                     </div>
                 </div>
 
