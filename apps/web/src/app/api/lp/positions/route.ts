@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
+import { MONETARY_CONFIG } from '@megatron/lib-common';
 
 export async function GET(): Promise<NextResponse> {
     try {
@@ -31,6 +32,10 @@ export async function GET(): Promise<NextResponse> {
                 unlockSchedule: {
                     orderBy: { unlockDate: 'asc' },
                 },
+                withdrawalQueue: {
+                    where: { status: 'pending' },
+                    orderBy: { requestedAt: 'desc' }
+                }
             },
         });
 
@@ -52,6 +57,21 @@ export async function GET(): Promise<NextResponse> {
                 : 0;
 
             // Find next unlock date
+            const schedule = share.unlockSchedule.map((s: any) => ({
+                percentage: s.unlockPercentage.toNumber(),
+                unlockDate: s.unlockDate
+            }));
+            const now = new Date();
+            let maxUnlockedPct = 0;
+            for (const s of schedule) {
+                if (now >= s.unlockDate) {
+                    maxUnlockedPct = Math.max(maxUnlockedPct, s.percentage);
+                }
+            }
+
+            const vestedPrincipal = contributed * (maxUnlockedPct / 100);
+            const instantLimit = vestedPrincipal * MONETARY_CONFIG.MAX_INSTANT_WITHDRAWAL_PCT;
+
             const nextUnlock = share.unlockSchedule.find((s: any) => !s.unlocked);
             const vestingEnd = nextUnlock?.unlockDate.toISOString().split('T')[0] ?? 'Fully vested';
 
@@ -65,7 +85,15 @@ export async function GET(): Promise<NextResponse> {
                 earnings,
                 apy: Math.round(apy * 10) / 10,
                 vestingEnd,
+                vestedPrincipal,
+                instantLimit,
                 unclaimedRewards: share.unclaimedRewards.toNumber(),
+                pendingWithdrawals: share.withdrawalQueue.map((w: any) => ({
+                    id: w.id,
+                    amount: w.amountUsdc.toNumber(),
+                    status: w.status,
+                    requestedAt: w.requestedAt
+                }))
             };
         });
 
