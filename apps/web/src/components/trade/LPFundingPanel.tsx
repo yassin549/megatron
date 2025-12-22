@@ -160,9 +160,9 @@ export function LPFundingPanel({
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-5 md:p-6 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
             {/* Tabs */}
-            <div className="flex bg-black/40 rounded-xl p-1 mb-6 relative border border-white/5">
+            <div className="flex bg-black/40 rounded-xl p-1 mb-4 relative border border-white/5">
                 <motion.div
                     className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-lg"
                     initial={false}
@@ -174,13 +174,13 @@ export function LPFundingPanel({
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-3 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     BUY LP SHARES
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-3 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     SELL MY SHARES
                 </button>
@@ -195,25 +195,25 @@ export function LPFundingPanel({
                     transition={{ duration: 0.2, ease: "easeOut" }}
                 >
                     {/* Header Info */}
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isBuy ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
-                                {isBuy ? <Droplets className="w-5 h-5 text-blue-400" /> : <ArrowUpRight className="w-5 h-5 text-rose-400" />}
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isBuy ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
+                                {isBuy ? <Droplets className="w-4 h-4 text-blue-400" /> : <ArrowUpRight className="w-4 h-4 text-rose-400" />}
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white leading-none mb-1">
+                                <h3 className="text-base font-bold text-white leading-none mb-1">
                                     {isBuy ? 'Supply Liquidity' : 'Withdraw Funds'}
                                 </h3>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-[10px] text-zinc-500">
                                     {isBuy ? 'Earn from every trade' : 'Manage your position'}
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={() => setShowInfo(!showInfo)}
-                            className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
                         >
-                            <Info className="w-4 h-4 text-zinc-500" />
+                            <Info className="w-3.5 h-3.5 text-zinc-500" />
                         </button>
                     </div>
 
@@ -233,7 +233,7 @@ export function LPFundingPanel({
                     )}
 
                     {/* Stats Section */}
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-3 mb-4">
                         {isBuy ? (
                             <>
                                 <div className="flex justify-between items-end mb-1">
@@ -270,17 +270,17 @@ export function LPFundingPanel({
                                 </div>
                             </>
                         ) : (
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-white/5 border border-white/5 rounded-xl p-4">
-                                    <span className="text-[10px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Your Stake</span>
+                            <div className="grid grid-cols-2 gap-2.5">
+                                <div className="bg-white/5 border border-white/5 rounded-xl p-3">
+                                    <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Your Stake</span>
                                     <div className="flex items-baseline gap-1">
-                                        <span className="text-xl font-mono font-bold text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
+                                        <span className="text-lg font-mono font-bold text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
                                     </div>
                                 </div>
-                                <div className="bg-white/5 border border-white/5 rounded-xl p-4">
-                                    <span className="text-[10px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Earnings</span>
+                                <div className="bg-white/5 border border-white/5 rounded-xl p-3">
+                                    <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Earnings</span>
                                     <div className="flex items-center gap-1">
-                                        <span className="text-xl font-mono font-bold text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
+                                        <span className="text-lg font-mono font-bold text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
                                     </div>
                                 </div>
                             </div>
@@ -288,8 +288,8 @@ export function LPFundingPanel({
                     </div>
 
                     {/* Input Area */}
-                    <div className="mb-6">
-                        <div className="flex justify-between items-center mb-3">
+                    <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                                 {isBuy ? 'Investment Amount' : 'Withdraw Amount'}
                             </span>
@@ -311,13 +311,13 @@ export function LPFundingPanel({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-5 text-2xl md:text-3xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all font-bold"
+                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-xl md:text-2xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all font-bold"
                             />
-                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-zinc-600 font-black">
+                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs text-zinc-600 font-black">
                                 USDC
                             </span>
                         </div>
-                        <div className="flex gap-2.5 mt-3">
+                        <div className="flex gap-2.5 mt-2">
                             {(isBuy ? ['50', '100', '500', 'MAX'] : ['25%', '50%', 'INSTANT MAX', 'MAX']).map((val) => (
                                 <button
                                     key={val}
@@ -342,7 +342,7 @@ export function LPFundingPanel({
                     </div>
 
                     {/* Summary Card */}
-                    <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-8 space-y-3">
+                    <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-3">
                         <div className="flex justify-between items-center text-xs font-medium">
                             <span className="text-zinc-500 uppercase tracking-tighter">
                                 {isBuy ? 'Shares to Receive' : 'Execution Mode'}
@@ -369,7 +369,7 @@ export function LPFundingPanel({
                     <button
                         onClick={handleAction}
                         disabled={!amount || parseFloat(amount) <= 0 || loading}
-                        className={`w-full py-5 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
+                        className={`w-full py-4 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
                             ${isBuy
                                 ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-blue-900/40 hover:from-blue-600 hover:to-blue-400'
                                 : 'bg-gradient-to-r from-rose-700 to-rose-500 text-white shadow-rose-900/40 hover:from-rose-600 hover:to-rose-400'
@@ -390,7 +390,7 @@ export function LPFundingPanel({
 
                     {/* Withdrawal Queue Section */}
                     {!isBuy && userPosition?.pendingWithdrawals?.length > 0 && (
-                        <div className="mt-8 pt-8 border-t border-white/5">
+                        <div className="mt-6 pt-6 border-t border-white/5">
                             <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                                 <Clock className="w-3 h-3" />
                                 Active Withdrawal Queue

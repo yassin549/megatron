@@ -102,9 +102,9 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-5 md:p-6 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
             {/* Tabs */}
-            <div className="flex bg-black/40 rounded-xl p-1 mb-6 relative border border-white/5">
+            <div className="flex bg-black/40 rounded-xl p-1 mb-4 relative border border-white/5">
                 <motion.div
                     className={`absolute inset-y-1 w-[calc(50%-4px)] rounded-lg shadow-lg ${isBuy ? 'bg-emerald-500/20 shadow-emerald-500/10' : 'bg-rose-500/20 shadow-rose-500/10'}`}
                     animate={{
@@ -115,13 +115,13 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-3 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     BUY {assetSymbol}
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-3 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     SELL {assetSymbol}
                 </button>
@@ -136,8 +136,8 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                     transition={{ duration: 0.2 }}
                 >
                     {/* Input Area */}
-                    <div className="mb-6">
-                        <div className="flex justify-between items-center mb-3">
+                    <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                                 {isBuy ? 'Invest Amount' : 'Quantity'}
                             </span>
@@ -151,14 +151,14 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-5 text-2xl md:text-3xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all font-bold"
+                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-xl md:text-2xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all font-bold"
                             />
-                            <span className="absolute right-6 top-1/2 -translate-y-1/2 text-sm text-zinc-600 font-black">
+                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs text-zinc-600 font-black">
                                 {isBuy ? 'USDC' : 'SHARES'}
                             </span>
                         </div>
                         {/* Presets */}
-                        <div className="flex gap-2.5 mt-3">
+                        <div className="flex gap-2.5 mt-2">
                             {['10', '50', '250', 'MAX'].map((val) => (
                                 <button
                                     key={val}
@@ -172,7 +172,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                     </div>
 
                     {/* Order Details */}
-                    <div className="bg-black/40 border border-white/5 rounded-2xl p-5 mb-8 space-y-4 font-mono">
+                    <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4 font-mono">
                         <div className="flex justify-between items-center text-[10px] md:text-xs">
                             <span className="text-zinc-500 uppercase tracking-tighter">Current Price</span>
                             <span className="text-white font-bold">${assetPrice.toFixed(2)}</span>
@@ -193,7 +193,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                     <button
                         onClick={handleTrade}
                         disabled={!amount || loading}
-                        className={`w-full py-5 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
+                        className={`w-full py-4 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
                             ${isBuy
                                 ? 'bg-gradient-to-r from-emerald-700 to-emerald-500 text-white shadow-emerald-900/40 hover:from-emerald-600 hover:to-emerald-400'
                                 : 'bg-gradient-to-r from-rose-700 to-rose-500 text-white shadow-rose-900/40 hover:from-rose-600 hover:to-rose-400'
