@@ -7,6 +7,7 @@ import { SubNavbar } from '@/components/layout/SubNavbar';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderForm } from '@/components/trade/OrderForm';
+import { LPFundingPanel } from '@/components/trade/LPFundingPanel';
 import { ArrowLeft, Clock, Activity, TrendingUp, Users } from 'lucide-react';
 
 interface Asset {
@@ -237,10 +238,20 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN (Order Form Only) */}
+                    {/* RIGHT COLUMN (Order Form or LP Funding Panel) */}
                     <div className="lg:col-span-4 space-y-6">
-                        {/* Order Form */}
-                        <OrderForm assetId={asset.id} assetPrice={asset.status === 'funding' ? 0 : asset.price} assetSymbol={asset.name} />
+                        {asset.status === 'funding' ? (
+                            <LPFundingPanel
+                                assetId={asset.id}
+                                assetName={asset.name}
+                                softCap={asset.softCap}
+                                hardCap={asset.hardCap}
+                                currentFunding={asset.liquidity}
+                                fundingDeadline={asset.fundingDeadline}
+                            />
+                        ) : (
+                            <OrderForm assetId={asset.id} assetPrice={asset.price} assetSymbol={asset.name} />
+                        )}
                     </div>
                 </div>
             </main>
