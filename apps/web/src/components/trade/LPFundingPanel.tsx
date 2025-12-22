@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { Droplets, Clock, Info } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Droplets, Clock, Info, CheckCircle2, X, Wallet } from 'lucide-react';
 
 interface LPFundingPanelProps {
     assetId: string;
@@ -23,10 +24,17 @@ export function LPFundingPanel({
     fundingDeadline
 }: LPFundingPanelProps) {
     const { status } = useSession();
+    const router = useRouter();
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
     const [userBalance, setUserBalance] = useState(0);
     const [showInfo, setShowInfo] = useState(false);
+    const [successModal, setSuccessModal] = useState<{
+        show: boolean;
+        message: string;
+        isActivation: boolean;
+        contributedAmount: string;
+    }>({ show: false, message: '', isActivation: false, contributedAmount: '' });
 
     // Fetch balance on mount
     useEffect(() => {
@@ -58,18 +66,38 @@ export function LPFundingPanel({
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
+            const contributedAmount = amount;
             setAmount('');
+
             if (data.activated) {
-                alert(`🎉 Your contribution activated the market! You are now an LP for ${assetName}.`);
+                setSuccessModal({
+                    show: true,
+                    message: `Your contribution activated the market! You are now an LP for ${assetName}.`,
+                    isActivation: true,
+                    contributedAmount
+                });
             } else {
-                alert(`✅ Successfully contributed $${amount} to ${assetName} liquidity pool!`);
+                setSuccessModal({
+                    show: true,
+                    message: `Successfully contributed $${contributedAmount} to ${assetName} liquidity pool!`,
+                    isActivation: false,
+                    contributedAmount
+                });
             }
-            window.location.reload();
         } catch (err: any) {
             alert(`Contribution failed: ${err.message}`);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCloseModal = () => {
+        setSuccessModal({ show: false, message: '', isActivation: false, contributedAmount: '' });
+        window.location.reload();
+    };
+
+    const handleViewPortfolio = () => {
+        router.push('/portfolio');
     };
 
     if (status !== 'authenticated') {
@@ -228,6 +256,74 @@ export function LPFundingPanel({
                     </span>
                 )}
             </button>
+
+            {/* Success Modal */}
+            {successModal.show && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        onClick={handleCloseModal}
+                    />
+
+                    {/* Modal Card */}
+                    <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
+                        {/* Close Button */}
+                        <button
+                            onClick={handleCloseModal}
+                            className="absolute top-4 right-4 p-1 rounded-lg hover:bg-white/10 transition-colors"
+                        >
+                            <X className="w-5 h-5 text-zinc-400" />
+                        </button>
+
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4">
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${successModal.isActivation
+                                    ? 'bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border-2 border-emerald-500/50'
+                                    : 'bg-emerald-500/20 border-2 border-emerald-500/30'
+                                }`}>
+                                <CheckCircle2 className={`w-8 h-8 ${successModal.isActivation ? 'text-emerald-400' : 'text-emerald-500'}`} />
+                            </div>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-xl font-bold text-white text-center mb-2">
+                            {successModal.isActivation ? '🎉 Market Activated!' : '✅ Contribution Successful!'}
+                        </h3>
+
+                        {/* Message */}
+                        <p className="text-zinc-400 text-center text-sm mb-6">
+                            {successModal.message}
+                        </p>
+
+                        {/* Contribution Amount Badge */}
+                        <div className="flex justify-center mb-6">
+                            <div className="px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                                <span className="text-blue-400 font-mono font-bold">
+                                    +${successModal.contributedAmount} USDC
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={handleCloseModal}
+                                className="flex-1 py-3 px-4 rounded-xl font-semibold text-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all"
+                            >
+                                Close
+                            </button>
+                            <button
+                                onClick={handleViewPortfolio}
+                                className="flex-1 py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white transition-all flex items-center justify-center gap-2"
+                            >
+                                <Wallet className="w-4 h-4" />
+                                See Portfolio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
