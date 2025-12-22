@@ -215,96 +215,63 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
             </AnimatePresence>
 
             {/* Success Modal */}
-            onClick={handleCloseModal}
-                    />
-
-            {/* Modal Card */}
-            <div className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in duration-200">
-                {/* Close Button */}
-                <button
-                    onClick={handleCloseModal}
-                    className="absolute top-4 right-4 p-1 rounded-lg hover:bg-white/10 transition-colors"
-                >
-                    <X className="w-5 h-5 text-zinc-400" />
-                </button>
-
-                {/* Icon */}
-                <div className="flex justify-center mb-4">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${successModal.type === 'buy'
-                        ? 'bg-emerald-500/20 border-emerald-500/50'
-                        : 'bg-rose-500/20 border-rose-500/50'
-                        }`}>
-                        {successModal.type === 'buy' ? (
-                            <TrendingUp className="w-8 h-8 text-emerald-400" />
-                        ) : (
-                            <TrendingDown className="w-8 h-8 text-rose-400" />
-                        )}
+            <AnimatePresence>
+                {successModal.show && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+                            onClick={handleCloseModal}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center"
+                        >
+                            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${successModal.type === 'buy' ? 'bg-emerald-500/10' : 'bg-rose-500/10'
+                                }`}>
+                                {successModal.type === 'buy' ? (
+                                    <TrendingUp className="w-10 h-10 text-emerald-400" />
+                                ) : (
+                                    <TrendingDown className="w-10 h-10 text-rose-400" />
+                                )}
+                            </div>
+                            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">
+                                {successModal.type === 'buy' ? 'ORDER FILLED' : 'SALE EXECUTED'}
+                            </h3>
+                            <p className="text-zinc-400 text-sm mb-8 leading-relaxed font-medium">
+                                {successModal.type === 'buy'
+                                    ? `You successfully acquired ${successModal.shares.toFixed(4)} ${assetSymbol} shares.`
+                                    : `You successfully sold ${successModal.amount} shares to the market.`
+                                }
+                            </p>
+                            <div className="bg-black/40 rounded-2xl p-4 mb-8 border border-white/5">
+                                <span className={`text-2xl font-mono font-black ${successModal.type === 'buy' ? 'text-emerald-400' : 'text-rose-400'
+                                    }`}>
+                                    {successModal.type === 'buy' ? '+' : '-'}{successModal.type === 'buy' ? successModal.shares.toFixed(2) : successModal.amount} SHARES
+                                </span>
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="flex-1 py-4 bg-white/10 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all active:scale-[0.95]"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    onClick={handleViewPortfolio}
+                                    className="flex-1 py-4 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.95]"
+                                >
+                                    Portfolio
+                                </button>
+                            </div>
+                        </motion.div>
                     </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="text-xl font-bold text-white text-center mb-2">
-                    {successModal.type === 'buy' ? '✅ Buy Order Executed!' : '✅ Sell Order Executed!'}
-                </h3>
-
-                {/* Message */}
-                <p className="text-zinc-400 text-center text-sm mb-6">
-                    {successModal.type === 'buy'
-                        ? `You bought ${successModal.shares.toFixed(4)} shares of ${assetSymbol}!`
-                        : `You sold ${successModal.amount} shares of ${assetSymbol}!`
-                    }
-                </p>
-
-                {/* Trade Details */}
-                <div className="bg-black/30 border border-white/5 rounded-xl p-4 mb-6 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-zinc-500">Order Type</span>
-                        <span className={`font-bold ${successModal.type === 'buy' ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {successModal.type.toUpperCase()}
-                        </span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-zinc-500">{successModal.type === 'buy' ? 'Amount Spent' : 'Shares Sold'}</span>
-                        <span className="text-white font-mono">
-                            {successModal.type === 'buy' ? `$${successModal.amount}` : successModal.amount}
-                        </span>
-                    </div>
-                    {successModal.type === 'buy' && (
-                        <div className="flex justify-between">
-                            <span className="text-zinc-500">Shares Received</span>
-                            <span className="text-emerald-400 font-mono font-bold">{successModal.shares.toFixed(4)}</span>
-                        </div>
-                    )}
-                    <div className="flex justify-between border-t border-white/5 pt-2 mt-2">
-                        <span className="text-zinc-500">Trade ID</span>
-                        <span className="text-zinc-400 font-mono text-xs">{successModal.tradeId.slice(0, 8)}...</span>
-                    </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex gap-3">
-                    <button
-                        onClick={handleCloseModal}
-                        className="flex-1 py-3 px-4 rounded-xl font-semibold text-sm border border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all"
-                    >
-                        Close
-                    </button>
-                    <button
-                        onClick={handleViewPortfolio}
-                        className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm text-white transition-all flex items-center justify-center gap-2 ${successModal.type === 'buy'
-                            ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400'
-                            : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
-                            }`}
-                    >
-                        <Wallet className="w-4 h-4" />
-                        See Portfolio
-                    </button>
-                </div>
-            </div>
+                )}
+            </AnimatePresence>
         </div>
-    )
-}
-        </>
     );
 }
-
