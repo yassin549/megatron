@@ -56,59 +56,59 @@ export default function LeaderboardPage() {
 
             <main className="max-w-5xl mx-auto px-4 py-12">
                 <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
-                    <h1 className="text-4xl font-bold text-white mb-3 tracking-tight flex items-center justify-center gap-3">
-                        <Trophy className="w-8 h-8 text-yellow-500" />
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight flex items-center justify-center gap-2 md:gap-3">
+                        <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500" />
                         Hall of Fame
                     </h1>
-                    <p className="text-gray-400 text-lg">
+                    <p className="text-gray-400 text-sm md:text-lg px-4">
                         Top traders by percentage return on investment.
                     </p>
                 </div>
 
                 {/* Top 3 Cards */}
                 {data.length >= 3 && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                        {/* Silver (2nd) */}
-                        <div className="order-2 md:order-1 bg-gradient-to-b from-gray-800 to-black border border-gray-600 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 shadow-xl shadow-gray-500/10">
-                            <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-gray-400">
-                                <span className="text-2xl font-bold text-gray-300">2</span>
-                            </div>
-                            <h3 className="font-bold text-white mb-1">{maskEmail(data[1].email)}</h3>
-                            <p className="text-green-400 font-mono text-xl font-bold">
-                                +{data[1].returnPercent.toFixed(2)}%
-                            </p>
-                            <p className="text-xs text-gray-500 mt-2 font-mono">
-                                Vol: ${data[1].totalDeposited.toLocaleString()}
-                            </p>
-                        </div>
-
-                        {/* Gold (1st) */}
-                        <div className="order-1 md:order-2 bg-gradient-to-b from-yellow-900/40 to-black border border-yellow-500 rounded-xl p-8 text-center transform -translate-y-4 hover:-translate-y-6 transition-transform duration-300 shadow-2xl shadow-yellow-500/20 relative overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
+                        {/* Gold (1st) - First on mobile */}
+                        <div className="order-1 md:order-2 bg-gradient-to-b from-yellow-900/40 to-black border border-yellow-500 rounded-xl p-6 md:p-8 text-center md:-translate-y-4 hover:scale-105 transition-transform duration-300 shadow-2xl shadow-yellow-500/20 relative overflow-hidden">
                             <div className="absolute inset-0 bg-yellow-500/10 blur-xl"></div>
                             <div className="relative z-10">
-                                <div className="w-20 h-20 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-yellow-500">
-                                    <Trophy className="w-10 h-10 text-yellow-500" />
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-yellow-500">
+                                    <Trophy className="w-8 h-8 md:w-10 md:h-10 text-yellow-500" />
                                 </div>
-                                <h3 className="font-bold text-2xl text-white mb-1">{maskEmail(data[0].email)}</h3>
-                                <p className="text-yellow-400 font-mono text-3xl font-bold">
+                                <h3 className="font-bold text-xl md:text-2xl text-white mb-1">{maskEmail(data[0].email)}</h3>
+                                <p className="text-yellow-400 font-mono text-2xl md:text-3xl font-bold">
                                     +{data[0].returnPercent.toFixed(2)}%
                                 </p>
-                                <p className="text-xs text-yellow-500/70 mt-3 font-mono">
+                                <p className="text-[10px] md:text-xs text-yellow-500/70 mt-2 md:mt-3 font-mono">
                                     Vol: ${data[0].totalDeposited.toLocaleString()}
                                 </p>
                             </div>
                         </div>
 
+                        {/* Silver (2nd) */}
+                        <div className="order-2 md:order-1 bg-gradient-to-b from-gray-800 to-black border border-gray-600 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-300 shadow-xl shadow-gray-500/10">
+                            <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-gray-400">
+                                <span className="text-xl md:text-2xl font-bold text-gray-300">2</span>
+                            </div>
+                            <h3 className="font-bold text-white mb-1">{maskEmail(data[1].email)}</h3>
+                            <p className="text-green-400 font-mono text-lg md:text-xl font-bold">
+                                +{data[1].returnPercent.toFixed(2)}%
+                            </p>
+                            <p className="text-[10px] md:text-xs text-gray-500 mt-1 md:mt-2 font-mono">
+                                Vol: ${data[1].totalDeposited.toLocaleString()}
+                            </p>
+                        </div>
+
                         {/* Bronze (3rd) */}
-                        <div className="order-3 bg-gradient-to-b from-orange-900/20 to-black border border-orange-700 rounded-xl p-6 text-center transform hover:-translate-y-2 transition-transform duration-300 shadow-xl shadow-orange-500/10">
-                            <div className="w-16 h-16 bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-orange-600">
-                                <span className="text-2xl font-bold text-orange-400">3</span>
+                        <div className="order-3 bg-gradient-to-b from-orange-900/20 to-black border border-orange-700 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-300 shadow-xl shadow-orange-500/10">
+                            <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-orange-600">
+                                <span className="text-xl md:text-2xl font-bold text-orange-400">3</span>
                             </div>
                             <h3 className="font-bold text-white mb-1">{maskEmail(data[2].email)}</h3>
-                            <p className="text-orange-400 font-mono text-xl font-bold">
+                            <p className="text-orange-400 font-mono text-lg md:text-xl font-bold">
                                 +{data[2].returnPercent.toFixed(2)}%
                             </p>
-                            <p className="text-xs text-gray-500 mt-2 font-mono">
+                            <p className="text-[10px] md:text-xs text-gray-500 mt-1 md:mt-2 font-mono">
                                 Vol: ${data[2].totalDeposited.toLocaleString()}
                             </p>
                         </div>
@@ -119,11 +119,11 @@ export default function LeaderboardPage() {
                 <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-md">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b border-white/10 bg-white/5 text-xs text-gray-400 uppercase tracking-wider font-mono">
-                                <th className="px-6 py-4">Rank</th>
-                                <th className="px-6 py-4">Trader</th>
-                                <th className="px-6 py-4 text-right">Portfolio Value</th>
-                                <th className="px-6 py-4 text-right">Return %</th>
+                            <tr className="border-b border-white/10 bg-white/5 text-[10px] md:text-xs text-gray-400 uppercase tracking-wider font-mono">
+                                <th className="px-3 md:px-6 py-3 md:py-4">Rank</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4">Trader</th>
+                                <th className="hidden sm:table-cell px-6 py-4 text-right">Portfolio Value</th>
+                                <th className="px-3 md:px-6 py-3 md:py-4 text-right">Return</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -132,17 +132,18 @@ export default function LeaderboardPage() {
                                     key={entry.id}
                                     className={`group hover:bg-white/5 transition-colors ${index < 3 ? 'bg-white/[0.02]' : ''}`}
                                 >
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                                    <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-mono text-gray-500">
                                         #{index + 1}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white group-hover:text-blue-400 transition-colors">
-                                        {maskEmail(entry.email)}
-                                        {index < 3 && <Medal className={`inline-block w-3 h-3 ml-2 ${index === 0 ? 'text-yellow-500' : index === 1 ? 'text-gray-400' : 'text-orange-500'}`} />}
+                                    <td className="px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-medium text-white group-hover:text-blue-400 transition-colors">
+                                        <div className="max-w-[120px] md:max-w-none truncate">
+                                            {maskEmail(entry.email)}
+                                        </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-right font-mono">
+                                    <td className="hidden sm:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-right font-mono">
                                         ${entry.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                     </td>
-                                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold text-right font-mono ${entry.returnPercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                    <td className={`px-3 md:px-6 py-3 md:py-4 whitespace-nowrap text-xs md:text-sm font-bold text-right font-mono ${entry.returnPercent >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                                         {entry.returnPercent >= 0 ? '+' : ''}{entry.returnPercent.toFixed(2)}%
                                     </td>
                                 </tr>

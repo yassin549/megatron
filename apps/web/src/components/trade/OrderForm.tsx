@@ -101,7 +101,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
 
     return (
         <>
-            <div className="bg-zinc-900 border border-white/5 rounded-2xl p-6 backdrop-blur-xl sticky top-36 z-30 shadow-2xl">
+            <div className="bg-zinc-900 border border-white/5 rounded-2xl p-5 md:p-6 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl">
                 {/* Tabs */}
                 <div className="flex bg-black/40 rounded-xl p-1 mb-6 relative border border-white/5">
                     <div
@@ -133,9 +133,9 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-4 text-2xl font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                            className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-3 md:py-4 text-xl md:text-2xl font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
                         />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-zinc-500 font-bold">
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] md:text-sm text-zinc-500 font-bold">
                             {isBuy ? 'USDC' : 'SHARES'}
                         </span>
                     </div>
@@ -154,17 +154,17 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                 </div>
 
                 {/* Summary */}
-                <div className="bg-black/20 border border-white/5 rounded-xl p-5 mb-6 space-y-3 font-mono text-xs">
+                <div className="bg-black/20 border border-white/5 rounded-xl p-4 md:p-5 mb-6 space-y-2 md:space-y-3 font-mono text-[10px] md:text-xs">
                     <div className="flex justify-between items-center">
-                        <span className="text-zinc-500">Market Price</span>
+                        <span className="text-zinc-500 uppercase tracking-tighter">Market Price</span>
                         <span className="text-white font-medium">${assetPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-zinc-500">Est. Shares</span>
+                        <span className="text-zinc-500 uppercase tracking-tighter">Est. Shares</span>
                         <span className="text-white font-medium">{estimatedShares.toFixed(4)}</span>
                     </div>
-                    <div className="flex justify-between items-center border-t border-white/5 pt-3 mt-1">
-                        <span className="text-zinc-500">Fee (0.5%)</span>
+                    <div className="flex justify-between items-center border-t border-white/5 pt-2 md:pt-3 mt-1">
+                        <span className="text-zinc-500 uppercase tracking-tighter">Fee (0.5%)</span>
                         <span className="text-zinc-400">${fee.toFixed(2)}</span>
                     </div>
                 </div>
@@ -205,8 +205,8 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                         {/* Icon */}
                         <div className="flex justify-center mb-4">
                             <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${successModal.type === 'buy'
-                                    ? 'bg-emerald-500/20 border-emerald-500/50'
-                                    : 'bg-rose-500/20 border-rose-500/50'
+                                ? 'bg-emerald-500/20 border-emerald-500/50'
+                                : 'bg-rose-500/20 border-rose-500/50'
                                 }`}>
                                 {successModal.type === 'buy' ? (
                                     <TrendingUp className="w-8 h-8 text-emerald-400" />
@@ -266,8 +266,8 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                             <button
                                 onClick={handleViewPortfolio}
                                 className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm text-white transition-all flex items-center justify-center gap-2 ${successModal.type === 'buy'
-                                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400'
-                                        : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
+                                    ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400'
+                                    : 'bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400'
                                     }`}
                             >
                                 <Wallet className="w-4 h-4" />

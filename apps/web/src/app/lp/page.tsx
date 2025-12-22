@@ -93,62 +93,62 @@ export default function LPDashboardPage() {
                     </Link>
                 </div>
 
-                {/* LP Stats */}
-                <div className="grid md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground">Total Contributed</p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
+                {/* LP Stats - Compact Mobile */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-6 md:mb-8">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-6">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Contributed</p>
+                        <p className="text-lg md:text-3xl font-bold text-foreground mt-0.5 md:mt-1 font-mono">
                             ${summary.totalContributed.toLocaleString()}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground">Current Value</p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-6">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Value</p>
+                        <p className="text-lg md:text-3xl font-bold text-foreground mt-0.5 md:mt-1 font-mono">
                             ${summary.totalValue.toLocaleString()}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground">Total Earnings</p>
-                        <p className="text-3xl font-bold text-green-500 mt-1">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-6">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Earnings</p>
+                        <p className="text-lg md:text-3xl font-bold text-green-500 mt-0.5 md:mt-1 font-mono">
                             +${summary.totalEarnings.toLocaleString()}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-6">
-                        <p className="text-sm text-muted-foreground">Active Pools</p>
-                        <p className="text-3xl font-bold text-foreground mt-1">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-6">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Pools</p>
+                        <p className="text-lg md:text-3xl font-bold text-foreground mt-0.5 md:mt-1 font-mono">
                             {summary.poolCount}
                         </p>
                     </div>
                 </div>
 
-                {/* How LP Works */}
-                <div className="bg-card border border-border rounded-xl p-6 mb-8">
-                    <h2 className="font-semibold text-foreground mb-4">How LP Works</h2>
-                    <div className="grid md:grid-cols-3 gap-6">
+                {/* How LP Works - Compact Mobile */}
+                <div className="bg-card border border-border rounded-xl p-4 md:p-6 mb-6 md:mb-8">
+                    <h2 className="font-semibold text-foreground mb-3 md:mb-4 text-sm md:text-base">How LP Works</h2>
+                    <div className="grid grid-cols-3 md:grid-cols-3 gap-2 md:gap-6">
                         <div>
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
-                                <span className="text-primary font-bold">1</span>
+                            <div className="w-7 h-7 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-2 md:mb-3">
+                                <span className="text-primary font-bold text-xs md:text-base">1</span>
                             </div>
-                            <h3 className="font-medium text-foreground mb-1">Provide Liquidity</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="font-medium text-foreground mb-0.5 md:mb-1 text-xs md:text-base">Provide</h3>
+                            <p className="text-[10px] md:text-sm text-muted-foreground hidden md:block">
                                 Deposit USDC to fund new or existing asset pools during the funding phase.
                             </p>
                         </div>
                         <div>
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
-                                <span className="text-primary font-bold">2</span>
+                            <div className="w-7 h-7 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-2 md:mb-3">
+                                <span className="text-primary font-bold text-xs md:text-base">2</span>
                             </div>
-                            <h3 className="font-medium text-foreground mb-1">Earn Fees</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="font-medium text-foreground mb-0.5 md:mb-1 text-xs md:text-base">Earn</h3>
+                            <p className="text-[10px] md:text-sm text-muted-foreground hidden md:block">
                                 Receive 90% of trading fees proportional to your pool share.
                             </p>
                         </div>
                         <div>
-                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
-                                <span className="text-primary font-bold">3</span>
+                            <div className="w-7 h-7 md:w-10 md:h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-2 md:mb-3">
+                                <span className="text-primary font-bold text-xs md:text-base">3</span>
                             </div>
-                            <h3 className="font-medium text-foreground mb-1">Sell Shares</h3>
-                            <p className="text-sm text-muted-foreground">
+                            <h3 className="font-medium text-foreground mb-0.5 md:mb-1 text-xs md:text-base">Sell</h3>
+                            <p className="text-[10px] md:text-sm text-muted-foreground hidden md:block">
                                 After 30-day vesting, sell up to 10% daily. FIFO queue for large exits.
                             </p>
                         </div>

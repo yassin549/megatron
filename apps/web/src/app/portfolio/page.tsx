@@ -176,67 +176,66 @@ export default function PortfolioPage() {
             <SubNavbar />
 
             <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold tracking-tight">Portfolio Overview</h1>
+                <div className="flex items-center justify-between mb-6 md:mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Portfolio</h1>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
-                    <div className="glass-panel p-6 rounded-xl">
-                        <div className="flex items-center gap-3 mb-3 text-muted-foreground">
-                            <div className="p-2 bg-blue-500/10 rounded-lg">
-                                <PieChart className="w-5 h-5 text-blue-500" />
+                {/* Stats Grid - Compact Mobile 2x2 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8 md:mb-10">
+                    <div className="glass-panel p-3 md:p-6 rounded-xl">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3 text-muted-foreground">
+                            <div className="p-1.5 md:p-2 bg-blue-500/10 rounded-lg">
+                                <PieChart className="w-4 h-4 md:w-5 md:h-5 text-blue-500" />
                             </div>
-                            <span className="text-sm font-medium">Total Equity</span>
+                            <span className="text-[10px] md:text-sm font-medium uppercase tracking-wider">Equity</span>
                         </div>
-                        <div className="text-3xl font-bold font-mono tracking-tight text-foreground">
+                        <div className="text-lg md:text-3xl font-bold font-mono tracking-tight text-foreground">
                             ${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
 
-                    <div className="glass-panel p-6 rounded-xl">
-                        <div className="flex items-center gap-3 mb-3 text-muted-foreground">
-                            <div className="p-2 bg-purple-500/10 rounded-lg">
-                                <Droplets className="w-5 h-5 text-purple-500" />
+                    <div className="glass-panel p-3 md:p-6 rounded-xl">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3 text-muted-foreground">
+                            <div className="p-1.5 md:p-2 bg-cyan-500/10 rounded-lg">
+                                <Droplets className="w-4 h-4 md:w-5 md:h-5 text-cyan-500" />
                             </div>
-                            <span className="text-sm font-medium">LP Value</span>
+                            <span className="text-[10px] md:text-sm font-medium uppercase tracking-wider">LP Value</span>
                         </div>
-                        <div className="text-3xl font-bold font-mono tracking-tight text-purple-400">
+                        <div className="text-lg md:text-3xl font-bold font-mono tracking-tight text-cyan-400">
                             ${lpValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
 
-                    <div className="glass-panel p-6 rounded-xl">
-                        <div className="flex items-center gap-3 mb-3 text-muted-foreground">
-                            <div className="p-2 bg-emerald-500/10 rounded-lg">
-                                <TrendingUp className="w-5 h-5 text-emerald-500" />
+                    <div className="glass-panel p-3 md:p-6 rounded-xl">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3 text-muted-foreground">
+                            <div className="p-1.5 md:p-2 bg-emerald-500/10 rounded-lg">
+                                <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-emerald-500" />
                             </div>
-                            <span className="text-sm font-medium">LP Earnings</span>
+                            <span className="text-[10px] md:text-sm font-medium uppercase tracking-wider">Earnings</span>
                         </div>
-                        <div className={`text-3xl font-bold font-mono tracking-tight ${(lpData?.summary?.totalEarnings || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        <div className={`text-lg md:text-3xl font-bold font-mono tracking-tight ${(lpData?.summary?.totalEarnings || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                             {(lpData?.summary?.totalEarnings || 0) >= 0 ? '+' : ''}${(lpData?.summary?.totalEarnings || 0).toFixed(2)}
                         </div>
                     </div>
 
-                    <div className="glass-panel p-6 rounded-xl">
-                        <div className="flex items-center gap-3 mb-3 text-muted-foreground">
-                            <div className="p-2 bg-amber-500/10 rounded-lg">
-                                <DollarSign className="w-5 h-5 text-amber-500" />
+                    <div className="glass-panel p-3 md:p-6 rounded-xl">
+                        <div className="flex items-center gap-2 md:gap-3 mb-1.5 md:mb-3 text-muted-foreground">
+                            <div className="p-1.5 md:p-2 bg-amber-500/10 rounded-lg">
+                                <DollarSign className="w-4 h-4 md:w-5 md:h-5 text-amber-500" />
                             </div>
-                            <span className="text-sm font-medium">Cash Balance</span>
+                            <span className="text-[10px] md:text-sm font-medium uppercase tracking-wider">Cash</span>
                         </div>
-                        <div className="text-3xl font-bold font-mono tracking-tight text-foreground">
+                        <div className="text-lg md:text-3xl font-bold font-mono tracking-tight text-foreground">
                             ${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                         </div>
                     </div>
                 </div>
 
-                {/* LP Positions Section */}
-                <div className="mb-10">
-                    <div className="mb-6 flex items-center gap-2">
-                        <Droplets className="w-5 h-5 text-purple-500" />
-                        <h2 className="text-xl font-bold">Liquidity Positions</h2>
-                        <span className="ml-2 px-2 py-0.5 bg-purple-500/10 text-purple-400 text-xs font-medium rounded-full">
+                <div className="mb-8 md:mb-10">
+                    <div className="mb-4 md:mb-6 flex items-center gap-2">
+                        <Droplets className="w-4 h-4 md:w-5 md:h-5 text-cyan-500" />
+                        <h2 className="text-lg md:text-xl font-bold">Liquidity Positions</h2>
+                        <span className="ml-2 px-1.5 md:px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] md:text-xs font-medium rounded-full">
                             {lpData?.positions?.length || 0} pools
                         </span>
                     </div>

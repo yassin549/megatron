@@ -202,10 +202,10 @@ export function AssetCard({
                 className="block h-full glass-card rounded-xl p-3.5 md:p-5 flex flex-col justify-between hover:scale-[1.02] transform"
             >
                 {/* Header Row */}
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-3">
                     {/* Left: Image & Title */}
-                    <div className="flex items-center gap-3 overflow-hidden pr-8">
-                        <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-white/5 shadow-inner">
+                    <div className="flex items-center gap-2.5 md:gap-3 overflow-hidden pr-6 md:pr-8">
+                        <div className="relative w-8 h-8 md:w-10 md:h-10 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800 border border-white/5 shadow-inner">
                             {!error && imageUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -216,31 +216,31 @@ export function AssetCard({
                                 />
                             ) : (
                                 <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-blue-400 transition-colors">
-                                    <Icon className="w-5 h-5" />
+                                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
                                 </div>
                             )}
                         </div>
-                        <h3 className="text-sm font-semibold text-zinc-100 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+                        <h3 className="text-[13px] md:text-sm font-semibold text-zinc-100 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
                             {name}
                         </h3>
                     </div>
                 </div>
 
                 {/* Data Row */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-2 gap-2 mt-1.5 md:mt-2">
                     {/* Price Box */}
-                    <div className="bg-black/20 rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
-                        <span className="block text-[9px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">Price</span>
-                        <div className="text-xs md:text-sm font-bold text-zinc-100 tabular-nums">
+                    <div className="bg-black/20 rounded-lg md:rounded-xl px-2 py-1 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
+                        <span className="block text-[8px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">Price</span>
+                        <div className="text-[11px] md:text-sm font-bold text-zinc-100 tabular-nums">
                             ${displayPrice.toFixed(2)}
-                            {isFunding && <span className="text-[10px] ml-1 text-yellow-500 font-normal">{(fundingProgress || 0).toFixed(0)}% Funded</span>}
+                            {isFunding && <span className="text-[9px] ml-1 text-yellow-500 font-normal">{(fundingProgress || 0).toFixed(0)}%</span>}
                         </div>
                     </div>
                     {/* Change Box */}
-                    <div className="bg-black/20 rounded-xl px-2.5 py-1.5 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
-                        <span className="block text-[9px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">24h Change</span>
-                        <div className={`text-xs md:text-sm font-bold tabular-nums flex items-center gap-1 ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    <div className="bg-black/20 rounded-lg md:rounded-xl px-2 py-1 md:px-3 md:py-2 border border-white/5 group-hover:border-white/10 transition-colors">
+                        <span className="block text-[8px] md:text-[10px] uppercase tracking-wider text-zinc-500 font-medium mb-0.5">24h Change</span>
+                        <div className={`text-[11px] md:text-sm font-bold tabular-nums flex items-center gap-1 ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {isPositive ? <ArrowUpRight className="w-2.5 h-2.5 md:w-3 md:h-3" /> : <ArrowDownRight className="w-2.5 h-2.5 md:w-3 md:h-3" />}
                             {Math.abs(displayChange).toFixed(2)}%
                         </div>
                     </div>
@@ -253,20 +253,20 @@ export function AssetCard({
                         <span className="font-mono">{formatVolume(volume24h)}</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 md:gap-2">
                         {/* Status Tag */}
                         {isFunding ? (
-                            <div className="px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-medium text-yellow-500 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <div className="px-1.5 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[8px] md:text-[10px] font-medium text-yellow-500 opacity-80 group-hover:opacity-100 transition-opacity">
                                 Funding
                             </div>
                         ) : (
-                            <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <div className="px-1.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[8px] md:text-[10px] font-medium text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity">
                                 Live
                             </div>
                         )}
 
-                        {/* AI Tag */}
-                        <div className="px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-medium text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity">
+                        {/* AI Tag - Hidden on very small mobile if space is tight */}
+                        <div className="hidden xs:block px-1.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-[8px] md:text-[10px] font-medium text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity">
                             AI Analysis
                         </div>
                     </div>

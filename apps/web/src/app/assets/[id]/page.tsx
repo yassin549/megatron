@@ -132,41 +132,45 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* Header */}
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                            <div>
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-0">
+                            <div className="min-w-0">
                                 <div className="flex items-center gap-3 mb-2">
                                     {asset.imageUrl && (
-                                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/10">
+                                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={asset.imageUrl} alt={asset.name} className="w-full h-full object-cover" />
                                         </div>
                                     )}
-                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider border whitespace-nowrap ${asset.status === 'active'
-                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                        : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                        }`}>
-                                        {asset.status}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-6 text-sm text-zinc-400 font-medium">
-                                    <span className="flex items-center gap-2">
-                                        <Clock className="w-4 h-4 text-zinc-500" />
-                                        24h Vol: <span className="text-zinc-200">${asset.volume24h.toLocaleString()}</span>
-                                    </span>
-                                    <span className="flex items-center gap-2">
-                                        <Users className="w-4 h-4 text-zinc-500" />
-                                        Holders: <span className="text-zinc-200">{asset.holders || 0}</span>
-                                    </span>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
+                                            <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] uppercase font-bold tracking-wider border whitespace-nowrap ${asset.status === 'active'
+                                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                }`}>
+                                                {asset.status}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-[10px] md:text-sm text-zinc-400 font-medium mt-1">
+                                            <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                                <Clock className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
+                                                Vol: <span className="text-zinc-200">${asset.volume24h.toLocaleString()}</span>
+                                            </span>
+                                            <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                                <Users className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
+                                                Holders: <span className="text-zinc-200">{asset.holders || 0}</span>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="text-left md:text-right">
-                                <div className="text-4xl font-bold text-white tracking-tighter mb-1 flex items-center md:justify-end gap-2">
+                            <div className="flex items-end justify-between md:flex-col md:items-end gap-2 bg-black/20 p-3 md:p-0 rounded-xl md:bg-transparent border border-white/5 md:border-0">
+                                <div className="text-xl md:text-4xl font-bold text-white tracking-tighter tabular-nums">
                                     ${asset.price.toFixed(2)}
-                                    {asset.status === 'funding' && <span className="text-lg text-yellow-500 font-normal">(Funding Phase)</span>}
+                                    {asset.status === 'funding' && <span className="text-xs md:text-lg text-yellow-500 font-normal ml-2">(Funding)</span>}
                                 </div>
-                                <div className={`text-base font-medium flex items-center md:justify-end gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {asset.change24h >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingUp className="w-4 h-4 rotate-180" />}
+                                <div className={`text-sm md:text-base font-medium flex items-center gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {asset.change24h >= 0 ? <TrendingUp className="w-3 h-3 md:w-4 md:h-4" /> : <TrendingUp className="w-3 h-3 md:w-4 md:h-4 rotate-180" />}
                                     {(asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
                                 </div>
                             </div>
@@ -194,24 +198,24 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                             )}
                         </div>
 
-                        {/* Asset Stats Grid (Moved from Right Col) */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
-                                <span className="text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
+                        {/* Asset Stats Grid - Compact Mobile */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                            <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
+                                <span className="text-xs md:text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
                             </div>
-                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
-                                <span className="text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
+                            <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
+                                <span className="text-xs md:text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
                             </div>
-                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">Total Supply</span>
-                                <span className="text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
+                            <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Supply</span>
+                                <span className="text-xs md:text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
                             </div>
-                            <div className="glass-card p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                <span className="text-xs text-zinc-500 block mb-1 uppercase tracking-wider font-semibold">24h Range</span>
-                                <span className="text-sm font-bold text-white font-mono">
-                                    {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(2)} - $${asset.high24h.toFixed(2)}` : '-- / --'}
+                            <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">24h Range</span>
+                                <span className="text-[10px] md:text-sm font-bold text-white font-mono whitespace-nowrap">
+                                    {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(1)}-$${asset.high24h.toFixed(1)}` : '-- / --'}
                                 </span>
                             </div>
                         </div>

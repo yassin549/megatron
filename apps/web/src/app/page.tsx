@@ -94,15 +94,15 @@ export default function HomePage() {
                 {!isAuthenticated && !searchParam && categoryParam === 'all' && (
                     <div className="mb-6 md:mb-12 glass-panel rounded-3xl p-5 md:p-12 text-center relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-700">
                         <div className="relative z-10">
-                            <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
-                                when world variables become investable assets
+                            <h1 className="text-xl md:text-3xl font-bold text-white mb-2 md:mb-3 tracking-tight leading-tight px-2">
+                                When world variables become investable assets
                             </h1>
-                            <p className="text-base md:text-lg text-gray-400 mb-6 max-w-2xl mx-auto">
+                            <p className="text-sm md:text-lg text-gray-400 mb-5 md:mb-6 max-w-2xl mx-auto px-4 md:px-0">
                                 Trade, invest, earn from anything: real world variables tracked by LLM analysis and institutional-grade tools.
                             </p>
                             <Link
                                 href="/signup"
-                                className="inline-flex px-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all shadow-lg hover:scale-105 active:scale-95"
+                                className="inline-flex w-full md:w-auto items-center justify-center px-8 py-3.5 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-all shadow-lg hover:scale-[1.02] active:scale-95 text-sm md:text-base"
                             >
                                 Start Trading
                             </Link>

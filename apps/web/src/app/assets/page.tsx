@@ -99,18 +99,18 @@ export default function AssetsPage() {
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto px-4 py-8">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-foreground">
+                        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                             Assets
                         </h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="text-sm md:text-muted-foreground mt-1">
                             Trade synthetic assets tied to real-world variables
                         </p>
                     </div>
                     <Link
                         href="/assets/request"
-                        className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                        className="w-full md:w-auto px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors text-center text-sm"
                     >
                         Request Asset
                     </Link>
@@ -124,8 +124,8 @@ export default function AssetsPage() {
                                 key={filter}
                                 onClick={() => setActiveFilter(filter)}
                                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeFilter === filter
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'text-muted-foreground hover:text-foreground'
+                                    ? 'bg-primary text-primary-foreground'
+                                    : 'text-muted-foreground hover:text-foreground'
                                     }`}
                             >
                                 {filter}
@@ -145,8 +145,8 @@ export default function AssetsPage() {
                                         )
                                     }
                                     className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${activeType === category.toLowerCase()
-                                            ? 'border-primary bg-primary/10 text-primary'
-                                            : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
+                                        ? 'border-primary bg-primary/10 text-primary'
+                                        : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                                         }`}
                                 >
                                     {category}
@@ -156,29 +156,29 @@ export default function AssetsPage() {
                     </div>
                 </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-card border border-border rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground">Total Assets</p>
-                        <p className="text-2xl font-bold text-foreground">
+                {/* Stats - Compact 2x2 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-4">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Total Assets</p>
+                        <p className="text-lg md:text-2xl font-bold text-foreground font-mono">
                             {stats.totalAssets}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground">24h Volume</p>
-                        <p className="text-2xl font-bold text-foreground">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-4">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">24h Volume</p>
+                        <p className="text-lg md:text-2xl font-bold text-foreground font-mono">
                             {formatNumber(stats.volume24h)}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground">Total Liquidity</p>
-                        <p className="text-2xl font-bold text-foreground">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-4">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Liquidity</p>
+                        <p className="text-lg md:text-2xl font-bold text-foreground font-mono">
                             {formatNumber(stats.totalLiquidity)}
                         </p>
                     </div>
-                    <div className="bg-card border border-border rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground">Active Traders</p>
-                        <p className="text-2xl font-bold text-foreground">
+                    <div className="bg-card border border-border rounded-xl p-3 md:p-4">
+                        <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-wider">Traders</p>
+                        <p className="text-lg md:text-2xl font-bold text-foreground font-mono">
                             {stats.activeTraders.toLocaleString()}
                         </p>
                     </div>
