@@ -104,13 +104,13 @@ export function LPFundingPanel({
         return (
             <div className="bg-zinc-900 border border-white/5 rounded-2xl p-6 text-center backdrop-blur-xl">
                 <Droplets className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-white mb-2">Become a Liquidity Provider</h3>
-                <p className="text-gray-400 mb-4 text-xs">Sign in to fund this market and earn trading fees.</p>
+                <h3 className="text-lg font-bold text-white mb-2">Participate in This Pool</h3>
+                <p className="text-gray-400 mb-4 text-sm">Sign in to buy LP shares and earn trading fees.</p>
                 <Link
                     href="/login"
                     className="inline-block w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-500/20"
                 >
-                    Sign In to Contribute
+                    Sign In to Participate
                 </Link>
             </div>
         );
@@ -125,8 +125,8 @@ export function LPFundingPanel({
                         <Droplets className="w-4 h-4 text-blue-400" />
                     </div>
                     <div>
-                        <h3 className="text-sm font-bold text-white">Fund This Market</h3>
-                        <p className="text-[10px] text-zinc-500">Provide liquidity & earn fees</p>
+                        <h3 className="text-base font-bold text-white">Buy LP Shares</h3>
+                        <p className="text-xs text-zinc-500">Earn 90% of trading fees</p>
                     </div>
                 </div>
                 <button
@@ -140,7 +140,7 @@ export function LPFundingPanel({
             {/* Info Tooltip */}
             {showInfo && (
                 <div className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-[10px] text-blue-200 space-y-1">
-                    <p className="font-semibold">How LP Funding Works:</p>
+                    <p className="font-semibold">How Pool Participation Works:</p>
                     <ul className="list-disc list-inside space-y-0.5 text-blue-300/80">
                         <li>Contribute USDC to provide initial liquidity</li>
                         <li>Earn 90% of all trading fees proportionally</li>
@@ -151,9 +151,9 @@ export function LPFundingPanel({
 
             {/* Funding Progress */}
             <div className="mb-4">
-                <div className="flex justify-between text-[10px] mb-1.5">
-                    <span className="text-zinc-400">Funding Progress</span>
-                    <span className="text-white font-bold">{fundingProgress.toFixed(1)}%</span>
+                <div className="flex justify-between text-xs mb-2">
+                    <span className="text-zinc-400">Pool Funding</span>
+                    <span className="text-white font-bold text-sm">{fundingProgress.toFixed(1)}%</span>
                 </div>
                 <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
                     <div className="h-full relative">
@@ -194,8 +194,8 @@ export function LPFundingPanel({
 
             {/* Input */}
             <div className="mb-4">
-                <div className="flex justify-between text-[10px] text-zinc-500 mb-1.5 font-mono uppercase tracking-wider font-semibold">
-                    <span>Contribution Amount</span>
+                <div className="flex justify-between text-xs text-zinc-500 mb-2 font-mono uppercase tracking-wider font-semibold">
+                    <span>Investment Amount</span>
                     <span>Balance: <span className="text-zinc-300">${userBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></span>
                 </div>
                 <div className="relative">
@@ -252,7 +252,7 @@ export function LPFundingPanel({
                 ) : (
                     <span className="flex items-center justify-center gap-2">
                         <Droplets className="w-4 h-4" />
-                        FUND THIS MARKET
+                        BUY LP SHARES
                     </span>
                 )}
             </button>
@@ -279,8 +279,8 @@ export function LPFundingPanel({
                         {/* Icon */}
                         <div className="flex justify-center mb-4">
                             <div className={`w-16 h-16 rounded-full flex items-center justify-center ${successModal.isActivation
-                                    ? 'bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border-2 border-emerald-500/50'
-                                    : 'bg-emerald-500/20 border-2 border-emerald-500/30'
+                                ? 'bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border-2 border-emerald-500/50'
+                                : 'bg-emerald-500/20 border-2 border-emerald-500/30'
                                 }`}>
                                 <CheckCircle2 className={`w-8 h-8 ${successModal.isActivation ? 'text-emerald-400' : 'text-emerald-500'}`} />
                             </div>

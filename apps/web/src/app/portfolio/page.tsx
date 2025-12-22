@@ -123,7 +123,7 @@ export default function PortfolioPage() {
             setWithdrawModal({ show: false, position: null, amount: '', loading: false, error: '' });
             setSuccessModal({
                 show: true,
-                message: `Successfully withdrew from ${withdrawModal.position.assetName} LP!`,
+                message: `Successfully sold shares from ${withdrawModal.position.assetName} pool!`,
                 amount: withdrawModal.amount
             });
 
@@ -285,7 +285,7 @@ export default function PortfolioPage() {
                                                         onClick={() => setWithdrawModal({ show: true, position: lp, amount: '', loading: false, error: '' })}
                                                         className="inline-flex items-center gap-1 text-xs font-medium text-rose-400 hover:text-rose-300 transition-colors bg-rose-500/10 px-3 py-1.5 rounded-lg hover:bg-rose-500/20"
                                                     >
-                                                        Withdraw
+                                                        Sell Shares
                                                     </button>
                                                 </td>
                                             </tr>
@@ -299,9 +299,9 @@ export default function PortfolioPage() {
                                     <Droplets className="w-7 h-7 text-purple-400/50" />
                                 </div>
                                 <h3 className="text-lg font-medium text-foreground mb-1">No LP positions</h3>
-                                <p className="text-muted-foreground text-sm mb-6">Fund assets in the funding phase to earn trading fees.</p>
+                                <p className="text-muted-foreground text-sm mb-6">Participate in asset pools to earn trading fees.</p>
                                 <Link href="/" className="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-500 transition-colors">
-                                    Explore Funding Opportunities
+                                    Explore Pools
                                 </Link>
                             </div>
                         )}
@@ -393,7 +393,7 @@ export default function PortfolioPage() {
                                 <Droplets className="w-5 h-5 text-rose-400" />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-white">Withdraw LP</h3>
+                                <h3 className="text-lg font-bold text-white">Sell LP Shares</h3>
                                 <p className="text-xs text-zinc-500">{withdrawModal.position.assetName}</p>
                             </div>
                         </div>
@@ -410,7 +410,7 @@ export default function PortfolioPage() {
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-xs text-zinc-500 mb-2 uppercase tracking-wider font-semibold">Withdraw Amount (USDC)</label>
+                            <label className="block text-xs text-zinc-500 mb-2 uppercase tracking-wider font-semibold">Shares to Sell (USDC Value)</label>
                             <input
                                 type="number"
                                 value={withdrawModal.amount}
@@ -448,11 +448,11 @@ export default function PortfolioPage() {
                             disabled={!withdrawModal.amount || parseFloat(withdrawModal.amount) <= 0 || withdrawModal.loading}
                             className="w-full py-3.5 rounded-xl font-bold text-sm uppercase bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                         >
-                            {withdrawModal.loading ? 'PROCESSING...' : 'WITHDRAW'}
+                            {withdrawModal.loading ? 'PROCESSING...' : 'SELL MY SHARES'}
                         </button>
 
                         <p className="text-center text-[10px] text-zinc-500 mt-3">
-                            Note: Only vested amounts can be withdrawn instantly.
+                            Note: Only vested shares can be sold instantly.
                         </p>
                     </div>
                 </div>
@@ -470,7 +470,7 @@ export default function PortfolioPage() {
                             </div>
                         </div>
 
-                        <h3 className="text-xl font-bold text-white text-center mb-2">Withdrawal Successful!</h3>
+                        <h3 className="text-xl font-bold text-white text-center mb-2">Shares Sold Successfully!</h3>
                         <p className="text-zinc-400 text-center text-sm mb-4">{successModal.message}</p>
 
                         <div className="flex justify-center mb-6">

@@ -89,7 +89,7 @@ export default function LPDashboardPage() {
                         href="/assets"
                         className="px-4 py-2 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
                     >
-                        Find Assets to Fund
+                        Participate in Pools
                     </Link>
                 </div>
 
@@ -147,9 +147,9 @@ export default function LPDashboardPage() {
                             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center mb-3">
                                 <span className="text-primary font-bold">3</span>
                             </div>
-                            <h3 className="font-medium text-foreground mb-1">Withdraw</h3>
+                            <h3 className="font-medium text-foreground mb-1">Sell Shares</h3>
                             <p className="text-sm text-muted-foreground">
-                                After 30-day vesting, withdraw up to 10% daily. FIFO queue for large exits.
+                                After 30-day vesting, sell up to 10% daily. FIFO queue for large exits.
                             </p>
                         </div>
                     </div>
@@ -212,8 +212,8 @@ export default function LPDashboardPage() {
 
                                         {/* Actions */}
                                         <div className="mt-4 md:mt-0 md:text-right">
-                                            <button className="w-full md:w-auto px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/5 rounded-lg text-primary transition-colors">
-                                                Withdraw
+                                            <button className="w-full md:w-auto px-4 py-2 text-sm bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg text-rose-400 transition-colors font-medium">
+                                                Sell My Shares
                                             </button>
                                         </div>
                                     </div>
