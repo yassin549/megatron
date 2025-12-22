@@ -3,6 +3,7 @@ import { db } from '@megatron/database';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getRedisClient } from '@megatron/lib-integrations';
+import { MONETARY_CONFIG } from '@megatron/lib-common';
 
 async function isAdmin() {
     const session = await getServerSession(authOptions);
@@ -30,6 +31,7 @@ export async function GET() {
             totalUsers,
             activeAssetsCount,
             tradeStats,
+            allTimeTradeStats,
             treasury
         ] = await Promise.all([
             db.user.count(),
@@ -38,8 +40,14 @@ export async function GET() {
                 where: { timestamp: { gte: oneDayAgo } },
                 select: { price: true, quantity: true, fee: true }
             }),
+            db.trade.aggregate({
+                _sum: { fee: true }
+            }),
             db.platformTreasury.findUnique({ where: { id: 'treasury' } })
         ]);
+
+        const allTimeFees = Number(allTimeTradeStats._sum.fee || 0);
+        const realPlatformRevenue = allTimeFees * MONETARY_CONFIG.PLATFORM_SHARE;
 
         let totalVolume24h = 0;
         let totalFees24h = 0;
@@ -77,8 +85,9 @@ export async function GET() {
                 totalUsers,
                 activeAssets: activeAssetsCount,
                 totalVolume24h,
-                platformFees: treasury ? Number(treasury.balance) : totalFees24h, // Prioritize cumulative treasury balance
-                platformFees24h: totalFees24h
+                platformFees: realPlatformRevenue,
+                platformFees24h: totalFees24h,
+                treasuryBalance: treasury ? Number(treasury.balance) : 0
             },
             health: {
                 database: 'Connected',
