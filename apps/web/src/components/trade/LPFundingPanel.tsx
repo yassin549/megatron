@@ -159,7 +159,7 @@ export function LPFundingPanel({
                     <div className="h-full relative">
                         <div className="absolute inset-0 bg-zinc-700/50" />
                         <div
-                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-500"
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(progressToHardCap, 100)}%` }}
                         />
                         <div
@@ -182,7 +182,7 @@ export function LPFundingPanel({
                 </div>
                 <div className="flex-1 bg-black/20 rounded-lg p-2 border border-white/5">
                     <span className="text-[9px] text-zinc-500 block">Est. APY</span>
-                    <span className="text-xs font-bold text-purple-400">{estimatedAPY}</span>
+                    <span className="text-xs font-bold text-cyan-400">{estimatedAPY}</span>
                 </div>
                 {fundingDeadline && (
                     <div className="flex-1 bg-black/20 rounded-lg p-2 border border-white/5 flex items-center gap-1">
@@ -235,7 +235,7 @@ export function LPFundingPanel({
                     <div className="flex gap-1 text-[8px]">
                         <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">10% D0</span>
                         <span className="px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded">25% D30</span>
-                        <span className="px-1.5 py-0.5 bg-purple-500/20 text-purple-400 rounded">50% D90</span>
+                        <span className="px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">50% D90</span>
                         <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-400 rounded">100% D180</span>
                     </div>
                 </div>
@@ -245,7 +245,7 @@ export function LPFundingPanel({
             <button
                 onClick={handleContribute}
                 disabled={!amount || parseFloat(amount) <= 0 || loading}
-                className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 hover:from-blue-500 hover:via-purple-500 hover:to-blue-500 text-white shadow-blue-900/30"
+                className="w-full py-3.5 rounded-xl font-bold text-sm tracking-widest shadow-lg transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 hover:from-blue-500 hover:via-cyan-400 hover:to-blue-500 text-white shadow-blue-900/30"
             >
                 {loading ? (
                     'PROCESSING...'
@@ -255,6 +255,14 @@ export function LPFundingPanel({
                         BUY LP SHARES
                     </span>
                 )}
+            </button>
+
+            {/* Sell Button */}
+            <button
+                onClick={() => router.push('/portfolio')}
+                className="w-full py-2.5 mt-2 rounded-xl font-semibold text-xs tracking-wider transition-all active:scale-[0.98] uppercase border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300"
+            >
+                SELL MY SHARES
             </button>
 
             {/* Success Modal */}
