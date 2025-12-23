@@ -226,6 +226,8 @@ export function AssetCard({
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={`relative group ${viewMode === 'grid' ? 'h-[160px] md:h-[185px]' : 'w-full'}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
@@ -233,7 +235,7 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl md:rounded-2xl transition-all duration-500 hover:border-white/10 hover:bg-zinc-900 overflow-hidden ${viewMode === 'list'
+                className={`block bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl md:rounded-2xl transition-all duration-500 hover:border-white/20 hover:bg-zinc-900 overflow-hidden ${viewMode === 'list'
                     ? 'flex flex-col sm:flex-row sm:items-center gap-4 p-4 md:p-5'
                     : 'h-full p-3 md:p-4 flex flex-col justify-between'
                     }`}
@@ -257,7 +259,7 @@ export function AssetCard({
                     <motion.div layout className="flex-1 min-w-0">
                         <motion.h3
                             layout
-                            className={`font-bold text-white truncate group-hover:text-blue-400 transition-colors leading-tight ${viewMode === 'list' ? 'text-base md:text-lg' : 'text-sm md:text-base'
+                            className={`font-bold text-white line-clamp-2 group-hover:text-blue-400 transition-colors leading-tight ${viewMode === 'list' ? 'text-base md:text-lg' : 'text-sm md:text-base'
                                 }`}
                         >
                             {name}
