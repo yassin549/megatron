@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, IChartApi, ISeriesApi, LineData } from 'lightweight-charts';
+import { useEffect, useRef } from 'react';
+import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
 
 interface EquityPoint {
     time: number;
@@ -21,8 +21,13 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
     const equitySeriesRef = useRef<ISeriesApi<"Area"> | null>(null);
     const profitSeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
 
+    // Initialize chart when loading is complete and container is available
     useEffect(() => {
-        if (!chartContainerRef.current) return;
+        // Don't initialize if still loading or no container
+        if (loading || !chartContainerRef.current) return;
+
+        // Don't reinitialize if chart already exists
+        if (chartRef.current) return;
 
         const chart = createChart(chartContainerRef.current, {
             layout: {
@@ -34,7 +39,7 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
                 horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
             },
             width: chartContainerRef.current.clientWidth,
-            height: 300,
+            height: 280,
             timeScale: {
                 borderVisible: false,
                 timeVisible: true,
@@ -96,40 +101,39 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
         return () => {
             window.removeEventListener('resize', handleResize);
             chart.remove();
+            chartRef.current = null;
+            equitySeriesRef.current = null;
+            profitSeriesRef.current = null;
         };
-    }, []);
+    }, [loading]); // Depend on loading state
 
+    // Update data when it changes
     useEffect(() => {
-        if (equitySeriesRef.current && profitSeriesRef.current) {
-            // Always set data to ensure chart renders (even if all values are 0)
-            const equityData = data.length > 0
-                ? data.map((p) => ({ time: p.time as any, value: p.value }))
-                : [];
-            const profitData = data.length > 0
-                ? data.map((p) => ({ time: p.time as any, value: p.profit }))
-                : [];
+        if (!equitySeriesRef.current || !profitSeriesRef.current) return;
 
-            equitySeriesRef.current.setData(equityData);
-            profitSeriesRef.current.setData(profitData);
-
-            if (data.length > 0) {
-                chartRef.current?.timeScale().fitContent();
-            }
+        if (data.length > 0) {
+            equitySeriesRef.current.setData(
+                data.map((p) => ({ time: p.time as any, value: p.value }))
+            );
+            profitSeriesRef.current.setData(
+                data.map((p) => ({ time: p.time as any, value: p.profit }))
+            );
+            chartRef.current?.timeScale().fitContent();
         }
     }, [data]);
 
     return (
         <div className="glass-card rounded-xl p-6 relative">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-lg font-semibold text-foreground">Performance Analysis</h2>
+                    <h2 className="text-base font-semibold text-foreground">Performance Analysis</h2>
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-4">
                         <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                            <span className="w-2 h-2 rounded-full bg-blue-500" />
                             Total Equity (Cash + Positions)
                         </span>
                         <span className="flex items-center gap-1.5">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500" />
                             Realized Profit
                         </span>
                     </p>
@@ -148,15 +152,15 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
             </div>
 
             {loading ? (
-                <div className="h-[300px] flex items-center justify-center">
+                <div className="h-[280px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
             ) : (
-                <div ref={chartContainerRef} className="w-full h-[300px]" />
+                <div ref={chartContainerRef} className="w-full h-[280px]" />
             )}
 
             <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-5">
-                <ActivityIcon className="w-32 h-32 text-primary" />
+                <ActivityIcon className="w-24 h-24 text-primary" />
             </div>
         </div>
     );
