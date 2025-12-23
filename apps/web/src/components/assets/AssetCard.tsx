@@ -209,66 +209,93 @@ export function AssetCard({
             <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="relative group"
+                className="relative group w-full"
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
                 onMouseMove={handleMouseMove}
             >
                 <Link
                     href={`/assets/${id}`}
-                    className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-3 hover:border-white/10 hover:bg-zinc-900 transition-all duration-300"
+                    className="flex flex-col sm:flex-row sm:items-center gap-4 bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-2xl p-4 md:p-5 hover:border-white/10 hover:bg-zinc-900 transition-all duration-300 group-hover:shadow-2xl group-hover:shadow-blue-500/5"
                 >
-                    {/* Icon */}
-                    <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-800/80 border border-white/5">
-                        {!imgError && imageUrl ? (
-                            <img src={imageUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
-                        ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-zinc-500"><Icon className="w-6 h-6" /></div>
-                        )}
-                    </div>
+                    {/* Primary Row: Icon + Name + Price */}
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                        {/* Larger Icon */}
+                        <div className="relative w-14 h-14 md:w-16 md:h-16 flex-shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-zinc-800/80 border border-white/5">
+                            {!imgError && imageUrl ? (
+                                <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={() => setImgError(true)} />
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center text-zinc-500"><Icon className="w-8 h-8" /></div>
+                            )}
+                        </div>
 
-                    {/* Name & Type */}
-                    <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-zinc-100 truncate group-hover:text-blue-400 transition-colors">{name}</h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">{type}</span>
-                            <span className={`w-1 h-1 rounded-full ${isFunding ? 'bg-yellow-400' : 'bg-emerald-400'}`} />
+                        {/* Name & Type */}
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-base md:text-lg font-bold text-white truncate group-hover:text-blue-400 transition-colors leading-tight">{name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 font-bold">{type}</span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]'}`} />
+                                <span className="text-[10px] text-zinc-600 font-medium hidden xs:inline">{isFunding ? 'Funding Phase' : 'Live Trading'}</span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Sparkline (Desktop only in list) */}
-                    <div className="hidden md:block">
-                        <Sparkline data={priceHistory || []} positive={isPositive} />
-                    </div>
-
-                    {/* Price & Change */}
-                    <div className="text-right flex flex-col items-end min-w-[80px]">
-                        <span className="text-sm font-bold text-white">${price.toFixed(2)}</span>
-                        <span className={`flex items-center gap-0.5 text-[10px] font-medium ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
-                            {Math.abs(change24h).toFixed(1)}%
-                        </span>
-                    </div>
-
-                    {/* Desktop Stats */}
-                    <div className="hidden sm:flex items-center gap-4 border-l border-white/5 pl-4 ml-2">
-                        <div className="flex flex-col">
-                            <span className="text-[8px] text-zinc-600 uppercase">Vol</span>
-                            <span className="text-[10px] text-zinc-400 font-mono">{formatVolume(volume24h)}</span>
+                    {/* Desktop/Mobile Middle Section: Sparkline */}
+                    <div className="flex items-center justify-between sm:justify-center px-2 sm:px-0">
+                        {/* Price & Change (Mobile context inside middle section) */}
+                        <div className="flex flex-col sm:hidden">
+                            <span className="text-lg font-black text-white">${price.toFixed(2)}</span>
+                            <span className={`flex items-center gap-0.5 text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                {Math.abs(change24h).toFixed(2)}%
+                            </span>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="text-[8px] text-zinc-600 uppercase">Holders</span>
-                            <span className="text-[10px] text-zinc-400 font-mono">{holders}</span>
+
+                        <div className="flex-shrink-0">
+                            <Sparkline data={priceHistory || []} positive={isPositive} />
                         </div>
                     </div>
 
-                    {/* Bookmark */}
-                    <button
-                        onClick={handleToggleBookmark}
-                        className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-blue-400 bg-blue-400/10' : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'}`}
-                    >
-                        <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                    </button>
+                    {/* Stats Section: Price, Vol, Holders (Always visible) */}
+                    <div className="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 sm:border-l border-white/5 pt-3 sm:pt-0 sm:pl-6 min-w-fit">
+                        {/* Price & Change (Desktop) */}
+                        <div className="hidden sm:flex flex-col items-end min-w-[100px]">
+                            <span className="text-xl font-black text-white tracking-tight">${price.toFixed(2)}</span>
+                            <span className={`flex items-center gap-0.5 text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                                {Math.abs(change24h).toFixed(2)}%
+                            </span>
+                        </div>
+
+                        {/* Informational Stats */}
+                        <div className="flex items-center gap-5">
+                            <div className="flex flex-col items-center xs:items-start">
+                                <span className="text-[9px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Volume</span>
+                                <span className="text-xs md:text-sm text-zinc-300 font-mono font-bold">{formatVolume(volume24h)}</span>
+                            </div>
+                            <div className="flex flex-col items-center xs:items-start">
+                                <span className="text-[9px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Holders</span>
+                                <span className="text-xs md:text-sm text-zinc-300 font-mono font-bold">{holders}</span>
+                            </div>
+                            {isFunding && (
+                                <div className="flex flex-col items-center xs:items-start">
+                                    <span className="text-[9px] md:text-[10px] text-yellow-600/80 uppercase font-black tracking-tighter">Goal</span>
+                                    <span className="text-xs md:text-sm text-yellow-500 font-mono font-bold">{fundingProgress?.toFixed(0)}%</span>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Bookmark - Always visible in list */}
+                        <button
+                            onClick={handleToggleBookmark}
+                            className={`p-2.5 rounded-xl transition-all ${isBookmarked
+                                ? 'text-blue-400 bg-blue-400/10'
+                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Bookmark className={`w-5 h-5 ${isBookmarked ? 'fill-current' : ''}`} />
+                        </button>
+                    </div>
                 </Link>
 
                 {/* Flying Tooltip (Mobile restricted handled in Portal) */}
