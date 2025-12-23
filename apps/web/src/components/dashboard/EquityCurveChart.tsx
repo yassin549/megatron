@@ -34,7 +34,7 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
                 horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
             },
             width: chartContainerRef.current.clientWidth,
-            height: 400,
+            height: 300,
             timeScale: {
                 borderVisible: false,
                 timeVisible: true,
@@ -100,14 +100,21 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
     }, []);
 
     useEffect(() => {
-        if (equitySeriesRef.current && profitSeriesRef.current && data.length > 0) {
-            equitySeriesRef.current.setData(
-                data.map((p) => ({ time: p.time as any, value: p.value }))
-            );
-            profitSeriesRef.current.setData(
-                data.map((p) => ({ time: p.time as any, value: p.profit }))
-            );
-            chartRef.current?.timeScale().fitContent();
+        if (equitySeriesRef.current && profitSeriesRef.current) {
+            // Always set data to ensure chart renders (even if all values are 0)
+            const equityData = data.length > 0
+                ? data.map((p) => ({ time: p.time as any, value: p.value }))
+                : [];
+            const profitData = data.length > 0
+                ? data.map((p) => ({ time: p.time as any, value: p.profit }))
+                : [];
+
+            equitySeriesRef.current.setData(equityData);
+            profitSeriesRef.current.setData(profitData);
+
+            if (data.length > 0) {
+                chartRef.current?.timeScale().fitContent();
+            }
         }
     }, [data]);
 
@@ -141,15 +148,11 @@ export function EquityCurveChart({ data, loading }: EquityCurveChartProps) {
             </div>
 
             {loading ? (
-                <div className="h-[400px] flex items-center justify-center">
+                <div className="h-[300px] flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-            ) : data.length === 0 ? (
-                <div className="h-[400px] flex items-center justify-center text-muted-foreground text-sm italic">
-                    Building your performance history...
-                </div>
             ) : (
-                <div ref={chartContainerRef} className="w-full h-[400px]" />
+                <div ref={chartContainerRef} className="w-full h-[300px]" />
             )}
 
             <div className="absolute top-0 right-0 p-6 pointer-events-none opacity-5">
