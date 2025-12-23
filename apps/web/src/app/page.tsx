@@ -181,8 +181,8 @@ export default function HomePage() {
                             </span>
                         </div>
 
-                        {/* View Toggle - Hidden on Desktop */}
-                        <div className="flex md:hidden items-center bg-white/5 rounded-lg p-1 border border-white/10">
+                        {/* View Toggle - Icons Only */}
+                        <div className="flex items-center bg-white/5 rounded-lg p-1 border border-white/10">
                             <button
                                 onClick={() => toggleView('grid')}
                                 className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
@@ -207,7 +207,7 @@ export default function HomePage() {
                         layout
                         className={viewMode === 'grid'
                             ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
-                            : "flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 lg:px-4"
+                            : "flex flex-col gap-3 md:gap-4 lg:px-4"
                         }
                     >
                         {filteredAssets.map((asset, index) => (
@@ -222,8 +222,7 @@ export default function HomePage() {
                                 <AssetCard
                                     {...asset}
                                     isAuthenticated={isAuthenticated}
-                                    // Desktop is ALWAYS grid, mobile follows user preference
-                                    viewMode={typeof window !== 'undefined' && window.innerWidth < 768 ? viewMode : 'grid'}
+                                    viewMode={viewMode}
                                 />
                             </motion.div>
                         ))}

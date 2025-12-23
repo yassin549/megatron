@@ -86,8 +86,7 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
 
     const fillPath = `${linePath} L ${width},${height} L 0,${height} Z`;
 
-    const color = positive ? '#10b981' : '#f43f5e'; // Emerald-500 : Rose-500
-    const glowId = `glow-${Math.random().toString(36).substr(2, 9)}`;
+    const color = positive ? '#34d399' : '#f43f5e'; // Emerald-400 : Rose-500
     const gradientId = `chart-grad-${Math.random().toString(36).substr(2, 9)}`;
 
     return (
@@ -98,25 +97,17 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
             className="overflow-visible"
         >
             <defs>
-                <filter id={glowId}>
-                    <feGaussianBlur stdDeviation="1.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
                 <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+                    <stop offset="0%" stopColor={color} stopOpacity="0.2" />
                     <stop offset="100%" stopColor={color} stopOpacity="0" />
                 </linearGradient>
             </defs>
-            {isList && (
-                <motion.path
-                    layout
-                    d={fillPath}
-                    fill={`url(#${gradientId})`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.4 }}
-                />
-            )}
+            <motion.path
+                layout
+                d={fillPath}
+                fill={`url(#${gradientId})`}
+                transition={{ duration: 0.4 }}
+            />
             <motion.path
                 layout
                 d={linePath}
@@ -125,7 +116,6 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
                 strokeWidth={isList ? 2 : 1.5}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                filter={`url(#${glowId})`}
                 transition={{ duration: 0.4 }}
             />
         </motion.svg>
@@ -236,124 +226,138 @@ export function AssetCard({
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`relative group w-full h-[170px] md:h-[185px]`}
+            className={`relative group ${viewMode === 'grid' ? 'h-[160px] md:h-[185px]' : 'w-full'}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onMouseMove={handleMouseMove}
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-zinc-900/60 backdrop-blur-md border border-white/5 rounded-2xl md:rounded-[2rem] transition-all duration-500 hover:border-white/10 hover:bg-zinc-900/80 overflow-hidden ${viewMode === 'list'
-                        ? 'flex flex-col sm:flex-row sm:items-center gap-4 p-4 md:p-6'
-                        : 'p-4 md:p-5 flex flex-col'
+                className={`block bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl md:rounded-2xl transition-all duration-500 hover:border-white/10 hover:bg-zinc-900 overflow-hidden ${viewMode === 'list'
+                    ? 'flex flex-col sm:flex-row sm:items-center gap-4 p-4 md:p-5'
+                    : 'h-full p-3 md:p-4 flex flex-col justify-between'
                     }`}
             >
-                {/* 1. Header: Icon + Name Group */}
-                <motion.div layout className="flex items-center gap-3 md:gap-4 flex-shrink-0">
+                {/* Header: Icon + Name */}
+                <motion.div layout className="flex items-center gap-3 md:gap-4 flex-1 min-w-0">
+                    {/* Larger Icon */}
                     <motion.div
                         layout
-                        className={`relative flex-shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-zinc-800 border border-white/5 ${viewMode === 'list' ? 'w-16 h-16 md:w-20 md:h-20' : 'w-10 h-10 md:w-11 md:h-11'
+                        className={`relative flex-shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-zinc-800/80 border border-white/5 ${viewMode === 'list' ? 'w-14 h-14 md:w-16 md:h-16' : 'w-10 h-10 md:w-12 md:h-12'
                             }`}
                     >
                         {!imgError && imageUrl ? (
-                            <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onError={() => setImgError(true)} />
+                            <img src={imageUrl} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={() => setImgError(true)} />
                         ) : (
-                            <div className="absolute inset-0 flex items-center justify-center text-zinc-600 bg-zinc-800"><Icon className="w-6 h-6" /></div>
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-500"><Icon className="w-8 h-8" /></div>
                         )}
                     </motion.div>
 
+                    {/* Name & Type */}
                     <motion.div layout className="flex-1 min-w-0">
                         <motion.h3
                             layout
-                            className={`font-bold text-white truncate tracking-tight group-hover:text-blue-400 transition-colors ${viewMode === 'list' ? 'text-lg md:text-xl' : 'text-sm md:text-base'
+                            className={`font-bold text-white truncate group-hover:text-blue-400 transition-colors leading-tight ${viewMode === 'list' ? 'text-base md:text-lg' : 'text-xs md:text-sm'
                                 }`}
                         >
                             {name}
                         </motion.h3>
-                        <motion.div layout className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500">{type}</span>
-                            <span className={`w-1 h-1 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-500/40'}`} />
+                        <motion.div layout className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 font-bold">{type}</span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400 opacity-50'}`} />
                         </motion.div>
                     </motion.div>
                 </motion.div>
 
-                {/* 2. Main Content: Price & Sparkline Area */}
+                {/* Middle: Chart & Price */}
                 <motion.div
                     layout
-                    className={`flex items-center justify-between flex-1 ${viewMode === 'list'
-                            ? 'sm:justify-center px-4 md:px-12 gap-10 md:gap-16'
-                            : 'mt-auto py-2'
+                    className={`flex items-center justify-between ${viewMode === 'list'
+                        ? 'sm:justify-center px-2 sm:px-0 gap-8'
+                        : 'mt-2 md:mt-3'
                         }`}
                 >
+                    {/* Price & Change (Conditional placement) */}
                     <motion.div
                         layout
                         className={`flex ${viewMode === 'list'
-                                ? 'flex-col sm:hidden'
-                                : 'flex-col items-start gap-0.5'
+                            ? 'flex-col sm:hidden'
+                            : 'flex-col md:flex-row md:items-baseline gap-0.5 md:gap-2'
                             }`}
                     >
-                        <span className={`font-black text-white tabular-nums tracking-tight ${viewMode === 'list' ? 'text-xl' : 'text-lg md:text-2xl'}`}>
+                        <span className={`font-black text-white tabular-nums ${viewMode === 'list' ? 'text-lg' : 'text-sm md:text-lg'}`}>
                             ${price.toFixed(2)}
                         </span>
-                        <span className={`flex items-center gap-1 font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'} ${viewMode === 'list' ? 'text-xs md:text-sm' : 'text-xs md:text-sm'}`}>
-                            {isPositive ? <ArrowUpRight className="w-3 h-3 md:w-3.5 md:h-3.5" /> : <ArrowDownRight className="w-3 h-3 md:w-3.5 md:h-3.5" />}
+                        <span className={`flex items-center gap-0.5 font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'} ${viewMode === 'list' ? 'text-xs' : 'text-[10px] md:text-xs'}`}>
+                            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
                         </span>
                     </motion.div>
 
-                    <motion.div layout className="flex-shrink-0 pr-1">
+                    {/* The Chart */}
+                    <motion.div layout className="flex-shrink-0">
                         <AssetMiniChart data={priceHistory || []} positive={isPositive} viewMode={viewMode} />
                     </motion.div>
                 </motion.div>
 
-                {/* 3. Footer / Stats Row */}
+                {/* Footer / Right-side Stats */}
                 <motion.div
                     layout
-                    className={`flex items-center justify-between min-w-fit flex-shrink-0 ${viewMode === 'list'
-                            ? 'sm:justify-end gap-10 md:gap-14 border-t sm:border-t-0 sm:border-l border-white/5 pt-4 sm:pt-0 sm:pl-10'
-                            : 'mt-auto pt-3 border-t border-white/5'
+                    className={`flex items-center justify-between min-w-fit ${viewMode === 'list'
+                        ? 'sm:justify-end gap-6 border-t sm:border-t-0 sm:border-l border-white/5 pt-3 sm:pt-0 sm:pl-6'
+                        : 'mt-auto pt-1.5 md:pt-2'
                         }`}
                 >
-                    {/* Desktop Highlight Stats (List Only) */}
+                    {/* Desktop Price (List only) */}
                     {viewMode === 'list' && (
-                        <div className="hidden sm:flex flex-col items-end min-w-[120px]">
-                            <span className="text-2xl md:text-3xl font-black text-white tracking-tighter tabular-nums">${price.toFixed(2)}</span>
-                            <span className={`flex items-center gap-1 text-sm font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                        <div className="hidden sm:flex flex-col items-end min-w-[100px]">
+                            <span className="text-xl font-black text-white tracking-tight">${price.toFixed(2)}</span>
+                            <span className={`flex items-center gap-0.5 text-xs font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                                 {Math.abs(change24h).toFixed(2)}%
                             </span>
                         </div>
                     )}
 
-                    {/* Secondary Metrics Row */}
-                    <motion.div layout className="flex items-center gap-4 md:gap-6">
-                        <div className={`flex items-center ${viewMode === 'list' ? 'flex-col items-start' : 'gap-1.5'} group/stat`}>
-                            <TrendingUp className={`w-3 h-3 text-zinc-600 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                            <span className={`text-[9px] text-zinc-600 uppercase font-black tracking-tighter ${viewMode === 'list' ? 'mb-0.5' : 'hidden'}`}>Volume</span>
-                            <span className="text-[10px] md:text-xs font-mono font-bold text-zinc-400 tabular-nums">{formatVolume(volume24h)}</span>
+                    {/* Informational Stats */}
+                    <motion.div layout className="flex items-center gap-4 md:gap-5 overflow-hidden">
+                        <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-zinc-500 group-hover:text-zinc-400">
+                            <TrendingUp className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
+                            <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Vol</span>
+                            <span className="text-[10px] md:text-xs font-mono font-bold">{formatVolume(volume24h)}</span>
                         </div>
-                        <div className={`flex items-center ${viewMode === 'list' ? 'flex-col items-start' : 'gap-1.5'} group/stat`}>
-                            <Users className={`w-3 h-3 text-zinc-600 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                            <span className={`text-[9px] text-zinc-600 uppercase font-black tracking-tighter ${viewMode === 'list' ? 'mb-0.5' : 'hidden'}`}>Holders</span>
-                            <span className="text-[10px] md:text-xs font-mono font-bold text-zinc-400 tabular-nums">{holders}</span>
+                        <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-zinc-500 group-hover:text-zinc-400">
+                            <Users className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
+                            <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Holders</span>
+                            <span className="text-[10px] md:text-xs font-mono font-bold">{holders}</span>
                         </div>
                         {isFunding && (
-                            <div className={`flex items-center ${viewMode === 'list' ? 'flex-col items-start' : 'gap-1.5'} text-yellow-500/60`}>
+                            <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-yellow-500/80">
                                 <Activity className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                                <span className={`text-[9px] uppercase font-black tracking-tighter ${viewMode === 'list' ? 'mb-0.5' : 'hidden'}`}>Goal</span>
-                                <span className="text-[10px] md:text-xs font-mono font-bold tabular-nums">{fundingProgress?.toFixed(0)}%</span>
+                                <span className="text-[8px] md:text-[10px] text-yellow-600/80 uppercase font-black tracking-tighter">Goal</span>
+                                <span className="text-[10px] md:text-xs font-mono font-bold">{fundingProgress?.toFixed(0)}%</span>
                             </div>
                         )}
                     </motion.div>
 
-                    {/* Actions */}
-                    <motion.div layout className="flex items-center">
+                    {/* Status & Bookmark */}
+                    <motion.div layout className="flex items-center gap-2 md:gap-4">
+                        {/* Grid Only Status */}
+                        {viewMode === 'grid' && (
+                            <div className="flex items-center gap-1.5">
+                                <span className={`w-1.5 h-1.5 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400'}`} />
+                                <span className={`text-[8px] md:text-[10px] font-medium ${isFunding ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                                    {isFunding ? 'Funding' : 'Live'}
+                                </span>
+                            </div>
+                        )}
+
                         <button
                             type="button"
                             onClick={handleToggleBookmark}
-                            className={`p-2 rounded-xl transition-all duration-300 ${isBookmarked
-                                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-lg shadow-blue-500/10'
-                                    : 'text-zinc-600 hover:text-white hover:bg-white/5 border border-transparent'
+                            className={`p-1.5 md:p-2.5 rounded-xl transition-all ${isBookmarked
+                                ? 'bg-blue-500/10 text-blue-400'
+                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Bookmark className={`w-4 h-4 md:w-5 md:h-5 ${isBookmarked ? 'fill-current' : ''}`} />
@@ -362,19 +366,19 @@ export function AssetCard({
                 </motion.div>
             </Link>
 
-            {/* Flying AI Portal Tooltip */}
+            {/* Flying Tooltip */}
             {isHovering && hasMouseMoved && (typeof window !== 'undefined' && window.innerWidth >= 768) && (typeof document !== 'undefined') && createPortal(
                 <div
-                    className="fixed z-[9999] pointer-events-none p-5 max-w-[320px] bg-zinc-950/98 backdrop-blur-3xl border border-blue-500/20 rounded-2xl shadow-2xl"
+                    className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl"
                     style={tooltipStyle}
                 >
-                    <div className="flex items-start gap-4">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 flex-shrink-0 animate-pulse" />
+                    <div className="flex items-start gap-3">
+                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0 animate-pulse" />
                         <div>
-                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-2 block">AI Synthesis Layer</span>
-                            <p className="text-xs text-zinc-300 font-mono leading-relaxed opacity-90">
+                            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Mega-AI Insight</span>
+                            <p className="text-xs text-zinc-300 font-mono leading-relaxed">
                                 {displayedText}
-                                <span className="inline-block w-1 h-3 bg-blue-400/80 ml-1 animate-pulse align-middle" />
+                                <span className="inline-block w-1.5 h-3 bg-blue-400 ml-0.5 animate-pulse" />
                             </p>
                         </div>
                     </div>
