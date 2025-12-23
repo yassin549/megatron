@@ -39,6 +39,16 @@ export async function GET() {
                             }
                         }
                     }
+                },
+                lpShares: {
+                    include: {
+                        pool: {
+                            select: {
+                                totalLPShares: true,
+                                totalUsdc: true
+                            }
+                        }
+                    }
                 }
             },
         });
@@ -61,16 +71,29 @@ export async function GET() {
             );
         }
 
-        // Calculate Portfolio Value: Hot Balance + (Shares * Current Price)
+        // Calculate Trading Positions Value
         let positionsValue = 0;
         for (const pos of user.positions) {
             const price = pos.asset.lastMarketPrice?.toNumber() || 0;
             positionsValue += pos.shares.toNumber() * price;
         }
 
+        // Calculate LP Positions Value
+        let lpPositionsValue = 0;
+        for (const share of user.lpShares) {
+            const totalShares = share.pool.totalLPShares.toNumber();
+            const totalUsdc = share.pool.totalUsdc.toNumber();
+            const userShares = share.lpShares.toNumber();
+
+            if (totalShares > 0) {
+                lpPositionsValue += (userShares / totalShares) * totalUsdc;
+            } else {
+                lpPositionsValue += share.contributedUsdc.toNumber();
+            }
+        }
+
         const hotBalance = user.walletHotBalance.toNumber();
-        const lpBalance = user.walletColdBalance.toNumber();
-        const totalPortfolioValue = hotBalance + lpBalance + positionsValue;
+        const totalPortfolioValue = hotBalance + positionsValue + lpPositionsValue;
 
         const response = {
             id: user.id,
