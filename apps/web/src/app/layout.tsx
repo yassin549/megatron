@@ -12,6 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
     title: "Megatron | LP-Funded Synthetic Assets",
     description: "Trade synthetic assets backed by liquidity pools",
+    icons: {
+        icon: "/images/megatron-logo.jpg",
+    },
 };
 
 export default function RootLayout({
