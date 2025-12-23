@@ -160,9 +160,9 @@ export function LPFundingPanel({
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 md:p-4 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
             {/* Tabs */}
-            <div className="flex bg-black/40 rounded-xl p-1 mb-4 relative border border-white/5">
+            <div className="flex bg-black/40 rounded-lg p-0.5 mb-3 relative border border-white/5">
                 <motion.div
                     className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-lg"
                     initial={false}
@@ -174,13 +174,13 @@ export function LPFundingPanel({
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     BUY LP SHARES
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     SELL MY SHARES
                 </button>
@@ -194,26 +194,21 @@ export function LPFundingPanel({
                     exit={{ opacity: 0, x: isBuy ? 20 : -20 }}
                     transition={{ duration: 0.2, ease: "easeOut" }}
                 >
-                    {/* Header Info */}
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isBuy ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
-                                {isBuy ? <Droplets className="w-4 h-4 text-blue-400" /> : <ArrowUpRight className="w-4 h-4 text-rose-400" />}
+                    {/* Header Info - Compact */}
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isBuy ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
+                                {isBuy ? <Droplets className="w-3.5 h-3.5 text-blue-400" /> : <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />}
                             </div>
-                            <div>
-                                <h3 className="text-base font-bold text-white leading-none mb-1">
-                                    {isBuy ? 'Supply Liquidity' : 'Withdraw Funds'}
-                                </h3>
-                                <p className="text-[10px] text-zinc-500">
-                                    {isBuy ? 'Earn from every trade' : 'Manage your position'}
-                                </p>
-                            </div>
+                            <h3 className="text-sm font-bold text-white">
+                                {isBuy ? 'Supply Liquidity' : 'Withdraw Funds'}
+                            </h3>
                         </div>
                         <button
                             onClick={() => setShowInfo(!showInfo)}
-                            className="p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+                            className="p-1 rounded hover:bg-white/5 transition-colors"
                         >
-                            <Info className="w-3.5 h-3.5 text-zinc-500" />
+                            <Info className="w-3 h-3 text-zinc-500" />
                         </button>
                     </div>
 
@@ -221,86 +216,74 @@ export function LPFundingPanel({
                         <motion.div
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
-                            className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-200/90 leading-relaxed"
+                            className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-[10px] text-blue-200/90 leading-relaxed"
                         >
                             <p className="font-bold mb-1">LP Protocol Rules:</p>
-                            <ul className="space-y-1 list-disc list-inside">
+                            <ul className="space-y-0.5 list-disc list-inside">
                                 <li>LPs earn 90% of all swap fees proportionally.</li>
-                                <li>Instant withdrawals are capped at 25% of vested principal.</li>
-                                <li>Vesting occurs linearly over 180 days.</li>
+                                <li>Instant withdrawals capped at 25% vested.</li>
+                                <li>180 day linear vesting.</li>
                             </ul>
                         </motion.div>
                     )}
 
                     {/* Stats Section */}
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-2 mb-3">
                         {isBuy ? (
                             <>
-                                <div className="flex justify-between items-end mb-1">
-                                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Progress to Soft Cap</span>
-                                    <span className="text-lg font-mono font-bold text-white">{fundingProgress.toFixed(1)}%</span>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Progress to Soft Cap</span>
+                                    <span className="text-sm font-mono font-bold text-white">{fundingProgress.toFixed(1)}%</span>
                                 </div>
-                                <div className="h-3 bg-black/40 rounded-full overflow-hidden border border-white/5 p-0.5">
-                                    <div className="h-full relative rounded-full overflow-hidden">
-                                        <motion.div
-                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 to-cyan-400 shadow-[0_0_15px_rgba(37,99,235,0.4)]"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min(progressToHardCap, 100)}%` }}
-                                        />
-                                        <div
-                                            className="absolute inset-y-0 w-1 bg-white/40 blur-[1px]"
-                                            style={{ left: `${(softCap / hardCap) * 100}%` }}
-                                        />
-                                    </div>
+                                <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                    <motion.div
+                                        className="h-full bg-gradient-to-r from-blue-600 to-cyan-400"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${Math.min(progressToHardCap, 100)}%` }}
+                                    />
                                 </div>
-                                <div className="flex justify-between items-center text-[10px] font-mono font-medium">
+                                <div className="flex justify-between items-center text-[9px] font-mono">
                                     <span className="text-zinc-500">${currentFunding.toLocaleString()} RAISED</span>
                                     <span className="text-blue-500">SOFT CAP: ${softCap.toLocaleString()}</span>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 mt-6">
-                                    <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-                                        <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider text-center">Remaining</span>
-                                        <span className="text-sm md:text-base font-mono font-bold text-emerald-400 block text-center">${remainingToSoftCap.toLocaleString()}</span>
+                                <div className="grid grid-cols-2 gap-2 mt-2">
+                                    <div className="bg-white/5 border border-white/5 rounded-lg p-2">
+                                        <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider text-center">Remaining</span>
+                                        <span className="text-sm font-mono font-bold text-emerald-400 block text-center">${remainingToSoftCap.toLocaleString()}</span>
                                     </div>
-                                    <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-                                        <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider text-center">Est. APY</span>
-                                        <span className="text-sm md:text-base font-mono font-bold text-cyan-400 block text-center">{estimatedAPY}</span>
+                                    <div className="bg-white/5 border border-white/5 rounded-lg p-2">
+                                        <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider text-center">Est. APY</span>
+                                        <span className="text-sm font-mono font-bold text-cyan-400 block text-center">{estimatedAPY}</span>
                                     </div>
                                 </div>
                             </>
                         ) : (
-                            <div className="grid grid-cols-2 gap-2.5">
-                                <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-                                    <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Your Stake</span>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-lg font-mono font-bold text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
-                                    </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-white/5 border border-white/5 rounded-lg p-2">
+                                    <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider">Your Stake</span>
+                                    <span className="text-sm font-mono font-bold text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
                                 </div>
-                                <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-                                    <span className="text-[9px] text-zinc-500 font-bold block mb-1 uppercase tracking-wider">Earnings</span>
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-lg font-mono font-bold text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
-                                    </div>
+                                <div className="bg-white/5 border border-white/5 rounded-lg p-2">
+                                    <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider">Earnings</span>
+                                    <span className="text-sm font-mono font-bold text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Input Area */}
-                    <div className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <div className="mb-3">
+                        <div className="flex justify-between items-center mb-1">
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
                                 {isBuy ? 'Investment Amount' : 'Withdraw Amount'}
                             </span>
-                            <span className="text-[10px] text-zinc-400 font-medium">
-                                {isBuy ? 'Available: ' : (parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? 'Vested principal: ' : 'Liquid Limit: ')}
-                                <span className={`${(parseFloat(amount || '0') > (userPosition?.instantLimit || 0)) && !isBuy ? 'text-blue-400' : 'text-white'} font-mono`}>
+                            <span className="text-[9px] text-zinc-400 font-medium">
+                                {isBuy ? 'Available: ' : 'Limit: '}
+                                <span className="text-white font-mono">
                                     ${isBuy
                                         ? userBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })
-                                        : (parseFloat(amount || '0') > (userPosition?.instantLimit || 0)
-                                            ? (userPosition?.vestedPrincipal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })
-                                            : (userPosition?.instantLimit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }))
+                                        : (userPosition?.instantLimit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })
                                     }
                                 </span>
                             </span>
@@ -311,29 +294,27 @@ export function LPFundingPanel({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/40 border border-white/5 rounded-2xl px-5 py-4 text-xl md:text-2xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 focus:ring-1 focus:ring-blue-500/20 transition-all font-bold"
+                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
                             />
-                            <span className="absolute right-5 top-1/2 -translate-y-1/2 text-xs text-zinc-600 font-black">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-black">
                                 USDC
                             </span>
                         </div>
-                        <div className="flex gap-2.5 mt-2">
-                            {(isBuy ? ['50', '100', '500', 'MAX'] : ['25%', '50%', 'INSTANT MAX', 'MAX']).map((val) => (
+                        <div className="flex gap-2 mt-1.5">
+                            {(isBuy ? ['50', '100', 'MAX'] : ['25%', '50%', 'MAX']).map((val) => (
                                 <button
                                     key={val}
                                     onClick={() => {
                                         if (isBuy) {
                                             setAmount(val === 'MAX' ? userBalance.toString() : val);
                                         } else {
-                                            const instant = userPosition?.instantLimit || 0;
                                             const vested = userPosition?.vestedPrincipal || 0;
                                             if (val === '25%') setAmount((vested * 0.25).toFixed(2));
                                             else if (val === '50%') setAmount((vested * 0.5).toFixed(2));
-                                            else if (val === 'INSTANT MAX') setAmount(instant.toFixed(2));
                                             else setAmount(vested.toFixed(2));
                                         }
                                     }}
-                                    className="flex-1 py-2 text-[9px] font-mono font-black border border-white/5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white transition-all uppercase whitespace-nowrap"
+                                    className="flex-1 py-1.5 text-[8px] font-mono font-black border border-white/5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white transition-all uppercase"
                                 >
                                     {val}
                                 </button>
@@ -342,34 +323,20 @@ export function LPFundingPanel({
                     </div>
 
                     {/* Summary Card */}
-                    <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-3">
-                        <div className="flex justify-between items-center text-xs font-medium">
-                            <span className="text-zinc-500 uppercase tracking-tighter">
-                                {isBuy ? 'Shares to Receive' : 'Execution Mode'}
-                            </span>
-                            <span className={`${!isBuy && parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? 'text-blue-400' : 'text-white'} font-mono font-bold`}>
-                                {isBuy
-                                    ? `${estimatedShares.toFixed(2)} LP`
-                                    : (parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? 'Progressive' : 'Instant')
-                                }
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center border-t border-white/5 pt-3">
-                            <span className="text-zinc-500 uppercase tracking-tighter text-[10px]">Protocol Vesting</span>
-                            <div className="flex gap-1.5">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-                                <div className={`w-2 h-2 rounded-full ${!isBuy && parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? 'bg-blue-500' : 'bg-blue-500/40'}`} />
-                                <div className="w-2 h-2 rounded-full bg-cyan-500/40" />
-                                <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
-                            </div>
-                        </div>
+                    <div className="flex justify-between items-center bg-black/40 border border-white/5 rounded-xl p-3 mb-4">
+                        <span className="text-[9px] text-zinc-500 uppercase tracking-tighter">
+                            {isBuy ? 'Shares to Receive' : 'Execution'}
+                        </span>
+                        <span className="text-sm font-mono font-bold text-white">
+                            {isBuy ? `${estimatedShares.toFixed(2)} LP` : 'Instant'}
+                        </span>
                     </div>
 
                     {/* Primary Button */}
                     <button
                         onClick={handleAction}
                         disabled={!amount || parseFloat(amount) <= 0 || loading}
-                        className={`w-full py-4 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
+                        className={`w-full py-3 rounded-xl font-black text-[10px] md:text-xs tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-2
                             ${isBuy
                                 ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-blue-900/40 hover:from-blue-600 hover:to-blue-400'
                                 : 'bg-gradient-to-r from-rose-700 to-rose-500 text-white shadow-rose-900/40 hover:from-rose-600 hover:to-rose-400'
@@ -382,8 +349,8 @@ export function LPFundingPanel({
                             </span>
                         ) : (
                             <>
-                                {isBuy ? <Droplets className="w-5 h-5" /> : (parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? <Clock className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />)}
-                                {isBuy ? 'DEPLOY CAPITAL' : (parseFloat(amount || '0') > (userPosition?.instantLimit || 0) ? 'QUEUE PROGRESSIVE SELL' : 'INSTANT WITHDRAW')}
+                                {isBuy ? <Droplets className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+                                {isBuy ? 'DEPLOY CAPITAL' : 'WITHDRAW'}
                             </>
                         )}
                     </button>
