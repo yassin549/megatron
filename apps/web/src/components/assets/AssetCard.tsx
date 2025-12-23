@@ -65,19 +65,15 @@ function Sparkline({ data, positive }: { data: number[]; positive: boolean }) {
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = max - min || 1;
-    const height = 32;
-    const width = 80;
+    // Responsive height/width
+    const height = typeof window !== 'undefined' && window.innerWidth < 768 ? 24 : 32;
+    const width = typeof window !== 'undefined' && window.innerWidth < 768 ? 60 : 80;
 
     const points = data.map((val, i) => {
         const x = (i / (data.length - 1)) * width;
         const y = height - ((val - min) / range) * height;
         return `${x},${y}`;
     }).join(' ');
-
-    const areaPath = `M0,${height} L${points.split(' ').map((p, i) => {
-        const [x, y] = p.split(',');
-        return i === 0 ? `${x},${y}` : ` L${x},${y}`;
-    }).join('')} L${width},${height} Z`;
 
     const lineColor = positive ? '#3b82f6' : '#f43f5e';
     const gradientId = `sparkline-${positive ? 'pos' : 'neg'}-${Math.random().toString(36).substr(2, 9)}`;
@@ -212,7 +208,7 @@ export function AssetCard({
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative group h-[170px] md:h-[185px]"
+            className="relative group h-[160px] md:h-[185px]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             onMouseMove={handleMouseMove}
@@ -235,12 +231,12 @@ export function AssetCard({
 
             <Link
                 href={`/assets/${id}`}
-                className="block h-full bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-4 flex flex-col justify-between hover:border-white/10 hover:bg-zinc-900 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/5"
+                className="block h-full bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-3 md:p-4 flex flex-col justify-between hover:border-white/10 hover:bg-zinc-900 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/5"
             >
                 {/* Header: Icon + Name */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 md:gap-3">
                     {/* Asset Icon - Larger */}
-                    <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-800/80 border border-white/5">
+                    <div className="relative w-10 h-10 md:w-12 md:h-12 flex-shrink-0 rounded-lg md:rounded-xl overflow-hidden bg-zinc-800/80 border border-white/5">
                         {!imgError && imageUrl ? (
                             <img
                                 src={imageUrl}
@@ -250,47 +246,49 @@ export function AssetCard({
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 group-hover:text-blue-400 transition-colors">
-                                <Icon className="w-6 h-6" />
+                                <Icon className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
                         )}
                     </div>
 
                     {/* Name only */}
-                    <div className="flex-1 min-w-0 pr-8">
-                        <h3 className="text-sm font-medium text-zinc-100 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
+                    <div className="flex-1 min-w-0 pr-6 md:pr-8">
+                        <h3 className="text-xs md:text-sm font-medium text-zinc-100 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
                             {name}
                         </h3>
                     </div>
                 </div>
 
                 {/* Middle Row: Price + Change + Sparkline */}
-                <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center justify-between mt-2 md:mt-3">
                     {/* Price & Change */}
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-lg font-semibold text-white tabular-nums">
+                    <div className="flex flex-col md:flex-row md:items-baseline gap-0.5 md:gap-2">
+                        <span className="text-sm md:text-lg font-semibold text-white tabular-nums">
                             ${price.toFixed(2)}
                         </span>
-                        <span className={`flex items-center gap-0.5 text-xs font-medium ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                        <span className={`flex items-center gap-0.5 text-[10px] md:text-xs font-medium ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {isPositive ? <ArrowUpRight className="w-2.5 h-2.5 md:w-3 md:h-3" /> : <ArrowDownRight className="w-2.5 h-2.5 md:w-3 md:h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
                         </span>
                     </div>
 
                     {/* Sparkline */}
-                    <Sparkline data={priceHistory || []} positive={isPositive} />
+                    <div className="flex-shrink-0">
+                        <Sparkline data={priceHistory || []} positive={isPositive} />
+                    </div>
                 </div>
 
                 {/* Footer: Stats Row with Labels + Status */}
-                <div className="flex items-center justify-between mt-auto pt-2">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                            <TrendingUp className="w-3 h-3" />
-                            <span className="text-zinc-600">Vol</span>
+                <div className="flex items-center justify-between mt-auto pt-1.5 md:pt-2">
+                    <div className="flex items-center gap-1.5 md:gap-3 overflow-hidden">
+                        <div className="flex items-center gap-0.5 md:gap-1 text-[8px] md:text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                            <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                            <span className="hidden xs:inline text-zinc-600">Vol</span>
                             <span className="font-mono">{formatVolume(volume24h)}</span>
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                            <Users className="w-3 h-3" />
-                            <span className="text-zinc-600">Holders</span>
+                        <div className="flex items-center gap-0.5 md:gap-1 text-[8px] md:text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                            <Users className="w-2.5 h-2.5 md:w-3 md:h-3" />
+                            <span className="hidden xs:inline text-zinc-600">Holders</span>
                             <span className="font-mono">{holders}</span>
                         </div>
                         {isFunding && fundingProgress !== undefined && (
@@ -303,15 +301,15 @@ export function AssetCard({
                     </div>
 
                     {/* Status indicator - Bottom Right */}
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 md:gap-1.5">
                         <span
-                            className={`w-2 h-2 rounded-full ${isFunding
+                            className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full ${isFunding
                                 ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'
                                 : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
                                 }`}
                             style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
                         />
-                        <span className={`text-[10px] font-medium ${isFunding ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                        <span className={`text-[8px] md:text-[10px] font-medium ${isFunding ? 'text-yellow-400' : 'text-emerald-400'}`}>
                             {isFunding ? 'Funding' : 'Live'}
                         </span>
                     </div>
@@ -319,24 +317,26 @@ export function AssetCard({
             </Link>
 
             {/* Flying Tooltip */}
-            {isHovering && hasMouseMoved && (typeof window !== 'undefined' && window.innerWidth >= 768) && (typeof document !== 'undefined') && createPortal(
-                <div
-                    className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl shadow-blue-500/10 animate-in fade-in zoom-in-95 duration-150"
-                    style={tooltipStyle}
-                >
-                    <div className="flex items-start gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0 animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
-                        <div>
-                            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Mega-AI Insight</span>
-                            <p className="text-xs text-zinc-300 font-mono leading-relaxed">
-                                {displayedText}
-                                <span className="inline-block w-1.5 h-3 bg-blue-400 ml-0.5 animate-pulse align-middle" />
-                            </p>
+            {
+                isHovering && hasMouseMoved && (typeof window !== 'undefined' && window.innerWidth >= 768) && (typeof document !== 'undefined') && createPortal(
+                    <div
+                        className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl shadow-blue-500/10 animate-in fade-in zoom-in-95 duration-150"
+                        style={tooltipStyle}
+                    >
+                        <div className="flex items-start gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0 animate-pulse shadow-[0_0_8px_rgba(96,165,250,0.8)]" />
+                            <div>
+                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Mega-AI Insight</span>
+                                <p className="text-xs text-zinc-300 font-mono leading-relaxed">
+                                    {displayedText}
+                                    <span className="inline-block w-1.5 h-3 bg-blue-400 ml-0.5 animate-pulse align-middle" />
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </div>,
-                document.body
-            )}
-        </motion.div>
+                    </div>,
+                    document.body
+                )
+            }
+        </motion.div >
     );
 }

@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import Link from 'next/link';
+import { Search } from 'lucide-react';
 
 interface Asset {
     id: string;
@@ -31,14 +32,30 @@ interface Asset {
 
 export default function HomePage() {
     const { status: authStatus } = useSession();
+    const router = useRouter();
     const searchParams = useSearchParams();
     const searchParam = searchParams.get('q') || '';
     const categoryParam = searchParams.get('category') || 'all';
 
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(true);
+    const [mobileSearchText, setMobileSearchText] = useState(searchParam);
 
     const isAuthenticated = authStatus === 'authenticated';
+
+    // Sync mobile search text when URL param changes
+    useEffect(() => {
+        setMobileSearchText(searchParam);
+    }, [searchParam]);
+
+    const handleMobileSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (mobileSearchText.trim()) {
+            router.push(`/?q=${encodeURIComponent(mobileSearchText)}&category=${categoryParam}`);
+        } else {
+            router.push(`/?category=${categoryParam}`);
+        }
+    };
 
     useEffect(() => {
         async function fetchAssets() {
@@ -115,23 +132,45 @@ export default function HomePage() {
                     </div>
                 )}
 
-                {/* Markets Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 animate-in fade-in duration-500 delay-100">
-                    <h2 className="text-xl font-bold text-white capitalize flex items-center gap-2">
-                        {searchParam ? (
-                            <>Results for "<span className="text-blue-400">{searchParam}</span>"</>
-                        ) : (
-                            <>{categoryParam === 'all' ? 'All Markets' : `${categoryParam} Markets`}</>
-                        )}
-                    </h2>
-                    <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded w-fit">
-                        {filteredAssets.length} RESULTS
-                    </span>
+                {/* Markets Title & Mobile Search */}
+                <div className="flex flex-col gap-4 mb-6 animate-in fade-in duration-500 delay-100">
+                    {/* Mobile Search Bar - Only visible on small screens */}
+                    <div className="md:hidden">
+                        <form
+                            onSubmit={handleMobileSearch}
+                            className="relative"
+                        >
+                            <input
+                                name="mobileSearch"
+                                type="text"
+                                value={mobileSearchText}
+                                onChange={(e) => setMobileSearchText(e.target.value)}
+                                placeholder="Search markets..."
+                                className="w-full pl-4 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+                            />
+                            <button type="submit" className="absolute right-3 top-3.5 text-gray-500">
+                                <Search className="w-4 h-4" />
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h2 className="text-xl font-bold text-white capitalize flex items-center gap-2">
+                            {searchParam ? (
+                                <>Results for "<span className="text-blue-400">{searchParam}</span>"</>
+                            ) : (
+                                <>{categoryParam === 'all' ? 'All Markets' : `${categoryParam} Markets`}</>
+                            )}
+                        </h2>
+                        <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded w-fit">
+                            {filteredAssets.length} RESULTS
+                        </span>
+                    </div>
                 </div>
 
-                {/* Assets Grid */}
+                {/* Assets Grid - 2 columns on mobile */}
                 {filteredAssets.length > 0 ? (
-                    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                         {filteredAssets.map((asset, index) => (
                             <div
                                 key={asset.id}
