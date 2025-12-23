@@ -174,15 +174,15 @@ export function LPFundingPanel({
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    BUY LP SHARES
+                    Buy LP Shares
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    SELL MY SHARES
+                    Sell My Shares
                 </button>
             </div>
 
@@ -200,7 +200,7 @@ export function LPFundingPanel({
                             <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isBuy ? 'bg-blue-500/10' : 'bg-rose-500/10'}`}>
                                 {isBuy ? <Droplets className="w-3.5 h-3.5 text-blue-400" /> : <ArrowUpRight className="w-3.5 h-3.5 text-rose-400" />}
                             </div>
-                            <h3 className="text-sm font-bold text-white">
+                            <h3 className="text-sm font-medium text-white">
                                 {isBuy ? 'Supply Liquidity' : 'Withdraw Funds'}
                             </h3>
                         </div>
@@ -218,7 +218,7 @@ export function LPFundingPanel({
                             animate={{ height: 'auto', opacity: 1 }}
                             className="mb-3 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-[10px] text-blue-200/90 leading-relaxed"
                         >
-                            <p className="font-bold mb-1">LP Protocol Rules:</p>
+                            <p className="font-medium mb-1">LP Protocol Rules:</p>
                             <ul className="space-y-0.5 list-disc list-inside">
                                 <li>LPs earn 90% of all swap fees proportionally.</li>
                                 <li>Instant withdrawals capped at 25% vested.</li>
@@ -232,8 +232,8 @@ export function LPFundingPanel({
                         {isBuy ? (
                             <>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Progress to Soft Cap</span>
-                                    <span className="text-sm font-mono font-bold text-white">{fundingProgress.toFixed(1)}%</span>
+                                    <span className="text-[9px] font-medium text-zinc-500 uppercase tracking-wide">Progress to Soft Cap</span>
+                                    <span className="text-sm font-mono font-medium text-white">{fundingProgress.toFixed(1)}%</span>
                                 </div>
                                 <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
                                     <motion.div
@@ -242,31 +242,31 @@ export function LPFundingPanel({
                                         animate={{ width: `${Math.min(progressToHardCap, 100)}%` }}
                                     />
                                 </div>
-                                <div className="flex justify-between items-center text-[9px] font-mono">
-                                    <span className="text-zinc-500">${currentFunding.toLocaleString()} RAISED</span>
-                                    <span className="text-blue-500">SOFT CAP: ${softCap.toLocaleString()}</span>
+                                <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500">
+                                    <span>${currentFunding.toLocaleString()} raised</span>
+                                    <span className="text-blue-400">Soft cap: ${softCap.toLocaleString()}</span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-2 mt-2">
                                     <div className="bg-white/5 border border-white/5 rounded-lg p-2">
-                                        <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider text-center">Remaining</span>
-                                        <span className="text-sm font-mono font-bold text-emerald-400 block text-center">${remainingToSoftCap.toLocaleString()}</span>
+                                        <span className="text-[8px] text-zinc-500 font-medium block uppercase tracking-wide text-center">Remaining</span>
+                                        <span className="text-sm font-mono font-medium text-emerald-400 block text-center">${remainingToSoftCap.toLocaleString()}</span>
                                     </div>
                                     <div className="bg-white/5 border border-white/5 rounded-lg p-2">
-                                        <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider text-center">Est. APY</span>
-                                        <span className="text-sm font-mono font-bold text-cyan-400 block text-center">{estimatedAPY}</span>
+                                        <span className="text-[8px] text-zinc-500 font-medium block uppercase tracking-wide text-center">Est. APY</span>
+                                        <span className="text-sm font-mono font-medium text-cyan-400 block text-center">{estimatedAPY}</span>
                                     </div>
                                 </div>
                             </>
                         ) : (
                             <div className="grid grid-cols-2 gap-2">
                                 <div className="bg-white/5 border border-white/5 rounded-lg p-2">
-                                    <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider">Your Stake</span>
-                                    <span className="text-sm font-mono font-bold text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
+                                    <span className="text-[8px] text-zinc-500 font-medium block uppercase tracking-wide">Your Stake</span>
+                                    <span className="text-sm font-mono font-medium text-white">${userPosition?.currentValue?.toLocaleString() || '0.00'}</span>
                                 </div>
                                 <div className="bg-white/5 border border-white/5 rounded-lg p-2">
-                                    <span className="text-[8px] text-zinc-500 font-bold block uppercase tracking-wider">Earnings</span>
-                                    <span className="text-sm font-mono font-bold text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
+                                    <span className="text-[8px] text-zinc-500 font-medium block uppercase tracking-wide">Earnings</span>
+                                    <span className="text-sm font-mono font-medium text-emerald-400">+${userPosition?.earnings?.toLocaleString() || '0.00'}</span>
                                 </div>
                             </div>
                         )}
@@ -275,7 +275,7 @@ export function LPFundingPanel({
                     {/* Input Area */}
                     <div className="mb-3">
                         <div className="flex justify-between items-center mb-1">
-                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                            <span className="text-[9px] font-medium text-zinc-500 uppercase tracking-wide">
                                 {isBuy ? 'Investment Amount' : 'Withdraw Amount'}
                             </span>
                             <span className="text-[9px] text-zinc-400 font-medium">
@@ -294,9 +294,9 @@ export function LPFundingPanel({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
+                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-black">
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-medium">
                                 USDC
                             </span>
                         </div>
@@ -314,7 +314,7 @@ export function LPFundingPanel({
                                             else setAmount(vested.toFixed(2));
                                         }
                                     }}
-                                    className="flex-1 py-1.5 text-[8px] font-mono font-black border border-white/5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white transition-all uppercase"
+                                    className="flex-1 py-1.5 text-[8px] font-mono font-medium border border-white/5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white transition-all"
                                 >
                                     {val}
                                 </button>
@@ -324,10 +324,10 @@ export function LPFundingPanel({
 
                     {/* Summary Card */}
                     <div className="flex justify-between items-center bg-black/40 border border-white/5 rounded-xl p-3 mb-4">
-                        <span className="text-[9px] text-zinc-500 uppercase tracking-tighter">
+                        <span className="text-[9px] text-zinc-500 uppercase tracking-wide">
                             {isBuy ? 'Shares to Receive' : 'Execution'}
                         </span>
-                        <span className="text-sm font-mono font-bold text-white">
+                        <span className="text-sm font-mono font-medium text-white">
                             {isBuy ? `${estimatedShares.toFixed(2)} LP` : 'Instant'}
                         </span>
                     </div>
@@ -336,21 +336,21 @@ export function LPFundingPanel({
                     <button
                         onClick={handleAction}
                         disabled={!amount || parseFloat(amount) <= 0 || loading}
-                        className={`w-full py-3 rounded-xl font-black text-[10px] md:text-xs tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-2
+                        className={`w-full py-3 rounded-xl font-semibold text-[10px] md:text-xs tracking-wide shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
                             ${isBuy
-                                ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-blue-900/40 hover:from-blue-600 hover:to-blue-400'
-                                : 'bg-gradient-to-r from-rose-700 to-rose-500 text-white shadow-rose-900/40 hover:from-rose-600 hover:to-rose-400'
+                                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-900/30 hover:from-blue-500 hover:to-blue-400'
+                                : 'bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-rose-900/30 hover:from-rose-500 hover:to-rose-400'
                             }`}
                     >
                         {loading ? (
                             <span className="flex items-center gap-3">
-                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
-                                PROCESSING...
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                                Processing...
                             </span>
                         ) : (
                             <>
                                 {isBuy ? <Droplets className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                                {isBuy ? 'DEPLOY CAPITAL' : 'WITHDRAW'}
+                                {isBuy ? 'Deploy Capital' : 'Withdraw'}
                             </>
                         )}
                     </button>
