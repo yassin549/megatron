@@ -243,7 +243,7 @@ export function AssetCard({
                     {/* Larger Icon */}
                     <motion.div
                         layout
-                        className={`relative flex-shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-zinc-800/80 border border-white/5 ${viewMode === 'list' ? 'w-14 h-14 md:w-16 md:h-16' : 'w-10 h-10 md:w-12 md:h-12'
+                        className={`relative flex-shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-zinc-800/80 border border-white/5 ${viewMode === 'list' ? 'w-14 h-14 md:w-16 md:h-16' : 'w-14 h-14 md:w-16 md:h-16'
                             }`}
                     >
                         {!imgError && imageUrl ? (
@@ -257,15 +257,17 @@ export function AssetCard({
                     <motion.div layout className="flex-1 min-w-0">
                         <motion.h3
                             layout
-                            className={`font-bold text-white truncate group-hover:text-blue-400 transition-colors leading-tight ${viewMode === 'list' ? 'text-base md:text-lg' : 'text-xs md:text-sm'
+                            className={`font-bold text-white truncate group-hover:text-blue-400 transition-colors leading-tight ${viewMode === 'list' ? 'text-base md:text-lg' : 'text-sm md:text-base'
                                 }`}
                         >
                             {name}
                         </motion.h3>
-                        <motion.div layout className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 font-bold">{type}</span>
-                            <span className={`w-1.5 h-1.5 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400 opacity-50'}`} />
-                        </motion.div>
+                        {viewMode === 'list' && (
+                            <motion.div layout className="flex items-center gap-2 mt-1">
+                                <span className="text-[10px] md:text-xs uppercase tracking-widest text-zinc-500 font-bold">{type}</span>
+                                <span className={`w-1.5 h-1.5 rounded-full ${isFunding ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-400 opacity-50'}`} />
+                            </motion.div>
+                        )}
                     </motion.div>
                 </motion.div>
 
@@ -322,19 +324,16 @@ export function AssetCard({
                     {/* Informational Stats */}
                     <motion.div layout className="flex items-center gap-4 md:gap-5 overflow-hidden">
                         <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-zinc-500 group-hover:text-zinc-400">
-                            <TrendingUp className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                            <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Vol</span>
+                            {viewMode === 'grid' ? <TrendingUp className="w-2.5 h-2.5" /> : <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Vol</span>}
                             <span className="text-[10px] md:text-xs font-mono font-bold">{formatVolume(volume24h)}</span>
                         </div>
                         <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-zinc-500 group-hover:text-zinc-400">
-                            <Users className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                            <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Holders</span>
+                            {viewMode === 'grid' ? <Users className="w-2.5 h-2.5" /> : <span className="text-[8px] md:text-[10px] text-zinc-600 uppercase font-black tracking-tighter">Holders</span>}
                             <span className="text-[10px] md:text-xs font-mono font-bold">{holders}</span>
                         </div>
                         {isFunding && (
                             <div className="flex items-center sm:flex-col gap-1.5 sm:gap-0 text-yellow-500/80">
-                                <Activity className={`w-3 h-3 ${viewMode === 'list' ? 'hidden' : 'inline'}`} />
-                                <span className="text-[8px] md:text-[10px] text-yellow-600/80 uppercase font-black tracking-tighter">Goal</span>
+                                {viewMode === 'grid' ? <Activity className="w-2.5 h-2.5" /> : <span className="text-[8px] md:text-[10px] text-yellow-600/80 uppercase font-black tracking-tighter">Goal</span>}
                                 <span className="text-[10px] md:text-xs font-mono font-bold">{fundingProgress?.toFixed(0)}%</span>
                             </div>
                         )}
