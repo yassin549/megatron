@@ -173,14 +173,18 @@ export function AssetCard({
     const fullDescription = (description || aiSummary || "AI analysis pending...")
         .split('undefined').join('').trim();
 
+    // Ensure we have a valid string for typing animation
+    const safeDescription = fullDescription.length > 0 ? fullDescription : "AI analysis pending...";
+
     useEffect(() => {
         if (isHovering) {
             let idx = 0;
             setDisplayedText('');
             if (typingInterval.current) clearInterval(typingInterval.current);
             typingInterval.current = setInterval(() => {
-                if (idx < fullDescription.length) {
-                    setDisplayedText(prev => prev + (fullDescription[idx] || ''));
+                if (idx < safeDescription.length) {
+                    const char = safeDescription.charAt(idx);
+                    setDisplayedText(prev => prev + char);
                     idx++;
                 } else {
                     if (typingInterval.current) clearInterval(typingInterval.current);
@@ -218,10 +222,10 @@ export function AssetCard({
                 type="button"
                 onClick={handleToggleBookmark}
                 className={`absolute top-3 right-3 z-20 p-1.5 rounded-full transition-all duration-200 ${isBookmarked
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : isAuthenticated
-                            ? 'text-zinc-600 hover:bg-white/5 hover:text-zinc-300'
-                            : 'text-zinc-800 cursor-not-allowed'
+                    ? 'bg-blue-500/20 text-blue-400'
+                    : isAuthenticated
+                        ? 'text-zinc-600 hover:bg-white/5 hover:text-zinc-300'
+                        : 'text-zinc-800 cursor-not-allowed'
                     }`}
                 disabled={!isAuthenticated}
                 title={isAuthenticated ? 'Toggle Bookmark' : 'Login to bookmark'}
@@ -233,10 +237,10 @@ export function AssetCard({
                 href={`/assets/${id}`}
                 className="block h-full bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-4 flex flex-col justify-between hover:border-white/10 hover:bg-zinc-900 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/5"
             >
-                {/* Header: Icon + Name + Status Dot */}
+                {/* Header: Icon + Name */}
                 <div className="flex items-start gap-3">
-                    {/* Asset Icon */}
-                    <div className="relative w-10 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-800/80 border border-white/5">
+                    {/* Asset Icon - Larger */}
+                    <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-800/80 border border-white/5">
                         {!imgError && imageUrl ? (
                             <img
                                 src={imageUrl}
@@ -246,29 +250,16 @@ export function AssetCard({
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-500 group-hover:text-blue-400 transition-colors">
-                                <Icon className="w-5 h-5" />
+                                <Icon className="w-6 h-6" />
                             </div>
                         )}
                     </div>
 
-                    {/* Name + Status */}
+                    {/* Name only */}
                     <div className="flex-1 min-w-0 pr-8">
                         <h3 className="text-sm font-medium text-zinc-100 leading-tight group-hover:text-blue-400 transition-colors line-clamp-2">
                             {name}
                         </h3>
-                        {/* Status indicator with blinking dot */}
-                        <div className="flex items-center gap-1.5 mt-1">
-                            <span
-                                className={`w-1.5 h-1.5 rounded-full ${isFunding
-                                        ? 'bg-yellow-400 animate-pulse shadow-[0_0_6px_rgba(250,204,21,0.6)]'
-                                        : 'bg-emerald-400 animate-pulse shadow-[0_0_6px_rgba(52,211,153,0.6)]'
-                                    }`}
-                                style={{ animationDuration: '2s' }}
-                            />
-                            <span className={`text-[10px] font-medium ${isFunding ? 'text-yellow-400/80' : 'text-emerald-400/80'}`}>
-                                {isFunding ? 'Funding' : 'Live'}
-                            </span>
-                        </div>
                     </div>
                 </div>
 
@@ -289,22 +280,41 @@ export function AssetCard({
                     <Sparkline data={priceHistory || []} positive={isPositive} />
                 </div>
 
-                {/* Footer: Stats Row */}
-                <div className="flex items-center gap-4 mt-auto pt-2">
-                    <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                        <TrendingUp className="w-3 h-3" />
-                        <span className="font-mono">{formatVolume(volume24h)}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
-                        <Users className="w-3 h-3" />
-                        <span className="font-mono">{holders}</span>
-                    </div>
-                    {isFunding && fundingProgress !== undefined && (
-                        <div className="flex items-center gap-1 text-[10px] text-yellow-500/80">
-                            <Activity className="w-3 h-3" />
-                            <span className="font-mono">{fundingProgress.toFixed(0)}%</span>
+                {/* Footer: Stats Row with Labels + Status */}
+                <div className="flex items-center justify-between mt-auto pt-2">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                            <TrendingUp className="w-3 h-3" />
+                            <span className="text-zinc-600">Vol</span>
+                            <span className="font-mono">{formatVolume(volume24h)}</span>
                         </div>
-                    )}
+                        <div className="flex items-center gap-1 text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors">
+                            <Users className="w-3 h-3" />
+                            <span className="text-zinc-600">Holders</span>
+                            <span className="font-mono">{holders}</span>
+                        </div>
+                        {isFunding && fundingProgress !== undefined && (
+                            <div className="flex items-center gap-1 text-[10px] text-yellow-500/80">
+                                <Activity className="w-3 h-3" />
+                                <span className="text-yellow-600/60">Cap</span>
+                                <span className="font-mono">{fundingProgress.toFixed(0)}%</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Status indicator - Bottom Right */}
+                    <div className="flex items-center gap-1.5">
+                        <span
+                            className={`w-2 h-2 rounded-full ${isFunding
+                                ? 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.6)]'
+                                : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'
+                                }`}
+                            style={{ animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}
+                        />
+                        <span className={`text-[10px] font-medium ${isFunding ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                            {isFunding ? 'Funding' : 'Live'}
+                        </span>
+                    </div>
                 </div>
             </Link>
 
