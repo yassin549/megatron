@@ -237,20 +237,20 @@ export default function DashboardPage() {
                     transition={{ delay: 0.4 }}
                     className="mt-12"
                 >
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-4 mb-6">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-2xl font-bold text-foreground">
+                            <h2 className="text-xl md:text-2xl font-bold text-foreground">
                                 Active Positions
                             </h2>
-                            <span className="text-xs font-mono bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
+                            <span className="text-[10px] md:text-xs font-mono bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
                                 {portfolioStats?.positions.length || 0} TOTAL
                             </span>
                         </div>
                         <Link
                             href="/portfolio"
-                            className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1 group"
+                            className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1 group w-fit"
                         >
-                            Terminal View
+                            <span>Terminal View</span>
                             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                             </svg>
