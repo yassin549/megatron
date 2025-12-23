@@ -7,6 +7,7 @@ import { AssetCard } from '@/components/assets';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import Link from 'next/link';
 import { Search, LayoutGrid, List } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Asset {
     id: string;
@@ -202,14 +203,20 @@ export default function HomePage() {
 
                 {/* Assets Grid / List */}
                 {filteredAssets.length > 0 ? (
-                    <div className={viewMode === 'grid'
-                        ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
-                        : "grid grid-cols-1 gap-3 md:gap-4"
-                    }>
+                    <motion.div
+                        layout
+                        className={viewMode === 'grid'
+                            ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
+                            : "flex flex-col gap-3 md:gap-4 lg:px-4"
+                        }
+                    >
                         {filteredAssets.map((asset, index) => (
-                            <div
+                            <motion.div
+                                layout
                                 key={asset.id}
-                                className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="fill-mode-backwards"
                                 style={{ animationDelay: `${index * 50}ms` }}
                             >
                                 <AssetCard
@@ -217,9 +224,9 @@ export default function HomePage() {
                                     isAuthenticated={isAuthenticated}
                                     viewMode={viewMode}
                                 />
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
+                    </motion.div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-24 border border-dashed border-white/10 rounded-xl bg-white/5">
                         <p className="text-gray-500 text-lg mb-4">No markets found.</p>
