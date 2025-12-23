@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
+import { Search, LayoutGrid, List } from 'lucide-react';
 
 interface Asset {
     id: string;
@@ -40,8 +40,20 @@ export default function HomePage() {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(true);
     const [mobileSearchText, setMobileSearchText] = useState(searchParam);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const isAuthenticated = authStatus === 'authenticated';
+
+    // Persist view mode
+    useEffect(() => {
+        const saved = localStorage.getItem('assetViewMode');
+        if (saved === 'list' || saved === 'grid') setViewMode(saved);
+    }, []);
+
+    const toggleView = (mode: 'grid' | 'list') => {
+        setViewMode(mode);
+        localStorage.setItem('assetViewMode', mode);
+    };
 
     // Sync mobile search text when URL param changes
     useEffect(() => {
@@ -154,23 +166,46 @@ export default function HomePage() {
                         </form>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <h2 className="text-xl font-bold text-white capitalize flex items-center gap-2">
-                            {searchParam ? (
-                                <>Results for "<span className="text-blue-400">{searchParam}</span>"</>
-                            ) : (
-                                <>{categoryParam === 'all' ? 'All Markets' : `${categoryParam} Markets`}</>
-                            )}
-                        </h2>
-                        <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded w-fit">
-                            {filteredAssets.length} RESULTS
-                        </span>
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <h2 className="text-xl font-bold text-white capitalize flex items-center gap-2">
+                                {searchParam ? (
+                                    <>Results for "<span className="text-blue-400">{searchParam}</span>"</>
+                                ) : (
+                                    <>{categoryParam === 'all' ? 'All Markets' : `${categoryParam} Markets`}</>
+                                )}
+                            </h2>
+                            <span className="text-xs font-mono text-gray-500 bg-white/5 px-2 py-1 rounded w-fit">
+                                {filteredAssets.length} <span className="hidden xs:inline">RESULTS</span>
+                            </span>
+                        </div>
+
+                        {/* View Toggle - Icons Only */}
+                        <div className="flex items-center bg-white/5 rounded-lg p-1 border border-white/10">
+                            <button
+                                onClick={() => toggleView('grid')}
+                                className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                title="Grid View"
+                            >
+                                <LayoutGrid className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => toggleView('list')}
+                                className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-blue-500 text-white shadow-lg' : 'text-gray-500 hover:text-gray-300'}`}
+                                title="List View"
+                            >
+                                <List className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Assets Grid - 2 columns on mobile */}
+                {/* Assets Grid / List */}
                 {filteredAssets.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+                    <div className={viewMode === 'grid'
+                        ? "grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6"
+                        : "grid grid-cols-1 gap-3 md:gap-4"
+                    }>
                         {filteredAssets.map((asset, index) => (
                             <div
                                 key={asset.id}
@@ -180,6 +215,7 @@ export default function HomePage() {
                                 <AssetCard
                                     {...asset}
                                     isAuthenticated={isAuthenticated}
+                                    viewMode={viewMode}
                                 />
                             </div>
                         ))}

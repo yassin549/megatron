@@ -120,8 +120,9 @@ export function AssetCard({
     isBookmarked: initialIsBookmarked,
     isAuthenticated,
     holders = 0,
-    priceHistory
-}: AssetCardProps) {
+    priceHistory,
+    viewMode = 'grid'
+}: AssetCardProps & { viewMode?: 'grid' | 'list' }) {
     const isPositive = change24h >= 0;
     const Icon = TYPE_ICONS[type] || LayoutGrid;
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || false);
@@ -203,6 +204,91 @@ export function AssetCard({
         top: isNearBottom ? `${mousePos.y - 140}px` : `${mousePos.y + 16}px`
     };
 
+    if (viewMode === 'list') {
+        return (
+            <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="relative group"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                onMouseMove={handleMouseMove}
+            >
+                <Link
+                    href={`/assets/${id}`}
+                    className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-sm border border-white/5 rounded-xl p-3 hover:border-white/10 hover:bg-zinc-900 transition-all duration-300"
+                >
+                    {/* Icon */}
+                    <div className="relative w-12 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-800/80 border border-white/5">
+                        {!imgError && imageUrl ? (
+                            <img src={imageUrl} alt={name} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-500"><Icon className="w-6 h-6" /></div>
+                        )}
+                    </div>
+
+                    {/* Name & Type */}
+                    <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-zinc-100 truncate group-hover:text-blue-400 transition-colors">{name}</h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">{type}</span>
+                            <span className={`w-1 h-1 rounded-full ${isFunding ? 'bg-yellow-400' : 'bg-emerald-400'}`} />
+                        </div>
+                    </div>
+
+                    {/* Sparkline (Desktop only in list) */}
+                    <div className="hidden md:block">
+                        <Sparkline data={priceHistory || []} positive={isPositive} />
+                    </div>
+
+                    {/* Price & Change */}
+                    <div className="text-right flex flex-col items-end min-w-[80px]">
+                        <span className="text-sm font-bold text-white">${price.toFixed(2)}</span>
+                        <span className={`flex items-center gap-0.5 text-[10px] font-medium ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {isPositive ? <ArrowUpRight className="w-2.5 h-2.5" /> : <ArrowDownRight className="w-2.5 h-2.5" />}
+                            {Math.abs(change24h).toFixed(1)}%
+                        </span>
+                    </div>
+
+                    {/* Desktop Stats */}
+                    <div className="hidden sm:flex items-center gap-4 border-l border-white/5 pl-4 ml-2">
+                        <div className="flex flex-col">
+                            <span className="text-[8px] text-zinc-600 uppercase">Vol</span>
+                            <span className="text-[10px] text-zinc-400 font-mono">{formatVolume(volume24h)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-[8px] text-zinc-600 uppercase">Holders</span>
+                            <span className="text-[10px] text-zinc-400 font-mono">{holders}</span>
+                        </div>
+                    </div>
+
+                    {/* Bookmark */}
+                    <button
+                        onClick={handleToggleBookmark}
+                        className={`p-2 rounded-lg transition-colors ${isBookmarked ? 'text-blue-400 bg-blue-400/10' : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'}`}
+                    >
+                        <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                    </button>
+                </Link>
+
+                {/* Flying Tooltip (Mobile restricted handled in Portal) */}
+                {isHovering && hasMouseMoved && (typeof window !== 'undefined' && window.innerWidth >= 768) && (typeof document !== 'undefined') && createPortal(
+                    <div className="fixed z-[9999] pointer-events-none p-4 max-w-[280px] bg-zinc-950/95 backdrop-blur-xl border border-blue-500/30 rounded-xl shadow-2xl" style={tooltipStyle}>
+                        <div className="flex items-start gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 animate-pulse" />
+                            <div>
+                                <span className="text-[10px] font-bold text-blue-400 uppercase block mb-1">Mega-AI Insight</span>
+                                <p className="text-xs text-zinc-300 font-mono leading-relaxed">{displayedText}<span className="inline-block w-1.5 h-3 bg-blue-400 ml-0.5 animate-pulse" /></p>
+                            </div>
+                        </div>
+                    </div>,
+                    document.body
+                )}
+            </motion.div>
+        );
+    }
+
+    // Default Grid View
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
