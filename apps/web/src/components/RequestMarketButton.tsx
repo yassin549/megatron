@@ -15,7 +15,7 @@ export function RequestMarketButton() {
     const [isSuccess, setIsSuccess] = useState(false);
 
     // Initial button animation variants
-    const buttonVariants = {
+    const buttonVariants: any = {
         initial: { scale: 0, opacity: 0 },
         animate: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 260, damping: 20 } },
         hover: { scale: 1.1, rotate: 90, transition: { duration: 0.3 } },
@@ -23,7 +23,7 @@ export function RequestMarketButton() {
     };
 
     // Modal animation variants
-    const modalVariants = {
+    const modalVariants: any = {
         hidden: { opacity: 0, y: 50, scale: 0.9 },
         visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.3 } },
         exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.2 } }
