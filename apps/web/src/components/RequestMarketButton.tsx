@@ -22,7 +22,7 @@ export function RequestMarketButton() {
         tap: { scale: 0.95 }
     };
 
-    // Card animation: Popover for Desktop, Bottom Sheet for Mobile
+    // Card animation: Popover for Desktop, Centered Modal for Mobile
     const cardVariants: any = {
         hidden: {
             opacity: 0,
@@ -88,7 +88,7 @@ export function RequestMarketButton() {
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
+                className="fixed bottom-32 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
             >
                 <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/10 transition-colors duration-300 ${isOpen ? 'bg-zinc-800 text-white' : 'bg-primary text-white hover:bg-blue-600'}`}>
 
@@ -123,14 +123,14 @@ export function RequestMarketButton() {
                 </div>
             </motion.button>
 
-            {/* Popover / Bottom Sheet */}
+            {/* Popover / Modal */}
             {mounted && createPortal(
                 <AnimatePresence>
                     {isOpen && (
                         <>
-                            {/* Invisible Backdrop to close on click outside */}
+                            {/* Backdrop: Darker on mobile for focus */}
                             <div
-                                className="fixed inset-0 z-[59] bg-black/20 md:bg-transparent"
+                                className="fixed inset-0 z-[59] bg-black/60 md:bg-black/20 backdrop-blur-sm md:backdrop-blur-none"
                                 onClick={() => setIsOpen(false)}
                             />
 
@@ -141,10 +141,10 @@ export function RequestMarketButton() {
                                 exit="exit"
                                 className={`
                                     fixed z-[60] bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden
-                                    /* Mobile: Bottom Sheet */
-                                    bottom-0 left-0 right-0 rounded-t-3xl border-b-0 pb-safe
-                                    /* Desktop: Popover */
-                                    md:bottom-24 md:right-8 md:left-auto md:w-[380px] md:rounded-2xl md:border-b md:pb-0
+                                    /* Mobile: Centered Modal */
+                                    top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[380px] rounded-2xl
+                                    /* Desktop: Popover at Bottom Right */
+                                    md:top-auto md:left-auto md:bottom-24 md:right-8 md:transform-none md:w-[380px]
                                 `}
                             >
                                 {/* Header */}
@@ -159,15 +159,13 @@ export function RequestMarketButton() {
                                         </div>
                                     </div>
 
-                                    {/* Close Button (Always visible now for accessibility) */}
+                                    {/* Close Button */}
                                     <button
                                         onClick={() => setIsOpen(false)}
                                         className="p-2 -mr-2 text-zinc-500 hover:text-white rounded-full hover:bg-white/10 transition-colors"
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
-
-                                    {/* Mobile Drag Handle Visual - REMOVED for Center Modal */}
                                 </div>
 
                                 {/* Body */}
