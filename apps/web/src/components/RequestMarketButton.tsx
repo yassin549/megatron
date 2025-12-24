@@ -134,13 +134,13 @@ export function RequestMarketButton() {
                             />
 
                             {/* Positioning Wrapper: Flex Center on Mobile, Custom on Desktop */}
-                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 md:block">
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 md:block px-4 md:px-0">
                                 <motion.div
                                     variants={cardVariants}
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-[90%] max-w-[380px] md:w-[380px]"
+                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px]"
                                 >
                                     {/* Header */}
                                     <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between relative">
@@ -164,7 +164,7 @@ export function RequestMarketButton() {
                                     </div>
 
                                     {/* Body */}
-                                    <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                    <div className="p-5 max-h-[80dvh] overflow-y-auto custom-scrollbar">
                                         {!isSuccess ? (
                                             <form onSubmit={handleSubmit} className="space-y-4">
                                                 <div className="space-y-1.5">
