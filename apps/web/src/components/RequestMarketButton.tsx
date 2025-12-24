@@ -125,13 +125,13 @@ export function RequestMarketButton() {
                                 className={`
                                     fixed z-[60] bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden
                                     /* Mobile: Bottom Sheet */
-                                    bottom-0 left-0 right-0 rounded-t-3xl border-b-0
+                                    bottom-0 left-0 right-0 rounded-t-3xl border-b-0 pb-safe
                                     /* Desktop: Popover */
-                                    md:bottom-24 md:right-8 md:left-auto md:w-[380px] md:rounded-2xl md:border-b
+                                    md:bottom-24 md:right-8 md:left-auto md:w-[380px] md:rounded-2xl md:border-b md:pb-0
                                 `}
                             >
                                 {/* Header */}
-                                <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between relative">
                                     <div className="flex items-center gap-2.5">
                                         <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
                                             <Send className="w-4 h-4" />
@@ -141,8 +141,17 @@ export function RequestMarketButton() {
                                             <p className="text-xs text-zinc-400">What should we add next?</p>
                                         </div>
                                     </div>
-                                    {/* Mobile Close Handle/Indicator */}
-                                    <div className="md:hidden w-12 h-1 bg-white/10 rounded-full mx-auto absolute top-3 left-0 right-0" />
+
+                                    {/* Close Button (Always visible now for accessibility) */}
+                                    <button
+                                        onClick={() => setIsOpen(false)}
+                                        className="p-2 -mr-2 text-zinc-500 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Mobile Drag Handle Visual */}
+                                    <div className="md:hidden w-12 h-1 bg-white/20 rounded-full mx-auto absolute top-2 left-0 right-0 pointer-events-none" />
                                 </div>
 
                                 {/* Body */}
@@ -156,7 +165,7 @@ export function RequestMarketButton() {
                                                     value={title}
                                                     onChange={(e) => setTitle(e.target.value)}
                                                     placeholder="e.g. BTC to $100k?"
-                                                    className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                                    className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
                                                     required
                                                 />
                                             </div>
@@ -167,7 +176,7 @@ export function RequestMarketButton() {
                                                     value={description}
                                                     onChange={(e) => setDescription(e.target.value)}
                                                     placeholder="Resolution criteria..."
-                                                    className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                                                    className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
                                                     required
                                                 />
                                             </div>
