@@ -6,6 +6,7 @@ import { Providers } from "./providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { InitialLoader } from "@/components/ui/InitialLoader";
+import { RequestMarketButton } from "@/components/RequestMarketButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
                         <Navbar />
                         {children}
                         <MobileBottomNav />
+                        <RequestMarketButton />
                     </div>
                     <Analytics />
                 </Providers>
