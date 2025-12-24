@@ -167,8 +167,7 @@ export function RequestMarketButton() {
                                         <X className="w-5 h-5" />
                                     </button>
 
-                                    {/* Mobile Drag Handle Visual */}
-                                    <div className="md:hidden w-12 h-1 bg-white/20 rounded-full mx-auto absolute top-2 left-0 right-0 pointer-events-none" />
+                                    {/* Mobile Drag Handle Visual - REMOVED for Center Modal */}
                                 </div>
 
                                 {/* Body */}
