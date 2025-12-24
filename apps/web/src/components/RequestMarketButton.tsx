@@ -22,13 +22,12 @@ export function RequestMarketButton() {
         tap: { scale: 0.95 }
     };
 
-    // Card animation: Popover for Desktop, Centered Modal for Mobile
+    // Card animation
     const cardVariants: any = {
         hidden: {
             opacity: 0,
             y: 20,
-            scale: 0.95,
-            transformOrigin: "bottom right"
+            scale: 0.95
         },
         visible: {
             opacity: 1,
@@ -128,126 +127,123 @@ export function RequestMarketButton() {
                 <AnimatePresence>
                     {isOpen && (
                         <>
-                            {/* Backdrop: Darker on mobile for focus */}
+                            {/* Backdrop: Darker on mobile for focus - Close on click */}
                             <div
                                 className="fixed inset-0 z-[59] bg-black/60 md:bg-black/20 backdrop-blur-sm md:backdrop-blur-none"
                                 onClick={() => setIsOpen(false)}
                             />
 
-                            <motion.div
-                                variants={cardVariants}
-                                initial="hidden"
-                                animate="visible"
-                                exit="exit"
-                                className={`
-                                    fixed z-[60] bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden
-                                    /* Mobile: Centered Modal */
-                                    top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[380px] rounded-2xl
-                                    /* Desktop: Popover at Bottom Right */
-                                    md:top-auto md:left-auto md:bottom-24 md:right-8 md:transform-none md:w-[380px]
-                                `}
-                            >
-                                {/* Header */}
-                                <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between relative">
-                                    <div className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                                            <Send className="w-4 h-4" />
+                            {/* Positioning Wrapper: Flex Center on Mobile, Custom on Desktop */}
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 md:block">
+                                <motion.div
+                                    variants={cardVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-[90%] max-w-[380px] md:w-[380px]"
+                                >
+                                    {/* Header */}
+                                    <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between relative">
+                                        <div className="flex items-center gap-2.5">
+                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                                                <Send className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-white text-sm">New Market</h3>
+                                                <p className="text-xs text-zinc-400">What should we add next?</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-bold text-white text-sm">New Market</h3>
-                                            <p className="text-xs text-zinc-400">What should we add next?</p>
-                                        </div>
+
+                                        {/* Close Button */}
+                                        <button
+                                            onClick={() => setIsOpen(false)}
+                                            className="p-2 -mr-2 text-zinc-500 hover:text-white rounded-full hover:bg-white/10 transition-colors"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
                                     </div>
 
-                                    {/* Close Button */}
-                                    <button
-                                        onClick={() => setIsOpen(false)}
-                                        className="p-2 -mr-2 text-zinc-500 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
-
-                                {/* Body */}
-                                <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                                    {!isSuccess ? (
-                                        <form onSubmit={handleSubmit} className="space-y-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Title</label>
-                                                <input
-                                                    type="text"
-                                                    value={title}
-                                                    onChange={(e) => setTitle(e.target.value)}
-                                                    placeholder="e.g. BTC to $100k?"
-                                                    className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                                    required
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Details</label>
-                                                <textarea
-                                                    value={description}
-                                                    onChange={(e) => setDescription(e.target.value)}
-                                                    placeholder="Resolution criteria..."
-                                                    className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
-                                                    required
-                                                />
-                                            </div>
-
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Image (Optional)</label>
-                                                <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}>
+                                    {/* Body */}
+                                    <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                        {!isSuccess ? (
+                                            <form onSubmit={handleSubmit} className="space-y-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Title</label>
                                                     <input
-                                                        type="file"
-                                                        accept="image/*"
-                                                        onChange={handleImageChange}
-                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        type="text"
+                                                        value={title}
+                                                        onChange={(e) => setTitle(e.target.value)}
+                                                        placeholder="e.g. BTC to $100k?"
+                                                        className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
+                                                        required
                                                     />
-                                                    {imagePreview ? (
-                                                        <div className="flex items-center gap-3">
-                                                            <img src={imagePreview} alt="Preview" className="w-10 h-10 rounded object-cover" />
-                                                            <span className="text-xs text-zinc-400">Image selected</span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }}
-                                                                className="ml-auto text-xs text-red-400 hover:text-red-300 z-20"
-                                                            >
-                                                                Remove
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
-                                                            <Upload className="w-4 h-4" />
-                                                            <span className="text-xs">Click to upload</span>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            </div>
 
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
-                                            >
-                                                {isSubmitting ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    "Submit Request"
-                                                )}
-                                            </button>
-                                        </form>
-                                    ) : (
-                                        <div className="py-8 text-center flex flex-col items-center">
-                                            <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-3">
-                                                <Sparkles className="w-6 h-6" />
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Details</label>
+                                                    <textarea
+                                                        value={description}
+                                                        onChange={(e) => setDescription(e.target.value)}
+                                                        placeholder="Resolution criteria..."
+                                                        className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                                                        required
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Image (Optional)</label>
+                                                    <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/*"
+                                                            onChange={handleImageChange}
+                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                        />
+                                                        {imagePreview ? (
+                                                            <div className="flex items-center gap-3">
+                                                                <img src={imagePreview} alt="Preview" className="w-10 h-10 rounded object-cover" />
+                                                                <span className="text-xs text-zinc-400">Image selected</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }}
+                                                                    className="ml-auto text-xs text-red-400 hover:text-red-300 z-20"
+                                                                >
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
+                                                                <Upload className="w-4 h-4" />
+                                                                <span className="text-xs">Click to upload</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="submit"
+                                                    disabled={isSubmitting}
+                                                    className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
+                                                >
+                                                    {isSubmitting ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        "Submit Request"
+                                                    )}
+                                                </button>
+                                            </form>
+                                        ) : (
+                                            <div className="py-8 text-center flex flex-col items-center">
+                                                <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-3">
+                                                    <Sparkles className="w-6 h-6" />
+                                                </div>
+                                                <h3 className="text-lg font-bold text-white">Sent!</h3>
+                                                <p className="text-xs text-zinc-400 mt-1">We'll review your market shortly.</p>
                                             </div>
-                                            <h3 className="text-lg font-bold text-white">Sent!</h3>
-                                            <p className="text-xs text-zinc-400 mt-1">We'll review your market shortly.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </motion.div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            </div>
                         </>
                     )}
                 </AnimatePresence>,
