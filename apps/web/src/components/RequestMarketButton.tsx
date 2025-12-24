@@ -90,7 +90,7 @@ export function RequestMarketButton() {
                 onClick={() => setIsOpen(!isOpen)}
                 className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
             >
-                <div className={`relative flex items-center gap-2 px-5 py-3 rounded-full shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/10 transition-colors duration-300 ${isOpen ? 'bg-zinc-800 text-white' : 'bg-primary text-white hover:bg-blue-600'}`}>
+                <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/10 transition-colors duration-300 ${isOpen ? 'bg-zinc-800 text-white' : 'bg-primary text-white hover:bg-blue-600'}`}>
 
                     {/* Shimmer Effect (only when not open) */}
                     {!isOpen && (
@@ -108,14 +108,17 @@ export function RequestMarketButton() {
                                 }
                             }
                         }}
-                        className="relative z-10 font-bold tracking-tight"
+                        className="hidden md:inline-block relative z-10 font-bold tracking-tight"
                     >
                         Request Market
                     </motion.span>
                     {isOpen ? (
-                        <X className="w-5 h-5 relative z-10" />
+                        <X className="w-6 h-6 md:w-5 md:h-5 relative z-10" />
                     ) : (
-                        <Sparkles className="w-5 h-5 relative z-10 animate-pulse" />
+                        <>
+                            <Plus className="md:hidden w-6 h-6 relative z-10" />
+                            <Sparkles className="hidden md:block w-5 h-5 relative z-10 animate-pulse" />
+                        </>
                     )}
                 </div>
             </motion.button>
