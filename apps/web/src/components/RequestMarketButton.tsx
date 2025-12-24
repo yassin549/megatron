@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Upload, Sparkles, Loader2 } from 'lucide-react';
+import { Plus, X, Upload, Sparkles, Loader2, Send } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 export function RequestMarketButton() {
@@ -17,16 +17,31 @@ export function RequestMarketButton() {
     // Initial button animation variants
     const buttonVariants: any = {
         initial: { scale: 0, opacity: 0 },
-        animate: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 260, damping: 20 } },
-        hover: { scale: 1.1, rotate: 90, transition: { duration: 0.3 } },
-        tap: { scale: 0.9 }
+        animate: { scale: 1, opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
+        hover: { scale: 1.05, y: -2, transition: { duration: 0.2 } },
+        tap: { scale: 0.95 }
     };
 
-    // Modal animation variants
-    const modalVariants: any = {
-        hidden: { opacity: 0, y: 50, scale: 0.9 },
-        visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.3 } },
-        exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.2 } }
+    // Card animation: Popover for Desktop, Bottom Sheet for Mobile
+    const cardVariants: any = {
+        hidden: {
+            opacity: 0,
+            y: 20,
+            scale: 0.95,
+            transformOrigin: "bottom right"
+        },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: { type: "spring", bounce: 0.3, duration: 0.4 }
+        },
+        exit: {
+            opacity: 0,
+            y: 20,
+            scale: 0.95,
+            transition: { duration: 0.2 }
+        }
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,13 +59,10 @@ export function RequestMarketButton() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1500));
-
         setIsSubmitting(false);
         setIsSuccess(true);
-
         // Reset after success
         setTimeout(() => {
             setIsOpen(false);
@@ -62,160 +74,158 @@ export function RequestMarketButton() {
         }, 1500);
     };
 
-    // Determine if we are on client to use portals
+    // Client-only portal
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
 
     return (
         <>
+            {/* Main Floating Button */}
             <motion.button
                 variants={buttonVariants}
                 initial="initial"
                 animate="animate"
                 whileHover="hover"
                 whileTap="tap"
-                onClick={() => setIsOpen(true)}
-                className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-[60] p-4 bg-primary text-primary-foreground rounded-full shadow-[0_0_20px_rgba(59,130,246,0.5)] border border-white/20 hover:shadow-[0_0_30px_rgba(59,130,246,0.8)] backdrop-blur-md group"
+                onClick={() => setIsOpen(!isOpen)}
+                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
             >
-                <Plus className="w-6 h-6 md:w-8 md:h-8" />
+                <div className={`relative flex items-center gap-2 px-5 py-3 rounded-full shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/10 transition-colors duration-300 ${isOpen ? 'bg-zinc-800 text-white' : 'bg-primary text-white hover:bg-blue-600'}`}>
+
+                    {/* Shimmer Effect (only when not open) */}
+                    {!isOpen && (
+                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0" />
+                    )}
+
+                    <span className="relative z-10 font-bold tracking-tight">Request Market</span>
+                    {isOpen ? (
+                        <X className="w-5 h-5 relative z-10" />
+                    ) : (
+                        <Sparkles className="w-5 h-5 relative z-10 animate-pulse" />
+                    )}
+                </div>
             </motion.button>
 
+            {/* Popover / Bottom Sheet */}
             {mounted && createPortal(
                 <AnimatePresence>
                     {isOpen && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6">
-                            {/* Backdrop */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
+                        <>
+                            {/* Invisible Backdrop to close on click outside */}
+                            <div
+                                className="fixed inset-0 z-[59] bg-black/20 md:bg-transparent"
                                 onClick={() => setIsOpen(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                             />
 
-                            {/* Modal Card */}
                             <motion.div
-                                variants={modalVariants}
+                                variants={cardVariants}
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
-                                className="relative w-full max-w-lg bg-[#0C0F14] border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+                                className={`
+                                    fixed z-[60] bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden
+                                    /* Mobile: Bottom Sheet */
+                                    bottom-0 left-0 right-0 rounded-t-3xl border-b-0
+                                    /* Desktop: Popover */
+                                    md:bottom-24 md:right-8 md:left-auto md:w-[380px] md:rounded-2xl md:border-b
+                                `}
                             >
-                                {/* Glow Effect */}
-                                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
-                                <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none" />
-
-                                <div className="relative p-6 md:p-8">
-                                    <div className="flex items-center justify-between mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2.5 bg-primary/10 rounded-xl">
-                                                <Sparkles className="w-6 h-6 text-primary" />
-                                            </div>
-                                            <div>
-                                                <h2 className="text-2xl font-bold text-white tracking-tight">Request Market</h2>
-                                                <p className="text-sm text-zinc-400">Propose a new asset for the ecosystem</p>
-                                            </div>
+                                {/* Header */}
+                                <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
+                                            <Send className="w-4 h-4" />
                                         </div>
-                                        <button
-                                            onClick={() => setIsOpen(false)}
-                                            className="p-2 hover:bg-white/5 rounded-full text-zinc-500 hover:text-white transition-colors"
-                                        >
-                                            <X className="w-5 h-5" />
-                                        </button>
+                                        <div>
+                                            <h3 className="font-bold text-white text-sm">New Market</h3>
+                                            <p className="text-xs text-zinc-400">What should we add next?</p>
+                                        </div>
                                     </div>
+                                    {/* Mobile Close Handle/Indicator */}
+                                    <div className="md:hidden w-12 h-1 bg-white/10 rounded-full mx-auto absolute top-3 left-0 right-0" />
+                                </div>
 
+                                {/* Body */}
+                                <div className="p-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
                                     {!isSuccess ? (
-                                        <form onSubmit={handleSubmit} className="space-y-5">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-zinc-300 ml-1">Market Title</label>
+                                        <form onSubmit={handleSubmit} className="space-y-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Title</label>
                                                 <input
                                                     type="text"
                                                     value={title}
                                                     onChange={(e) => setTitle(e.target.value)}
-                                                    placeholder="e.g. Will SpaceX launch Starship in 2025?"
-                                                    className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                                                    placeholder="e.g. BTC to $100k?"
+                                                    className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
                                                     required
                                                 />
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-zinc-300 ml-1">Description</label>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Details</label>
                                                 <textarea
                                                     value={description}
                                                     onChange={(e) => setDescription(e.target.value)}
-                                                    placeholder="Describe the criteria for resolution..."
-                                                    className="w-full h-32 bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all resize-none"
+                                                    placeholder="Resolution criteria..."
+                                                    className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
                                                     required
                                                 />
                                             </div>
 
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-zinc-300 ml-1">Market Image</label>
-                                                <div
-                                                    className={`relative border-2 border-dashed rounded-xl p-4 transition-all ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}
-                                                >
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Image (Optional)</label>
+                                                <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}>
                                                     <input
                                                         type="file"
                                                         accept="image/*"
                                                         onChange={handleImageChange}
                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                     />
-
                                                     {imagePreview ? (
-                                                        <div className="relative h-40 w-full rounded-lg overflow-hidden">
-                                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                                                                <span className="text-white font-medium text-sm">Click to change</span>
-                                                            </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <img src={imagePreview} alt="Preview" className="w-10 h-10 rounded object-cover" />
+                                                            <span className="text-xs text-zinc-400">Image selected</span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }}
+                                                                className="ml-auto text-xs text-red-400 hover:text-red-300 z-20"
+                                                            >
+                                                                Remove
+                                                            </button>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex flex-col items-center justify-center py-8 text-zinc-500">
-                                                            <Upload className="w-8 h-8 mb-3 opacity-50" />
-                                                            <p className="text-sm font-medium">Click to upload image</p>
-                                                            <p className="text-xs opacity-60 mt-1">PNG, JPG up to 5MB</p>
+                                                        <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
+                                                            <Upload className="w-4 h-4" />
+                                                            <span className="text-xs">Click to upload</span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <div className="pt-2">
-                                                <button
-                                                    type="submit"
-                                                    disabled={isSubmitting}
-                                                    className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-500/20 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
-                                                >
-                                                    {isSubmitting ? (
-                                                        <>
-                                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                                            Submitting...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            Create Request
-                                                            <Sparkles className="w-4 h-4 ml-1" />
-                                                        </>
-                                                    )}
-                                                </button>
-                                            </div>
+                                            <button
+                                                type="submit"
+                                                disabled={isSubmitting}
+                                                className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
+                                            >
+                                                {isSubmitting ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    "Submit Request"
+                                                )}
+                                            </button>
                                         </form>
                                     ) : (
-                                        <motion.div
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="flex flex-col items-center justify-center py-12 text-center"
-                                        >
-                                            <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6">
-                                                <Sparkles className="w-10 h-10" />
+                                        <div className="py-8 text-center flex flex-col items-center">
+                                            <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-3">
+                                                <Sparkles className="w-6 h-6" />
                                             </div>
-                                            <h3 className="text-2xl font-bold text-white mb-2">Request Submitted!</h3>
-                                            <p className="text-zinc-400 max-w-xs mx-auto">
-                                                Your market proposal has been sent to our team for review. You'll be notified once it's live.
-                                            </p>
-                                        </motion.div>
+                                            <h3 className="text-lg font-bold text-white">Sent!</h3>
+                                            <p className="text-xs text-zinc-400 mt-1">We'll review your market shortly.</p>
+                                        </div>
                                     )}
                                 </div>
                             </motion.div>
-                        </div>
+                        </>
                     )}
                 </AnimatePresence>,
                 document.body
