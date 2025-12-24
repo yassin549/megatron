@@ -97,7 +97,21 @@ export function RequestMarketButton() {
                         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0" />
                     )}
 
-                    <span className="relative z-10 font-bold tracking-tight">Request Market</span>
+                    <motion.span
+                        variants={{
+                            hover: {
+                                scale: [1, 1.08, 1],
+                                transition: {
+                                    duration: 1.2,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                }
+                            }
+                        }}
+                        className="relative z-10 font-bold tracking-tight"
+                    >
+                        Request Market
+                    </motion.span>
                     {isOpen ? (
                         <X className="w-5 h-5 relative z-10" />
                     ) : (
