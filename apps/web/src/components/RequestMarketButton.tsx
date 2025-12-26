@@ -173,7 +173,7 @@ export function RequestMarketButton() {
                                     className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px] flex flex-col"
                                 >
                                     {/* Header */}
-                                    <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                    <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             {mode !== 'menu' && !isSuccess && (
                                                 <button
@@ -183,13 +183,9 @@ export function RequestMarketButton() {
                                                     <ChevronLeft className="w-5 h-5" />
                                                 </button>
                                             )}
-                                            <div className="flex items-center gap-2">
-                                                <div>
-                                                    <h3 className="font-bold text-white text-sm">
-                                                        {isSuccess ? 'Received!' : 'Share Feedback'}
-                                                    </h3>
-                                                </div>
-                                            </div>
+                                            <h3 className="font-bold text-white text-[15px] tracking-tight">
+                                                {isSuccess ? 'Received!' : mode === 'market' ? 'New Asset' : mode === 'feature' ? 'Feature Request' : 'Share Feedback'}
+                                            </h3>
                                         </div>
                                         <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
                                             <X className="w-5 h-5" />
@@ -197,7 +193,7 @@ export function RequestMarketButton() {
                                     </div>
 
                                     {/* Content Area */}
-                                    <div className="relative overflow-hidden">
+                                    <div className="relative overflow-hidden bg-[#0C0F14]">
                                         <AnimatePresence mode="wait" initial={false} custom={mode === 'menu' ? -1 : 1}>
                                             {isSuccess ? (
                                                 <motion.div
@@ -217,22 +213,22 @@ export function RequestMarketButton() {
                                                     initial="enter"
                                                     animate="center"
                                                     exit="exit"
-                                                    className="p-4 space-y-3"
+                                                    className="p-3 space-y-2 h-[400px] flex flex-col justify-center"
                                                 >
                                                     <button
                                                         onClick={() => setMode('market')}
-                                                        className="w-full p-4 bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all group"
+                                                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all duration-200 group relative flex flex-col justify-center h-[120px]"
                                                     >
-                                                        <h4 className="font-bold text-white">New Measurable Asset</h4>
-                                                        <p className="text-xs text-zinc-400 mt-1">Suggest a new prediction asset</p>
+                                                        <h4 className="font-medium text-white/90 group-hover:text-white text-[15px] transition-colors">New Measurable Asset</h4>
+                                                        <p className="text-[13px] text-zinc-500 group-hover:text-zinc-400 mt-1 transition-colors">Suggest a new measurable asset</p>
                                                     </button>
 
                                                     <button
                                                         onClick={() => setMode('feature')}
-                                                        className="w-full p-4 bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all group"
+                                                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all duration-200 group relative flex flex-col justify-center h-[120px]"
                                                     >
-                                                        <h4 className="font-bold text-white">Feature Request</h4>
-                                                        <p className="text-xs text-zinc-400 mt-1">Suggest features or improvements</p>
+                                                        <h4 className="font-medium text-white/90 group-hover:text-white text-[15px] transition-colors">Feature Request</h4>
+                                                        <p className="text-[13px] text-zinc-500 group-hover:text-zinc-400 mt-1 transition-colors">Suggest features or improvements</p>
                                                     </button>
                                                 </motion.div>
                                             ) : (
@@ -243,7 +239,7 @@ export function RequestMarketButton() {
                                                     initial="enter"
                                                     animate="center"
                                                     exit="exit"
-                                                    className="p-5 max-h-[60vh] overflow-y-auto custom-scrollbar"
+                                                    className="p-5 h-[400px] overflow-y-auto custom-scrollbar flex flex-col"
                                                 >
                                                     <form onSubmit={handleSubmit} className="space-y-4">
                                                         <div className="space-y-1.5">

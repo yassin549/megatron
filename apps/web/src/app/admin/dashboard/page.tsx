@@ -175,8 +175,8 @@ export default function AdminDashboardPage() {
                                 className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-xl hover:bg-primary/20 transition-all text-left group"
                             >
                                 <div>
-                                    <p className="font-bold text-primary">Review Asset Requests</p>
-                                    <p className="text-sm text-muted-foreground">Approve or reject new market suggestions from users.</p>
+                                    <p className="font-bold text-primary">Review Feedback</p>
+                                    <p className="text-sm text-muted-foreground">Approve or reject community feedback and new markets.</p>
                                 </div>
                                 <ChevronRight className="w-5 h-5 text-primary" />
                             </Link>

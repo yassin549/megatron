@@ -55,39 +55,52 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Request not found' }, { status: 404 });
         }
 
-        // If approving, we need to create the Asset and Pool
+        // If approving, we need to check if it's a Feature Request or a Market Request
         if (status === 'approved') {
-            await db.$transaction(async (tx: any) => {
-                // 1. Create Asset
-                const asset = await tx.asset.create({
-                    data: {
-                        name: assetRequest.variableName,
-                        description: assetRequest.description,
-                        type: 'generated', // Default type for requests
-                        oracleQueries: assetRequest.suggestedQueries || [],
-                        status: 'funding',
-                        softCap: 1000,
-                        hardCap: 5000,
-                        pricingParams: { P0: 10, k: 0.05 }, // Defaults
-                    }
-                });
+            // Check if it's a feature request based on our metadata convention
+            const isFeatureRequest = Array.isArray(assetRequest.suggestedQueries) &&
+                assetRequest.suggestedQueries.some((q: any) => typeof q === 'string' && q.includes('TYPE:FEATURE'));
 
-                // 2. Create Pool
-                await tx.liquidityPool.create({
-                    data: {
-                        assetId: asset.id,
-                        status: 'funding',
-                        totalUsdc: 0,
-                        totalLPShares: 0
-                    }
-                });
-
-                // 3. Update Request Status
-                await tx.assetRequest.update({
+            if (isFeatureRequest) {
+                // For feature requests, we just update the status
+                await db.assetRequest.update({
                     where: { id: requestId },
                     data: { status, adminNotes, reviewedAt: new Date() }
                 });
-            });
+            } else {
+                // For market requests, we create the Asset and Pool
+                await db.$transaction(async (tx: any) => {
+                    // 1. Create Asset
+                    const asset = await tx.asset.create({
+                        data: {
+                            name: assetRequest.variableName,
+                            description: assetRequest.description,
+                            type: 'generated', // Default type for requests
+                            oracleQueries: assetRequest.suggestedQueries || [],
+                            status: 'funding',
+                            softCap: 1000,
+                            hardCap: 5000,
+                            pricingParams: { P0: 10, k: 0.05 }, // Defaults
+                        }
+                    });
+
+                    // 2. Create Pool
+                    await tx.liquidityPool.create({
+                        data: {
+                            assetId: asset.id,
+                            status: 'funding',
+                            totalUsdc: 0,
+                            totalLPShares: 0
+                        }
+                    });
+
+                    // 3. Update Request Status
+                    await tx.assetRequest.update({
+                        where: { id: requestId },
+                        data: { status, adminNotes, reviewedAt: new Date() }
+                    });
+                });
+            }
         } else {
             // Just update status for Rejection
             await db.assetRequest.update({
