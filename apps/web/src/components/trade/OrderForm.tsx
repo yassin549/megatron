@@ -117,13 +117,13 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                     onClick={() => setType('buy')}
                     className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    BUY {assetSymbol}
+                    BUY
                 </button>
                 <button
                     onClick={() => setType('sell')}
                     className={`flex-1 py-2.5 text-[10px] md:text-xs font-black tracking-tighter relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
-                    SELL {assetSymbol}
+                    SELL
                 </button>
             </div>
 
