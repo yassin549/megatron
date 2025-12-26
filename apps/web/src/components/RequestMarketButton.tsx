@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import {
     Plus,
     X,
@@ -46,7 +46,7 @@ export function RequestMarketButton() {
     }, [isOpen]);
 
     // Initial button animation
-    const buttonVariants = {
+    const buttonVariants: Variants = {
         initial: { scale: 0, opacity: 0 },
         animate: { scale: 1, opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
         hover: { scale: 1.05, y: -2, transition: { duration: 0.2 } },
@@ -54,7 +54,7 @@ export function RequestMarketButton() {
     };
 
     // Modal animation
-    const modalVariants = {
+    const modalVariants: Variants = {
         hidden: { opacity: 0, y: 20, scale: 0.95 },
         visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.3, duration: 0.4 } },
         exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.2 } }
@@ -116,8 +116,8 @@ export function RequestMarketButton() {
                 className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
             >
                 <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl backdrop-blur-md border transition-all duration-300 ${isOpen
-                        ? 'bg-zinc-800 text-white border-white/10'
-                        : 'bg-primary text-white border-white/10 shadow-primary/25 hover:bg-primary/90'
+                    ? 'bg-zinc-800 text-white border-white/10'
+                    : 'bg-primary text-white border-white/10 shadow-primary/25 hover:bg-primary/90'
                     }`}>
                     {!isOpen && (
                         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0" />
