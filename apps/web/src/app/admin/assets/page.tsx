@@ -118,42 +118,7 @@ export default function AdminAssetsPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
-            {/* Admin Header */}
-            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
-                                <span className="text-primary-foreground font-bold text-sm">M</span>
-                            </div>
-                            <span className="font-bold">Admin</span>
-                        </Link>
-                        <nav className="flex items-center gap-4 ml-8">
-                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Dashboard
-                            </Link>
-                            <Link href="/admin/assets" className="text-sm text-primary font-bold">
-                                Assets
-                            </Link>
-                            <Link href="/admin/requests" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Requests
-                            </Link>
-                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Users
-                            </Link>
-                        </nav>
-                    </div>
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('megatron_admin');
-                            router.push('/admin/login');
-                        }}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </header>
+
 
             <main className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">

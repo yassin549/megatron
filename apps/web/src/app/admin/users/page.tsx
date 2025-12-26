@@ -138,42 +138,7 @@ export default function AdminUsersPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            {/* Admin Header */}
-            <header className="border-b border-border bg-card">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-                                <span className="text-primary-foreground font-bold text-sm">M</span>
-                            </div>
-                            <span className="font-bold text-foreground">Admin</span>
-                        </Link>
-                        <nav className="flex items-center gap-4 ml-8">
-                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-                                Dashboard
-                            </Link>
-                            <Link href="/admin/assets" className="text-sm text-muted-foreground hover:text-foreground">
-                                Assets
-                            </Link>
-                            <Link href="/admin/requests" className="text-sm text-muted-foreground hover:text-foreground">
-                                Requests
-                            </Link>
-                            <Link href="/admin/users" className="text-sm text-primary font-medium">
-                                Users
-                            </Link>
-                        </nav>
-                    </div>
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('megatron_admin');
-                            router.push('/admin/login');
-                        }}
-                        className="text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </header>
+
 
             <main className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex items-center justify-between mb-8">

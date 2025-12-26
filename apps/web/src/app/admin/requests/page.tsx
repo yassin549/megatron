@@ -82,42 +82,7 @@ export default function AdminRequestsPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
-            {/* Admin Header */}
-            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
-                                <span className="text-primary-foreground font-bold text-sm">M</span>
-                            </div>
-                            <span className="font-bold">Admin</span>
-                        </Link>
-                        <nav className="flex items-center gap-4 ml-8">
-                            <Link href="/admin/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Dashboard
-                            </Link>
-                            <Link href="/admin/assets" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Assets
-                            </Link>
-                            <Link href="/admin/requests" className="text-sm text-primary font-bold">
-                                Requests
-                            </Link>
-                            <Link href="/admin/users" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                                Users
-                            </Link>
-                        </nav>
-                    </div>
-                    <button
-                        onClick={() => {
-                            localStorage.removeItem('megatron_admin');
-                            router.push('/admin/login');
-                        }}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </header>
+
 
             <main className="max-w-7xl mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -177,8 +142,8 @@ export default function AdminRequestsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-md border ${request.status === 'pending' || request.status === 'submitted' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                                    request.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                                request.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                    'bg-red-500/10 text-red-500 border-red-500/20'
                                                 }`}>
                                                 {request.status}
                                             </span>
