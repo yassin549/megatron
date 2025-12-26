@@ -48,31 +48,88 @@ export function RequestMarketButton() {
     // Initial button animation
     const buttonVariants: Variants = {
         initial: { scale: 0, opacity: 0 },
-        animate: { scale: 1, opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
-        hover: { scale: 1.05, y: -2, transition: { duration: 0.2 } },
-        tap: { scale: 0.95 }
+        animate: {
+            scale: 1,
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 15,
+                mass: 0.8
+            }
+        },
+        hover: {
+            scale: 1.1,
+            y: -4,
+            rotate: 2,
+            transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 10
+            }
+        },
+        tap: { scale: 0.9, rotate: -2 }
     };
 
     // Modal animation
     const modalVariants: Variants = {
-        hidden: { opacity: 0, y: 20, scale: 0.95 },
-        visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.3, duration: 0.4 } },
-        exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.2 } }
+        hidden: {
+            opacity: 0,
+            y: 50,
+            scale: 0.8,
+            rotateX: 10
+        },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotateX: 0,
+            transition: {
+                type: "spring",
+                bounce: 0.4,
+                duration: 0.5
+            }
+        },
+        exit: {
+            opacity: 0,
+            y: 50,
+            scale: 0.8,
+            rotateX: -10,
+            transition: {
+                duration: 0.3,
+                ease: "backIn"
+            }
+        }
     };
 
     // Content slide animation
-    const contentVariants = {
-        enter: (direction: number) => ({
-            x: direction > 0 ? 100 : -100,
-            opacity: 0
+    const contentVariants: Variants = {
+        enter: (direction: any) => ({
+            x: direction > 0 ? 150 : -150,
+            opacity: 0,
+            scale: 0.9,
+            rotateY: direction > 0 ? 15 : -15
         }),
         center: {
             x: 0,
-            opacity: 1
+            opacity: 1,
+            scale: 1,
+            rotateY: 0,
+            transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 25
+            }
         },
-        exit: (direction: number) => ({
-            x: direction < 0 ? 100 : -100,
-            opacity: 0
+        exit: (direction: any) => ({
+            x: direction < 0 ? 150 : -150,
+            opacity: 0,
+            scale: 0.9,
+            rotateY: direction < 0 ? 15 : -15,
+            transition: {
+                duration: 0.2
+            }
         })
     };
 
@@ -131,24 +188,21 @@ export function RequestMarketButton() {
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
+                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group"
             >
-                <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl backdrop-blur-md border transition-all duration-300 ${isOpen
-                    ? 'bg-zinc-800 text-white border-white/10'
-                    : 'bg-primary text-white border-white/10 shadow-primary/25 hover:bg-primary/90'
+                <div className={`relative flex items-center justify-center p-4 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.3)] backdrop-blur-xl border border-white/20 transition-all duration-300 ${isOpen
+                    ? 'bg-zinc-900 text-white'
+                    : 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white hover:from-emerald-400 hover:to-emerald-600'
                     }`}>
-                    {!isOpen && (
-                        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0" />
-                    )}
-
-                    <motion.span className="hidden md:inline-block relative z-10 font-bold tracking-tight">
-                        Feedback
-                    </motion.span>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 animate-[shine_1.5s_infinite]" />
 
                     {isOpen ? (
-                        <X className="w-6 h-6 md:w-5 md:h-5 relative z-10" />
+                        <X className="w-6 h-6 relative z-10" />
                     ) : (
-                        <MessageSquare className="w-6 h-6 md:w-5 md:h-5 relative z-10" />
+                        <div className="relative z-10">
+                            <MessageSquare className="w-6 h-6" />
+                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-emerald-600" />
+                        </div>
                     )}
                 </div>
             </motion.button>
@@ -158,52 +212,73 @@ export function RequestMarketButton() {
                 <AnimatePresence>
                     {isOpen && (
                         <>
-                            <div
-                                className="fixed inset-0 z-[59] bg-black/60 md:bg-black/40 backdrop-blur-sm"
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 z-[59] bg-zinc-950/60 backdrop-blur-sm"
                                 onClick={() => setIsOpen(false)}
                             />
 
-                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 px-4 md:px-0">
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-28 md:right-8 px-4 md:px-0">
                                 <motion.div
                                     variants={modalVariants}
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
                                     layout
-                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px] flex flex-col"
+                                    className="bg-zinc-900/90 border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl overflow-hidden pointer-events-auto rounded-[32px] w-full max-w-[380px] md:w-[380px] flex flex-col relative"
                                 >
+                                    {/* Gradient borders */}
+                                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+                                    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+
                                     {/* Header */}
-                                    <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                    <div className="p-6 pb-2 flex items-center justify-between relative z-10">
                                         <div className="flex items-center gap-3">
-                                            {mode !== 'menu' && !isSuccess && (
-                                                <button
-                                                    onClick={() => setMode('menu')}
-                                                    className="p-1 -ml-2 text-zinc-400 hover:text-white transition-colors"
-                                                >
-                                                    <ChevronLeft className="w-5 h-5" />
-                                                </button>
-                                            )}
-                                            <h3 className="font-bold text-white text-[15px] tracking-tight">
-                                                {isSuccess ? 'Received!' : mode === 'market' ? 'New Asset' : mode === 'feature' ? 'Feature Request' : 'Share Feedback'}
-                                            </h3>
+                                            <AnimatePresence mode="popLayout">
+                                                {mode !== 'menu' && !isSuccess && (
+                                                    <motion.button
+                                                        initial={{ opacity: 0, x: -10, rotate: -180 }}
+                                                        animate={{ opacity: 1, x: 0, rotate: 0 }}
+                                                        exit={{ opacity: 0, x: -10, rotate: 180 }}
+                                                        onClick={() => setMode('menu')}
+                                                        className="p-2 -ml-2 rounded-full hover:bg-white/5 text-zinc-400 hover:text-white transition-all"
+                                                    >
+                                                        <ChevronLeft className="w-5 h-5" />
+                                                    </motion.button>
+                                                )}
+                                            </AnimatePresence>
+                                            <motion.h3
+                                                layoutId="title"
+                                                className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 text-lg tracking-tight"
+                                            >
+                                                {isSuccess ? 'Received!' : mode === 'market' ? 'Suggest Asset' : mode === 'feature' ? 'Suggest Feature' : 'Feedback'}
+                                            </motion.h3>
                                         </div>
-                                        <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
+                                        <button
+                                            onClick={() => setIsOpen(false)}
+                                            className="p-2 -mr-2 rounded-full hover:bg-white/5 text-zinc-500 hover:text-white transition-all transform hover:rotate-90 duration-300"
+                                        >
                                             <X className="w-5 h-5" />
                                         </button>
                                     </div>
 
                                     {/* Content Area */}
-                                    <div className="relative overflow-hidden bg-[#0C0F14]">
+                                    <div className="relative overflow-hidden min-h-[420px]">
                                         <AnimatePresence mode="wait" initial={false} custom={mode === 'menu' ? -1 : 1}>
                                             {isSuccess ? (
                                                 <motion.div
                                                     key="success"
-                                                    initial={{ opacity: 0, scale: 0.9 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    className="p-8 text-center"
+                                                    initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                                                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                                    className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"
                                                 >
-                                                    <h3 className="text-lg font-bold text-white mb-2">Thanks for your input!</h3>
-                                                    <p className="text-zinc-400 text-sm">We review all requests carefully.</p>
+                                                    <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.3)] mb-6 animate-bounce">
+                                                        <Sparkles className="w-10 h-10 text-white" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Thanks!</h3>
+                                                    <p className="text-zinc-400 leading-relaxed max-w-[200px]">We'll review your {mode === 'market' ? 'asset' : 'suggestion'} and see if it fits!</p>
                                                 </motion.div>
                                             ) : mode === 'menu' ? (
                                                 <motion.div
@@ -213,22 +288,42 @@ export function RequestMarketButton() {
                                                     initial="enter"
                                                     animate="center"
                                                     exit="exit"
-                                                    className="p-3 space-y-2 h-[400px] flex flex-col justify-center"
+                                                    className="absolute inset-0 p-4 space-y-3 flex flex-col justify-center"
                                                 >
                                                     <button
                                                         onClick={() => setMode('market')}
-                                                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all duration-200 group relative flex flex-col justify-center h-[120px]"
+                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-emerald-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-emerald-500/30 rounded-2xl text-left transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] hover:-translate-y-1"
                                                     >
-                                                        <h4 className="font-medium text-white/90 group-hover:text-white text-[15px] transition-colors">New Measurable Asset</h4>
-                                                        <p className="text-[13px] text-zinc-500 group-hover:text-zinc-400 mt-1 transition-colors">Suggest a new measurable asset</p>
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300 group-hover:bg-emerald-500/20">
+                                                                <TrendingUp className="w-6 h-6 text-emerald-400 group-hover:text-emerald-300" />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-bold text-white text-lg tracking-tight mb-1 group-hover:text-emerald-300 transition-colors">New Measurable Asset</h4>
+                                                                <p className="text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors line-clamp-2">Propose a new market or asset to be added.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                                                            <ChevronLeft className="w-5 h-5 text-emerald-500 rotate-180" />
+                                                        </div>
                                                     </button>
 
                                                     <button
                                                         onClick={() => setMode('feature')}
-                                                        className="w-full p-4 bg-zinc-900/40 hover:bg-zinc-800 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all duration-200 group relative flex flex-col justify-center h-[120px]"
+                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-purple-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-purple-500/30 rounded-2xl text-left transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:-translate-y-1"
                                                     >
-                                                        <h4 className="font-medium text-white/90 group-hover:text-white text-[15px] transition-colors">Feature Request</h4>
-                                                        <p className="text-[13px] text-zinc-500 group-hover:text-zinc-400 mt-1 transition-colors">Suggest features or improvements</p>
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300 group-hover:bg-purple-500/20">
+                                                                <Lightbulb className="w-6 h-6 text-purple-400 group-hover:text-purple-300" />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-bold text-white text-lg tracking-tight mb-1 group-hover:text-purple-300 transition-colors">Feature Request</h4>
+                                                                <p className="text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors line-clamp-2">Ideas to make the platform better.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                                                            <ChevronLeft className="w-5 h-5 text-purple-500 rotate-180" />
+                                                        </div>
                                                     </button>
                                                 </motion.div>
                                             ) : (
@@ -239,41 +334,41 @@ export function RequestMarketButton() {
                                                     initial="enter"
                                                     animate="center"
                                                     exit="exit"
-                                                    className="p-5 h-[400px] overflow-y-auto custom-scrollbar flex flex-col"
+                                                    className="absolute inset-0 p-6 overflow-y-auto custom-scrollbar flex flex-col"
                                                 >
-                                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                                        <div className="space-y-1.5">
-                                                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                                                                {mode === 'market' ? 'Asset Name' : 'Feature Title'}
+                                                    <form onSubmit={handleSubmit} className="space-y-5">
+                                                        <div className="space-y-2">
+                                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">
+                                                                {mode === 'market' ? 'Asset Name?' : 'What\'s the Idea?'}
                                                             </label>
                                                             <input
                                                                 type="text"
                                                                 value={title}
                                                                 onChange={(e) => setTitle(e.target.value)}
-                                                                placeholder={mode === 'market' ? "e.g. Bitcoin 100k?" : "e.g. Dark Mode"}
-                                                                className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                                                                placeholder={mode === 'market' ? "e.g. Bitcoin 100k December" : "e.g. Dark Mode Toggle"}
+                                                                className="w-full bg-black/20 focus:bg-black/40 border-2 border-white/5 rounded-xl px-4 py-3 text-base font-bold text-white placeholder-zinc-700 focus:outline-none focus:border-white/20 transition-all"
                                                                 required
                                                                 autoFocus
                                                             />
                                                         </div>
 
-                                                        <div className="space-y-1.5">
-                                                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                                                                {mode === 'market' ? 'Resolution Criteria' : 'Details & Impact'}
+                                                        <div className="space-y-2">
+                                                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">
+                                                                {mode === 'market' ? 'Resolution Criteria' : 'Why is it useful?'}
                                                             </label>
                                                             <textarea
                                                                 value={description}
                                                                 onChange={(e) => setDescription(e.target.value)}
-                                                                placeholder={mode === 'market' ? "How do we know who wins?" : "Describe how this helps..."}
-                                                                className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                                                                placeholder={mode === 'market' ? "How do we decide the outcome? Be specific." : "Explain how this helps you..."}
+                                                                className="w-full h-32 bg-black/20 focus:bg-black/40 border-2 border-white/5 rounded-xl px-4 py-3 text-sm font-medium text-white placeholder-zinc-700 focus:outline-none focus:border-white/20 transition-all resize-none"
                                                                 required
                                                             />
                                                         </div>
 
                                                         {mode === 'market' && (
-                                                            <div className="space-y-1.5">
-                                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Icon (Optional)</label>
-                                                                <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20'}`}>
+                                                            <div className="space-y-2">
+                                                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Icon (Optional)</label>
+                                                                <div className={`relative border-2 border-dashed rounded-xl p-4 transition-all duration-300 group ${imagePreview ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/5 hover:border-white/20 hover:bg-white/5'}`}>
                                                                     <input
                                                                         type="file"
                                                                         accept="image/*"
@@ -281,29 +376,46 @@ export function RequestMarketButton() {
                                                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                                                     />
                                                                     {imagePreview ? (
-                                                                        <div className="flex items-center gap-3">
-                                                                            <img src={imagePreview} alt="Preview" className="w-8 h-8 rounded object-cover" />
-                                                                            <span className="text-xs text-zinc-400">Selected</span>
-                                                                            <button type="button" onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }} className="ml-auto text-xs text-red-400 z-20">Remove</button>
+                                                                        <div className="flex items-center gap-4">
+                                                                            <img src={imagePreview} alt="Preview" className="w-12 h-12 rounded-lg object-cover shadow-lg" />
+                                                                            <div>
+                                                                                <p className="text-xs font-bold text-emerald-400">Image Selected</p>
+                                                                                <button type="button" onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }} className="text-[10px] font-bold text-red-400 uppercase tracking-wider hover:text-red-300 relative z-20 mt-1">Remove</button>
+                                                                            </div>
                                                                         </div>
                                                                     ) : (
-                                                                        <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
-                                                                            <Upload className="w-3 h-3" />
-                                                                            <span className="text-xs">Upload</span>
+                                                                        <div className="flex items-center justify-center gap-3 text-zinc-500 py-2 group-hover:text-zinc-300 transition-colors">
+                                                                            <Upload className="w-5 h-5" />
+                                                                            <span className="text-xs font-bold uppercase tracking-wider">Upload Icon</span>
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                         )}
 
-                                                        <button
-                                                            type="submit"
-                                                            disabled={isSubmitting}
-                                                            className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
-                                                        >
-                                                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                                            {isSubmitting ? 'Sending...' : 'Submit Request'}
-                                                        </button>
+                                                        <div className="pt-2">
+                                                            <button
+                                                                type="submit"
+                                                                disabled={isSubmitting}
+                                                                className={`w-full py-4 rounded-xl font-black text-sm tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
+                                                                    ${mode === 'market'
+                                                                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 text-white shadow-emerald-900/20'
+                                                                        : 'bg-gradient-to-r from-purple-600 to-purple-400 hover:from-purple-500 hover:to-purple-300 text-white shadow-purple-900/20'
+                                                                    }`}
+                                                            >
+                                                                {isSubmitting ? (
+                                                                    <>
+                                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                                        SENDING...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Send className="w-4 h-4" />
+                                                                        SUBMIT REQUEST
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </div>
                                                     </form>
                                                 </motion.div>
                                             )}
