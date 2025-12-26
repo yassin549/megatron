@@ -59,10 +59,7 @@ export default function AdminDashboardPage() {
         }
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('megatron_admin');
-        router.push('/admin/login');
-    };
+
 
     if (loading && !stats) {
         return (
@@ -77,27 +74,7 @@ export default function AdminDashboardPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground tracking-tight antialiased">
-            {/* Header */}
-            <header className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-10">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded shadow-lg shadow-primary/20 flex items-center justify-center">
-                            <span className="text-primary-foreground font-bold text-sm">
-                                M
-                            </span>
-                        </div>
-                        <h1 className="text-xl font-bold">
-                            Megatron Admin
-                        </h1>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                        Logout
-                    </button>
-                </div>
-            </header>
+
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 py-8">
