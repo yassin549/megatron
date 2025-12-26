@@ -107,6 +107,7 @@ export default function AdminRequestsPage() {
                         <table className="w-full">
                             <thead>
                                 <tr className="text-left text-sm text-muted-foreground bg-secondary/30">
+                                    <th className="px-6 py-4 font-bold uppercase tracking-wider">Type</th>
                                     <th className="px-6 py-4 font-bold uppercase tracking-wider">Proposal</th>
                                     <th className="px-6 py-4 font-bold uppercase tracking-wider">User</th>
                                     <th className="px-6 py-4 font-bold uppercase tracking-wider">Status</th>
@@ -117,7 +118,7 @@ export default function AdminRequestsPage() {
                             <tbody className="divide-y divide-border">
                                 {filteredRequests.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="px-6 py-16 text-center text-muted-foreground">
+                                        <td colSpan={6} className="px-6 py-16 text-center text-muted-foreground">
                                             <div className="flex flex-col items-center gap-2">
                                                 <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
                                                     <Search className="w-6 h-6 opacity-20" />
@@ -127,55 +128,73 @@ export default function AdminRequestsPage() {
                                         </td>
                                     </tr>
                                 )}
-                                {filteredRequests.map((request) => (
-                                    <tr key={request.id} className="hover:bg-primary/5 transition-colors group">
-                                        <td className="px-6 py-4">
-                                            <div className="max-w-[300px]">
-                                                <div className="font-bold text-foreground">{request.variableName}</div>
-                                                <p className="text-sm text-muted-foreground line-clamp-1" title={request.description}>
-                                                    {request.description}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm font-medium">
-                                            {request.userEmail}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-md border ${request.status === 'pending' || request.status === 'submitted' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
-                                                request.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                                                    'bg-red-500/10 text-red-500 border-red-500/20'
-                                                }`}>
-                                                {request.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-muted-foreground">
-                                            {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '-'}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            {(request.status === 'pending' || request.status === 'submitted') && (
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(request.id, 'approved')}
-                                                        className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 flex items-center gap-1.5"
-                                                    >
-                                                        <Check className="w-3.5 h-3.5" />
-                                                        Approve
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleUpdateStatus(request.id, 'rejected')}
-                                                        className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 flex items-center gap-1.5"
-                                                    >
-                                                        <X className="w-3.5 h-3.5" />
-                                                        Reject
-                                                    </button>
+                                {filteredRequests.map((request) => {
+                                    // Parse type from suggestedQueries
+                                    let type = 'Market';
+                                    if (Array.isArray(request.suggestedQueries)) {
+                                        if (request.suggestedQueries.some((q: any) => typeof q === 'string' && q.includes('TYPE:FEATURE'))) {
+                                            type = 'Feature';
+                                        }
+                                    }
+
+                                    return (
+                                        <tr key={request.id} className="hover:bg-primary/5 transition-colors group">
+                                            <td className="px-6 py-4">
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${type === 'Feature'
+                                                        ? 'bg-amber-500/10 text-amber-500'
+                                                        : 'bg-blue-500/10 text-blue-500'
+                                                    }`}>
+                                                    {type}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="max-w-[300px]">
+                                                    <div className="font-bold text-foreground">{request.variableName}</div>
+                                                    <p className="text-sm text-muted-foreground line-clamp-1" title={request.description}>
+                                                        {request.description}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            {request.status !== 'pending' && request.status !== 'submitted' && (
-                                                <span className="text-xs text-muted-foreground italic">Processed</span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-medium">
+                                                {request.userEmail}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2.5 py-1 text-xs font-bold uppercase rounded-md border ${request.status === 'pending' || request.status === 'submitted' ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20' :
+                                                    request.status === 'approved' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                                                        'bg-red-500/10 text-red-500 border-red-500/20'
+                                                    }`}>
+                                                    {request.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-muted-foreground">
+                                                {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-right">
+                                                {(request.status === 'pending' || request.status === 'submitted') && (
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <button
+                                                            onClick={() => handleUpdateStatus(request.id, 'approved')}
+                                                            className="px-3 py-1.5 bg-green-500 text-white text-xs font-bold rounded-lg hover:bg-green-600 transition-all shadow-lg shadow-green-500/20 flex items-center gap-1.5"
+                                                        >
+                                                            <Check className="w-3.5 h-3.5" />
+                                                            Approve
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleUpdateStatus(request.id, 'rejected')}
+                                                            className="px-3 py-1.5 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 flex items-center gap-1.5"
+                                                        >
+                                                            <X className="w-3.5 h-3.5" />
+                                                            Reject
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {request.status !== 'pending' && request.status !== 'submitted' && (
+                                                    <span className="text-xs text-muted-foreground italic">Processed</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

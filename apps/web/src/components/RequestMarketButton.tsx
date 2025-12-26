@@ -89,14 +89,32 @@ export function RequestMarketButton() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setIsSubmitting(false);
-        setIsSuccess(true);
 
-        setTimeout(() => {
-            setIsOpen(false);
-        }, 2000);
+        try {
+            const res = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: mode,
+                    title,
+                    description,
+                    // Note: Image upload not fully implemented in API yet, skipping for now
+                })
+            });
+
+            if (res.ok) {
+                setIsSuccess(true);
+                setTimeout(() => {
+                    setIsOpen(false);
+                }, 2000);
+            } else {
+                console.error('Failed to submit feedback');
+            }
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Client-only portal
@@ -151,6 +169,7 @@ export function RequestMarketButton() {
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
+                                    layout
                                     className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px] flex flex-col"
                                 >
                                     {/* Header */}
@@ -165,19 +184,9 @@ export function RequestMarketButton() {
                                                 </button>
                                             )}
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSuccess ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'
-                                                    }`}>
-                                                    {isSuccess ? <Sparkles className="w-4 h-4" /> :
-                                                        mode === 'market' ? <TrendingUp className="w-4 h-4" /> :
-                                                            mode === 'feature' ? <Lightbulb className="w-4 h-4" /> :
-                                                                <MessageSquare className="w-4 h-4" />}
-                                                </div>
                                                 <div>
                                                     <h3 className="font-bold text-white text-sm">
-                                                        {isSuccess ? 'Received!' :
-                                                            mode === 'market' ? 'Request Market' :
-                                                                mode === 'feature' ? 'Request Feature' :
-                                                                    'Share Feedback'}
+                                                        {isSuccess ? 'Received!' : 'Share Feedback'}
                                                     </h3>
                                                 </div>
                                             </div>
@@ -212,28 +221,18 @@ export function RequestMarketButton() {
                                                 >
                                                     <button
                                                         onClick={() => setMode('market')}
-                                                        className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group flex items-start gap-4"
+                                                        className="w-full p-4 bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all group"
                                                     >
-                                                        <div className="p-2.5 bg-blue-500/20 text-blue-400 rounded-lg group-hover:scale-110 transition-transform">
-                                                            <TrendingUp className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-white">New Market</h4>
-                                                            <p className="text-xs text-zinc-400 mt-1">Suggest a new prediction asset</p>
-                                                        </div>
+                                                        <h4 className="font-bold text-white">New Measurable Asset</h4>
+                                                        <p className="text-xs text-zinc-400 mt-1">Suggest a new prediction asset</p>
                                                     </button>
 
                                                     <button
                                                         onClick={() => setMode('feature')}
-                                                        className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group flex items-start gap-4"
+                                                        className="w-full p-4 bg-zinc-900/50 hover:bg-zinc-800/80 border border-white/5 hover:border-white/10 rounded-xl text-left transition-all group"
                                                     >
-                                                        <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg group-hover:scale-110 transition-transform">
-                                                            <Lightbulb className="w-5 h-5" />
-                                                        </div>
-                                                        <div>
-                                                            <h4 className="font-bold text-white">Feature Request</h4>
-                                                            <p className="text-xs text-zinc-400 mt-1">Suggest features or improvements</p>
-                                                        </div>
+                                                        <h4 className="font-bold text-white">Feature Request</h4>
+                                                        <p className="text-xs text-zinc-400 mt-1">Suggest features or improvements</p>
                                                     </button>
                                                 </motion.div>
                                             ) : (
