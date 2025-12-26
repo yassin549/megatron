@@ -2,45 +2,78 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Upload, Sparkles, Loader2, Send } from 'lucide-react';
+import {
+    Plus,
+    X,
+    Upload,
+    Sparkles,
+    Loader2,
+    MessageSquare,
+    TrendingUp,
+    Lightbulb,
+    ChevronLeft,
+    Send
+} from 'lucide-react';
 import { createPortal } from 'react-dom';
+
+type FeedbackMode = 'menu' | 'market' | 'feature';
 
 export function RequestMarketButton() {
     const [isOpen, setIsOpen] = useState(false);
+    const [mode, setMode] = useState<FeedbackMode>('menu');
+
+    // Form States
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    // Initial button animation variants
-    const buttonVariants: any = {
+    // Reset state when closing
+    useEffect(() => {
+        if (!isOpen) {
+            setTimeout(() => {
+                setMode('menu');
+                setIsSuccess(false);
+                setTitle('');
+                setDescription('');
+                setImage(null);
+                setImagePreview(null);
+            }, 300);
+        }
+    }, [isOpen]);
+
+    // Initial button animation
+    const buttonVariants = {
         initial: { scale: 0, opacity: 0 },
         animate: { scale: 1, opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
         hover: { scale: 1.05, y: -2, transition: { duration: 0.2 } },
         tap: { scale: 0.95 }
     };
 
-    // Card animation
-    const cardVariants: any = {
-        hidden: {
-            opacity: 0,
-            y: 20,
-            scale: 0.95
+    // Modal animation
+    const modalVariants = {
+        hidden: { opacity: 0, y: 20, scale: 0.95 },
+        visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", bounce: 0.3, duration: 0.4 } },
+        exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.2 } }
+    };
+
+    // Content slide animation
+    const contentVariants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? 100 : -100,
+            opacity: 0
+        }),
+        center: {
+            x: 0,
+            opacity: 1
         },
-        visible: {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            transition: { type: "spring", bounce: 0.3, duration: 0.4 }
-        },
-        exit: {
-            opacity: 0,
-            y: 20,
-            scale: 0.95,
-            transition: { duration: 0.2 }
-        }
+        exit: (direction: number) => ({
+            x: direction < 0 ? 100 : -100,
+            opacity: 0
+        })
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,9 +81,7 @@ export function RequestMarketButton() {
             const file = e.target.files[0];
             setImage(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
+            reader.onloadend = () => setImagePreview(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
@@ -62,15 +93,10 @@ export function RequestMarketButton() {
         await new Promise(resolve => setTimeout(resolve, 1500));
         setIsSubmitting(false);
         setIsSuccess(true);
-        // Reset after success
+
         setTimeout(() => {
             setIsOpen(false);
-            setIsSuccess(false);
-            setTitle('');
-            setDescription('');
-            setImage(null);
-            setImagePreview(null);
-        }, 1500);
+        }, 2000);
     };
 
     // Client-only portal
@@ -87,160 +113,206 @@ export function RequestMarketButton() {
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-32 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
+                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] group overflow-hidden"
             >
-                <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl shadow-blue-500/20 backdrop-blur-md border border-white/10 transition-colors duration-300 ${isOpen ? 'bg-zinc-800 text-white' : 'bg-primary text-white hover:bg-blue-600'}`}>
-
-                    {/* Shimmer Effect (only when not open) */}
+                <div className={`relative flex items-center gap-2 p-3 md:px-5 md:py-3 rounded-full shadow-xl backdrop-blur-md border transition-all duration-300 ${isOpen
+                        ? 'bg-zinc-800 text-white border-white/10'
+                        : 'bg-primary text-white border-white/10 shadow-primary/25 hover:bg-primary/90'
+                    }`}>
                     {!isOpen && (
                         <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-0" />
                     )}
 
-                    <motion.span
-                        variants={{
-                            hover: {
-                                scale: [1, 1.08, 1],
-                                transition: {
-                                    duration: 1.2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }
-                            }
-                        }}
-                        className="hidden md:inline-block relative z-10 font-bold tracking-tight"
-                    >
-                        Request Market
+                    <motion.span className="hidden md:inline-block relative z-10 font-bold tracking-tight">
+                        Feedback
                     </motion.span>
+
                     {isOpen ? (
                         <X className="w-6 h-6 md:w-5 md:h-5 relative z-10" />
                     ) : (
-                        <>
-                            <Plus className="md:hidden w-6 h-6 relative z-10" />
-                            <Sparkles className="hidden md:block w-5 h-5 relative z-10 animate-pulse" />
-                        </>
+                        <MessageSquare className="w-6 h-6 md:w-5 md:h-5 relative z-10" />
                     )}
                 </div>
             </motion.button>
 
-            {/* Popover / Modal */}
+            {/* Modal */}
             {mounted && createPortal(
                 <AnimatePresence>
                     {isOpen && (
                         <>
-                            {/* Backdrop: Darker on mobile for focus - Close on click */}
                             <div
-                                className="fixed inset-0 z-[59] bg-black/60 md:bg-black/20 backdrop-blur-sm md:backdrop-blur-none"
+                                className="fixed inset-0 z-[59] bg-black/60 md:bg-black/40 backdrop-blur-sm"
                                 onClick={() => setIsOpen(false)}
                             />
 
-                            {/* Positioning Wrapper: Flex Center on Mobile, Custom on Desktop */}
-                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 md:block px-4 md:px-0">
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none md:inset-auto md:bottom-24 md:right-8 px-4 md:px-0">
                                 <motion.div
-                                    variants={cardVariants}
+                                    variants={modalVariants}
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"
-                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px]"
+                                    className="bg-[#0C0F14] border border-white/10 shadow-2xl overflow-hidden pointer-events-auto rounded-2xl w-full max-w-[380px] md:w-[380px] flex flex-col"
                                 >
                                     {/* Header */}
-                                    <div className="p-5 border-b border-white/5 bg-white/5 flex items-center justify-between relative">
-                                        <div className="flex items-center gap-2.5">
-                                            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                                                <Send className="w-4 h-4" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-white text-sm">New Market</h3>
-                                                <p className="text-xs text-zinc-400">What should we add next?</p>
+                                    <div className="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            {mode !== 'menu' && !isSuccess && (
+                                                <button
+                                                    onClick={() => setMode('menu')}
+                                                    className="p-1 -ml-2 text-zinc-400 hover:text-white transition-colors"
+                                                >
+                                                    <ChevronLeft className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isSuccess ? 'bg-green-500/20 text-green-400' : 'bg-primary/20 text-primary'
+                                                    }`}>
+                                                    {isSuccess ? <Sparkles className="w-4 h-4" /> :
+                                                        mode === 'market' ? <TrendingUp className="w-4 h-4" /> :
+                                                            mode === 'feature' ? <Lightbulb className="w-4 h-4" /> :
+                                                                <MessageSquare className="w-4 h-4" />}
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-bold text-white text-sm">
+                                                        {isSuccess ? 'Received!' :
+                                                            mode === 'market' ? 'Request Market' :
+                                                                mode === 'feature' ? 'Request Feature' :
+                                                                    'Share Feedback'}
+                                                    </h3>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        {/* Close Button */}
-                                        <button
-                                            onClick={() => setIsOpen(false)}
-                                            className="p-2 -mr-2 text-zinc-500 hover:text-white rounded-full hover:bg-white/10 transition-colors"
-                                        >
+                                        <button onClick={() => setIsOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
                                             <X className="w-5 h-5" />
                                         </button>
                                     </div>
 
-                                    {/* Body */}
-                                    <div className="p-5 max-h-[80dvh] overflow-y-auto custom-scrollbar">
-                                        {!isSuccess ? (
-                                            <form onSubmit={handleSubmit} className="space-y-4">
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Title</label>
-                                                    <input
-                                                        type="text"
-                                                        value={title}
-                                                        onChange={(e) => setTitle(e.target.value)}
-                                                        placeholder="e.g. BTC to $100k?"
-                                                        className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors"
-                                                        required
-                                                    />
-                                                </div>
+                                    {/* Content Area */}
+                                    <div className="relative overflow-hidden">
+                                        <AnimatePresence mode="wait" initial={false} custom={mode === 'menu' ? -1 : 1}>
+                                            {isSuccess ? (
+                                                <motion.div
+                                                    key="success"
+                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
+                                                    className="p-8 text-center"
+                                                >
+                                                    <h3 className="text-lg font-bold text-white mb-2">Thanks for your input!</h3>
+                                                    <p className="text-zinc-400 text-sm">We review all requests carefully.</p>
+                                                </motion.div>
+                                            ) : mode === 'menu' ? (
+                                                <motion.div
+                                                    key="menu"
+                                                    custom={-1}
+                                                    variants={contentVariants}
+                                                    initial="enter"
+                                                    animate="center"
+                                                    exit="exit"
+                                                    className="p-4 space-y-3"
+                                                >
+                                                    <button
+                                                        onClick={() => setMode('market')}
+                                                        className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group flex items-start gap-4"
+                                                    >
+                                                        <div className="p-2.5 bg-blue-500/20 text-blue-400 rounded-lg group-hover:scale-110 transition-transform">
+                                                            <TrendingUp className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-white">New Market</h4>
+                                                            <p className="text-xs text-zinc-400 mt-1">Suggest a new prediction asset</p>
+                                                        </div>
+                                                    </button>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Details</label>
-                                                    <textarea
-                                                        value={description}
-                                                        onChange={(e) => setDescription(e.target.value)}
-                                                        placeholder="Resolution criteria..."
-                                                        className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-base md:text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-primary/50 transition-colors resize-none"
-                                                        required
-                                                    />
-                                                </div>
+                                                    <button
+                                                        onClick={() => setMode('feature')}
+                                                        className="w-full p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-left transition-all group flex items-start gap-4"
+                                                    >
+                                                        <div className="p-2.5 bg-amber-500/20 text-amber-400 rounded-lg group-hover:scale-110 transition-transform">
+                                                            <Lightbulb className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-white">Feature Request</h4>
+                                                            <p className="text-xs text-zinc-400 mt-1">Suggest features or improvements</p>
+                                                        </div>
+                                                    </button>
+                                                </motion.div>
+                                            ) : (
+                                                <motion.div
+                                                    key="form"
+                                                    custom={1}
+                                                    variants={contentVariants}
+                                                    initial="enter"
+                                                    animate="center"
+                                                    exit="exit"
+                                                    className="p-5 max-h-[60vh] overflow-y-auto custom-scrollbar"
+                                                >
+                                                    <form onSubmit={handleSubmit} className="space-y-4">
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                                                                {mode === 'market' ? 'Asset Name' : 'Feature Title'}
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                value={title}
+                                                                onChange={(e) => setTitle(e.target.value)}
+                                                                placeholder={mode === 'market' ? "e.g. Bitcoin 100k?" : "e.g. Dark Mode"}
+                                                                className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors"
+                                                                required
+                                                                autoFocus
+                                                            />
+                                                        </div>
 
-                                                <div className="space-y-1.5">
-                                                    <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Image (Optional)</label>
-                                                    <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20 hover:bg-white/5'}`}>
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*"
-                                                            onChange={handleImageChange}
-                                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                        />
-                                                        {imagePreview ? (
-                                                            <div className="flex items-center gap-3">
-                                                                <img src={imagePreview} alt="Preview" className="w-10 h-10 rounded object-cover" />
-                                                                <span className="text-xs text-zinc-400">Image selected</span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }}
-                                                                    className="ml-auto text-xs text-red-400 hover:text-red-300 z-20"
-                                                                >
-                                                                    Remove
-                                                                </button>
-                                                            </div>
-                                                        ) : (
-                                                            <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
-                                                                <Upload className="w-4 h-4" />
-                                                                <span className="text-xs">Click to upload</span>
+                                                        <div className="space-y-1.5">
+                                                            <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                                                                {mode === 'market' ? 'Resolution Criteria' : 'Details & Impact'}
+                                                            </label>
+                                                            <textarea
+                                                                value={description}
+                                                                onChange={(e) => setDescription(e.target.value)}
+                                                                placeholder={mode === 'market' ? "How do we know who wins?" : "Describe how this helps..."}
+                                                                className="w-full h-24 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                                                                required
+                                                            />
+                                                        </div>
+
+                                                        {mode === 'market' && (
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Icon (Optional)</label>
+                                                                <div className={`relative border border-dashed rounded-lg p-3 transition-colors ${imagePreview ? 'border-primary/50 bg-primary/5' : 'border-white/10 hover:border-white/20'}`}>
+                                                                    <input
+                                                                        type="file"
+                                                                        accept="image/*"
+                                                                        onChange={handleImageChange}
+                                                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                                    />
+                                                                    {imagePreview ? (
+                                                                        <div className="flex items-center gap-3">
+                                                                            <img src={imagePreview} alt="Preview" className="w-8 h-8 rounded object-cover" />
+                                                                            <span className="text-xs text-zinc-400">Selected</span>
+                                                                            <button type="button" onClick={(e) => { e.preventDefault(); setImage(null); setImagePreview(null); }} className="ml-auto text-xs text-red-400 z-20">Remove</button>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div className="flex items-center justify-center gap-2 text-zinc-500 py-1">
+                                                                            <Upload className="w-3 h-3" />
+                                                                            <span className="text-xs">Upload</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         )}
-                                                    </div>
-                                                </div>
 
-                                                <button
-                                                    type="submit"
-                                                    disabled={isSubmitting}
-                                                    className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
-                                                >
-                                                    {isSubmitting ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        "Submit Request"
-                                                    )}
-                                                </button>
-                                            </form>
-                                        ) : (
-                                            <div className="py-8 text-center flex flex-col items-center">
-                                                <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-3">
-                                                    <Sparkles className="w-6 h-6" />
-                                                </div>
-                                                <h3 className="text-lg font-bold text-white">Sent!</h3>
-                                                <p className="text-xs text-zinc-400 mt-1">We'll review your market shortly.</p>
-                                            </div>
-                                        )}
+                                                        <button
+                                                            type="submit"
+                                                            disabled={isSubmitting}
+                                                            className="w-full mt-2 bg-white text-black hover:bg-zinc-200 font-bold py-3 rounded-lg disabled:opacity-70 transition-colors flex items-center justify-center gap-2 text-sm"
+                                                        >
+                                                            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                                                            {isSubmitting ? 'Sending...' : 'Submit Request'}
+                                                        </button>
+                                                    </form>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </motion.div>
                             </div>
