@@ -22,6 +22,34 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Typewriter Effect Component
+const TypewriterText = ({ text }: { text: string }) => {
+    const [displayedText, setDisplayedText] = useState('');
+    const [index, setIndex] = useState(0);
+
+    useEffect(() => {
+        setDisplayedText('');
+        setIndex(0);
+    }, [text]);
+
+    useEffect(() => {
+        if (index < text.length) {
+            const timeout = setTimeout(() => {
+                setDisplayedText((prev) => prev + text.charAt(index));
+                setIndex((prev) => prev + 1);
+            }, 20); // Speed of typing
+            return () => clearTimeout(timeout);
+        }
+    }, [index, text]);
+
+    return (
+        <span>
+            {displayedText}
+            <span className="animate-pulse text-primary">|</span>
+        </span>
+    );
+};
+
 interface AssetCardProps {
     id: string;
     name: string;
@@ -200,8 +228,27 @@ export function AssetCard({
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
+                {/* Hover Description Overlay (Typewriter Effect) */}
+                <AnimatePresence>
+                    {isHovering && (description || aiSummary) && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="absolute inset-0 bg-obsidian-900/95 p-4 z-20 flex flex-col justify-center items-center text-center rounded-2xl border border-primary/20 backdrop-blur-xl"
+                        >
+                            <div className="text-xs font-mono text-primary mb-2 uppercase tracking-widest opacity-70">
+                                {aiSummary ? 'AI ANALYSIS' : 'ASSET BRIEF'}
+                            </div>
+                            <p className="text-sm text-zinc-300 font-medium leading-relaxed">
+                                <TypewriterText text={aiSummary || description || ''} />
+                            </p>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
                 {/* Header Section */}
-                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'}`}>
+                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
                         <div className={`relative overflow-hidden rounded-xl bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
                             }`}>
@@ -213,6 +260,7 @@ export function AssetCard({
                                     height={48}
                                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
                                     onError={() => setImageError(true)}
+                                    unoptimized={imageUrl.startsWith('/uploads')} // Fix for local uploads
                                 />
                             ) : (
                                 <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
@@ -244,8 +292,7 @@ export function AssetCard({
                 </div>
 
                 {/* Metrics Section */}
-                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'
-                    }`}>
+                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
                         <div className="text-lg font-bold text-white font-mono tracking-tight">
