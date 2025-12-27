@@ -139,6 +139,7 @@ export function AssetCard({
     viewMode = 'grid',
     aiConfidence
 }: AssetCardProps) {
+    const [imageError, setImageError] = useState(false);
     const isPositive = change24h >= 0;
     const Icon = TYPE_ICONS[type] || LayoutGrid;
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || false);
@@ -204,16 +205,17 @@ export function AssetCard({
                     <div className="relative">
                         <div className={`relative overflow-hidden rounded-xl bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
                             }`}>
-                            {imageUrl ? (
+                            {imageUrl && !imageError ? (
                                 <Image
                                     src={imageUrl}
                                     alt={name}
                                     width={48}
                                     height={48}
                                     className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                                    onError={() => setImageError(true)}
                                 />
                             ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
+                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
                                     <Icon className="w-6 h-6" />
                                 </div>
                             )}

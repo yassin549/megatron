@@ -22,7 +22,7 @@ const INITIAL_ASSETS = [
         pricingParams: { P0: 12.0, k: 0.001 },
         softCap: 12000,
         hardCap: 60000,
-        // Image generation failed previously, using placeholder or themed color in UI
+        imageUrl: '/assets/market-images/global_temp_art_1766049359120.png', // Using existing placeholder
     },
 ];
 
