@@ -93,9 +93,30 @@ export async function GET(): Promise<NextResponse> {
 
                 const currentPrice = asset.lastDisplayPrice?.toNumber() ??
                     (asset.pricingParams as { P0?: number })?.P0 ?? 10;
-                const oldPrice = oldPriceTick?.priceDisplay?.toNumber() ?? currentPrice;
-                const change24h = oldPrice > 0
-                    ? ((currentPrice - oldPrice) / oldPrice) * 100
+
+                // Improved oldPrice logic for accurate growth display on new assets
+                let oldPrice = oldPriceTick?.priceDisplay?.toNumber();
+
+                if (oldPrice === undefined) {
+                    // Fallback 1: Use P0 from pricingParams (initial price)
+                    oldPrice = (asset.pricingParams as { P0?: number })?.P0;
+                }
+
+                if (oldPrice === undefined) {
+                    // Fallback 2: Use the oldest available tick in history
+                    const oldestTick = await db.priceTick.findFirst({
+                        where: { assetId: asset.id },
+                        orderBy: { timestamp: 'asc' },
+                        select: { priceDisplay: true }
+                    });
+                    oldPrice = oldestTick?.priceDisplay?.toNumber();
+                }
+
+                // Final fallback if still null (extremely rare)
+                const effectiveOldPrice = oldPrice ?? currentPrice;
+
+                const change24h = effectiveOldPrice > 0
+                    ? ((currentPrice - effectiveOldPrice) / effectiveOldPrice) * 100
                     : 0;
 
                 const lastFundamental = asset.lastFundamental?.toNumber() ?? null;
