@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@megatron/database';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
     request: Request,
     { params }: { params: { id: string } }
@@ -51,7 +53,8 @@ export async function GET(
         }
 
         // Get price 24h ago for change
-        const oldPriceTick = await db.priceTick.findFirst({
+        // Get price 24h ago for change
+        let oldPriceTick = await db.priceTick.findFirst({
             where: {
                 assetId: id,
                 timestamp: { lte: oneDayAgo },
@@ -59,6 +62,15 @@ export async function GET(
             orderBy: { timestamp: 'desc' },
             select: { priceDisplay: true },
         });
+
+        // If asset is new (<24h), use the earliest available tick as the baseline
+        if (!oldPriceTick) {
+            oldPriceTick = await db.priceTick.findFirst({
+                where: { assetId: id },
+                orderBy: { timestamp: 'asc' },
+                select: { priceDisplay: true },
+            });
+        }
 
         // Get latest oracle logs (LLM reasoning)
         const oracleLogs = await db.oracleLog.findMany({

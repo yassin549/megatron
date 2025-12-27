@@ -57,7 +57,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     useEffect(() => {
         async function fetchAsset() {
             try {
-                const res = await fetch(`/api/assets/${params.id}`);
+                const res = await fetch(`/api/assets/${params.id}`, { cache: 'no-store' });
                 if (res.ok) {
                     const data = await res.json();
 
