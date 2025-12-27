@@ -4,44 +4,48 @@
 
 @layer base {
   :root {
-    /* Premium Deep Slate Theme */
-    --background: 220 18% 6%;
-    /* #0C0F14 */
-    --foreground: 220 20% 98%;
-    /* #F7F8F9 */
+    /* Deep Obsidian Theme - Base Variables */
+    
+    /* Background: Very dark blue-grey/black */
+    --background: 222 47% 4%; /* #050912 */
+    
+    /* Foreground: Off-white/Silver */
+    --foreground: 210 40% 98%;
 
-    --card: 220 16% 9%;
-    /* #13171D */
-    --card-foreground: 220 20% 98%;
+    /* Card: Slightly lighter dark */
+    --card: 222 47% 7%; /* #090E1A */
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 16% 9%;
-    --popover-foreground: 220 20% 98%;
+    /* Popover */
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
 
+    /* Primary: Electric Blue */
     --primary: 217 91% 60%;
-    /* #3B82F6 Electric Blue */
-    --primary-foreground: 220 20% 98%;
+    --primary-foreground: 222 47% 4%;
 
-    --secondary: 220 14% 18%;
-    /* #282C35 */
-    --secondary-foreground: 220 20% 98%;
+    /* Secondary: Deep Purple/Slate */
+    --secondary: 217 33% 15%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 14% 14%;
-    /* #1F232B */
-    --muted-foreground: 220 10% 65%;
+    /* Muted: Subtle background elements */
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 220 20% 98%;
+    /* Accent: Neon Purple */
+    --accent: 270 100% 60%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84% 60%;
-    /* #EF4444 */
+    /* Destructive: Neon Rose */
+    --destructive: 345 80% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 14% 16%;
-    /* #23272E */
-    --input: 220 14% 16%;
-    --ring: 217 91% 60%;
+    /* Borders & Inputs */
+    --border: 217 33% 15%; /* #1A2230 */
+    --input: 217 33% 15%;
+    --ring: 224 76% 48%;
 
-    --radius: 0.75rem;
+    --radius: 0.75rem; /* 12px */
   }
 }
 
@@ -51,25 +55,27 @@
   }
 
   body {
-    @apply bg-background text-foreground tracking-tight antialiased selection:bg-primary/20 selection:text-primary;
-    background-image:
-      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 80% 10%, rgba(139, 92, 246, 0.05) 0%, transparent 30%);
-    background-attachment: fixed;
+    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
+    /* Cosmic Grid Background */
+    background-image: 
+        radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    background-position: center top;
   }
 
-  /* Smooth Scrollbar */
+  /* Custom Scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
-
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    @apply bg-secondary rounded-full hover:bg-secondary/80 transition-colors;
+    @apply bg-secondary rounded-full hover:bg-primary/50 transition-colors;
   }
 }
 
@@ -77,89 +83,63 @@
   .text-balance {
     text-wrap: balance;
   }
-
+  
+  /* Glassmorphism Classes */
   .glass-panel {
-    @apply bg-card/60 backdrop-blur-2xl border border-white/10 shadow-2xl;
+    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
   }
-
+  
   .glass-card {
-    @apply bg-card/40 backdrop-blur-xl border border-white/5 shadow-lg transition-all duration-300 hover:bg-card/60 hover:border-white/10;
+    @apply bg-card/40 backdrop-blur-lg border border-white/5 shadow-lg transition-all duration-300 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
   }
-
+  
   .glass-nav {
-    @apply bg-background/80 backdrop-blur-2xl border-t border-white/10;
+    @apply bg-background/80 backdrop-blur-2xl border-b border-white/5;
   }
 
+  /* Text Effects */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400;
+  }
+  
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500;
+  }
+
+  /* Animation Utilities */
   .animate-in {
-    animation: animate-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: animate-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
-
+  
   @keyframes animate-in {
     from {
       opacity: 0;
-      transform: translateY(8px) scale(0.98);
+      transform: translateY(10px);
     }
-
     to {
       opacity: 1;
-      transform: translateY(0) scale(1);
+      transform: translateY(0);
     }
   }
 
-  /* Mobile Utilities */
+  .fill-mode-backwards {
+    animation-fill-mode: backwards;
+  }
+
+  /* Hide scrollbar but keep functionality */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
-  .animate-blink {
-    animation: blink 1s step-end infinite;
-  }
-
-  @keyframes blink {
-
-    0%,
-    100% {
-      opacity: 1;
-    }
-
-    50% {
-      opacity: 0;
-    }
-  }
-
-  .animate-breathe {
-    animation: breathe 4s ease-in-out infinite;
-  }
-
-  @keyframes breathe {
-
-    0%,
-    100% {
-      transform: scale(1);
-    }
-
-    50% {
-      transform: scale(0.95);
-    }
-  }
 }
 
 @layer base {
-  html {
-    -webkit-text-size-adjust: 100%;
-  }
-
-  /* Prevent iOS zoom on inputs */
+  /* Mobile Input Zoom Fix */
   @media screen and (max-width: 768px) {
-
-    input,
-    select,
-    textarea {
+    input, select, textarea {
       font-size: 16px !important;
     }
   }

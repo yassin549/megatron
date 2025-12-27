@@ -50,7 +50,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className="glass-nav sticky top-16 z-40 transition-all duration-300">
+        <div className="glass-nav sticky top-16 z-40 transition-all duration-300 border-b border-white/5">
             <div className="max-w-[1400px] mx-auto px-4">
                 <div
                     ref={scrollRef}
@@ -69,17 +69,22 @@ export function SubNavbar() {
                                     href={`/?category=${category.id}`}
                                     data-active={isActive}
                                     className={`group flex items-center px-4 py-2.5 md:px-6 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
-                                        ? 'border-blue-500 text-white'
-                                        : 'border-transparent text-gray-500 hover:text-gray-200'
+                                        ? 'border-primary text-white shadow-[0_4px_12px_-2px_rgba(59,130,246,0.3)]'
+                                        : 'border-transparent text-muted-foreground hover:text-white'
                                         }`}
                                 >
-                                    <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-110 inline-block pointer-events-none">
+                                    <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-105 inline-block pointer-events-none">
                                         {category.name}
                                     </span>
 
                                     {/* Animated underline for non-active items */}
                                     {!isActive && (
-                                        <div className="absolute inset-x-4 bottom-0 h-[2px] bg-blue-500/0 group-hover:bg-blue-500/40 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                        <div className="absolute inset-x-4 bottom-0 h-[2px] bg-primary/0 group-hover:bg-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                    )}
+
+                                    {/* Active Glow Effect */}
+                                    {isActive && (
+                                        <div className="absolute inset-0 bg-primary/5 blur-md -z-10 rounded-lg"></div>
                                     )}
                                 </Link>
                             </motion.div>

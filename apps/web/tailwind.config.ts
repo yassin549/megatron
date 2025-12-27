@@ -12,8 +12,19 @@ const config: Config = {
                 'xs': '475px',
             },
             colors: {
+                // Base
                 background: "hsl(var(--background))",
                 foreground: "hsl(var(--foreground))",
+
+                // Functional
+                card: {
+                    DEFAULT: "hsl(var(--card))",
+                    foreground: "hsl(var(--card-foreground))",
+                },
+                popover: {
+                    DEFAULT: "hsl(var(--popover))",
+                    foreground: "hsl(var(--popover-foreground))",
+                },
                 primary: {
                     DEFAULT: "hsl(var(--primary))",
                     foreground: "hsl(var(--primary-foreground))",
@@ -34,20 +45,58 @@ const config: Config = {
                     DEFAULT: "hsl(var(--destructive))",
                     foreground: "hsl(var(--destructive-foreground))",
                 },
+
+                // Border/Input
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
-                card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
+
+                // Custom "Deep Obsidian" Palette
+                obsidian: {
+                    950: "#020408", // Main background
+                    900: "#06080F", // Secondary background
+                    800: "#0F131D", // Card background
+                    700: "#1A202E", // Hover state
+                    600: "#273042", // Border
                 },
-                popover: {
-                    DEFAULT: "hsl(var(--popover))",
-                    foreground: "hsl(var(--popover-foreground))",
-                },
+                neon: {
+                    blue: "#3B82F6",    // Core Brand
+                    purple: "#8B5CF6",  // Secondary Brand
+                    cyan: "#06B6D4",    // Highlights
+                    emerald: "#10B981", // Success
+                    rose: "#F43F5E",    // Error/Short
+                }
             },
-            borderColor: {
-                DEFAULT: "hsl(var(--border))",
+            borderRadius: {
+                lg: "var(--radius)",
+                md: "calc(var(--radius) - 2px)",
+                sm: "calc(var(--radius) - 4px)",
+            },
+            animation: {
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+                "glow": "glow 2s ease-in-out infinite alternate",
+                "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+            },
+            keyframes: {
+                "accordion-down": {
+                    from: { height: "0" },
+                    to: { height: "var(--radix-accordion-content-height)" },
+                },
+                "accordion-up": {
+                    from: { height: "var(--radix-accordion-content-height)" },
+                    to: { height: "0" },
+                },
+                glow: {
+                    "0%": { boxShadow: "0 0 5px rgba(59, 130, 246, 0.5)" },
+                    "100%": { boxShadow: "0 0 20px rgba(59, 130, 246, 0.8), 0 0 10px rgba(139, 92, 246, 0.6)" },
+                },
+                "border-beam": {
+                    "100%": {
+                        "offset-distance": "100%",
+                    },
+                },
             },
         },
     },

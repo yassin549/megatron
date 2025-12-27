@@ -52,8 +52,8 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
     if (stats.isLoading) {
         return (
             <div className="flex items-center gap-6 animate-pulse">
-                <div className="h-4 w-24 bg-secondary/50 rounded" />
-                {!isMobile && <div className="h-4 w-20 bg-secondary/50 rounded" />}
+                <div className="h-4 w-24 bg-white/10 rounded" />
+                {!isMobile && <div className="h-4 w-20 bg-white/10 rounded" />}
             </div>
         );
     }
@@ -64,7 +64,7 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
                 <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                     Cash
                 </span>
-                <span className="text-sm font-bold text-green-500">
+                <span className="text-sm font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
                     ${parseFloat(stats.walletHotBalance).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </span>
             </div>
@@ -73,25 +73,25 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
 
     return (
         <div className="flex items-center gap-6 mr-4">
-            <div className="flex flex-col items-end">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <div className="flex flex-col items-end group cursor-default">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold group-hover:text-primary transition-colors">
                     Portfolio
                 </span>
-                <span className="text-sm font-bold text-green-500">
+                <span className="text-sm font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
                     ${parseFloat(stats.portfolioValue).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className="flex flex-col items-end">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <div className="flex flex-col items-end group cursor-default">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold group-hover:text-primary transition-colors">
                     Cash
                 </span>
-                <span className="text-sm font-bold text-green-500">
+                <span className="text-sm font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
                     ${parseFloat(stats.walletHotBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
             </div>
             <Link
                 href="/wallet"
-                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors ml-2"
+                className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 ml-2 border border-white/10"
             >
                 Deposit
             </Link>
