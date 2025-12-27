@@ -136,7 +136,8 @@ export function AssetCard({
     isAuthenticated,
     holders = 0,
     priceHistory,
-    viewMode = 'grid'
+    viewMode = 'grid',
+    aiConfidence
 }: AssetCardProps) {
     const isPositive = change24h >= 0;
     const Icon = TYPE_ICONS[type] || LayoutGrid;
@@ -296,8 +297,8 @@ export function AssetCard({
                         <button
                             onClick={handleToggleBookmark}
                             className={`p-1.5 rounded-lg transition-all ${isBookmarked
-                                    ? 'text-neon-blue bg-blue-500/10'
-                                    : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                                ? 'text-neon-blue bg-blue-500/10'
+                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
