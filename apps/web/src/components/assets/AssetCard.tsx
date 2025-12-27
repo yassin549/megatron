@@ -287,7 +287,7 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h3 className={`font-bold text-white truncate group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
+                        <h3 className={`font-bold text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
                             }`}>
                             {name}
                         </h3>
