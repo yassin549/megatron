@@ -23,32 +23,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Typewriter Effect Component
-const TypewriterText = ({ text }: { text: string }) => {
-    const [displayedText, setDisplayedText] = useState('');
-    const [index, setIndex] = useState(0);
 
-    useEffect(() => {
-        setDisplayedText('');
-        setIndex(0);
-    }, [text]);
-
-    useEffect(() => {
-        if (index < text.length) {
-            const timeout = setTimeout(() => {
-                setDisplayedText((prev) => prev + text.charAt(index));
-                setIndex((prev) => prev + 1);
-            }, 20); // Speed of typing
-            return () => clearTimeout(timeout);
-        }
-    }, [index, text]);
-
-    return (
-        <span>
-            {displayedText}
-            <span className="animate-pulse text-primary">|</span>
-        </span>
-    );
-};
 
 interface AssetCardProps {
     id: string;
@@ -241,7 +216,7 @@ export function AssetCard({
                                 ASSET BRIEF
                             </div>
                             <p className="text-sm text-zinc-300 font-medium leading-relaxed">
-                                <TypewriterText text={description} />
+                                {description}
                             </p>
                         </motion.div>
                     )}
