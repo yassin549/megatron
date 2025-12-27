@@ -218,6 +218,16 @@ export function AssetCard({
                             <p className="text-sm text-zinc-300 font-medium leading-relaxed">
                                 {description}
                             </p>
+                            <button
+                                onClick={handleToggleBookmark}
+                                className={`mt-4 p-2.5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold tracking-wider border ${isBookmarked
+                                    ? 'text-primary bg-primary/10 border-primary/20'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border-white/10'
+                                    }`}
+                            >
+                                <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
+                                {isBookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
+                            </button>
                         </motion.div>
                     )}
                 </AnimatePresence>
