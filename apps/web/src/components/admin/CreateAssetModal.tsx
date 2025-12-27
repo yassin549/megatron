@@ -32,6 +32,23 @@ export function CreateAssetModal({ onClose, onSuccess, initialData }: CreateAsse
         imageUrl: ''
     });
 
+    const [categories, setCategories] = useState<string[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/categories');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data.categories || []);
+                }
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     useEffect(() => {
         if (initialData) {
             setFormData({
@@ -243,14 +260,14 @@ export function CreateAssetModal({ onClose, onSuccess, initialData }: CreateAsse
                         <select
                             value={formData.type}
                             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                            className="w-full bg-zinc-900 border border-white/5 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full bg-zinc-900 border border-white/5 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 capitalize"
                         >
-                            <option value="social">Social</option>
-                            <option value="economics">Economics</option>
-                            <option value="sports">Sports</option>
-                            <option value="crypto">Crypto</option>
-                            <option value="politics">Politics</option>
-                            <option value="science">Science</option>
+                            {categories.map((cat) => (
+                                <option key={cat} value={cat.toLowerCase()}>
+                                    {cat}
+                                </option>
+                            ))}
+                            {categories.length === 0 && <option value="social">Social</option>}
                         </select>
                     </div>
 
