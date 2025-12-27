@@ -230,7 +230,7 @@ export function AssetCard({
 
                 {/* Hover Description Overlay (Typewriter Effect) */}
                 <AnimatePresence>
-                    {isHovering && (description || aiSummary) && (
+                    {isHovering && description && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -238,10 +238,10 @@ export function AssetCard({
                             className="absolute inset-0 bg-obsidian-900/95 p-4 z-20 flex flex-col justify-center items-center text-center rounded-2xl border border-primary/20 backdrop-blur-xl"
                         >
                             <div className="text-xs font-mono text-primary mb-2 uppercase tracking-widest opacity-70">
-                                {aiSummary ? 'AI ANALYSIS' : 'ASSET BRIEF'}
+                                ASSET BRIEF
                             </div>
                             <p className="text-sm text-zinc-300 font-medium leading-relaxed">
-                                <TypewriterText text={aiSummary || description || ''} />
+                                <TypewriterText text={description} />
                             </p>
                         </motion.div>
                     )}
@@ -252,21 +252,34 @@ export function AssetCard({
                     <div className="relative">
                         <div className={`relative overflow-hidden rounded-xl bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
                             }`}>
+                            {/* Fallback Icon (Always rendered underneath) */}
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
+                                <Icon className="w-6 h-6" />
+                            </div>
+
+                            {/* Image Layer */}
                             {imageUrl && !imageError ? (
                                 <Image
                                     src={imageUrl}
                                     alt={name}
                                     width={48}
                                     height={48}
-                                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-500"
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-500"
                                     onError={() => setImageError(true)}
-                                    unoptimized={imageUrl.startsWith('/uploads')} // Fix for local uploads
+                                    unoptimized={imageUrl.startsWith('/uploads')}
                                 />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
-                                    <Icon className="w-6 h-6" />
-                                </div>
-                            )}
+                            ) : imageUrl && imageError ? (
+                                // Fallback to standard img tag if next/image fails
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={imageUrl}
+                                    alt={name}
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-500"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            ) : null}
                         </div>
                         {isFunding && (
                             <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-obsidian-800 animate-pulse" />
@@ -355,6 +368,6 @@ export function AssetCard({
                     </div>
                 )}
             </Link>
-        </motion.div>
+        </motion.div >
     );
 }
