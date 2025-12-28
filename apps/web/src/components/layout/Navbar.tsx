@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
@@ -20,6 +21,11 @@ export function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [bookmarks, setBookmarks] = useState<any[]>([]);
     const [loadingBookmarks, setLoadingBookmarks] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // Fetch Bookmarks
     useEffect(() => {
@@ -265,156 +271,159 @@ export function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile Menu Drawer (Complete Recode) */}
-            <AnimatePresence>
-                {isMobileMenuOpen && (
-                    <>
-                        {/* High-Performance Backdrop */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm md:hidden"
-                        />
+            {/* Mobile Menu Portal (Final Definitive Fix) */}
+            {mounted && createPortal(
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <div className="fixed inset-0 z-[9999] md:hidden">
+                            {/* Fast Backdrop */}
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                            />
 
-                        {/* Slide-out Drawer */}
-                        <motion.div
-                            initial={{ x: "100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "100%" }}
-                            transition={{ type: 'spring', damping: 28, stiffness: 220, mass: 0.8 }}
-                            className="fixed inset-y-0 right-0 z-[101] w-full max-w-[320px] bg-obsidian-950 border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] flex flex-col md:hidden"
-                        >
-                            {/* Drawer Header */}
-                            <div className="h-20 flex items-center justify-between px-6 border-b border-white/5 bg-white/[0.02]">
-                                <div className="flex items-center gap-3">
-                                    <div className="relative w-8 h-8">
-                                        <Image
-                                            src="/images/megatron-logo.jpg"
-                                            alt="Megatron Logo"
-                                            fill
-                                            className="object-contain mix-blend-screen filter brightness-110 contrast-125"
-                                        />
-                                    </div>
-                                    <span className="font-bold text-xl text-white tracking-tighter">
-                                        MEGATRON
-                                    </span>
-                                </div>
-                                <button
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 -mr-2 text-zinc-400 hover:text-white transition-colors bg-white/5 rounded-full"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-
-                            {/* Drawer Scrollable Content */}
-                            <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
-                                {/* 1. Account Identity */}
-                                {status === 'authenticated' ? (
-                                    <div className="relative p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-primary/20">
-                                                {session?.user?.email?.[0].toUpperCase()}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-white truncate text-sm">{session?.user?.email}</p>
-                                                <p className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
-                                                    <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                                                    Verified Trader
-                                                </p>
-                                            </div>
+                            {/* Solid Slide-out Drawer */}
+                            <motion.div
+                                initial={{ x: "100%" }}
+                                animate={{ x: 0 }}
+                                exit={{ x: "100%" }}
+                                transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
+                                className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-obsidian-950 border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
+                            >
+                                {/* Drawer Header */}
+                                <div className="h-20 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/5 bg-white/[0.02]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative w-8 h-8">
+                                            <Image
+                                                src="/images/megatron-logo.jpg"
+                                                alt="Megatron Logo"
+                                                fill
+                                                className="object-contain mix-blend-screen filter brightness-110 contrast-125"
+                                            />
                                         </div>
+                                        <span className="font-bold text-xl text-white tracking-tighter">
+                                            MEGATRON
+                                        </span>
                                     </div>
-                                ) : (
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Link
-                                            href="/login"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center justify-center py-3 rounded-xl border border-white/10 font-bold text-xs text-white hover:bg-white/5 active:scale-95 transition-all text-center"
-                                        >
-                                            LOGIN
-                                        </Link>
-                                        <Link
-                                            href="/signup"
-                                            onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center justify-center py-3 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-95 transition-all text-center"
-                                        >
-                                            JOIN
-                                        </Link>
-                                    </div>
-                                )}
-
-                                {/* 2. Enhanced Search */}
-                                <div className="space-y-3">
-                                    <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-1">Navigation</h3>
-                                    <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative group">
-                                        <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-                                        <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Search markets..."
-                                            className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/[0.05] transition-all"
-                                        />
-                                    </form>
+                                    <button
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="p-2 -mr-2 text-zinc-400 hover:text-white transition-colors bg-white/5 rounded-full"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
                                 </div>
 
-                                {/* 3. Grouped Links */}
-                                <div className="space-y-1">
-                                    <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
-                                        <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
-                                            <TrendingUp className="w-5 h-5 text-neon-purple opacity-70 group-hover:opacity-100" />
-                                            Portfolio
+                                {/* Drawer Scrollable Content */}
+                                <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
+                                    {/* 1. Account Identity */}
+                                    {status === 'authenticated' ? (
+                                        <div className="relative p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-primary/20">
+                                                    {session?.user?.email?.[0].toUpperCase()}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="font-bold text-white truncate text-sm">{session?.user?.email}</p>
+                                                    <p className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
+                                                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                                                        Verified Trader
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
-                                    </Link>
-                                    <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
-                                        <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
-                                            <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
-                                            Leaderboard
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Link
+                                                href="/login"
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="flex items-center justify-center py-4 rounded-xl border border-white/10 font-bold text-xs text-white hover:bg-white/5 active:scale-95 transition-all text-center"
+                                            >
+                                                LOGIN
+                                            </Link>
+                                            <Link
+                                                href="/signup"
+                                                onClick={() => setIsMobileMenuOpen(false)}
+                                                className="flex items-center justify-center py-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary/90 shadow-lg shadow-primary/20 active:scale-95 transition-all text-center"
+                                            >
+                                                JOIN
+                                            </Link>
                                         </div>
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
-                                    </Link>
-                                    {status === 'authenticated' && (
-                                        <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                    )}
+
+                                    {/* 2. Enhanced Search */}
+                                    <div className="space-y-3">
+                                        <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-1">Navigation</h3>
+                                        <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative group">
+                                            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                                            <input
+                                                type="text"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                placeholder="Search markets..."
+                                                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/[0.05] transition-all"
+                                            />
+                                        </form>
+                                    </div>
+
+                                    {/* 3. Grouped Links */}
+                                    <div className="space-y-1">
+                                        <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
                                             <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
-                                                <Bookmark className="w-5 h-5 text-neon-blue opacity-70 group-hover:opacity-100" />
-                                                Watchlist
+                                                <TrendingUp className="w-5 h-5 text-neon-purple opacity-70 group-hover:opacity-100" />
+                                                Portfolio
                                             </div>
-                                            <div className="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-bold">
-                                                {bookmarks.length}
-                                            </div>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
                                         </Link>
+                                        <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                                                <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
+                                                Leaderboard
+                                            </div>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                        </Link>
+                                        {status === 'authenticated' && (
+                                            <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                                <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                                                    <Bookmark className="w-5 h-5 text-neon-blue opacity-70 group-hover:opacity-100" />
+                                                    Watchlist
+                                                </div>
+                                                <div className="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-bold">
+                                                    {bookmarks.length}
+                                                </div>
+                                            </Link>
+                                        )}
+                                    </div>
+
+                                    {/* 4. Bottom Actions */}
+                                    {status === 'authenticated' && (
+                                        <div className="pt-6 border-t border-white/5">
+                                            <Link
+                                                href="/api/auth/signout"
+                                                className="flex items-center gap-3 w-full p-4 rounded-xl text-sm font-bold text-neon-rose hover:bg-neon-rose/10 transition-colors"
+                                            >
+                                                <LogOut className="w-5 h-5" />
+                                                SIGN OUT
+                                            </Link>
+                                        </div>
                                     )}
                                 </div>
 
-                                {/* 4. Bottom Actions */}
-                                {status === 'authenticated' && (
-                                    <div className="pt-6 border-t border-white/5">
-                                        <Link
-                                            href="/api/auth/signout"
-                                            className="flex items-center gap-3 w-full p-4 rounded-xl text-sm font-bold text-neon-rose hover:bg-neon-rose/10 transition-colors"
-                                        >
-                                            <LogOut className="w-5 h-5" />
-                                            SIGN OUT
-                                        </Link>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Sidebar Footer */}
-                            <div className="p-6 bg-white/[0.01] border-t border-white/5">
-                                <p className="text-[10px] text-zinc-600 font-mono text-center tracking-tighter">
-                                    FARADAY v1.4.2 // NEURAL ENGINE ACTIVE
-                                </p>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
-            <nav className="glass-nav md:hidden"></nav>
+                                {/* Sidebar Footer */}
+                                <div className="p-6 bg-white/[0.01] border-t border-white/5 flex-shrink-0">
+                                    <p className="text-[10px] text-zinc-600 font-mono text-center tracking-tighter">
+                                        FARADAY v1.4.2 // NEURAL ENGINE ACTIVE
+                                    </p>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </nav>
     );
 }
