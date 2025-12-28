@@ -28,9 +28,11 @@ export default function RootLayout({
             <body className={inter.className}>
                 <Providers>
                     <InitialLoader />
-                    <div className="min-h-screen bg-background text-foreground">
+                    <div className="min-h-screen bg-background text-foreground flex flex-col">
                         <Navbar />
-                        {children}
+                        <div className="flex-1 pb-28 md:pb-0">
+                            {children}
+                        </div>
                         <MobileBottomNav />
                         <RequestMarketButton />
                     </div>
