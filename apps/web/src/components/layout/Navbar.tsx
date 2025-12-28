@@ -278,13 +278,13 @@ export function Navbar() {
                             className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl md:hidden"
                         />
 
-                        {/* Drawer / Card */}
+                        {/* Slide-out Drawer */}
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="fixed top-20 right-4 z-[101] w-[calc(100vw-2rem)] max-w-sm bg-obsidian-950/95 backdrop-blur-3xl border border-white/10 shadow-2xl shadow-black/50 rounded-3xl flex flex-col max-h-[80vh] overflow-hidden"
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed inset-y-0 right-0 z-[101] w-full max-w-sm bg-obsidian-950/98 backdrop-blur-3xl border-l border-white/10 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] flex flex-col"
                         >
                             {/* Header */}
                             <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 bg-white/10">
@@ -309,8 +309,8 @@ export function Navbar() {
                                 </button>
                             </div>
 
-                            {/* Content */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-24">
+                            {/* Content Area */}
+                            <div className="flex-1 overflow-y-auto p-6 space-y-10 pb-32">
                                 {/* Search */}
                                 <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative">
                                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

@@ -10,7 +10,7 @@ export function SubNavbar() {
     const currentCategory = searchParams.get('category') || 'all';
     const scrollRef = useRef<HTMLDivElement>(null);
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([
-        { id: 'all', name: 'All' }
+        { id: 'all', name: 'Trending' }
     ]);
 
     useEffect(() => {
@@ -25,7 +25,7 @@ export function SubNavbar() {
                     }));
 
                     const filteredDynamic = dynamicCats.filter((c: any) => c.id !== 'all');
-                    setCategories([{ id: 'all', name: 'All' }, ...filteredDynamic]);
+                    setCategories([{ id: 'all', name: 'Trending' }, ...filteredDynamic]);
                 }
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
