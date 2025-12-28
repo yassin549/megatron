@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { db, Prisma } from '@megatron/database';
+import { db } from '@megatron/database';
+import { enrichAssets } from '@/lib/assets';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,7 +19,7 @@ export async function GET(): Promise<NextResponse> {
             userBookmarks = new Set(bookmarks.map(b => b.assetId));
         }
 
-        // Fetch all assets with their pools
+        // Fetch all assets with their pools and latest AI data
         const assets = await db.asset.findMany({
             include: {
                 pool: {
@@ -39,118 +40,7 @@ export async function GET(): Promise<NextResponse> {
             orderBy: { createdAt: 'desc' },
         });
 
-        // Calculate 24h stats for each asset
-        const now = new Date();
-        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
-        const enrichedAssets = await Promise.all(
-            assets.map(async (asset) => {
-                // Get 24h volume from trades
-                const volumeResult = await db.trade.aggregate({
-                    where: {
-                        assetId: asset.id,
-                        timestamp: { gte: oneDayAgo },
-                    },
-                    _sum: {
-                        fee: true,
-                    },
-                });
-
-                // Calculate volume as sum of (price * quantity) for all trades
-                const trades = await db.trade.findMany({
-                    where: {
-                        assetId: asset.id,
-                        timestamp: { gte: oneDayAgo },
-                    },
-                    select: {
-                        price: true,
-                        quantity: true,
-                    },
-                });
-
-                let volume24h = 0;
-                for (const t of trades) {
-                    volume24h += t.price.toNumber() * t.quantity.toNumber();
-                }
-
-                // Get Holders Count
-                const holdersCount = await db.position.count({
-                    where: {
-                        assetId: asset.id,
-                        shares: { gt: 0 }
-                    }
-                });
-
-                // Get price 24h ago for change calculation
-                const oldPriceTick = await db.priceTick.findFirst({
-                    where: {
-                        assetId: asset.id,
-                        timestamp: { lte: oneDayAgo },
-                    },
-                    orderBy: { timestamp: 'desc' },
-                    select: { priceDisplay: true },
-                });
-
-                const currentPrice = asset.lastDisplayPrice?.toNumber() ??
-                    (asset.pricingParams as { P0?: number })?.P0 ?? 10;
-
-                // Improved oldPrice logic for accurate growth display on new assets
-                let oldPrice = oldPriceTick?.priceDisplay?.toNumber();
-
-                if (oldPrice === undefined) {
-                    // Fallback 1: Use P0 from pricingParams (initial price)
-                    oldPrice = (asset.pricingParams as { P0?: number })?.P0;
-                }
-
-                if (oldPrice === undefined) {
-                    // Fallback 2: Use the oldest available tick in history
-                    const oldestTick = await db.priceTick.findFirst({
-                        where: { assetId: asset.id },
-                        orderBy: { timestamp: 'asc' },
-                        select: { priceDisplay: true }
-                    });
-                    oldPrice = oldestTick?.priceDisplay?.toNumber();
-                }
-
-                // Final fallback if still null (extremely rare)
-                const effectiveOldPrice = oldPrice ?? currentPrice;
-
-                const change24h = effectiveOldPrice > 0
-                    ? ((currentPrice - effectiveOldPrice) / effectiveOldPrice) * 100
-                    : 0;
-
-                const lastFundamental = asset.lastFundamental?.toNumber() ?? null;
-                const oracleLog = asset.oracleLogs[0];
-                const aiConfidence = oracleLog?.confidence?.toNumber() ?? null;
-                const aiSummary = oracleLog?.summary ?? null;
-
-                return {
-                    id: asset.id,
-                    name: asset.name,
-                    description: asset.description,
-                    type: asset.type,
-                    status: asset.status as 'funding' | 'active' | 'paused',
-                    price: currentPrice,
-                    change24h: Math.round(change24h * 100) / 100,
-                    volume24h: Math.round(volume24h * 100) / 100,
-                    totalSupply: asset.totalSupply.toNumber(),
-                    softCap: asset.softCap.toNumber(),
-                    hardCap: asset.hardCap.toNumber(),
-                    fundingDeadline: asset.fundingDeadline?.toISOString() ?? null,
-                    poolLiquidity: asset.pool?.totalUsdc.toNumber() ?? 0,
-                    fundingProgress: asset.pool
-                        ? Math.min(100, (asset.pool.totalUsdc.toNumber() / asset.softCap.toNumber()) * 100)
-                        : 0,
-                    // AI Data
-                    lastFundamental,
-                    aiConfidence,
-                    aiSummary,
-                    imageUrl: asset.imageUrl,
-                    holders: holdersCount,
-                    isBookmarked: userBookmarks.has(asset.id),
-                };
-            })
-        );
+        const enrichedAssets = await enrichAssets(assets, userBookmarks);
 
         return NextResponse.json({ assets: enrichedAssets });
     } catch (error) {

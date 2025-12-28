@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db as prisma } from '@megatron/database';
+import { enrichAssets } from '@/lib/assets';
 
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
@@ -17,14 +18,20 @@ export async function GET(req: NextRequest) {
             },
             include: {
                 asset: {
-                    select: {
-                        id: true,
-                        name: true,
-                        lastDisplayPrice: true,
+                    include: {
+                        pool: {
+                            select: {
+                                totalUsdc: true,
+                                totalLPShares: true,
+                            },
+                        },
                         oracleLogs: {
-                            take: 1,
                             orderBy: { createdAt: 'desc' },
-                            select: { deltaPercent: true }
+                            take: 1,
+                            select: {
+                                confidence: true,
+                                summary: true
+                            }
                         }
                     }
                 }
@@ -34,17 +41,13 @@ export async function GET(req: NextRequest) {
             }
         });
 
-        // Format for frontend - filter out bookmarks with deleted assets
-        const formatted = bookmarks
+        const assets = bookmarks
             .filter(b => b.asset !== null)
-            .map(b => ({
-                id: b.asset.id,
-                name: b.asset.name,
-                price: Number(b.asset.lastDisplayPrice || 0),
-                change: Number(b.asset.oracleLogs?.[0]?.deltaPercent || 0)
-            }));
+            .map(b => b.asset);
 
-        return NextResponse.json({ bookmarks: formatted });
+        const enrichedAssets = await enrichAssets(assets, new Set(assets.map(a => a.id)));
+
+        return NextResponse.json({ bookmarks: enrichedAssets });
     } catch (error) {
         console.error('Error fetching bookmarks:', error);
         return NextResponse.json({ error: 'Failed to fetch bookmarks' }, { status: 500 });

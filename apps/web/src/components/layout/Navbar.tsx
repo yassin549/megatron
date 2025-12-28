@@ -183,8 +183,8 @@ export function Navbar() {
                                                                     <p className="text-xs text-muted-foreground font-mono">${bm.price.toFixed(2)}</p>
                                                                 </div>
                                                             </div>
-                                                            <span className={`text-xs font-mono font-bold ${bm.change >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
-                                                                {bm.change > 0 ? '+' : ''}{bm.change.toFixed(2)}%
+                                                            <span className={`text-xs font-mono font-bold ${bm.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
+                                                                {bm.change24h > 0 ? '+' : ''}{bm.change24h.toFixed(2)}%
                                                             </span>
                                                         </Link>
                                                     ))}
