@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { TrendingUp } from 'lucide-react';
 
 export function SubNavbar() {
     const searchParams = useSearchParams();
@@ -73,7 +74,8 @@ export function SubNavbar() {
                                         : 'border-transparent text-muted-foreground hover:text-white'
                                         }`}
                                 >
-                                    <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-105 inline-block pointer-events-none">
+                                    <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-105 flex items-center gap-2 pointer-events-none">
+                                        {category.id === 'all' && <TrendingUp className="w-4 h-4 text-neon-emerald" />}
                                         {category.name}
                                     </span>
 

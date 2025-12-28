@@ -202,32 +202,32 @@ export default function HomePage() {
                         </form>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div className="flex items-baseline gap-3">
-                            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-4">
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
                                 {searchParam ? (
                                     <>Results for "<span className="text-primary">{searchParam}</span>"</>
                                 ) : (
-                                    <>{categoryParam === 'all' ? 'Market Overview' : `${categoryParam} Markets`}</>
+                                    <>{categoryParam === 'all' ? 'Trending Markets' : `${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)} Markets`}</>
                                 )}
                             </h2>
-                            <span className="text-xs font-mono text-muted-foreground bg-white/5 px-2 py-0.5 rounded border border-white/5">
-                                {filteredAssets.length} <span className="hidden xs:inline">ASSETS</span>
+                            <span className="hidden xs:inline-flex text-[10px] font-mono text-muted-foreground bg-white/5 px-2 py-0.5 rounded border border-white/5">
+                                {filteredAssets.length} ASSETS
                             </span>
                         </div>
 
                         {/* View Toggle - Icons Only */}
-                        <div className="flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm self-end sm:self-auto">
+                        <div className="flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm">
                             <button
                                 onClick={() => toggleView('grid')}
-                                className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                 title="Grid View"
                             >
                                 <LayoutGrid className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => toggleView('list')}
-                                className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                 title="List View"
                             >
                                 <List className="w-4 h-4" />

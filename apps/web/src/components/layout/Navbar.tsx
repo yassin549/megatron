@@ -328,7 +328,7 @@ export function Navbar() {
                                     {status === 'authenticated' ? (
                                         <>
                                             {/* Account Summary */}
-                                            <div className="relative group p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-white/5">
+                                            <div className="relative group p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-white/5 mt-4">
                                                 <div className="flex items-center gap-4 mb-2">
                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg ring-2 ring-primary/10">
                                                         {session?.user?.email?.[0].toUpperCase()}
