@@ -275,7 +275,7 @@ export function Navbar() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md md:hidden"
+                            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl md:hidden"
                         />
 
                         {/* Drawer / Card */}
@@ -284,10 +284,10 @@ export function Navbar() {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: -20 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="fixed top-20 right-4 z-[101] w-[calc(100vw-2rem)] max-w-sm glass-panel rounded-3xl flex flex-col max-h-[80vh] overflow-hidden"
+                            className="fixed top-20 right-4 z-[101] w-[calc(100vw-2rem)] max-w-sm bg-obsidian-950/95 backdrop-blur-3xl border border-white/10 shadow-2xl shadow-black/50 rounded-3xl flex flex-col max-h-[80vh] overflow-hidden"
                         >
                             {/* Header */}
-                            <div className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-white/5">
+                            <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 bg-white/10">
                                 <div className="flex items-center gap-3">
                                     <div className="relative w-8 h-8">
                                         <Image
