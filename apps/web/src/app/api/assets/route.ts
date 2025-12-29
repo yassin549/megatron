@@ -6,7 +6,10 @@ import { enrichAssets } from '@/lib/assets';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(): Promise<NextResponse> {
+export async function GET(req: Request): Promise<NextResponse> {
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get('q');
+
     try {
         const session = await getServerSession(authOptions);
         let userBookmarks = new Set<string>();
@@ -19,8 +22,15 @@ export async function GET(): Promise<NextResponse> {
             userBookmarks = new Set(bookmarks.map(b => b.assetId));
         }
 
-        // Fetch all assets with their pools and latest AI data
+        // Fetch assets with filtering if query is provided
         const assets = await db.asset.findMany({
+            where: query ? {
+                name: {
+                    contains: query,
+                    mode: 'insensitive'
+                },
+                status: 'active' // Only search active assets
+            } : {},
             include: {
                 pool: {
                     select: {
@@ -38,6 +48,7 @@ export async function GET(): Promise<NextResponse> {
                 }
             },
             orderBy: { createdAt: 'desc' },
+            take: query ? 10 : undefined, // Limit results for search
         });
 
         const enrichedAssets = await enrichAssets(assets, userBookmarks);
