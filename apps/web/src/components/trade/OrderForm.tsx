@@ -11,15 +11,37 @@ interface OrderFormProps {
     assetId: string;
     assetPrice: number;
     assetSymbol?: string;
+    userPosition?: {
+        shares: number;
+        avgPrice: number;
+        stopLoss: number | null;
+        takeProfit: number | null;
+    } | null;
+    onTradeSuccess?: () => void;
 }
 
-export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderFormProps) {
+import { Shield, Target, ChevronDown, ChevronUp, Save } from 'lucide-react';
+
+export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share', userPosition, onTradeSuccess }: OrderFormProps) {
     const { status } = useSession();
     const router = useRouter();
     const [type, setType] = useState<'buy' | 'sell'>('buy');
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
     const [userBalance, setUserBalance] = useState(0);
+
+    // Advanced Options
+    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [stopLoss, setStopLoss] = useState(userPosition?.stopLoss?.toString() || '');
+    const [takeProfit, setTakeProfit] = useState(userPosition?.takeProfit?.toString() || '');
+
+    // Sync targets when userPosition updates
+    useEffect(() => {
+        if (userPosition) {
+            setStopLoss(userPosition.stopLoss?.toString() || '');
+            setTakeProfit(userPosition.takeProfit?.toString() || '');
+        }
+    }, [userPosition]);
 
     // Success modal state
     const [successModal, setSuccessModal] = useState<{
@@ -44,16 +66,36 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
     const fee = parseFloat(amount || '0') * 0.005; // 0.5% fee
 
     const handleTrade = async () => {
-        if (!amount) return;
+        if (!amount && !showAdvanced) return;
         setLoading(true);
         try {
+            // If amount is empty but user is updating targets via the advanced section
+            if (!amount && showAdvanced && userPosition) {
+                const res = await fetch('/api/trade/position', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        assetId,
+                        stopLoss: stopLoss ? parseFloat(stopLoss) : null,
+                        takeProfit: takeProfit ? parseFloat(takeProfit) : null,
+                    }),
+                });
+                if (res.ok) {
+                    onTradeSuccess?.();
+                    setShowAdvanced(false);
+                }
+                return;
+            }
+
             const res = await fetch('/api/trade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: type,
                     assetId: assetId,
-                    amount: parseFloat(amount)
+                    amount: parseFloat(amount),
+                    stopLoss: stopLoss ? parseFloat(stopLoss) : null,
+                    takeProfit: takeProfit ? parseFloat(takeProfit) : null,
                 })
             });
             const data = await res.json();
@@ -67,6 +109,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                 tradeId: data.tradeId
             });
             setAmount('');
+            onTradeSuccess?.();
         } catch (err: any) {
             alert(`Order failed: ${err.message}`);
         } finally {
@@ -76,7 +119,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
 
     const handleCloseModal = () => {
         setSuccessModal(prev => ({ ...prev, show: false }));
-        window.location.reload();
+        // window.location.reload(); // Removed to allow smooth updates via onTradeSuccess
     };
 
     const handleViewPortfolio = () => {
@@ -102,7 +145,7 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 md:p-5 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden glass-panel">
             {/* Tabs */}
             <div className="flex bg-black/40 rounded-xl p-1 mb-4 relative border border-white/5">
                 <motion.div
@@ -171,39 +214,108 @@ export function OrderForm({ assetId, assetPrice, assetSymbol = 'Share' }: OrderF
                         </div>
                     </div>
 
+                    {/* Advanced Options Toggle */}
+                    <div className="mb-4">
+                        <button
+                            onClick={() => setShowAdvanced(!showAdvanced)}
+                            className="flex items-center justify-between w-full py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group"
+                        >
+                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest group-hover:text-white transition-colors">
+                                Advanced Order Options
+                            </span>
+                            {showAdvanced ? (
+                                <ChevronUp className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+                            ) : (
+                                <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors" />
+                            )}
+                        </button>
+
+                        <AnimatePresence>
+                            {showAdvanced && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="grid grid-cols-2 gap-3 mt-3">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-bold text-rose-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                                                <Shield className="w-2.5 h-2.5" />
+                                                Stop Loss
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={stopLoss}
+                                                onChange={(e) => setStopLoss(e.target.value)}
+                                                placeholder="Target Price"
+                                                className="w-full bg-black/60 border border-white/5 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-rose-500/40"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                                                <Target className="w-2.5 h-2.5" />
+                                                Take Profit
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={takeProfit}
+                                                onChange={(e) => setTakeProfit(e.target.value)}
+                                                placeholder="Target Price"
+                                                className="w-full bg-black/60 border border-white/5 rounded-xl px-4 py-3 text-xs font-mono text-white focus:outline-none focus:border-emerald-500/40"
+                                            />
+                                        </div>
+                                    </div>
+                                    {userPosition && !amount && (
+                                        <p className="mt-3 text-[9px] text-zinc-500 px-1 leading-tight italic">
+                                            You already have a position. Setting these will update your existing targets.
+                                        </p>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
                     {/* Order Details */}
-                    <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-6 space-y-4 font-mono">
+                    <div className="bg-black/30 border border-white/5 rounded-2xl p-4 mb-5 space-y-3 font-mono">
                         <div className="flex justify-between items-center text-[10px] md:text-xs">
                             <span className="text-zinc-500 uppercase tracking-tighter">Current Price</span>
-                            <span className="text-white font-bold">${assetPrice.toFixed(2)}</span>
+                            <span className="text-white font-bold tracking-tight">${assetPrice.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-4">
+                        {userPosition && (
+                            <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
+                                <span className="text-zinc-500 uppercase tracking-tighter">Entry Price</span>
+                                <span className="text-zinc-400 font-bold">${userPosition.avgPrice.toFixed(2)}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
                             <span className="text-zinc-500 uppercase tracking-tighter">{isBuy ? 'Est. Shares' : 'Est. Return'}</span>
-                            <span className="text-white font-bold">
+                            <span className="text-white font-bold tracking-tight">
                                 {isBuy ? estimatedShares.toFixed(4) : `$${(estimatedShares * assetPrice).toFixed(2)}`}
                             </span>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px] border-t border-white/5 pt-4 opacity-50">
-                            <span className="text-zinc-500 uppercase tracking-tighter">Trade Fee (0.5%)</span>
-                            <span className="text-zinc-400 font-bold">${fee.toFixed(2)}</span>
                         </div>
                     </div>
 
                     {/* Action Button */}
                     <button
                         onClick={handleTrade}
-                        disabled={!amount || loading}
+                        disabled={(!amount && (!showAdvanced || !userPosition)) || loading}
                         className={`w-full py-4 rounded-2xl font-black text-xs md:text-sm tracking-widest shadow-2xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed uppercase flex items-center justify-center gap-3
                             ${isBuy
-                                ? 'bg-gradient-to-r from-emerald-700 to-emerald-500 text-white shadow-emerald-900/40 hover:from-emerald-600 hover:to-emerald-400'
-                                : 'bg-gradient-to-r from-rose-700 to-rose-500 text-white shadow-rose-900/40 hover:from-rose-600 hover:to-rose-400'
+                                ? 'bg-gradient-to-r from-emerald-600 to-emerald-400 text-white shadow-emerald-900/40 hover:from-emerald-500 hover:to-emerald-300'
+                                : 'bg-gradient-to-r from-rose-600 to-rose-400 text-white shadow-rose-900/40 hover:from-rose-500 hover:to-rose-300'
                             }`}
                     >
                         {loading ? (
                             <span className="flex items-center gap-3">
                                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full" />
-                                EXECUTING...
+                                PROCESSING...
                             </span>
+                        ) : !amount && showAdvanced && userPosition ? (
+                            <>
+                                <Save className="w-5 h-5" />
+                                UPDATE TARGETS
+                            </>
                         ) : (
                             <>
                                 {isBuy ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownRight className="w-5 h-5" />}

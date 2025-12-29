@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const { type, assetId, amount } = body; // amount is USDC for buy, Shares for sell
+    const { type, assetId, amount, stopLoss, takeProfit } = body; // amount is USDC for buy, Shares for sell
 
     if (!type || !['buy', 'sell'].includes(type)) {
         return NextResponse.json({ error: 'Invalid trade type' }, { status: 400 });
@@ -35,9 +35,13 @@ export async function POST(req: Request) {
     }
 
     const tradeAmount = parseFloat(amount);
+    const sl = stopLoss !== undefined ? parseFloat(stopLoss) : undefined;
+    const tp = takeProfit !== undefined ? parseFloat(takeProfit) : undefined;
 
     try {
         const result = await db.$transaction(async (tx: any) => {
+            // ... (rest of the transaction logic)
+            // Note: I will only update the Position part below
             // 1. Fetch Asset
             const asset = await tx.asset.findUnique({
                 where: { id: assetId },
@@ -150,7 +154,12 @@ export async function POST(req: Request) {
                     const newTotalShares = oldShares + deltaShares;
                     await tx.position.update({
                         where: { userId_assetId: { userId, assetId } },
-                        data: { shares: newTotalShares, avgPrice: newTotalCost / newTotalShares },
+                        data: {
+                            shares: newTotalShares,
+                            avgPrice: newTotalCost / newTotalShares,
+                            stopLoss: sl !== undefined ? sl : undefined,
+                            takeProfit: tp !== undefined ? tp : undefined,
+                        },
                     });
                 } else {
                     await tx.position.create({
@@ -159,6 +168,8 @@ export async function POST(req: Request) {
                             assetId,
                             shares: deltaShares,
                             avgPrice: netAmount / deltaShares,
+                            stopLoss: sl !== undefined ? sl : null,
+                            takeProfit: tp !== undefined ? tp : null,
                         },
                     });
                 }

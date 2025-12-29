@@ -8,7 +8,6 @@ import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderForm } from '@/components/trade/OrderForm';
 import { LPFundingPanel } from '@/components/trade/LPFundingPanel';
-import { PositionManager } from '@/components/trade/PositionManager';
 import { ArrowLeft, Clock, Activity, TrendingUp, Users } from 'lucide-react';
 
 interface Asset {
@@ -256,15 +255,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
                     {/* RIGHT COLUMN (Order Form or LP Funding Panel) */}
                     <div className="lg:col-span-4 space-y-6">
-                        {asset.userPosition && asset.userPosition.shares > 0 && (
-                            <PositionManager
-                                assetId={asset.id}
-                                currentPrice={asset.price}
-                                position={asset.userPosition}
-                                onUpdate={fetchAsset}
-                            />
-                        )}
-
                         {asset.status === 'funding' ? (
                             <LPFundingPanel
                                 assetId={asset.id}
@@ -275,7 +265,13 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                 fundingDeadline={asset.fundingDeadline}
                             />
                         ) : (
-                            <OrderForm assetId={asset.id} assetPrice={asset.price} assetSymbol={asset.name} />
+                            <OrderForm
+                                assetId={asset.id}
+                                assetPrice={asset.price}
+                                assetSymbol={asset.name}
+                                userPosition={asset.userPosition}
+                                onTradeSuccess={fetchAsset}
+                            />
                         )}
                     </div>
                 </div>
