@@ -13,9 +13,10 @@ import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOu
 
 // Robust image component for search results
 function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
-    const [error, setError] = useState(false);
+    const [imageError, setImageError] = useState(false);
+    const [useStandardImg, setUseStandardImg] = useState(false);
 
-    if (!src || error) {
+    if (!src || imageError) {
         return (
             <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center text-zinc-600">
                 <FileText className="w-5 h-5" />
@@ -25,15 +26,30 @@ function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
 
     return (
         <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
-            <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover"
-                sizes="40px"
-                unoptimized={src.startsWith('/')}
-                onError={() => setError(true)}
-            />
+            {/* Fallback Icon underneath */}
+            <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
+                <FileText className="w-5 h-5" />
+            </div>
+
+            {!useStandardImg ? (
+                <Image
+                    src={src}
+                    alt={alt}
+                    fill
+                    className="object-cover relative z-10"
+                    sizes="40px"
+                    unoptimized={src.startsWith('/') || src.startsWith('http')}
+                    onError={() => setUseStandardImg(true)}
+                />
+            ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src={src}
+                    alt={alt}
+                    className="object-cover w-full h-full relative z-10"
+                    onError={() => setImageError(true)}
+                />
+            )}
         </div>
     );
 }

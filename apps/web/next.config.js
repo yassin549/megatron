@@ -14,7 +14,9 @@ const nextConfig = {
             'cdn.jsdelivr.net',
             'raw.githubusercontent.com',
             'upload.wikimedia.org',
-            'wikipedia.org'
+            'wikipedia.org',
+            'cdn-icons-png.flaticon.com',
+            's2.coinmarketcap.com'
         ],
     },
 };
