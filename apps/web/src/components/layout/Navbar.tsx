@@ -194,16 +194,25 @@ export function Navbar() {
                                                     >
                                                         <div className="flex items-center gap-3">
                                                             <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
-                                                                {asset.imageUrl ? (
+                                                                {/* Fallback Icon */}
+                                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
+                                                                    <FileText className="w-5 h-5" />
+                                                                </div>
+
+                                                                {/* Image Layer */}
+                                                                {asset.imageUrl && (
                                                                     <Image
                                                                         src={asset.imageUrl}
                                                                         alt={asset.name}
                                                                         fill
-                                                                        className="object-cover"
+                                                                        className="object-cover relative z-10"
                                                                         sizes="40px"
+                                                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
+                                                                        onError={(e) => {
+                                                                            // Hide the broken image to show the fallback icon
+                                                                            (e.target as HTMLImageElement).style.display = 'none';
+                                                                        }}
                                                                     />
-                                                                ) : (
-                                                                    <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                                                                 )}
                                                             </div>
                                                             <div>
@@ -492,16 +501,24 @@ export function Navbar() {
                                                             >
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
-                                                                        {asset.imageUrl ? (
+                                                                        {/* Fallback Icon */}
+                                                                        <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
+                                                                            <FileText className="w-5 h-5" />
+                                                                        </div>
+
+                                                                        {/* Image Layer */}
+                                                                        {asset.imageUrl && (
                                                                             <Image
                                                                                 src={asset.imageUrl}
                                                                                 alt={asset.name}
                                                                                 fill
-                                                                                className="object-cover"
+                                                                                className="object-cover relative z-10"
                                                                                 sizes="40px"
+                                                                                unoptimized={asset.imageUrl.startsWith('/uploads')}
+                                                                                onError={(e) => {
+                                                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                                                }}
                                                                             />
-                                                                        ) : (
-                                                                            <FileText className="w-5 h-5 text-zinc-500" />
                                                                         )}
                                                                     </div>
                                                                     <div>
