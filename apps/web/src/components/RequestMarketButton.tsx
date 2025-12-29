@@ -34,7 +34,7 @@ export function RequestMarketButton() {
     // Reset state when closing
     useEffect(() => {
         if (!isOpen) {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 setMode('menu');
                 setIsSuccess(false);
                 setTitle('');
@@ -42,6 +42,7 @@ export function RequestMarketButton() {
                 setImage(null);
                 setImagePreview(null);
             }, 300);
+            return () => clearTimeout(timer);
         }
     }, [isOpen]);
 
@@ -72,61 +73,55 @@ export function RequestMarketButton() {
         tap: { scale: 0.9, rotate: -2 }
     };
 
-    // Modal animation
+    // Modal animation - Simplified for performance
     const modalVariants: Variants = {
         hidden: {
             opacity: 0,
-            y: 50,
-            scale: 0.8,
-            rotateX: 10
+            y: 20,
+            scale: 0.95
         },
         visible: {
             opacity: 1,
             y: 0,
             scale: 1,
-            rotateX: 0,
             transition: {
                 type: "spring",
-                bounce: 0.4,
-                duration: 0.5
+                stiffness: 300,
+                damping: 25,
+                mass: 1
             }
         },
         exit: {
             opacity: 0,
-            y: 50,
-            scale: 0.8,
-            rotateX: -10,
+            y: 20,
+            scale: 0.95,
             transition: {
-                duration: 0.3,
-                ease: "backIn"
+                duration: 0.2,
+                ease: "easeOut"
             }
         }
     };
 
-    // Content slide animation
+    // Content slide animation - Snappier
     const contentVariants: Variants = {
-        enter: (direction: any) => ({
-            x: direction > 0 ? 150 : -150,
+        enter: (direction: number) => ({
+            x: direction > 0 ? 100 : -100,
             opacity: 0,
-            scale: 0.9,
-            rotateY: direction > 0 ? 15 : -15
+            filter: "blur(4px)"
         }),
         center: {
             x: 0,
             opacity: 1,
-            scale: 1,
-            rotateY: 0,
+            filter: "blur(0px)",
             transition: {
-                type: "spring",
-                stiffness: 300,
-                damping: 25
+                x: { type: "spring", stiffness: 400, damping: 30 },
+                opacity: { duration: 0.2 }
             }
         },
-        exit: (direction: any) => ({
-            x: direction < 0 ? 150 : -150,
+        exit: (direction: number) => ({
+            x: direction < 0 ? 100 : -100,
             opacity: 0,
-            scale: 0.9,
-            rotateY: direction < 0 ? 15 : -15,
+            filter: "blur(4px)",
             transition: {
                 duration: 0.2
             }
@@ -227,11 +222,11 @@ export function RequestMarketButton() {
                                     animate="visible"
                                     exit="exit"
                                     layout
-                                    className="bg-zinc-900/90 border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl overflow-hidden pointer-events-auto rounded-[32px] w-full max-w-[380px] md:w-[380px] flex flex-col relative"
+                                    className="bg-zinc-900/95 border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.7)] backdrop-blur-xl overflow-hidden pointer-events-auto rounded-[32px] w-full max-w-[380px] md:w-[380px] flex flex-col relative will-change-transform"
                                 >
                                     {/* Gradient borders */}
-                                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-                                    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
+                                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+                                    <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/40 to-transparent" />
 
                                     {/* Header */}
                                     <div className="p-6 pb-2 flex items-center justify-between relative z-10">
@@ -250,8 +245,10 @@ export function RequestMarketButton() {
                                                 )}
                                             </AnimatePresence>
                                             <motion.h3
-                                                layoutId="title"
                                                 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-400 text-lg tracking-tight"
+                                                initial={{ opacity: 0, y: -5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                key={mode + isSuccess}
                                             >
                                                 {isSuccess ? 'Received!' : mode === 'market' ? 'Suggest Asset' : mode === 'feature' ? 'Suggest Feature' : 'Feedback'}
                                             </motion.h3>
@@ -274,11 +271,11 @@ export function RequestMarketButton() {
                                                     animate={{ opacity: 1, scale: 1, rotate: 0 }}
                                                     className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center"
                                                 >
-                                                    <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-full flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.3)] mb-6 animate-bounce">
-                                                        <Sparkles className="w-10 h-10 text-white" />
+                                                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.3)] mb-6">
+                                                        <Sparkles className="w-8 h-8 text-white" />
                                                     </div>
-                                                    <h3 className="text-2xl font-black text-white mb-2 tracking-tight">Thanks!</h3>
-                                                    <p className="text-zinc-400 leading-relaxed max-w-[200px]">We'll review your {mode === 'market' ? 'asset' : 'suggestion'} and see if it fits!</p>
+                                                    <h3 className="text-xl font-black text-white mb-2 tracking-tight">Received!</h3>
+                                                    <p className="text-zinc-400 text-sm leading-relaxed max-w-[200px]">We'll review your suggestion and see if it fits!</p>
                                                 </motion.div>
                                             ) : mode === 'menu' ? (
                                                 <motion.div
