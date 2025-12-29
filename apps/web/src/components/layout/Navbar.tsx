@@ -175,7 +175,7 @@ export function Navbar() {
                                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                                    className="absolute top-full left-0 right-0 mt-2 glass-panel rounded-xl overflow-hidden z-50 shadow-2xl border border-white/10"
+                                    className="absolute top-full left-0 right-0 mt-2 bg-obsidian-950/95 backdrop-blur-2xl rounded-xl overflow-hidden z-50 shadow-2xl border border-white/10"
                                 >
                                     <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                                         {isSearching ? (
@@ -193,9 +193,15 @@ export function Navbar() {
                                                         className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-lg bg-obsidian-800 border border-white/5 flex items-center justify-center overflow-hidden relative">
+                                                            <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
                                                                 {asset.imageUrl ? (
-                                                                    <Image src={asset.imageUrl} alt={asset.name} fill className="object-cover" />
+                                                                    <Image
+                                                                        src={asset.imageUrl}
+                                                                        alt={asset.name}
+                                                                        fill
+                                                                        className="object-cover"
+                                                                        sizes="40px"
+                                                                    />
                                                                 ) : (
                                                                     <FileText className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                                                                 )}
@@ -482,12 +488,18 @@ export function Navbar() {
                                                                 key={asset.id}
                                                                 href={`/assets/${asset.id}`}
                                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                                className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 active:scale-[0.98] transition-all"
+                                                                className="flex items-center justify-between p-3 rounded-xl bg-white/[0.05] border border-white/10 active:scale-[0.98] transition-all"
                                                             >
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/5 flex items-center justify-center overflow-hidden relative">
+                                                                    <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
                                                                         {asset.imageUrl ? (
-                                                                            <Image src={asset.imageUrl} alt={asset.name} fill className="object-cover" />
+                                                                            <Image
+                                                                                src={asset.imageUrl}
+                                                                                alt={asset.name}
+                                                                                fill
+                                                                                className="object-cover"
+                                                                                sizes="40px"
+                                                                            />
                                                                         ) : (
                                                                             <FileText className="w-5 h-5 text-zinc-500" />
                                                                         )}

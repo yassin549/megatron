@@ -28,8 +28,8 @@ export async function GET(req: Request): Promise<NextResponse> {
                 name: {
                     contains: query,
                     mode: 'insensitive'
-                },
-                status: 'active' // Only search active assets
+                }
+                // Removed status filter to show all matching assets
             } : {},
             include: {
                 pool: {
