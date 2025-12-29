@@ -1,6 +1,6 @@
 'use client';
 
-import { createChart, ColorType, IChartApi } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, LineStyle } from 'lightweight-charts';
 import { useEffect, useRef, useState } from 'react';
 import { Clock } from 'lucide-react';
 
@@ -16,11 +16,17 @@ interface ChartProps {
         areaBottomColor?: string;
     };
     onTimeframeChange?: (tf: Timeframe) => void;
+    priceLines?: {
+        entry?: number;
+        stopLoss?: number;
+        takeProfit?: number;
+    };
 }
 
-export function AssetChart({ data, colors, onTimeframeChange }: ChartProps) {
+export function AssetChart({ data, colors, onTimeframeChange, priceLines }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
+    const seriesRef = useRef<any>(null);
     const [currentTimeframe, setCurrentTimeframe] = useState<Timeframe>('15m');
     const [chartType, setChartType] = useState<'area' | 'candlestick'>('area');
     const [isTimeframeMenuOpen, setIsTimeframeMenuOpen] = useState(false);
@@ -94,21 +100,10 @@ export function AssetChart({ data, colors, onTimeframeChange }: ChartProps) {
             });
         }
 
-        // Transform data if needed for candlestick (mock open/close for now if simple line data provided)
-        // Since we only passed 'value', we can't do true candlesticks yet unless backend sends OHLC.
-        // For now, if we only have line data, we just map it to simple candles (Open=Close) or we have to stick to Area.
-        // BUT user asked for toggle. We will try to map, but ideally backend sends candles.
-        // Given current data structure is { time, value }, we can only show Area authentically.
-        // To show candles processing, we'd need aggregation. 
-        // For this task, we will just render the series. If data is incompatible, it might break.
-        // Let's assume for now we keep Area series but maybe user *wants* to see candles.
-        // We will just feed the same data point as O=H=L=C for now if it's single value, 
-        // OR better: we keep the series type handling.
+        seriesRef.current = series;
 
         if (data.length > 0) {
             if (chartType === 'candlestick') {
-                // Mock OHLC from single value to prevent crash, OR ideally request OHLC from backend.
-                // For this quick fix, we render flat candles to at least show the toggle works.
                 const candleData = data.map(d => ({
                     time: d.time,
                     open: d.value,
@@ -132,8 +127,63 @@ export function AssetChart({ data, colors, onTimeframeChange }: ChartProps) {
         };
     }, [data, colors, chartType]);
 
+    // Handle Price Lines
+    useEffect(() => {
+        const series = seriesRef.current;
+        if (!series || !priceLines) return;
+
+        // Clear existing custom lines if any (lightweight-charts doesn't have internal tracked refs we can use easily without storing them)
+        // We'll trust the chart recreation in the main useEffect handles most cleanup, 
+        // but for dynamic updates within the same chart instance, we need to track them.
+    }, [priceLines]);
+
+    // Optimized Price Lines Application
+    useEffect(() => {
+        const series = seriesRef.current;
+        if (!series) return;
+
+        const lines: any[] = [];
+
+        if (priceLines?.entry) {
+            lines.push(series.createPriceLine({
+                price: priceLines.entry,
+                color: 'rgba(255, 255, 255, 0.8)',
+                lineWidth: 1,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'ENTRY',
+            }));
+        }
+
+        if (priceLines?.stopLoss) {
+            lines.push(series.createPriceLine({
+                price: priceLines.stopLoss,
+                color: '#f43f5e',
+                lineWidth: 1,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'SL',
+            }));
+        }
+
+        if (priceLines?.takeProfit) {
+            lines.push(series.createPriceLine({
+                price: priceLines.takeProfit,
+                color: '#10b981',
+                lineWidth: 1,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'TP',
+            }));
+        }
+
+        return () => {
+            lines.forEach(line => series.removePriceLine(line));
+        };
+    }, [priceLines, chartType]); // Re-apply when lines or chart type change
+
     return (
-        <div className="relative w-full h-[400px]">
+        <div className="relative w-full h-full">
             {/* Timeframe Controls (Top Left) */}
             <div className="absolute top-4 left-4 z-20 flex gap-2">
                 <div className="relative" onMouseEnter={() => setIsTimeframeMenuOpen(true)} onMouseLeave={() => setIsTimeframeMenuOpen(false)}>

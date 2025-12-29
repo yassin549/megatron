@@ -8,6 +8,7 @@ import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderForm } from '@/components/trade/OrderForm';
 import { LPFundingPanel } from '@/components/trade/LPFundingPanel';
+import { PositionManager } from '@/components/trade/PositionManager';
 import { ArrowLeft, Clock, Activity, TrendingUp, Users } from 'lucide-react';
 
 interface Asset {
@@ -31,6 +32,12 @@ interface Asset {
     imageUrl?: string;
     low24h?: number;
     high24h?: number;
+    userPosition?: {
+        shares: number;
+        avgPrice: number;
+        stopLoss: number | null;
+        takeProfit: number | null;
+    } | null;
 }
 
 interface OracleLog {
@@ -54,25 +61,25 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchAsset() {
-            try {
-                const res = await fetch(`/api/assets/${params.id}`, { cache: 'no-store' });
-                if (res.ok) {
-                    const data = await res.json();
+    async function fetchAsset() {
+        try {
+            const res = await fetch(`/api/assets/${params.id}`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
 
-                    // Only update if data has changed (simple check)
-                    setAsset(prev => JSON.stringify(prev) !== JSON.stringify(data.asset) ? data.asset : prev);
-                    setOracleLogs(prev => prev.length !== (data.oracleLogs || []).length ? data.oracleLogs : prev);
-                    setPriceHistory(data.priceHistory || []);
-                }
-            } catch (error) {
-                console.error('Failed to load asset', error);
-            } finally {
-                setLoading(false);
+                // Only update if data has changed (simple check)
+                setAsset(prev => JSON.stringify(prev) !== JSON.stringify(data.asset) ? data.asset : prev);
+                setOracleLogs(prev => prev.length !== (data.oracleLogs || []).length ? data.oracleLogs : prev);
+                setPriceHistory(data.priceHistory || []);
             }
+        } catch (error) {
+            console.error('Failed to load asset', error);
+        } finally {
+            setLoading(false);
         }
+    }
 
+    useEffect(() => {
         fetchAsset();
         const interval = setInterval(fetchAsset, 10000); // Poll every 10 seconds
         return () => clearInterval(interval);
@@ -187,6 +194,11 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         areaBottomColor: 'rgba(0, 0, 0, 0)',
                                         textColor: '#71717a',
                                     }}
+                                    priceLines={asset.userPosition ? {
+                                        entry: asset.userPosition.avgPrice,
+                                        stopLoss: asset.userPosition.stopLoss ?? undefined,
+                                        takeProfit: asset.userPosition.takeProfit ?? undefined,
+                                    } : undefined}
                                     onTimeframeChange={(tf) => {
                                         console.log('Fetching data for timeframe:', tf);
                                     }}
@@ -244,6 +256,15 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
                     {/* RIGHT COLUMN (Order Form or LP Funding Panel) */}
                     <div className="lg:col-span-4 space-y-6">
+                        {asset.userPosition && asset.userPosition.shares > 0 && (
+                            <PositionManager
+                                assetId={asset.id}
+                                currentPrice={asset.price}
+                                position={asset.userPosition}
+                                onUpdate={fetchAsset}
+                            />
+                        )}
+
                         {asset.status === 'funding' ? (
                             <LPFundingPanel
                                 assetId={asset.id}

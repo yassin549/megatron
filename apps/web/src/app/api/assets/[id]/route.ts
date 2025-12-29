@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@megatron/database';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,6 +112,20 @@ export async function GET(
         // Calculate market cap
         const marketCap = currentPrice * asset.totalSupply.toNumber();
 
+        // Get User Position if logged in
+        let userPosition = null;
+        const session = await getServerSession(authOptions);
+        if (session?.user?.id) {
+            userPosition = await db.position.findUnique({
+                where: {
+                    userId_assetId: {
+                        userId: session.user.id,
+                        assetId: id
+                    }
+                }
+            });
+        }
+
         // Get Holders Count
         const holdersCount = await db.position.count({
             where: {
@@ -157,6 +173,12 @@ export async function GET(
                 holders: holdersCount,
                 low24h,
                 high24h,
+                userPosition: userPosition ? {
+                    shares: userPosition.shares.toNumber(),
+                    avgPrice: userPosition.avgPrice.toNumber(),
+                    stopLoss: userPosition.stopLoss?.toNumber() ?? null,
+                    takeProfit: userPosition.takeProfit?.toNumber() ?? null,
+                } : null,
             },
             oracleLogs: oracleLogs.map((log: any) => {
                 let reasoning = null;
