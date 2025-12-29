@@ -9,7 +9,34 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
-import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut } from 'lucide-react';
+import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid } from 'lucide-react';
+
+// Robust image component for search results
+function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
+    const [error, setError] = useState(false);
+
+    if (!src || error) {
+        return (
+            <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center text-zinc-600">
+                <FileText className="w-5 h-5" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
+            <Image
+                src={src}
+                alt={alt}
+                fill
+                className="object-cover"
+                sizes="40px"
+                unoptimized={src.startsWith('/')}
+                onError={() => setError(true)}
+            />
+        </div>
+    );
+}
 
 export function Navbar() {
     const { data: session, status } = useSession();
@@ -193,28 +220,7 @@ export function Navbar() {
                                                         className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
-                                                                {/* Fallback Icon */}
-                                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
-                                                                    <FileText className="w-5 h-5" />
-                                                                </div>
-
-                                                                {/* Image Layer */}
-                                                                {asset.imageUrl && (
-                                                                    <Image
-                                                                        src={asset.imageUrl}
-                                                                        alt={asset.name}
-                                                                        fill
-                                                                        className="object-cover relative z-10"
-                                                                        sizes="40px"
-                                                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
-                                                                        onError={(e) => {
-                                                                            // Hide the broken image to show the fallback icon
-                                                                            (e.target as HTMLImageElement).style.display = 'none';
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                            </div>
+                                                            <SearchItemImage src={asset.imageUrl} alt={asset.name} />
                                                             <div>
                                                                 <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">
                                                                     {asset.name}
@@ -500,27 +506,7 @@ export function Navbar() {
                                                                 className="flex items-center justify-between p-3 rounded-xl bg-white/[0.05] border border-white/10 active:scale-[0.98] transition-all"
                                                             >
                                                                 <div className="flex items-center gap-3">
-                                                                    <div className="w-10 h-10 rounded-lg bg-obsidian-900 border border-white/10 flex items-center justify-center overflow-hidden relative">
-                                                                        {/* Fallback Icon */}
-                                                                        <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
-                                                                            <FileText className="w-5 h-5" />
-                                                                        </div>
-
-                                                                        {/* Image Layer */}
-                                                                        {asset.imageUrl && (
-                                                                            <Image
-                                                                                src={asset.imageUrl}
-                                                                                alt={asset.name}
-                                                                                fill
-                                                                                className="object-cover relative z-10"
-                                                                                sizes="40px"
-                                                                                unoptimized={asset.imageUrl.startsWith('/uploads')}
-                                                                                onError={(e) => {
-                                                                                    (e.target as HTMLImageElement).style.display = 'none';
-                                                                                }}
-                                                                            />
-                                                                        )}
-                                                                    </div>
+                                                                    <SearchItemImage src={asset.imageUrl} alt={asset.name} />
                                                                     <div>
                                                                         <p className="font-bold text-white text-xs">{asset.name}</p>
                                                                         <p className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest mt-0.5">{asset.type}</p>
