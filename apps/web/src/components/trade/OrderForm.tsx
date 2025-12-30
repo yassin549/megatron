@@ -47,6 +47,15 @@ export function OrderForm({
             const slValue = stopLoss ? parseFloat(stopLoss) : null;
             const tpValue = takeProfit ? parseFloat(takeProfit) : null;
 
+            // Trade Logic Validation
+            if (isBuy) {
+                if (slValue !== null && slValue >= assetPrice) throw new Error('For Buy positions, Stop Loss must be below Entry Price.');
+                if (tpValue !== null && tpValue <= assetPrice) throw new Error('For Buy positions, Take Profit must be above Entry Price.');
+            } else {
+                if (slValue !== null && slValue <= assetPrice) throw new Error('For Sell positions, Stop Loss must be above Entry Price.');
+                if (tpValue !== null && tpValue >= assetPrice) throw new Error('For Sell positions, Take Profit must be below Entry Price.');
+            }
+
             const res = await fetch('/api/trade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
