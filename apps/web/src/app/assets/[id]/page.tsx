@@ -367,7 +367,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24 h-fit">
+                    <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-32 h-fit">
                         {asset.status === 'funding' ? (
                             <LPFundingPanel
                                 assetId={asset.id}
