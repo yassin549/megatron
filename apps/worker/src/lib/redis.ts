@@ -1,15 +1,16 @@
-import { getRedisClient, CHANNELS as INTEGRATION_CHANNELS } from '@megatron/lib-integrations';
+import { getRedisClient } from '@megatron/lib-integrations';
 import { TradeEvent, OracleEvent } from '@megatron/lib-common';
 
+export const redis = getRedisClient();
+
 export const CHANNELS = {
-    EVENTS: INTEGRATION_CHANNELS?.EVENTS || 'megatron:events',
+    EVENTS: 'megatron:events',
 };
 
 /**
  * Publish an oracle event to the events channel
  */
 export async function publishOracleEvent(event: OracleEvent): Promise<void> {
-    const redis = getRedisClient();
     try {
         await redis.publish(CHANNELS.EVENTS, JSON.stringify(event));
         console.log(`[Redis] Published oracle event for ${event.assetId} (delta: ${event.deltaPercent}%)`);
@@ -22,7 +23,6 @@ export async function publishOracleEvent(event: OracleEvent): Promise<void> {
  * Publish a trade event to the events channel
  */
 export async function publishTradeEvent(event: TradeEvent): Promise<void> {
-    const redis = getRedisClient();
     try {
         await redis.publish(CHANNELS.EVENTS, JSON.stringify(event));
         console.log(`[Redis] Published trade event for ${event.assetId}`);
