@@ -226,34 +226,12 @@ export function AssetCard({
                                 <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
                             </motion.button>
 
-                            {/* Expanded Image */}
-                            <motion.div
-                                initial={{ scale: 0.8, y: 10, opacity: 0 }}
-                                animate={{ scale: 1, y: 0, opacity: 1 }}
-                                transition={{ delay: 0.05 }}
-                                className="relative w-20 h-20 mb-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-zinc-900"
-                            >
-                                {imageUrl && !imageError ? (
-                                    <Image
-                                        src={imageUrl}
-                                        alt={name}
-                                        fill
-                                        className="object-cover"
-                                        onError={() => setImageError(true)}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                                        <Icon className="w-10 h-10" />
-                                    </div>
-                                )}
-                            </motion.div>
-
                             {/* Name */}
                             <motion.h3
                                 initial={{ opacity: 0, y: 5 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 }}
-                                className="text-xl font-bold text-white mb-2 leading-tight"
+                                transition={{ delay: 0.05 }}
+                                className="text-xl font-bold text-white mb-3 leading-tight pt-4"
                             >
                                 {name}
                             </motion.h3>
