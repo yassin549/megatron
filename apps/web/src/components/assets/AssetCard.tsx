@@ -205,29 +205,71 @@ export function AssetCard({
 
                 {/* Hover Description Overlay (Typewriter Effect) */}
                 <AnimatePresence>
-                    {isHovering && description && (
+                    {isHovering && viewMode === 'grid' && (
                         <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 5 }}
-                            className="absolute inset-0 bg-obsidian-900/95 p-4 z-20 flex flex-col justify-center items-center text-center rounded-2xl border border-primary/20 backdrop-blur-xl"
+                            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+                            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-2xl border border-white/10"
                         >
-                            <div className="text-xs font-mono text-primary mb-2 uppercase tracking-widest opacity-70">
-                                ASSET BRIEF
-                            </div>
-                            <p className="text-sm text-zinc-300 font-medium leading-relaxed">
-                                {description}
-                            </p>
-                            <button
+                            {/* Expanded Image */}
+                            <motion.div
+                                initial={{ scale: 0.8, y: 10, opacity: 0 }}
+                                animate={{ scale: 1, y: 0, opacity: 1 }}
+                                transition={{ delay: 0.05 }}
+                                className="relative w-16 h-16 mb-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-zinc-900"
+                            >
+                                {imageUrl && !imageError ? (
+                                    <Image
+                                        src={imageUrl}
+                                        alt={name}
+                                        fill
+                                        className="object-cover"
+                                        onError={() => setImageError(true)}
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                                        <Icon className="w-8 h-8" />
+                                    </div>
+                                )}
+                            </motion.div>
+
+                            {/* Name */}
+                            <motion.h3
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="text-lg font-bold text-white mb-2 leading-tight"
+                            >
+                                {name}
+                            </motion.h3>
+
+                            {/* Description */}
+                            {description && (
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.15 }}
+                                    className="text-xs text-zinc-400 font-medium leading-relaxed line-clamp-3 mb-4"
+                                >
+                                    {description}
+                                </motion.p>
+                            )}
+
+                            <motion.button
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2 }}
                                 onClick={handleToggleBookmark}
-                                className={`mt-4 p-2.5 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold tracking-wider border ${isBookmarked
+                                className={`mt-auto p-2 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold tracking-wider border ${isBookmarked
                                     ? 'text-primary bg-primary/10 border-primary/20'
                                     : 'text-zinc-400 hover:text-white hover:bg-white/5 border-white/10'
                                     }`}
                             >
                                 <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
                                 {isBookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
-                            </button>
+                            </motion.button>
                         </motion.div>
                     )}
                 </AnimatePresence>
