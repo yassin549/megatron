@@ -203,22 +203,35 @@ export function AssetCard({
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
-                {/* Hover Description Overlay (Typewriter Effect) */}
+                {/* Hover Description Overlay */}
                 <AnimatePresence>
                     {isHovering && viewMode === 'grid' && (
                         <motion.div
                             initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                            animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+                            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
                             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                             transition={{ duration: 0.2 }}
                             className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-2xl border border-white/10"
                         >
+                            {/* Bookmark Button - Top Right */}
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                onClick={handleToggleBookmark}
+                                className={`absolute top-3 right-3 p-2 rounded-full transition-all border ${isBookmarked
+                                    ? 'text-primary bg-primary/10 border-primary/20'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/10 border-white/10'
+                                    }`}
+                            >
+                                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                            </motion.button>
+
                             {/* Expanded Image */}
                             <motion.div
                                 initial={{ scale: 0.8, y: 10, opacity: 0 }}
                                 animate={{ scale: 1, y: 0, opacity: 1 }}
                                 transition={{ delay: 0.05 }}
-                                className="relative w-16 h-16 mb-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-zinc-900"
+                                className="relative w-20 h-20 mb-4 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-zinc-900"
                             >
                                 {imageUrl && !imageError ? (
                                     <Image
@@ -230,7 +243,7 @@ export function AssetCard({
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-zinc-500">
-                                        <Icon className="w-8 h-8" />
+                                        <Icon className="w-10 h-10" />
                                     </div>
                                 )}
                             </motion.div>
@@ -240,7 +253,7 @@ export function AssetCard({
                                 initial={{ opacity: 0, y: 5 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
-                                className="text-lg font-bold text-white mb-2 leading-tight"
+                                className="text-xl font-bold text-white mb-2 leading-tight"
                             >
                                 {name}
                             </motion.h3>
@@ -251,25 +264,11 @@ export function AssetCard({
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.15 }}
-                                    className="text-xs text-zinc-400 font-medium leading-relaxed line-clamp-3 mb-4"
+                                    className="text-xs text-zinc-400 font-medium leading-relaxed line-clamp-4"
                                 >
                                     {description}
                                 </motion.p>
                             )}
-
-                            <motion.button
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                onClick={handleToggleBookmark}
-                                className={`mt-auto p-2 rounded-xl transition-all flex items-center gap-2 text-[10px] font-bold tracking-wider border ${isBookmarked
-                                    ? 'text-primary bg-primary/10 border-primary/20'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/5 border-white/10'
-                                    }`}
-                            >
-                                <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
-                                {isBookmarked ? 'BOOKMARKED' : 'BOOKMARK'}
-                            </motion.button>
                         </motion.div>
                     )}
                 </AnimatePresence>
