@@ -320,15 +320,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                     assetId={asset.id}
                                     assetPrice={asset.price}
                                     assetSymbol={asset.name}
-                                    userPosition={asset.userPosition}
-                                    onTradeSuccess={() => {
-                                        setHasInitializedTargets(false);
-                                        fetchAsset();
-                                    }}
-                                    stopLoss={orderStopLoss}
-                                    takeProfit={orderTakeProfit}
-                                    onStopLossChange={setOrderStopLoss}
-                                    onTakeProfitChange={setOrderTakeProfit}
+                                    onTradeSuccess={fetchAsset}
                                 />
                                 {/* Position Card - Shows below OrderForm when position exists */}
                                 {asset.userPosition && asset.userPosition.shares > 0 && (
