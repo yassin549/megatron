@@ -24,7 +24,7 @@ interface OrderFormProps {
     onTakeProfitChange?: (val: string) => void;
 }
 
-import { Shield, Target, Save } from 'lucide-react';
+import { Shield, Target, Save, LogOut } from 'lucide-react';
 
 export function OrderForm({
     assetId,
@@ -42,6 +42,7 @@ export function OrderForm({
     const [type, setType] = useState<'buy' | 'sell'>('buy');
     const [amount, setAmount] = useState('');
     const [loading, setLoading] = useState(false);
+    const [exitLoading, setExitLoading] = useState(false);
     const [userBalance, setUserBalance] = useState(0);
 
     // Fetch balance on mount/session load
@@ -56,6 +57,39 @@ export function OrderForm({
     const isBuy = type === 'buy';
     const estimatedShares = amount ? parseFloat(amount) / assetPrice : 0;
     const fee = parseFloat(amount || '0') * 0.005; // 0.5% fee
+
+    // Calculate P/L for existing position
+    const positionPnL = userPosition
+        ? (assetPrice - userPosition.avgPrice) * userPosition.shares
+        : 0;
+    const positionPnLPercent = userPosition && userPosition.avgPrice > 0
+        ? ((assetPrice - userPosition.avgPrice) / userPosition.avgPrice) * 100
+        : 0;
+
+    const handleExitPosition = async () => {
+        if (!userPosition || userPosition.shares <= 0) return;
+        setExitLoading(true);
+        try {
+            const res = await fetch('/api/trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'sell',
+                    assetId: assetId,
+                    shares: userPosition.shares,
+                }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error);
+            }
+            onTradeSuccess?.();
+        } catch (err: any) {
+            alert(`Exit failed: ${err.message}`);
+        } finally {
+            setExitLoading(false);
+        }
+    };
 
     const handleTrade = async () => {
         const slValue = stopLoss ? parseFloat(stopLoss) : null;
@@ -202,17 +236,10 @@ export function OrderForm({
                                 {isBuy ? 'USDC' : 'SHARES'}
                             </span>
                         </div>
-                        {/* Presets */}
-                        <div className="flex gap-2.5 mt-2">
-                            {['10', '50', '250', 'MAX'].map((val) => (
-                                <button
-                                    key={val}
-                                    onClick={() => setAmount(val === 'MAX' ? userBalance.toString() : val)}
-                                    className="flex-1 py-2 text-[10px] font-mono font-black border border-white/5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white transition-all uppercase"
-                                >
-                                    {val === 'MAX' ? 'MAX' : `$${val}`}
-                                </button>
-                            ))}
+                        {/* Max Amount Display */}
+                        <div className="mt-2 text-right">
+                            <span className="text-[10px] text-zinc-500">Max: </span>
+                            <span className="text-[10px] text-white font-mono font-bold">${userBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
                         </div>
                     </div>
 
@@ -261,10 +288,18 @@ export function OrderForm({
                             <span className="text-white font-bold tracking-tight">${assetPrice.toFixed(2)}</span>
                         </div>
                         {userPosition && (
-                            <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
-                                <span className="text-zinc-500 uppercase tracking-tighter">Entry Price</span>
-                                <span className="text-zinc-400 font-bold">${userPosition.avgPrice.toFixed(2)}</span>
-                            </div>
+                            <>
+                                <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
+                                    <span className="text-zinc-500 uppercase tracking-tighter">Entry Price</span>
+                                    <span className="text-zinc-400 font-bold">${userPosition.avgPrice.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
+                                    <span className="text-zinc-500 uppercase tracking-tighter">Position P/L</span>
+                                    <span className={`font-bold ${positionPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {positionPnL >= 0 ? '+' : ''}{positionPnL.toFixed(2)} ({positionPnLPercent >= 0 ? '+' : ''}{positionPnLPercent.toFixed(2)}%)
+                                    </span>
+                                </div>
+                            </>
                         )}
                         <div className="flex justify-between items-center text-[10px] md:text-xs border-t border-white/5 pt-3">
                             <span className="text-zinc-500 uppercase tracking-tighter">{isBuy ? 'Est. Shares' : 'Est. Return'}</span>
@@ -273,6 +308,24 @@ export function OrderForm({
                             </span>
                         </div>
                     </div>
+
+                    {/* Exit Position Button */}
+                    {userPosition && userPosition.shares > 0 && (
+                        <button
+                            onClick={handleExitPosition}
+                            disabled={exitLoading}
+                            className="w-full py-3 mb-3 rounded-xl font-bold text-xs tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {exitLoading ? (
+                                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-rose-400/30 border-t-rose-400 rounded-full" />
+                            ) : (
+                                <>
+                                    <LogOut className="w-4 h-4" />
+                                    Exit Position
+                                </>
+                            )}
+                        </button>
+                    )}
 
                     {/* Action Button */}
                     <button

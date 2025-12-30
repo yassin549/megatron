@@ -1,9 +1,5 @@
 import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi } from 'lightweight-charts';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Clock, Info } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-export type Timeframe = '1m' | '5m' | '15m' | '1H' | '4H' | '1D' | '1W';
 
 interface ChartProps {
     data: { time: string; value: number; volume?: number }[];
@@ -14,7 +10,6 @@ interface ChartProps {
         areaTopColor?: string;
         areaBottomColor?: string;
     };
-    onTimeframeChange?: (tf: Timeframe) => void;
     priceLines?: {
         entry?: number;
         stopLoss?: number | null;
@@ -23,28 +18,23 @@ interface ChartProps {
     onPriceLineChange?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
 }
 
-export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPriceLineChange }: ChartProps) {
+export function AssetChart({ data, colors, priceLines, onPriceLineChange }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
     const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
 
-    const [currentTimeframe, setCurrentTimeframe] = useState<Timeframe>('15m');
-    const [isTimeframeMenuOpen, setIsTimeframeMenuOpen] = useState(false);
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
     // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
     const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
 
+    // Hover state for cursor
+    const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | null>(null);
+
     // Profile state for coordinate-based rendering
     const [profileBars, setProfileBars] = useState<{ top: number; height: number; width: number }[]>([]);
-
-    const handleTimeframeSelect = (tf: Timeframe) => {
-        setCurrentTimeframe(tf);
-        setIsTimeframeMenuOpen(false);
-        onTimeframeChange?.(tf);
-    };
 
     // 1. Calculate Volume Profile Bins
     const volumeProfileBins = useMemo(() => {
@@ -87,7 +77,7 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                 vertLines: { color: 'rgba(255, 255, 255, 0.03)' },
                 horzLines: { color: 'rgba(255, 255, 255, 0.03)' },
             },
-            leftPriceScale: { visible: false }, // Use internal overlay for better control
+            leftPriceScale: { visible: false },
             rightPriceScale: {
                 borderColor: 'rgba(255, 255, 255, 0.1)',
                 visible: true,
@@ -102,6 +92,17 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                 horzLine: { color: 'rgba(255, 255, 255, 0.2)', labelBackgroundColor: '#1F2937' },
                 vertLine: { color: 'rgba(255, 255, 255, 0.2)', labelBackgroundColor: '#1F2937' },
             },
+            handleScroll: {
+                vertTouchDrag: true,
+                horzTouchDrag: true,
+                mouseWheel: true,
+                pressedMouseMove: true,
+            },
+            handleScale: {
+                axisPressedMouseMove: true,
+                mouseWheel: true,
+                pinch: true,
+            },
         });
 
         const series = chart.addAreaSeries({
@@ -114,7 +115,7 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
         const volumeSeries = chart.addHistogramSeries({
             color: '#26a69a',
             priceFormat: { type: 'volume' },
-            priceScaleId: '', // overlay
+            priceScaleId: '',
         });
         volumeSeries.priceScale().applyOptions({
             scaleMargins: { top: 0.85, bottom: 0 },
@@ -171,7 +172,7 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                 };
             });
             setProfileBars(bars);
-        }, 50); // Small delay to let chart internalize data
+        }, 50);
 
         return () => clearTimeout(timer);
     }, [volumeProfileBins, chartSize, data]);
@@ -256,66 +257,69 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
         }
     };
 
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (draggingType) return;
+        const series = seriesRef.current;
+        if (!series || !priceLines) {
+            setHoverLine(null);
+            return;
+        }
+        const rect = chartContainerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const y = e.clientY - rect.top;
+        const threshold = 15;
+
+        if (priceLines.takeProfit) {
+            const tpY = series.priceToCoordinate(priceLines.takeProfit);
+            if (tpY !== null && Math.abs(tpY - y) < threshold) {
+                setHoverLine('takeProfit');
+                return;
+            }
+        }
+        if (priceLines.stopLoss) {
+            const slY = series.priceToCoordinate(priceLines.stopLoss);
+            if (slY !== null && Math.abs(slY - y) < threshold) {
+                setHoverLine('stopLoss');
+                return;
+            }
+        }
+        setHoverLine(null);
+    };
+
+    const handleMouseLeave = () => {
+        setHoverLine(null);
+    };
+
+    const getCursorStyle = () => {
+        if (draggingType) return 'ns-resize';
+        if (hoverLine) return 'ns-resize';
+        return 'crosshair';
+    };
+
     return (
-        <div className="relative w-full h-full flex flex-col overflow-hidden group bg-[#09090b]">
-            {/* Header / Controls */}
-            <div className="flex items-center justify-between p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-40">
-                <div className="flex items-center gap-4">
-                    <button
-                        onMouseEnter={() => setIsTimeframeMenuOpen(true)}
-                        onMouseLeave={() => setIsTimeframeMenuOpen(false)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] font-bold text-gray-300 transition-all uppercase tracking-tighter"
-                    >
-                        <Clock className="w-3.5 h-3.5 text-blue-400" />
-                        <span>{currentTimeframe}</span>
-                    </button>
-
-                    <AnimatePresence>
-                        {isTimeframeMenuOpen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
-                                onMouseEnter={() => setIsTimeframeMenuOpen(true)}
-                                onMouseLeave={() => setIsTimeframeMenuOpen(false)}
-                                className="absolute top-12 left-4 w-32 bg-[#0F1218] border border-white/10 rounded-xl shadow-2xl py-2 overflow-hidden backdrop-blur-xl z-50"
-                            >
-                                {(['1m', '5m', '15m', '1H', '4H', '1D', '1W'] as Timeframe[]).map((tf) => (
-                                    <button
-                                        key={tf}
-                                        onClick={() => handleTimeframeSelect(tf)}
-                                        className={`w-full text-left px-4 py-2.5 text-[10px] font-bold transition-all uppercase ${currentTimeframe === tf ? 'bg-blue-500/10 text-blue-400' : 'text-zinc-500 hover:bg-white/5 hover:text-white'}`}
-                                    >
-                                        {tf}
-                                    </button>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-
-                <div className="hidden md:flex items-center gap-4">
-                    <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md border border-white/5 cursor-help group/info">
-                        <Info className="w-3 h-3 text-zinc-500" />
-                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">DRAG SL/TP LINES</span>
-                    </div>
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Live Markets
-                    </span>
-                </div>
+        <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
+            {/* Header */}
+            <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-40">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Live
+                </span>
             </div>
 
             {/* Chart Area */}
             <div className="flex-1 relative">
                 {/* Interaction Layer */}
                 <div
-                    className="absolute inset-0 z-20 cursor-crosshair"
+                    className="absolute inset-0 z-20"
                     onMouseDown={handleMouseDown}
-                    style={{ cursor: draggingType ? 'ns-resize' : 'crosshair' }}
+                    onMouseMove={handleMouseMove}
+                    onMouseLeave={handleMouseLeave}
+                    style={{ cursor: getCursorStyle() }}
                 />
 
                 <div ref={chartContainerRef} className="w-full h-full" />
 
-                {/* Volume Profile Overlay (Left) */}
+                {/* Volume Profile Overlay */}
                 <div className="absolute left-0 top-0 bottom-0 w-48 pointer-events-none z-10">
                     {profileBars.map((bar, i) => (
                         <div
@@ -331,21 +335,12 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                     ))}
                 </div>
 
-                {/* Drag Indicator Overlay */}
+                {/* Drag Indicator */}
                 {draggingType && (
                     <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
                         Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
                     </div>
                 )}
-            </div>
-
-            {/* Footer Status */}
-            <div className="px-4 py-2 border-t border-white/5 flex items-center justify-between text-[8px] font-bold text-zinc-600 uppercase tracking-widest bg-black/20">
-                <div className="flex items-center gap-4">
-                    <span>VP Profile: ACTIVE</span>
-                    <span>Polling: 10s</span>
-                </div>
-                <span>LLM Analysis Powered by Llama-3</span>
             </div>
         </div>
     );
