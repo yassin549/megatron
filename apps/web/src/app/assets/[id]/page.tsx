@@ -247,10 +247,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
                                         takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
                                     }}
-                                    onPriceLineChange={(type, price) => {
-                                        if (type === 'stopLoss') setOrderStopLoss(price.toString());
-                                        if (type === 'takeProfit') setOrderTakeProfit(price.toString());
-                                    }}
+                                    onUpdatePosition={handleChartUpdate}
                                 />
                             ) : (
                                 <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
@@ -304,7 +301,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="lg:col-span-4 space-y-4">
+                    <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24 h-fit">
                         {asset.status === 'funding' ? (
                             <LPFundingPanel
                                 assetId={asset.id}

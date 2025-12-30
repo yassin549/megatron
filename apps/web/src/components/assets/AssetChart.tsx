@@ -1,5 +1,6 @@
 import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi } from 'lightweight-charts';
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { Check, X } from 'lucide-react';
 
 interface ChartProps {
     data: { time: string; value: number; volume?: number }[];
@@ -15,16 +16,35 @@ interface ChartProps {
         stopLoss?: number | null;
         takeProfit?: number | null;
     };
-    onPriceLineChange?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
+    onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
 }
 
-export function AssetChart({ data, colors, priceLines, onPriceLineChange }: ChartProps) {
+export function AssetChart({ data, colors, priceLines, onUpdatePosition }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
     const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
 
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+
+    // Local lines state for optimistic UI updates during drag
+    const [localLines, setLocalLines] = useState({
+        stopLoss: priceLines?.stopLoss ?? null,
+        takeProfit: priceLines?.takeProfit ?? null,
+    });
+
+    // Pending confirmation state
+    const [pendingUpdate, setPendingUpdate] = useState<{ type: 'stopLoss' | 'takeProfit', value: number } | null>(null);
+
+    // Sync local lines with props when not dragging/pending
+    useEffect(() => {
+        if (!pendingUpdate) {
+            setLocalLines({
+                stopLoss: priceLines?.stopLoss ?? null,
+                takeProfit: priceLines?.takeProfit ?? null,
+            });
+        }
+    }, [priceLines, pendingUpdate]);
 
     // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
@@ -177,7 +197,7 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
         return () => clearTimeout(timer);
     }, [volumeProfileBins, chartSize, data]);
 
-    // 5. Price Line Management
+    // 5. Price Line Management (Use localLines)
     useEffect(() => {
         const series = seriesRef.current;
         if (!series) return;
@@ -188,18 +208,18 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
                 price: priceLines.entry, color: 'rgba(255, 255, 255, 0.3)', lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'ENTRY'
             }));
         }
-        if (priceLines?.stopLoss) {
+        if (localLines.stopLoss) {
             lines.push(series.createPriceLine({
-                price: priceLines.stopLoss, color: '#f43f5e', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'SL'
+                price: localLines.stopLoss, color: '#f43f5e', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'SL'
             }));
         }
-        if (priceLines?.takeProfit) {
+        if (localLines.takeProfit) {
             lines.push(series.createPriceLine({
-                price: priceLines.takeProfit, color: '#34d399', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'TP'
+                price: localLines.takeProfit, color: '#34d399', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'TP'
             }));
         }
         return () => lines.forEach(line => series.removePriceLine(line));
-    }, [priceLines]);
+    }, [priceLines?.entry, localLines]);
 
     // 6. Global Dragging Logic
     useEffect(() => {
@@ -210,35 +230,48 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
             if (y < 0 || y > rect.height) return;
             const newPrice = seriesRef.current.coordinateToPrice(y);
             if (newPrice !== null) {
-                onPriceLineChange?.(draggingTypeRef.current, Number(newPrice.toFixed(4)));
+                const price = Number(newPrice.toFixed(4));
+                setLocalLines(prev => ({
+                    ...prev,
+                    [draggingTypeRef.current!]: price
+                }));
             }
         };
 
         const handleGlobalMouseUp = () => {
-            if (draggingTypeRef.current) {
+            if (draggingTypeRef.current && seriesRef.current && chartContainerRef.current) {
+                // Determine final price
+                const type = draggingTypeRef.current;
+                const price = localLines[type];
+                if (price !== null) {
+                    setPendingUpdate({ type, value: price });
+                }
                 setDraggingType(null);
                 draggingTypeRef.current = null;
             }
         };
 
-        window.addEventListener('mousemove', handleGlobalMouseMove);
-        window.addEventListener('mouseup', handleGlobalMouseUp);
+        if (draggingType) {
+            window.addEventListener('mousemove', handleGlobalMouseMove);
+            window.addEventListener('mouseup', handleGlobalMouseUp);
+        }
         return () => {
             window.removeEventListener('mousemove', handleGlobalMouseMove);
             window.removeEventListener('mouseup', handleGlobalMouseUp);
         };
-    }, [onPriceLineChange]);
+    }, [draggingType, localLines]); // Need localLines in dep to capture latest value
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (pendingUpdate) return; // Block dragging while confirmation pending
         const series = seriesRef.current;
-        if (!series || !priceLines) return;
+        if (!series) return;
         const rect = chartContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
         const y = e.clientY - rect.top;
         const threshold = 20;
 
-        if (priceLines.takeProfit) {
-            const tpY = series.priceToCoordinate(priceLines.takeProfit);
+        if (localLines.takeProfit) {
+            const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
                 setDraggingType('takeProfit');
                 draggingTypeRef.current = 'takeProfit';
@@ -246,8 +279,8 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
                 return;
             }
         }
-        if (priceLines.stopLoss) {
-            const slY = series.priceToCoordinate(priceLines.stopLoss);
+        if (localLines.stopLoss) {
+            const slY = series.priceToCoordinate(localLines.stopLoss);
             if (slY !== null && Math.abs(slY - y) < threshold) {
                 setDraggingType('stopLoss');
                 draggingTypeRef.current = 'stopLoss';
@@ -258,9 +291,9 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (draggingType) return;
+        if (draggingType || pendingUpdate) return;
         const series = seriesRef.current;
-        if (!series || !priceLines) {
+        if (!series) {
             setHoverLine(null);
             return;
         }
@@ -269,15 +302,15 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
         const y = e.clientY - rect.top;
         const threshold = 15;
 
-        if (priceLines.takeProfit) {
-            const tpY = series.priceToCoordinate(priceLines.takeProfit);
+        if (localLines.takeProfit) {
+            const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
                 setHoverLine('takeProfit');
                 return;
             }
         }
-        if (priceLines.stopLoss) {
-            const slY = series.priceToCoordinate(priceLines.stopLoss);
+        if (localLines.stopLoss) {
+            const slY = series.priceToCoordinate(localLines.stopLoss);
             if (slY !== null && Math.abs(slY - y) < threshold) {
                 setHoverLine('stopLoss');
                 return;
@@ -294,6 +327,18 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
         if (draggingType) return 'ns-resize';
         if (hoverLine) return 'ns-resize';
         return 'crosshair';
+    };
+
+    const handleConfirmUpdate = () => {
+        if (pendingUpdate) {
+            onUpdatePosition?.(pendingUpdate.type, pendingUpdate.value);
+            setPendingUpdate(null);
+        }
+    };
+
+    const handleCancelUpdate = () => {
+        setPendingUpdate(null);
+        // Effects will sync localLines back to priceLines
     };
 
     return (
@@ -339,6 +384,26 @@ export function AssetChart({ data, colors, priceLines, onPriceLineChange }: Char
                 {draggingType && (
                     <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
                         Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
+                    </div>
+                )}
+
+                {/* Confirm/Cancel Overlay */}
+                {pendingUpdate && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex gap-2 bg-black/80 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-200">
+                        <button
+                            onClick={handleConfirmUpdate}
+                            className="bg-emerald-500 hover:bg-emerald-400 text-white p-2 rounded-lg transition-colors shadow-lg shadow-emerald-900/20"
+                            title="Confirm Change"
+                        >
+                            <Check className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={handleCancelUpdate}
+                            className="bg-zinc-700 hover:bg-zinc-600 text-white p-2 rounded-lg transition-colors"
+                            title="Cancel"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
                     </div>
                 )}
             </div>
