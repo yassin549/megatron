@@ -6,9 +6,9 @@ import { publishOracleEvent } from '../lib/redis';
 
 const DEFAULT_CADENCE_MS = (() => {
     const value = process.env.LLM_CADENCE_MS;
-    if (!value) return 600000;
+    if (!value) return 120000; // 2 minutes
     const parsed = parseInt(value, 10);
-    if (!Number.isFinite(parsed) || parsed <= 0) return 600000;
+    if (!Number.isFinite(parsed) || parsed <= 0) return 120000;
     return parsed;
 })();
 

@@ -1,12 +1,12 @@
 import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi } from 'lightweight-charts';
-import { useEffect, useRef, useState } from 'react';
-import { Clock } from 'lucide-react';
+import { useEffect, useRef, useState, useMemo } from 'react';
+import { Clock, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export type Timeframe = '1m' | '5m' | '15m' | '1H' | '4H' | '1D' | '1W';
 
 interface ChartProps {
-    data: { time: string; value: number }[];
+    data: { time: string; value: number; volume?: number }[];
     colors?: {
         backgroundColor?: string;
         lineColor?: string;
@@ -26,13 +26,19 @@ interface ChartProps {
 export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPriceLineChange }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
-    const seriesRef = useRef<ISeriesApi<any> | null>(null);
+    const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
+    const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
+
     const [currentTimeframe, setCurrentTimeframe] = useState<Timeframe>('15m');
     const [isTimeframeMenuOpen, setIsTimeframeMenuOpen] = useState(false);
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
     // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
+    const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
+
+    // Profile state for coordinate-based rendering
+    const [profileBars, setProfileBars] = useState<{ top: number; height: number; width: number }[]>([]);
 
     const handleTimeframeSelect = (tf: Timeframe) => {
         setCurrentTimeframe(tf);
@@ -40,15 +46,35 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
         onTimeframeChange?.(tf);
     };
 
+    // 1. Calculate Volume Profile Bins
+    const volumeProfileBins = useMemo(() => {
+        if (!data.length) return [];
+        const prices = data.map(d => d.value);
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        const range = max - min;
+        if (range === 0) return [];
+
+        const binCount = 20;
+        const binSize = range / binCount;
+        const bins = new Array(binCount).fill(0).map((_, i) => ({
+            priceStart: min + i * binSize,
+            priceEnd: min + (i + 1) * binSize,
+            volume: 0
+        }));
+
+        data.forEach(d => {
+            const index = Math.min(binCount - 1, Math.floor((d.value - min) / binSize));
+            bins[index].volume += d.volume || 1;
+        });
+
+        const maxVol = Math.max(...bins.map(b => b.volume));
+        return bins.map(b => ({ ...b, width: (b.volume / maxVol) * 100 }));
+    }, [data]);
+
+    // 2. Initialize Chart
     useEffect(() => {
         if (!chartContainerRef.current) return;
-
-        const handleResize = () => {
-            if (!chartContainerRef.current || !chartRef.current) return;
-            const { clientWidth, clientHeight } = chartContainerRef.current;
-            chartRef.current.applyOptions({ width: clientWidth, height: clientHeight });
-            setChartSize({ width: clientWidth, height: clientHeight });
-        };
 
         const chart = createChart(chartContainerRef.current, {
             layout: {
@@ -58,9 +84,10 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight || 400,
             grid: {
-                vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
-                horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+                vertLines: { color: 'rgba(255, 255, 255, 0.03)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.03)' },
             },
+            leftPriceScale: { visible: false }, // Use internal overlay for better control
             rightPriceScale: {
                 borderColor: 'rgba(255, 255, 255, 0.1)',
                 visible: true,
@@ -71,141 +98,168 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                 secondsVisible: false,
                 rightOffset: 12,
             },
-            localization: {
-                timeFormatter: (timestamp: number) => {
-                    return new Date(timestamp * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-            },
             crosshair: {
                 horzLine: { color: 'rgba(255, 255, 255, 0.2)', labelBackgroundColor: '#1F2937' },
                 vertLine: { color: 'rgba(255, 255, 255, 0.2)', labelBackgroundColor: '#1F2937' },
             },
         });
 
-        chartRef.current = chart;
-        setChartSize({ width: chartContainerRef.current.clientWidth, height: chartContainerRef.current.clientHeight || 400 });
-
         const series = chart.addAreaSeries({
             lineColor: colors?.lineColor || '#34d399',
-            topColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.2)',
+            topColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.1)',
             bottomColor: 'rgba(0, 0, 0, 0)',
             lineWidth: 2,
         });
 
-        seriesRef.current = series;
+        const volumeSeries = chart.addHistogramSeries({
+            color: '#26a69a',
+            priceFormat: { type: 'volume' },
+            priceScaleId: '', // overlay
+        });
+        volumeSeries.priceScale().applyOptions({
+            scaleMargins: { top: 0.85, bottom: 0 },
+        });
 
-        if (data.length > 0) {
-            series.setData(data);
-            chart.timeScale().fitContent();
-        }
+        chartRef.current = chart;
+        seriesRef.current = series;
+        volumeSeriesRef.current = volumeSeries;
+        setChartSize({ width: chartContainerRef.current.clientWidth, height: chart.options().height });
+
+        const handleResize = () => {
+            if (!chartContainerRef.current || !chartRef.current) return;
+            const { clientWidth, clientHeight } = chartContainerRef.current;
+            chartRef.current.applyOptions({ width: clientWidth, height: clientHeight });
+            setChartSize({ width: clientWidth, height: clientHeight });
+        };
 
         window.addEventListener('resize', handleResize);
-
         return () => {
             window.removeEventListener('resize', handleResize);
             chart.remove();
         };
-    }, [data, colors]);
+    }, [colors]);
 
-    // Price Line Manager
+    // 3. Update Data
+    useEffect(() => {
+        if (!seriesRef.current || !volumeSeriesRef.current || !data.length) return;
+
+        seriesRef.current.setData(data.map(d => ({ time: d.time as any, value: d.value })));
+
+        const volumeData = data.map((d, i) => ({
+            time: d.time as any,
+            value: d.volume || 0,
+            color: (i > 0 && d.value >= data[i - 1].value) ? 'rgba(16, 185, 129, 0.3)' : 'rgba(244, 63, 94, 0.3)'
+        }));
+        volumeSeriesRef.current.setData(volumeData);
+
+        chartRef.current?.timeScale().fitContent();
+    }, [data]);
+
+    // 4. Map Profile Bins to Coordinates
+    useEffect(() => {
+        const series = seriesRef.current;
+        if (!series || !volumeProfileBins.length) return;
+
+        const timer = setTimeout(() => {
+            const bars = volumeProfileBins.map(bin => {
+                const yStart = series.priceToCoordinate(bin.priceEnd) || 0;
+                const yEnd = series.priceToCoordinate(bin.priceStart) || 0;
+                return {
+                    top: yStart,
+                    height: Math.max(1, yEnd - yStart),
+                    width: bin.width
+                };
+            });
+            setProfileBars(bars);
+        }, 50); // Small delay to let chart internalize data
+
+        return () => clearTimeout(timer);
+    }, [volumeProfileBins, chartSize, data]);
+
+    // 5. Price Line Management
     useEffect(() => {
         const series = seriesRef.current;
         if (!series) return;
 
         const lines: any[] = [];
-
         if (priceLines?.entry) {
             lines.push(series.createPriceLine({
-                price: priceLines.entry,
-                color: 'rgba(255, 255, 255, 0.5)',
-                lineWidth: 1,
-                lineStyle: LineStyle.Dashed,
-                axisLabelVisible: true,
-                title: 'ENTRY',
+                price: priceLines.entry, color: 'rgba(255, 255, 255, 0.3)', lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'ENTRY'
             }));
         }
-
         if (priceLines?.stopLoss) {
             lines.push(series.createPriceLine({
-                price: priceLines.stopLoss,
-                color: '#f43f5e',
-                lineWidth: 1,
-                lineStyle: LineStyle.Solid,
-                axisLabelVisible: true,
-                title: 'SL',
+                price: priceLines.stopLoss, color: '#f43f5e', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'SL'
             }));
         }
-
         if (priceLines?.takeProfit) {
             lines.push(series.createPriceLine({
-                price: priceLines.takeProfit,
-                color: '#34d399',
-                lineWidth: 1,
-                lineStyle: LineStyle.Solid,
-                axisLabelVisible: true,
-                title: 'TP',
+                price: priceLines.takeProfit, color: '#34d399', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'TP'
             }));
         }
-
-        return () => {
-            lines.forEach(line => series.removePriceLine(line));
-        };
+        return () => lines.forEach(line => series.removePriceLine(line));
     }, [priceLines]);
 
-    // Dragging Logic
+    // 6. Global Dragging Logic
+    useEffect(() => {
+        const handleGlobalMouseMove = (e: MouseEvent) => {
+            if (!draggingTypeRef.current || !seriesRef.current || !chartContainerRef.current) return;
+            const rect = chartContainerRef.current.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            if (y < 0 || y > rect.height) return;
+            const newPrice = seriesRef.current.coordinateToPrice(y);
+            if (newPrice !== null) {
+                onPriceLineChange?.(draggingTypeRef.current, Number(newPrice.toFixed(4)));
+            }
+        };
+
+        const handleGlobalMouseUp = () => {
+            if (draggingTypeRef.current) {
+                setDraggingType(null);
+                draggingTypeRef.current = null;
+            }
+        };
+
+        window.addEventListener('mousemove', handleGlobalMouseMove);
+        window.addEventListener('mouseup', handleGlobalMouseUp);
+        return () => {
+            window.removeEventListener('mousemove', handleGlobalMouseMove);
+            window.removeEventListener('mouseup', handleGlobalMouseUp);
+        };
+    }, [onPriceLineChange]);
+
     const handleMouseDown = (e: React.MouseEvent) => {
         const series = seriesRef.current;
         if (!series || !priceLines) return;
-
         const rect = chartContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
-
         const y = e.clientY - rect.top;
-        const threshold = 15;
+        const threshold = 20;
 
-        // Check TP
         if (priceLines.takeProfit) {
             const tpY = series.priceToCoordinate(priceLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
                 setDraggingType('takeProfit');
+                draggingTypeRef.current = 'takeProfit';
                 e.preventDefault();
                 return;
             }
         }
-
-        // Check SL
         if (priceLines.stopLoss) {
             const slY = series.priceToCoordinate(priceLines.stopLoss);
             if (slY !== null && Math.abs(slY - y) < threshold) {
                 setDraggingType('stopLoss');
+                draggingTypeRef.current = 'stopLoss';
                 e.preventDefault();
                 return;
             }
         }
     };
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (!draggingType || !seriesRef.current) return;
-
-        const rect = chartContainerRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const y = e.clientY - rect.top;
-        const newPrice = seriesRef.current.coordinateToPrice(y);
-
-        if (newPrice !== null) {
-            onPriceLineChange?.(draggingType, Number(newPrice.toFixed(4)));
-        }
-    };
-
-    const handleMouseUp = () => {
-        setDraggingType(null);
-    };
-
     return (
-        <div className="relative w-full h-full flex flex-col overflow-hidden group">
+        <div className="relative w-full h-full flex flex-col overflow-hidden group bg-[#09090b]">
             {/* Header / Controls */}
-            <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-40">
+            <div className="flex items-center justify-between p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-40">
                 <div className="flex items-center gap-4">
                     <button
                         onMouseEnter={() => setIsTimeframeMenuOpen(true)}
@@ -239,37 +293,59 @@ export function AssetChart({ data, colors, onTimeframeChange, priceLines, onPric
                 </div>
 
                 <div className="hidden md:flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md border border-white/5 cursor-help group/info">
+                        <Info className="w-3 h-3 text-zinc-500" />
+                        <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">DRAG SL/TP LINES</span>
+                    </div>
                     <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        Live Execution
+                        Live Markets
                     </span>
                 </div>
             </div>
 
             {/* Chart Area */}
-            <div className="flex-1 relative bg-black/20">
+            <div className="flex-1 relative">
+                {/* Interaction Layer */}
                 <div
-                    className="absolute inset-0 z-20 cursor-default"
+                    className="absolute inset-0 z-20 cursor-crosshair"
                     onMouseDown={handleMouseDown}
                     style={{ cursor: draggingType ? 'ns-resize' : 'crosshair' }}
                 />
 
-                <svg
-                    className={`absolute inset-0 z-30 pointer-events-none`}
-                    width={chartSize.width}
-                    height={chartSize.height}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                />
-
                 <div ref={chartContainerRef} className="w-full h-full" />
 
+                {/* Volume Profile Overlay (Left) */}
+                <div className="absolute left-0 top-0 bottom-0 w-48 pointer-events-none z-10">
+                    {profileBars.map((bar, i) => (
+                        <div
+                            key={i}
+                            className="absolute left-0 bg-blue-500/10 border-r border-blue-500/10"
+                            style={{
+                                top: bar.top,
+                                height: bar.height,
+                                width: `${bar.width}%`,
+                                opacity: bar.width / 100 + 0.1
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {/* Drag Indicator Overlay */}
                 {draggingType && (
-                    <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[9px] font-black text-white uppercase tracking-widest animate-pulse">
-                        Adjusting {draggingType === 'stopLoss' ? 'SL' : 'TP'}
+                    <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
+                        Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
                     </div>
                 )}
+            </div>
+
+            {/* Footer Status */}
+            <div className="px-4 py-2 border-t border-white/5 flex items-center justify-between text-[8px] font-bold text-zinc-600 uppercase tracking-widest bg-black/20">
+                <div className="flex items-center gap-4">
+                    <span>VP Profile: ACTIVE</span>
+                    <span>Polling: 10s</span>
+                </div>
+                <span>LLM Analysis Powered by Llama-3</span>
             </div>
         </div>
     );

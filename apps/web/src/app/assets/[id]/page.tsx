@@ -116,21 +116,13 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     const chartData = priceHistory
         .map(p => ({
             time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any,
-            value: p.price
+            value: p.price,
+            volume: (p as any).volume || 0
         }))
         .sort((a, b) => (a.time as number) - (b.time as number))
         .filter((item, index, self) =>
             index === 0 || item.time !== self[index - 1].time
         );
-
-    // Stagnation logic
-    if (chartData.length > 0) {
-        const lastPoint = chartData[chartData.length - 1];
-        const now = Math.floor(Date.now() / 1000);
-        if (now - (lastPoint.time as number) > 60) {
-            chartData.push({ time: now as any, value: lastPoint.value });
-        }
-    }
 
     return (
         <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
