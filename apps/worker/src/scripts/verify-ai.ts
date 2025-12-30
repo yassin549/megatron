@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { db } from '@megatron/database';
 
 async function main() {
-    const prisma = new PrismaClient();
+    const prisma = db;
     const log = await prisma.oracleLog.findFirst({
         orderBy: { createdAt: 'desc' }
     });

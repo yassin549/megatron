@@ -248,23 +248,13 @@ export async function withdrawLiquidityInstant(userId: string, assetId: string, 
 
         if (!lpShare) throw new Error("LP not found");
 
-        // 2. Calculate Vested & Limits
+        // Calculate Vested & Limits
         // We need to map Prisma objects to our shared interface if needed, 
         // or just pass them if structure matches.
         // Prisma 'Decimal' needstoNumber() for our helper.
         // Helper expects simple objects.
-        const schedule = lpShare.unlockSchedule.map(s => ({
-            days: 0, // Not used by helper if we convert date directly? 
-            // Helper uses days from start... wait.
-            // Our helper `calculateVestedAmount` iterates schedule and checks logic.
-            // But we stored explicit `unlockDate` in DB!
-            // So we don't need `days` from start, we just check `unlockDate`.
-            // Wait, helper implementation:
-            // "const milestoneTime = start + (milestone.days...)"
-            // The helper assumes relative days.
-            // But our DB stores absolute dates.
-            // We should arguably just check the DB dates directly.
-            // Let's implement custom logic here using the DB dates for accuracy.
+        const schedule = lpShare.unlockSchedule.map((s: { unlockPercentage: Prisma.Decimal; unlockDate: Date }) => ({
+            days: 0,
             percentage: s.unlockPercentage.toNumber(),
             unlockDate: s.unlockDate
         }));
@@ -350,7 +340,7 @@ export async function requestWithdrawal(userId: string, assetId: string, amountU
         if (!lpShare) throw new Error("LP not found");
 
         // Calculate Vested
-        const schedule = lpShare.unlockSchedule.map(s => ({
+        const schedule = lpShare.unlockSchedule.map((s: { unlockPercentage: Prisma.Decimal; unlockDate: Date }) => ({
             percentage: s.unlockPercentage.toNumber(),
             unlockDate: s.unlockDate
         }));

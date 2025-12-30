@@ -3,7 +3,6 @@ import 'dotenv/config';
 import { db } from '@megatron/database';
 import { runLlmCycleForAsset } from '../modules/llm-pipeline';
 import { runPriceRecomputeForTest } from '../modules/price-engine';
-import { Prisma } from '@prisma/client';
 
 const ASSET_ID = '860ba70e-5a44-41d2-bc85-0c1de4faa46d'; // AI Hype Index
 

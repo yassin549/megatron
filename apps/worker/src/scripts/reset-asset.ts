@@ -1,7 +1,5 @@
 
-import { PrismaClient } from '@megatron/database';
-
-const db = new PrismaClient();
+import { db } from '@megatron/database';
 
 async function main() {
     console.log('🔄 Resetting AI Hype Index...');

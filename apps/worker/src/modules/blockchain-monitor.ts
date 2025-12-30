@@ -91,11 +91,11 @@ export async function checkDeposits() {
                 select: { id: true, depositAddress: true }
             });
 
-            const userMap = new Map(users.map(u => [u.depositAddress?.toLowerCase(), u.id]));
+            const userMap = new Map(users.map((u: { depositAddress: string | null; id: string }) => [u.depositAddress?.toLowerCase(), u.id]));
 
             for (const deposit of deposits) {
                 const userId = userMap.get(deposit.to);
-                if (userId) {
+                if (userId && typeof userId === 'string') {
                     // Create pending deposit (Fix #1: Two-phase confirmation)
                     await createPendingDeposit(userId, deposit.value, deposit.txHash, deposit.blockNumber);
                 }
