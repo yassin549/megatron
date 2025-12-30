@@ -9,7 +9,7 @@ import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderForm } from '@/components/trade/OrderForm';
 import { PositionCard } from '@/components/trade/PositionCard';
 import { LPFundingPanel } from '@/components/trade/LPFundingPanel';
-import { ArrowLeft, Activity, TrendingUp, Users } from 'lucide-react';
+import { ArrowLeft, Clock, Activity, TrendingUp, Users } from 'lucide-react';
 
 interface Asset {
     id: string;
