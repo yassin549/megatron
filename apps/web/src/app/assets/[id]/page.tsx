@@ -145,15 +145,19 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                 body: JSON.stringify({
                     type: 'sell',
                     assetId: asset.id,
-                    shares: asset.userPosition.shares,
+                    amount: asset.userPosition.shares,
                 }),
             });
             if (res.ok) {
                 setHasInitializedTargets(false);
                 fetchAsset();
+            } else {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to exit position');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to exit position', err);
+            alert(err.message);
         } finally {
             setIsExitingPosition(false);
         }
