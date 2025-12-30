@@ -43,7 +43,7 @@ async function main() {
             // 6. Withdrawal Queue (via LPShare)
             // Need to find LPShares first
             const shares = await db.lPShare.findMany({ where: { poolId } });
-            const shareIds = shares.map(s => s.id);
+            const shareIds = shares.map((s: { id: string }) => s.id);
 
             if (shareIds.length > 0) {
                 await db.withdrawalQueue.deleteMany({ where: { lpShareId: { in: shareIds } } });
