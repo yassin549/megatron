@@ -144,6 +144,34 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         }
     };
 
+    const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', value: number) => {
+        if (!asset) return;
+
+        // Update local state immediately
+        if (type === 'stopLoss') setOrderStopLoss(value.toString());
+        if (type === 'takeProfit') setOrderTakeProfit(value.toString());
+
+        // Prepare payload - use new value for the changed type, current state for the other
+        const slValue = type === 'stopLoss' ? value : (orderStopLoss ? parseFloat(orderStopLoss) : null);
+        const tpValue = type === 'takeProfit' ? value : (orderTakeProfit ? parseFloat(orderTakeProfit) : null);
+
+        setIsUpdatingTargets(true);
+        try {
+            const res = await fetch('/api/trade/position', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assetId: asset.id, stopLoss: slValue, takeProfit: tpValue }),
+            });
+            if (res.ok) {
+                fetchAsset();
+            }
+        } catch (err) {
+            console.error('Failed to update targets from chart', err);
+        } finally {
+            setIsUpdatingTargets(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center font-mono text-gray-500 animate-pulse">
