@@ -60,13 +60,25 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // Dynamic SL/TP state for the current order / position update
+    const [orderStopLoss, setOrderStopLoss] = useState('');
+    const [orderTakeProfit, setOrderTakeProfit] = useState('');
+    const [hasInitializedTargets, setHasInitializedTargets] = useState(false);
+
     async function fetchAsset() {
         try {
             const res = await fetch(`/api/assets/${params.id}`, { cache: 'no-store' });
             if (res.ok) {
                 const data = await res.json();
+                const newAsset = data.asset as Asset;
 
-                // Only update if data has changed (simple check)
+                // Sync local targets if not initialized and position exists
+                if (!hasInitializedTargets && newAsset.userPosition) {
+                    setOrderStopLoss(newAsset.userPosition.stopLoss?.toString() || '');
+                    setOrderTakeProfit(newAsset.userPosition.takeProfit?.toString() || '');
+                    setHasInitializedTargets(true);
+                }
+
                 setAsset(prev => JSON.stringify(prev) !== JSON.stringify(data.asset) ? data.asset : prev);
                 setOracleLogs(prev => prev.length !== (data.oracleLogs || []).length ? data.oracleLogs : prev);
                 setPriceHistory(data.priceHistory || []);
@@ -103,17 +115,15 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
 
     const chartData = priceHistory
         .map(p => ({
-            time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any, // Remove manual offset, rely on browser localization
+            time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any,
             value: p.price
         }))
         .sort((a, b) => (a.time as number) - (b.time as number))
         .filter((item, index, self) =>
-            // Unique timestamps only
             index === 0 || item.time !== self[index - 1].time
         );
 
-    // Stagnation logic: If the last price point is older than 2 minutes,
-    // add a "current" point to draw a flat line to "now".
+    // Stagnation logic
     if (chartData.length > 0) {
         const lastPoint = chartData[chartData.length - 1];
         const now = Math.floor(Date.now() / 1000);
@@ -134,7 +144,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                 </Link>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* LEFT COLUMN (Chart & Analysis) */}
+                    {/* LEFT COLUMN */}
                     <div className="lg:col-span-8 space-y-8">
 
                         {/* Header */}
@@ -143,7 +153,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                 <div className="flex items-center gap-3 mb-2">
                                     {asset.imageUrl && (
                                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img src={asset.imageUrl} alt={asset.name} className="w-full h-full object-cover" />
                                         </div>
                                     )}
@@ -193,11 +202,15 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         areaBottomColor: 'rgba(0, 0, 0, 0)',
                                         textColor: '#71717a',
                                     }}
-                                    priceLines={asset.userPosition ? {
-                                        entry: asset.userPosition.avgPrice,
-                                        stopLoss: asset.userPosition.stopLoss ?? undefined,
-                                        takeProfit: asset.userPosition.takeProfit ?? undefined,
-                                    } : undefined}
+                                    priceLines={{
+                                        entry: asset.userPosition?.avgPrice,
+                                        stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                        takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                    }}
+                                    onPriceLineChange={(type, price) => {
+                                        if (type === 'stopLoss') setOrderStopLoss(price.toString());
+                                        if (type === 'takeProfit') setOrderTakeProfit(price.toString());
+                                    }}
                                     onTimeframeChange={(tf) => {
                                         console.log('Fetching data for timeframe:', tf);
                                     }}
@@ -209,7 +222,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                             )}
                         </div>
 
-                        {/* Asset Stats Grid - Compact Mobile */}
+                        {/* Asset Stats Grid */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
                             <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
                                 <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
@@ -231,7 +244,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                             </div>
                         </div>
 
-                        {/* Description (Moved from Right Col) */}
+                        {/* Description */}
                         {asset.description && (
                             <div className="glass-panel p-6 rounded-xl">
                                 <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
@@ -253,7 +266,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN (Order Form or LP Funding Panel) */}
+                    {/* RIGHT COLUMN */}
                     <div className="lg:col-span-4 space-y-6">
                         {asset.status === 'funding' ? (
                             <LPFundingPanel
@@ -270,7 +283,14 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                 assetPrice={asset.price}
                                 assetSymbol={asset.name}
                                 userPosition={asset.userPosition}
-                                onTradeSuccess={fetchAsset}
+                                onTradeSuccess={() => {
+                                    setHasInitializedTargets(false); // Refetch and re-sync targets
+                                    fetchAsset();
+                                }}
+                                stopLoss={orderStopLoss}
+                                takeProfit={orderTakeProfit}
+                                onStopLossChange={setOrderStopLoss}
+                                onTakeProfitChange={setOrderTakeProfit}
                             />
                         )}
                     </div>
