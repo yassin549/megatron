@@ -33,3 +33,5 @@ console.log('[ENV] ARBITRUM_RPC_URL:', process.env.ARBITRUM_RPC_URL ? 'SET' : 'N
 console.log('[ENV] USDC_CONTRACT_ADDRESS:', process.env.USDC_CONTRACT_ADDRESS ? 'SET' : 'NOT SET');
 console.log('[ENV] PLATFORM_MNEMONIC:', process.env.PLATFORM_MNEMONIC ? 'SET' : 'NOT SET');
 console.log('[ENV] NEXTAUTH_SECRET:', process.env.NEXTAUTH_SECRET ? 'SET' : 'NOT SET');
+console.log('[ENV] REDIS_URL:', process.env.REDIS_URL ? 'SET' : 'NOT SET');
+console.log('[ENV] UPSTASH_REDIS_URL:', process.env.UPSTASH_REDIS_URL ? 'SET' : 'NOT SET');

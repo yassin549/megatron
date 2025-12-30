@@ -167,24 +167,20 @@ export async function startPriceEngine(): Promise<void> {
     const heartbeat = async () => {
         try {
             const assets = await db.asset.findMany({
-                where: {
-                    status: { in: ['active', 'funding'] }
-                },
-                select: { id: true }
+                where: { status: { in: ['active', 'funding'] } },
+                select: { id: true, name: true }
             });
 
             const now = Date.now();
-
             for (const asset of assets) {
-                // Check last tick time
                 const lastTick = await db.priceTick.findFirst({
                     where: { assetId: asset.id },
                     orderBy: { timestamp: 'desc' },
                     select: { timestamp: true }
                 });
 
-                // If no tick in last 60s, force a "stagnation" tick
                 if (!lastTick || now - lastTick.timestamp.getTime() > 65000) {
+                    // console.log(`[PriceEngine] Heartbeat: Forcing tick for ${asset.name}`);
                     await recomputePrice(asset.id, {});
                 }
             }
@@ -193,40 +189,47 @@ export async function startPriceEngine(): Promise<void> {
         }
     };
 
-    // Start heartbeat immediately
     void heartbeat();
     setInterval(heartbeat, 60000);
 
-    if (!REDIS_URL || (!REDIS_URL.startsWith('redis://') && !REDIS_URL.startsWith('rediss://'))) {
-        console.warn('Price Engine: REDIS_URL/UPSTASH_REDIS_URL not set or invalid. Event subscriber disabled.');
-        return;
-    }
+    // Subscriber initialization
+    console.log('[PriceEngine] Initializing subscriber...');
 
-    subscriber = new Redis(REDIS_URL, {
-        maxRetriesPerRequest: 3,
-        retryStrategy(times) {
-            if (times > 3) return null;
-            return Math.min(times * 50, 2000);
-        },
+    // We create a fresh client specifically for subscription
+    const sub = new Redis(REDIS_URL || 'redis://127.0.0.1:6379', {
+        maxRetriesPerRequest: null,
+        retryStrategy: (times) => Math.min(times * 200, 5000)
     });
 
-    subscriber.on('error', (err) => {
-        console.warn('Price Engine Redis error:', err.message);
+    sub.on('error', (err) => {
+        console.warn('[PriceEngine] Redis Subscriber error:', err.message);
     });
 
-    subscriber.on('message', async (_channel, message) => {
+    sub.on('connect', () => {
+        console.log('[PriceEngine] Subscriber connected');
+    });
+
+    sub.on('message', async (channel, message) => {
+        if (channel !== CHANNELS.EVENTS) return;
+
         try {
             const event = JSON.parse(message) as TradeEvent | OracleEvent;
-            if (event && event.type === 'trade') {
+            if (event.type === 'trade') {
+                console.log(`[PriceEngine] Processing trade event for ${event.assetId}`);
                 await handleTradeEvent(event as TradeEvent);
-            } else if (event && event.type === 'oracle') {
+            } else if (event.type === 'oracle') {
+                console.log(`[PriceEngine] Processing oracle event for ${event.assetId} (delta: ${event.deltaPercent}%)`);
                 await handleOracleEvent(event as OracleEvent);
             }
         } catch (err) {
-            console.error('Price Engine: failed to process message', err);
+            console.error('[PriceEngine] Failed to process message:', err);
         }
     });
 
-    await subscriber.subscribe(CHANNELS.EVENTS);
-    console.log('Price Engine: subscribed to', CHANNELS.EVENTS);
+    try {
+        await sub.subscribe(CHANNELS.EVENTS);
+        console.log('[PriceEngine] Subscribed to', CHANNELS.EVENTS);
+    } catch (err) {
+        console.error('[PriceEngine] Critical: Failed to subscribe to events channel', err);
+    }
 }
