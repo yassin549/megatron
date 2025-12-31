@@ -31,8 +31,11 @@ export async function GET() {
                 isBlacklisted: true,
                 createdAt: true,
                 positions: {
-                    where: { shares: { gt: 0 } },
-                    include: {
+                    where: { shares: { not: 0 } },
+                    select: {
+                        shares: true,
+                        avgPrice: true,
+                        collateral: true,
                         asset: {
                             select: {
                                 lastMarketPrice: true
@@ -75,7 +78,19 @@ export async function GET() {
         let positionsValue = 0;
         for (const pos of user.positions) {
             const price = pos.asset.lastMarketPrice?.toNumber() || 0;
-            positionsValue += pos.shares.toNumber() * price;
+            const shares = pos.shares.toNumber();
+
+            if (shares > 0) {
+                // LONG: Value is shares * currentPrice
+                positionsValue += shares * price;
+            } else if (shares < 0) {
+                // SHORT: Value is collateral + PnL
+                // PnL = (entryPrice - currentPrice) * abs(shares)
+                const entryPrice = pos.avgPrice.toNumber();
+                const pnl = (entryPrice - price) * Math.abs(shares);
+                const collateral = pos.collateral.toNumber();
+                positionsValue += (collateral + pnl);
+            }
         }
 
         // Calculate LP Positions Value

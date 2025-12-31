@@ -13,7 +13,7 @@ export async function GET(
         const { id } = params;
 
         // Fetch asset with pool data
-        const asset = await db.asset.findUnique({
+        let asset = await db.asset.findUnique({
             where: { id },
             include: {
                 pool: {
@@ -25,6 +25,29 @@ export async function GET(
                 },
             },
         });
+
+        // Slug Fallback Search
+        if (!asset) {
+            console.log(`[API/assets/[id]] ID ${id} not found, trying name lookup...`);
+            // Attempt to find by name (slugified)
+            asset = await db.asset.findFirst({
+                where: {
+                    OR: [
+                        { name: { mode: 'insensitive', equals: id.replace(/-/g, ' ') } },
+                        { id: { mode: 'insensitive', equals: id } } // Redundant but safe for cross-env sync
+                    ]
+                },
+                include: {
+                    pool: {
+                        select: {
+                            totalUsdc: true,
+                            totalLPShares: true,
+                            status: true,
+                        },
+                    },
+                },
+            });
+        }
 
         if (!asset) {
             return NextResponse.json(

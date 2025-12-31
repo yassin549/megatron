@@ -50,6 +50,9 @@ export async function POST(request: Request) {
                 status: 'funding',
                 oracleQueries: finalQueries,
                 pricingParams: { P0: 18, k: 1e-10 }, // Extremely flat curve so traders have no influence
+                lastDisplayPrice: 18,
+                lastMarketPrice: 18,
+                lastFundamental: 18,
                 pool: {
                     create: {
                         totalUsdc: 0,
