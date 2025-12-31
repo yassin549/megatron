@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, Prisma } from '@megatron/database';
-import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG, validateParams, calculateBuyCost } from '@megatron/lib-common';
+import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG, validateParams, calculateBuyCost, solveDeltaSharesFromRevenue } from '@megatron/lib-common';
 import { Redis } from 'ioredis';
 
 // Initialize Redis
@@ -244,12 +244,21 @@ export async function POST(req: Request) {
                 // SELL LOGIC (Exit Long OR Open Short)
                 // ==========================================
 
-                // tradeAmount is SHARES
-                const shareAmount = tradeAmount;
+                let shareAmount = 0;
+                let grossUsdc = 0;
                 const currentSupply = asset.totalSupply.toNumber();
 
-                // Calculate Revenue from Curve (Burn)
-                const grossUsdc = calculateSellRevenue(P0, k, currentSupply, shareAmount);
+                // If body.shares is provided (like from handleExitPosition), use it as raw shares.
+                // Otherwise, use tradeAmount as USDC.
+                if (body.shares) {
+                    shareAmount = parseFloat(body.shares);
+                    grossUsdc = calculateSellRevenue(P0, k, currentSupply, shareAmount);
+                } else {
+                    // tradeAmount is USDC
+                    grossUsdc = tradeAmount;
+                    shareAmount = solveDeltaSharesFromRevenue(P0, k, currentSupply, grossUsdc);
+                }
+
                 outputAmount = grossUsdc;
 
                 const fee = grossUsdc * CONFIG.SWAP_FEE;

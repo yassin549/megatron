@@ -115,6 +115,61 @@ export function calculateBuyCost(
 }
 
 /**
+ * Calculate shares to sell for a given USDC revenue
+ * Solves: P0*ΔS + k*S*ΔS - ½*k*ΔS² = A
+ * Using quadratic formula: ΔS = (b - √(b² - 4ac)) / (2a)
+ * where a = -k/2, b = (P0 + k*S), c = -A
+ * 
+ * @param P0 - Base price
+ * @param k - Slope
+ * @param S - Current total supply
+ * @param A - Target revenue (USDC)
+ * @returns Delta shares to sell/burn
+ */
+export function solveDeltaSharesFromRevenue(
+    P0: number,
+    k: number,
+    S: number,
+    A: number
+): number {
+    if (A <= 0) throw new Error('Revenue must be positive');
+
+    // Edge case: linear pricing (k=0)
+    if (k === 0) {
+        return A / P0;
+    }
+
+    // Quadratic formula coefficients
+    // 0.5*k*ΔS² - (P0 + k*S)*ΔS + A = 0
+    const a = k / 2;
+    const b = -(P0 + k * S);
+    const c = A;
+
+    const discriminant = b * b - 4 * a * c;
+
+    if (discriminant < 0) {
+        throw new Error('Insufficient curve depth to facilitate this revenue amount.');
+    }
+
+    // x = (-b - sqrt(D)) / 2a
+    const deltaS = (-b - Math.sqrt(discriminant)) / (2 * a);
+
+    if (deltaS <= 0) {
+        throw new Error('Invalid result: non-positive shares');
+    }
+
+    // Price Floor Check
+    const MIN_PRICE = 0.1;
+    const finalPrice = P0 + k * (S - deltaS);
+    if (finalPrice < MIN_PRICE) {
+        const maxSellable = (P0 + k * S - MIN_PRICE) / k;
+        throw new Error(`Price floor reached (0.1). Max sellable: ${maxSellable.toFixed(4)} shares.`);
+    }
+
+    return deltaS;
+}
+
+/**
  * Validate bonding curve parameters
  * @param P0 - Base price (must be > 0)
  * @param k - Slope (must be >= 0)

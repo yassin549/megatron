@@ -152,7 +152,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
             // If Short, we BUY to cover. If Long, we SELL to exit.
             const payload = isShort
                 ? { type: 'buy', assetId: asset.id, shares: Math.abs(asset.userPosition.shares).toString() }
-                : { type: 'sell', assetId: asset.id, amount: asset.userPosition.shares.toString() };
+                : { type: 'sell', assetId: asset.id, shares: asset.userPosition.shares.toString() };
 
             const res = await fetch('/api/trade', {
                 method: 'POST',

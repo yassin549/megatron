@@ -38,7 +38,7 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const estimatedShares = amount ? (isBuy ? parseFloat(amount) / assetPrice : parseFloat(amount)) : 0;
+    const estimatedShares = amount ? parseFloat(amount) / assetPrice : 0;
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -149,7 +149,7 @@ export function OrderForm({
             <div className="mb-4">
                 <div className="flex justify-between items-center mb-1.5">
                     <span className="text-[10px] font-bold text-zinc-500 uppercase">
-                        {isBuy ? 'Amount' : 'Shares'}
+                        Order Amount
                     </span>
                     <span className="text-[10px] text-zinc-400">
                         Max: <span className="text-white font-mono">${userBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
@@ -164,7 +164,7 @@ export function OrderForm({
                         className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-bold">
-                        {isBuy ? 'USDC' : 'SHARES'}
+                        USDC
                     </span>
                 </div>
             </div>
