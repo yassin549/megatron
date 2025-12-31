@@ -88,13 +88,12 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
                             </div>
 
                             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 md:mb-8 tracking-tighter leading-tight">
-                                Turn World Variables Into <br className="hidden md:block" />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-neon-purple animate-gradient-x">Investable Assets</span>
+                                If It Trends, <br className="hidden md:block" />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-neon-purple animate-gradient-x">You Can Trade It</span>
                             </h1>
 
                             <p className="text-base md:text-xl text-muted-foreground mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed">
-                                Trade AI-monitored real-world events. From climate data to political outcomes,
-                                verify your thesis with institutional-grade tools.
+                                Megatron lets you trade real-world dynamics like AI hype, capital flows, and geopolitical pressure as structured financial markets.
                             </p>
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
