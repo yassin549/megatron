@@ -384,8 +384,8 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* Main Sidebar - Sticky on Desktop */}
-                    <div className="col-span-12 lg:col-span-4 relative border-l border-white/5">
+                    {/* Main Sidebar - Solid Column */}
+                    <div className="col-span-12 lg:col-span-4 relative border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)]">
                         <div className="lg:sticky lg:top-[120px] lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar">
                             {asset && (
                                 <TradingSidebar

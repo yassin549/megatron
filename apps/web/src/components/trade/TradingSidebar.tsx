@@ -31,7 +31,7 @@ export function TradingSidebar({
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
     return (
-        <div className="flex flex-col h-full bg-zinc-900/30 backdrop-blur-xl border-l border-white/5 shadow-[-20px_0_30px_rgba(0,0,0,0.2)]">
+        <div className="flex flex-col h-full">
             {/* Perspective Tabs (Premium Toggle) - Padded at top */}
             <div className="px-5 pt-6 pb-2">
                 <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 relative">
