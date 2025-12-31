@@ -1,0 +1,114 @@
+'use client';
+
+import { useState } from 'react';
+import { OrderForm } from './OrderForm';
+import { PositionsList } from './PositionsList';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Activity, ShieldAlert, TrendingUp } from 'lucide-react';
+
+interface TradingSidebarProps {
+    assetId: string;
+    assetName: string;
+    assetPrice: number;
+    marketPrice: number;
+    status: string;
+    onTradeSuccess?: () => void;
+    // For chart interaction
+    activePositionId?: string | null;
+    onSelectPosition?: (assetId: string | null) => void;
+}
+
+export function TradingSidebar({
+    assetId,
+    assetName,
+    assetPrice,
+    marketPrice,
+    status,
+    onTradeSuccess,
+    activePositionId,
+    onSelectPosition
+}: TradingSidebarProps) {
+    const [view, setView] = useState<'trade' | 'positions'>('trade');
+
+    return (
+        <div className="flex flex-col h-full space-y-4">
+            {/* Perspective Tabs (Premium Toggle) */}
+            <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 relative">
+                <motion.div
+                    className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-lg border border-white/5"
+                    initial={false}
+                    animate={{
+                        left: view === 'trade' ? '4px' : '50%',
+                        width: 'calc(50% - 4px)'
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                />
+                <button
+                    onClick={() => setView('trade')}
+                    className={`flex-1 py-2.5 text-[10px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'trade' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    Trade
+                </button>
+                <button
+                    onClick={() => setView('positions')}
+                    className={`flex-1 py-2.5 text-[10px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'positions' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                    <Activity className="w-3.5 h-3.5" />
+                    Positions
+                </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 min-h-0">
+                <AnimatePresence mode="wait">
+                    {view === 'trade' ? (
+                        <motion.div
+                            key="trade"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }}
+                            transition={{ duration: 0.15 }}
+                        >
+                            <OrderForm
+                                assetId={assetId}
+                                assetPrice={assetPrice}
+                                marketPrice={marketPrice}
+                                assetSymbol={assetName}
+                                onTradeSuccess={onTradeSuccess}
+                            />
+
+                            {/* Pro-Tips / Market Status Hook */}
+                            <div className="mt-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <ShieldAlert className="w-4 h-4 text-blue-400" />
+                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Trading Intelligence</span>
+                                </div>
+                                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                                    Current volatility is <span className="text-white font-mono font-bold">NORMAL</span>.
+                                    Bonding curve depth ensures liquidity for orders up to $10,000.
+                                </p>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="positions"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.15 }}
+                            className="h-full"
+                        >
+                            <PositionsList
+                                currentAssetId={assetId}
+                                activePositionId={activePositionId}
+                                onSelectPosition={onSelectPosition}
+                                onActionSuccess={onTradeSuccess}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+}

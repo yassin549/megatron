@@ -6,9 +6,7 @@ import Link from 'next/link';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
-import { OrderForm } from '@/components/trade/OrderForm';
-import { PositionCard } from '@/components/trade/PositionCard';
-import { LPFundingPanel } from '@/components/trade/LPFundingPanel';
+import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import { ArrowLeft, Clock, Activity, TrendingUp, Users } from 'lucide-react';
 
 interface Asset {
@@ -70,6 +68,9 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
     const [orderTakeProfit, setOrderTakeProfit] = useState('');
     const [hasInitializedTargets, setHasInitializedTargets] = useState(false);
 
+    // Bidirectional interaction state
+    const [activePositionId, setActivePositionId] = useState<string | null>(null);
+
     async function fetchAsset() {
         try {
             const res = await fetch(`/api/assets/${params.id}`, { cache: 'no-store' });
@@ -108,23 +109,32 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         return () => clearInterval(interval);
     }, [params.id]);
 
-    const handleUpdateTargets = async () => {
+    const handleUpdateTargets = async (type: 'stopLoss' | 'takeProfit', value: number) => {
         if (!asset) return;
 
         // Validation
         const entryPrice = asset.userPosition?.avgPrice || 0;
         const isLong = (asset.userPosition?.shares || 0) > 0;
-        const slValue = orderStopLoss ? parseFloat(orderStopLoss) : null;
-        const tpValue = orderTakeProfit ? parseFloat(orderTakeProfit) : null;
+
+        // Determine proposed values
+        const currentSl = orderStopLoss ? parseFloat(orderStopLoss) : null;
+        const currentTp = orderTakeProfit ? parseFloat(orderTakeProfit) : null;
+
+        const slValue = type === 'stopLoss' ? value : currentSl;
+        const tpValue = type === 'takeProfit' ? value : currentTp;
 
         try {
             if (isLong) {
-                if (slValue !== null && slValue >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
-                if (tpValue !== null && tpValue <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
+                if (type === 'stopLoss' && value >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
+                if (type === 'takeProfit' && value <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
             } else if ((asset.userPosition?.shares || 0) < 0) {
-                if (slValue !== null && slValue <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
-                if (tpValue !== null && tpValue >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
+                if (type === 'stopLoss' && value <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
+                if (type === 'takeProfit' && value >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
             }
+
+            // Update local state immediately if valid
+            if (type === 'stopLoss') setOrderStopLoss(value.toString());
+            if (type === 'takeProfit') setOrderTakeProfit(value.toString());
 
             setIsUpdatingTargets(true);
             const res = await fetch('/api/trade/position', {
@@ -134,8 +144,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
             });
             if (res.ok) {
                 fetchAsset();
-            } else {
-                throw new Error('Failed to update targets');
             }
         } catch (err: any) {
             alert(err.message);
@@ -322,6 +330,8 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
                                     }}
                                     onUpdatePosition={handleChartUpdate}
+                                    activePositionId={activePositionId}
+                                    onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                 />
                             ) : (
                                 <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
@@ -374,45 +384,22 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* RIGHT COLUMN */}
-                    <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-32 h-fit">
-                        {asset.status === 'funding' ? (
-                            <LPFundingPanel
-                                assetId={asset.id}
-                                assetName={asset.name}
-                                softCap={asset.softCap}
-                                hardCap={asset.hardCap}
-                                currentFunding={asset.liquidity}
-                                fundingDeadline={asset.fundingDeadline}
-                            />
-                        ) : (
-                            <>
-                                <OrderForm
+                    {/* Main Sidebar - Sticky */}
+                    <div className="col-span-12 lg:col-span-4 space-y-6">
+                        <div className="sticky top-20">
+                            {asset && (
+                                <TradingSidebar
                                     assetId={asset.id}
+                                    assetName={asset.name}
                                     assetPrice={asset.price}
                                     marketPrice={asset.marketPrice}
-                                    assetSymbol={asset.name}
+                                    status={asset.status}
                                     onTradeSuccess={fetchAsset}
+                                    activePositionId={activePositionId}
+                                    onSelectPosition={setActivePositionId}
                                 />
-                                {/* Position Card - Shows below OrderForm when position exists */}
-                                {asset.userPosition && asset.userPosition.shares !== 0 && (
-                                    <PositionCard
-                                        shares={asset.userPosition.shares}
-                                        avgPrice={asset.userPosition.avgPrice}
-                                        currentPrice={asset.price}
-                                        stopLoss={orderStopLoss}
-                                        takeProfit={orderTakeProfit}
-                                        onStopLossChange={setOrderStopLoss}
-                                        onTakeProfitChange={setOrderTakeProfit}
-                                        onUpdateTargets={handleUpdateTargets}
-                                        onExitPosition={handleExitPosition}
-                                        isUpdating={isUpdatingTargets}
-                                        isExiting={isExitingPosition}
-                                        collateral={asset.userPosition.collateral}
-                                    />
-                                )}
-                            </>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

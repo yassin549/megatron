@@ -17,9 +17,18 @@ interface ChartProps {
         takeProfit?: number | null;
     };
     onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
+    activePositionId?: string | null;
+    onSelectPosition?: (assetId: string | null) => void;
 }
 
-export function AssetChart({ data, colors, priceLines, onUpdatePosition }: ChartProps) {
+export function AssetChart({
+    data,
+    colors,
+    priceLines,
+    onUpdatePosition,
+    activePositionId,
+    onSelectPosition
+}: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
     const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
@@ -203,23 +212,40 @@ export function AssetChart({ data, colors, priceLines, onUpdatePosition }: Chart
         if (!series) return;
 
         const lines: any[] = [];
+        const isSelected = activePositionId !== null;
+
         if (priceLines?.entry) {
             lines.push(series.createPriceLine({
-                price: priceLines.entry, color: 'rgba(255, 255, 255, 0.3)', lineWidth: 1, lineStyle: LineStyle.Dashed, axisLabelVisible: true, title: 'ENTRY'
+                price: priceLines.entry,
+                color: isSelected ? 'rgba(59, 130, 246, 0.8)' : 'rgba(255, 255, 255, 0.3)',
+                lineWidth: isSelected ? 2 : 1,
+                lineStyle: LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: 'ENTRY'
             }));
         }
         if (localLines.stopLoss) {
             lines.push(series.createPriceLine({
-                price: localLines.stopLoss, color: '#f43f5e', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'SL'
+                price: localLines.stopLoss,
+                color: '#f43f5e',
+                lineWidth: isSelected ? 2 : 1,
+                lineStyle: LineStyle.Solid,
+                axisLabelVisible: true,
+                title: 'SL'
             }));
         }
         if (localLines.takeProfit) {
             lines.push(series.createPriceLine({
-                price: localLines.takeProfit, color: '#34d399', lineWidth: 1, lineStyle: LineStyle.Solid, axisLabelVisible: true, title: 'TP'
+                price: localLines.takeProfit,
+                color: '#34d399',
+                lineWidth: isSelected ? 2 : 1,
+                lineStyle: LineStyle.Solid,
+                axisLabelVisible: true,
+                title: 'TP'
             }));
         }
         return () => lines.forEach(line => series.removePriceLine(line));
-    }, [priceLines?.entry, localLines]);
+    }, [priceLines?.entry, localLines, activePositionId]);
 
     // 6. Global Dragging Logic
     useEffect(() => {
@@ -270,6 +296,16 @@ export function AssetChart({ data, colors, priceLines, onUpdatePosition }: Chart
         const y = e.clientY - rect.top;
         const threshold = 20;
 
+        // Check for click on Entry line for selection
+        if (priceLines?.entry) {
+            const entryY = series.priceToCoordinate(priceLines.entry);
+            if (entryY !== null && Math.abs(entryY - y) < threshold) {
+                // If it's a click (not long press drag start), select
+                // For now, simpler: toggle selection
+                onSelectPosition?.(activePositionId ? null : 'current');
+                return;
+            }
+        }
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
