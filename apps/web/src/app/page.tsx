@@ -4,56 +4,55 @@ import { db } from '@megatron/database';
 import Link from 'next/link';
 import { SubNavbar } from '@/components/layout/SubNavbar';
 import { AssetGrid } from '@/components/assets/AssetGrid';
+import { enrichAssets } from '@/lib/assets';
 
-// Force dynamic since we are fetching live data (or use revalidate)
+// Force dynamic since we are fetching live data
 export const dynamic = 'force-dynamic';
 
 async function getAssets() {
     try {
+        const session = await getServerSession(authOptions);
+        let userBookmarks = new Set<string>();
+
+        if (session?.user?.id) {
+            const bookmarks = await db.bookmark.findMany({
+                where: { userId: session.user.id },
+                select: { assetId: true }
+            });
+            userBookmarks = new Set(bookmarks.map(b => b.assetId));
+        }
+
         const assets = await db.asset.findMany({
             include: {
-                pool: true,
-                _count: { select: { positions: true } },
-                bookmarks: true, // we need to know if user bookmarked it
+                pool: {
+                    select: {
+                        totalUsdc: true,
+                        totalLPShares: true,
+                    },
+                },
                 oracleLogs: {
                     orderBy: { createdAt: 'desc' },
-                    take: 1
+                    take: 1,
+                    select: {
+                        confidence: true,
+                        summary: true
+                    }
                 }
             },
             orderBy: {
-                // Default sorting, e.g. trending or newest
                 createdAt: 'desc'
             }
         });
 
-        const session = await getServerSession(authOptions);
-        const userId = session?.user?.id;
+        // Use the shared helper to calculate prices, changes, and volume
+        const enrichedAssets = await enrichAssets(assets, userBookmarks);
 
-        return assets.map(asset => {
-            const lastLog = asset.oracleLogs?.[0];
-            const isBookmarked = userId ? asset.bookmarks.some(b => b.userId === userId) : false;
+        // Cast status to match expected 'Asset' interface in AssetGrid
+        return enrichedAssets.map(a => ({
+            ...a,
+            status: a.status as 'active' | 'funding' | 'paused'
+        }));
 
-            return {
-                id: asset.id,
-                name: asset.name,
-                description: asset.description,
-                type: asset.type,
-                price: asset.price.toNumber(),
-                change24h: asset.change24h.toNumber(),
-                volume24h: asset.volume24h.toNumber(),
-                status: asset.status as 'active' | 'funding' | 'paused',
-                softCap: asset.softCap.toNumber(),
-                hardCap: asset.hardCap.toNumber(),
-                fundingProgress: asset.liquidity.toNumber(),
-                poolLiquidity: asset.pool?.totalUsdc.toNumber() || 0,
-                lastFundamental: null, // deprecated field
-                aiConfidence: lastLog?.confidence.toNumber() || null,
-                aiSummary: lastLog?.summary || null,
-                imageUrl: asset.imageUrl || undefined,
-                holders: asset._count.positions,
-                isBookmarked,
-            };
-        });
     } catch (error) {
         console.error('Failed to fetch assets', error);
         return [];
