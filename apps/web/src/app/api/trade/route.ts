@@ -316,6 +316,9 @@ export async function POST(req: Request) {
 
                     // 3. Pool pays out grossUsdc... INTO Collateral
                     if (asset.pool) {
+                        if (asset.pool.totalUsdc.toNumber() < grossUsdc) {
+                            throw new Error(`Insufficient liquidity in pool to facilitate this short. Pool only has ${asset.pool.totalUsdc.toFixed(2)} USDC.`);
+                        }
                         await tx.liquidityPool.update({
                             where: { id: asset.pool.id },
                             data: { totalUsdc: { decrement: grossUsdc } }

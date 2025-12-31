@@ -316,7 +316,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         textColor: '#71717a',
                                     }}
                                     priceLines={{
-                                        entry: asset.userPosition?.avgPrice,
+                                        entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
                                         stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
                                         takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
                                     }}

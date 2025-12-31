@@ -76,8 +76,10 @@ export function calculateSellRevenue(
     S: number,
     deltaS: number
 ): number {
-    if (deltaS > S) {
-        throw new Error('Cannot sell more shares than supply');
+    const MIN_PRICE = 0.1;
+    const finalPrice = P0 + k * (S - deltaS);
+    if (finalPrice < MIN_PRICE) {
+        throw new Error(`Price cannot drop below ${MIN_PRICE}. Max sellable: ${((P0 + k * S - MIN_PRICE) / k).toFixed(4)} shares.`);
     }
 
     if (deltaS < 0) {
