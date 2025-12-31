@@ -9,7 +9,8 @@
     "test": "turbo run test",
     "test:e2e": "playwright test",
     "lint": "turbo run lint",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "postinstall": "pnpm --filter @megatron/database generate"
   },
   "workspaces": [
     "apps/*",

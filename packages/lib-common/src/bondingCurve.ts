@@ -76,10 +76,10 @@ export function calculateSellRevenue(
     S: number,
     deltaS: number
 ): number {
-    const MIN_PRICE = 0.1;
+    const MIN_PRICE = 1e-18;
     const finalPrice = P0 + k * (S - deltaS);
     if (finalPrice < MIN_PRICE) {
-        throw new Error(`Price cannot drop below ${MIN_PRICE}. Max sellable: ${((P0 + k * S - MIN_PRICE) / k).toFixed(4)} shares.`);
+        throw new Error(`Price floor reached (1e-18). Max shortable: ${((P0 + k * S - MIN_PRICE) / k).toFixed(4)} shares.`);
     }
 
     if (deltaS < 0) {
@@ -158,12 +158,11 @@ export function solveDeltaSharesFromRevenue(
         throw new Error('Invalid result: non-positive shares');
     }
 
-    // Price Floor Check
-    const MIN_PRICE = 0.1;
+    const MIN_PRICE = 1e-18;
     const finalPrice = P0 + k * (S - deltaS);
     if (finalPrice < MIN_PRICE) {
         const maxSellable = (P0 + k * S - MIN_PRICE) / k;
-        throw new Error(`Price floor reached (0.1). Max sellable: ${maxSellable.toFixed(4)} shares.`);
+        throw new Error(`Price floor reached (1e-18). Max shortable: ${maxSellable.toFixed(4)} shares.`);
     }
 
     return deltaS;
