@@ -258,16 +258,16 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
             <SubNavbar />
 
-            <main className="max-w-[1400px] mx-auto px-4 py-8">
-                {/* Back Link */}
-                <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-8 transition-colors group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Markets
-                </Link>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    {/* LEFT COLUMN */}
-                    <div className="lg:col-span-8 space-y-8">
+            <main className="w-full mx-auto">
+                {/* Main Grid: Split Screen Style */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-64px)] overflow-hidden">
+                    {/* LEFT COLUMN - Scrollable Content */}
+                    <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8 overflow-y-auto no-scrollbar">
+                        {/* Back Link */}
+                        <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4 transition-colors group">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                            Back to Markets
+                        </Link>
 
                         {/* Header */}
                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-0">
@@ -384,9 +384,9 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* Main Sidebar - Sticky */}
-                    <div className="col-span-12 lg:col-span-4 space-y-6">
-                        <div className="sticky top-20">
+                    {/* Main Sidebar - Sticky/Fixed full height */}
+                    <div className="col-span-12 lg:col-span-4 h-full relative">
+                        <div className="sticky top-16 h-[calc(100vh-64px)] min-h-[500px]">
                             {asset && (
                                 <TradingSidebar
                                     assetId={asset.id}
@@ -396,7 +396,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                     status={asset.status}
                                     onTradeSuccess={fetchAsset}
                                     activePositionId={activePositionId}
-                                    onSelectPosition={setActivePositionId}
+                                    onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                 />
                             )}
                         </div>
