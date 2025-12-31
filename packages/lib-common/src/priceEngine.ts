@@ -41,15 +41,11 @@ export function calculateMarketWeight(
         throw new Error('Volume cannot be negative');
     }
 
-    // When volume is 0, return minimum weight
-    if (volRecent === 0) {
-        return 0.2;
-    }
+    // Base weight 0.1 (10%), max 0.5 (50%)
+    let weight = 0.1 + 0.4 * (volRecent / (volRecent + V0));
 
-    let weight = 0.5 + 0.5 * (volRecent / (volRecent + V0));
-
-    // Clamp to [0.2, 0.95]
-    weight = Math.max(0.2, Math.min(0.95, weight));
+    // Clamp to [0.05, 0.5] - Oracle always has at least 50% say
+    weight = Math.max(0.05, Math.min(0.5, weight));
 
     return weight;
 }

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
                 imageUrl,
                 status: 'funding',
                 oracleQueries: finalQueries,
-                pricingParams: { P0: 18, k: 0.001 }, // Lower slope to prevent huge price impact
+                pricingParams: { P0: 18, k: 1e-10 }, // Extremely flat curve so traders have no influence
                 pool: {
                     create: {
                         totalUsdc: 0,
