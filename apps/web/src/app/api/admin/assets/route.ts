@@ -49,7 +49,7 @@ export async function POST(request: Request) {
                 imageUrl,
                 status: 'funding',
                 oracleQueries: finalQueries,
-                pricingParams: { P0: 18, k: 0.1 }, // Default to 18.00 as requested/seen in UI
+                pricingParams: { P0: 18, k: 0.001 }, // Lower slope to prevent huge price impact
                 pool: {
                     create: {
                         totalUsdc: 0,

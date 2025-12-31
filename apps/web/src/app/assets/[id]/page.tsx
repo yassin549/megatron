@@ -75,11 +75,18 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                 const data = await res.json();
                 const newAsset = data.asset as Asset;
 
-                // Sync local targets if not initialized and position exists
-                if (!hasInitializedTargets && newAsset.userPosition) {
-                    setOrderStopLoss(newAsset.userPosition.stopLoss?.toString() || '');
-                    setOrderTakeProfit(newAsset.userPosition.takeProfit?.toString() || '');
-                    setHasInitializedTargets(true);
+                // Sync local targets
+                if (newAsset.userPosition) {
+                    if (!hasInitializedTargets) {
+                        setOrderStopLoss(newAsset.userPosition.stopLoss?.toString() || '');
+                        setOrderTakeProfit(newAsset.userPosition.takeProfit?.toString() || '');
+                        setHasInitializedTargets(true);
+                    }
+                } else {
+                    // Reset if no position
+                    setOrderStopLoss('');
+                    setOrderTakeProfit('');
+                    setHasInitializedTargets(false);
                 }
 
                 setAsset(prev => JSON.stringify(prev) !== JSON.stringify(data.asset) ? data.asset : prev);
