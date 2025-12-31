@@ -259,10 +259,10 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
             <SubNavbar />
 
             <main className="w-full mx-auto">
-                {/* Main Grid: Split Screen Style */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-64px)] overflow-hidden">
+                {/* Main Grid: Fixed Layout for independent scrolling on desktop */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-120px)] lg:overflow-hidden">
                     {/* LEFT COLUMN - Scrollable Content */}
-                    <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8 overflow-y-auto no-scrollbar">
+                    <div className="lg:col-span-8 h-full lg:overflow-y-auto p-4 md:p-8 lg:p-12 space-y-8 no-scrollbar">
                         {/* Back Link */}
                         <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4 transition-colors group">
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -384,9 +384,9 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* Main Sidebar - Sticky/Fixed full height */}
-                    <div className="col-span-12 lg:col-span-4 h-full relative">
-                        <div className="sticky top-16 h-[calc(100vh-64px)] min-h-[500px]">
+                    {/* Main Sidebar - Fixed Layout within Grid */}
+                    <div className="col-span-12 lg:col-span-4 h-full relative border-l border-white/5">
+                        <div className="h-full">
                             {asset && (
                                 <TradingSidebar
                                     assetId={asset.id}

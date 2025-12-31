@@ -61,6 +61,7 @@ export function AssetChart({
 
     // Hover state for cursor
     const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | null>(null);
+    const [hoverAxis, setHoverAxis] = useState<'price' | 'time' | null>(null);
 
     // Profile state for coordinate-based rendering
     const [profileBars, setProfileBars] = useState<{ top: number; height: number; width: number }[]>([]);
@@ -288,21 +289,26 @@ export function AssetChart({
     }, [draggingType, localLines]); // Need localLines in dep to capture latest value
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (pendingUpdate) return; // Block dragging while confirmation pending
+        if (pendingUpdate) return;
         const series = seriesRef.current;
         if (!series) return;
         const rect = chartContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
+        const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         const threshold = 20;
 
-        // Check for click on Entry line for selection
+        // Detection for axis Interaction scaling
+        // If we are in axis zones, let the chart handle it (don't preventDefault)
+        if (x > rect.width - 60 || y > rect.height - 30) {
+            return;
+        }
+
         if (priceLines?.entry) {
             const entryY = series.priceToCoordinate(priceLines.entry);
             if (entryY !== null && Math.abs(entryY - y) < threshold) {
-                // If it's a click (not long press drag start), select
-                // For now, simpler: toggle selection
                 onSelectPosition?.(activePositionId ? null : 'current');
+                e.preventDefault();
                 return;
             }
         }
@@ -331,12 +337,31 @@ export function AssetChart({
         const series = seriesRef.current;
         if (!series) {
             setHoverLine(null);
+            setHoverAxis(null);
             return;
         }
         const rect = chartContainerRef.current?.getBoundingClientRect();
         if (!rect) return;
+
+        const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         const threshold = 15;
+
+        // Time axis check (bottom)
+        if (y > rect.height - 30 && x < rect.width - 60) {
+            setHoverAxis('time');
+            setHoverLine(null);
+            return;
+        }
+
+        // Price axis check (right)
+        if (x > rect.width - 60 && y < rect.height - 30) {
+            setHoverAxis('price');
+            setHoverLine(null);
+            return;
+        }
+
+        setHoverAxis(null);
 
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
@@ -357,11 +382,14 @@ export function AssetChart({
 
     const handleMouseLeave = () => {
         setHoverLine(null);
+        setHoverAxis(null);
     };
 
     const getCursorStyle = () => {
         if (draggingType) return 'ns-resize';
         if (hoverLine) return 'ns-resize';
+        if (hoverAxis === 'price') return 'ns-resize';
+        if (hoverAxis === 'time') return 'ew-resize';
         return 'crosshair';
     };
 
@@ -388,15 +416,15 @@ export function AssetChart({
             </div>
 
             {/* Chart Area */}
-            <div className="flex-1 relative">
-                {/* Interaction Layer */}
-                <div
-                    className="absolute inset-0 z-20"
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                    style={{ cursor: getCursorStyle() }}
-                />
+            <div
+                className="flex-1 relative"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                style={{ cursor: getCursorStyle() }}
+            >
+                {/* Interaction Layer - Labels and Lines */}
+                <div className="absolute inset-0 pointer-events-none z-20" />
 
                 <div ref={chartContainerRef} className="w-full h-full" />
 
