@@ -18,6 +18,7 @@ interface Asset {
     type: string;
     status: 'active' | 'funding' | 'paused';
     price: number;
+    marketPrice: number;
     change24h: number;
     volume24h: number;
     marketCap: number;
@@ -389,6 +390,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                 <OrderForm
                                     assetId={asset.id}
                                     assetPrice={asset.price}
+                                    marketPrice={asset.marketPrice}
                                     assetSymbol={asset.name}
                                     onTradeSuccess={fetchAsset}
                                 />

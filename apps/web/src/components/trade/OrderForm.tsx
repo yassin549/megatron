@@ -10,6 +10,7 @@ import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Shield, Target 
 interface OrderFormProps {
     assetId: string;
     assetPrice: number;
+    marketPrice: number;
     assetSymbol?: string;
     onTradeSuccess?: () => void;
 }
@@ -17,6 +18,7 @@ interface OrderFormProps {
 export function OrderForm({
     assetId,
     assetPrice,
+    marketPrice,
     assetSymbol = 'Share',
     onTradeSuccess,
 }: OrderFormProps) {
@@ -38,7 +40,11 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const estimatedShares = amount ? parseFloat(amount) / assetPrice : 0;
+    const fillPrice = marketPrice || assetPrice;
+    const estimatedShares = amount ? parseFloat(amount) / fillPrice : 0;
+
+    const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
+    const isHighSpread = spreadPercent > 0.05; // 5% threshold
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -49,11 +55,11 @@ export function OrderForm({
 
             // Trade Logic Validation
             if (isBuy) {
-                if (slValue !== null && slValue >= assetPrice) throw new Error('For Buy positions, Stop Loss must be below Entry Price.');
-                if (tpValue !== null && tpValue <= assetPrice) throw new Error('For Buy positions, Take Profit must be above Entry Price.');
+                if (slValue !== null && slValue >= fillPrice) throw new Error('For Buy positions, Stop Loss must be below Entry Price.');
+                if (tpValue !== null && tpValue <= fillPrice) throw new Error('For Buy positions, Take Profit must be above Entry Price.');
             } else {
-                if (slValue !== null && slValue <= assetPrice) throw new Error('For Sell positions, Stop Loss must be above Entry Price.');
-                if (tpValue !== null && tpValue >= assetPrice) throw new Error('For Sell positions, Take Profit must be below Entry Price.');
+                if (slValue !== null && slValue <= fillPrice) throw new Error('For Sell positions, Stop Loss must be above Entry Price.');
+                if (tpValue !== null && tpValue >= fillPrice) throw new Error('For Sell positions, Take Profit must be below Entry Price.');
             }
 
             const res = await fetch('/api/trade', {
@@ -143,6 +149,28 @@ export function OrderForm({
                 >
                     SELL
                 </button>
+            </div>
+
+            {/* Price Info */}
+            <div className="mb-4 bg-black/30 rounded-xl p-3 border border-white/5 space-y-2">
+                <div className="flex justify-between items-center">
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Display Price</span>
+                    <span className="text-[10px] text-white font-mono">${assetPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Execution Price</span>
+                    <span className={`text-[10px] font-mono font-bold ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
+                        ${fillPrice.toFixed(2)}
+                    </span>
+                </div>
+                {isHighSpread && (
+                    <div className="flex items-start gap-2 pt-1 border-t border-white/5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 flex-shrink-0 animate-pulse" />
+                        <p className="text-[9px] text-amber-500/80 leading-tight">
+                            High spread between chart price and execution engine. You will be filled at the execution price.
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* Amount Input */}

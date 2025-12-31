@@ -177,6 +177,7 @@ export async function GET(
                 type: asset.type,
                 status: asset.status,
                 price: currentPrice,
+                marketPrice: asset.lastMarketPrice?.toNumber() ?? currentPrice,
                 change24h: Math.round(change24h * 100) / 100,
                 volume24h: Math.round(volume24h * 100) / 100,
                 marketCap: Math.round(marketCap * 100) / 100,
