@@ -25,7 +25,7 @@ COPY tsconfig.json tsconfig.json
 
 # Install pnpm and dependencies
 RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 # Copy the full source code from the prune step
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
