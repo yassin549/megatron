@@ -38,7 +38,7 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const estimatedShares = amount ? parseFloat(amount) / assetPrice : 0;
+    const estimatedShares = amount ? (isBuy ? parseFloat(amount) / assetPrice : parseFloat(amount)) : 0;
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -246,7 +246,7 @@ export function OrderForm({
                                 )}
                             </div>
                             <h3 className="text-xl font-black text-white mb-1 uppercase">
-                                {successModal.type === 'buy' ? 'ORDER FILLED' : 'SOLD'}
+                                ORDER FILLED
                             </h3>
                             <p className="text-zinc-400 text-sm mb-6">
                                 {successModal.shares.toFixed(4)} {assetSymbol} shares

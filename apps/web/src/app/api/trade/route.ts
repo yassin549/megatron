@@ -2,11 +2,10 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db, Prisma } from '@megatron/database';
-import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG } from '@megatron/lib-common';
+import { solveDeltaShares, calculateSellRevenue, TradeEvent, MONETARY_CONFIG, validateParams, calculateBuyCost } from '@megatron/lib-common';
 import { Redis } from 'ioredis';
 
-// Initialize Redis for publishing events
-// We use the same URL as the worker to ensure they talk on the same channel
+// Initialize Redis
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 const CONFIG = MONETARY_CONFIG;
@@ -25,180 +24,232 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const { type, assetId, amount, stopLoss, takeProfit } = body; // amount is USDC for buy, Shares for sell
+    const { type, assetId, amount, stopLoss, takeProfit } = body;
+    // Guidelines:
+    // BUY: amount is USDC usually. IF 'shares' provided in body, amounts to specific shares.
+    // SELL: amount is SHARES.
 
     if (!type || !['buy', 'sell'].includes(type)) {
         return NextResponse.json({ error: 'Invalid trade type' }, { status: 400 });
     }
-    if (!assetId || !amount || parseFloat(amount) <= 0) {
+    if (!assetId) {
         return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
-    const tradeAmount = parseFloat(amount);
+    // Amount validation
+    if (!amount && !body.shares) {
+        return NextResponse.json({ error: 'Amount or shares required' }, { status: 400 });
+    }
+
+    const tradeAmount = amount ? parseFloat(amount) : 0;
     const sl = stopLoss !== undefined ? parseFloat(stopLoss) : undefined;
     const tp = takeProfit !== undefined ? parseFloat(takeProfit) : undefined;
 
     try {
         const result = await db.$transaction(async (tx: any) => {
-            // ... (rest of the transaction logic)
-            // Note: I will only update the Position part below
-            // 1. Fetch Asset
             const asset = await tx.asset.findUnique({
                 where: { id: assetId },
                 include: { pool: true },
             });
 
             if (!asset) throw new Error('Asset not found');
-            if (asset.status !== 'active') throw new Error(`Asset is not active (status: ${asset.status})`);
+            if (asset.status !== 'active' && asset.status !== 'funding') throw new Error(`Asset is not active`);
 
-            // Check pricing params
             const params = asset.pricingParams as { P0: number; k: number } | null;
             if (!params) throw new Error('Asset has no pricing params');
             const { P0, k } = params;
 
-            // Fetch User
             const user = await tx.user.findUnique({ where: { id: userId } });
             if (!user) throw new Error('User not found');
             if (user.isBlacklisted) throw new Error('User is blacklisted');
 
+            // Fetch current position
+            const position = await tx.position.findUnique({
+                where: { userId_assetId: { userId, assetId } }
+            });
+
+            const currentShares = position ? position.shares.toNumber() : 0;
+            const currentCollateral = position ? (position.collateral?.toNumber() || 0) : 0;
+
             let tradeRecord;
-            let outputAmount;
+            let outputAmount = 0;
 
             if (type === 'buy') {
-                // --- BUY LOGIC ---
-                // User inputs USDC amount
-                if (user.walletHotBalance.lessThan(tradeAmount)) {
-                    throw new Error(`Insufficient funds`);
-                }
+                // ==========================================
+                // BUY LOGIC (Long Entry OR Short Cover)
+                // ==========================================
 
-                // Calc fees
-                const fee = tradeAmount * CONFIG.SWAP_FEE;
-                const netAmount = tradeAmount - fee;
                 const currentSupply = asset.totalSupply.toNumber();
 
-                // Calc output shares
-                const deltaShares = solveDeltaShares(P0, k, currentSupply, netAmount);
-                outputAmount = deltaShares;
+                // Determine netAmount (USDC)
+                let netAmount = 0;
+                let usedTradeAmount = 0;
+                let deltaShares = 0;
 
-                // Distribution
+                // Support buying specific SHARE amount (e.g. covering short)
+                if (body.shares) {
+                    const targetShares = parseFloat(body.shares);
+                    if (targetShares <= 0) throw new Error('Invalid share amount');
+
+                    // Calculate required USDC to buy targetShares
+                    // Cost is Net. User needs to Pay (Cost / (1 - SwapFee)).
+                    const costNet = calculateBuyCost(P0, k, currentSupply, targetShares);
+                    const costGross = costNet / (1 - CONFIG.SWAP_FEE);
+
+                    usedTradeAmount = costGross;
+                    netAmount = costNet;
+                    deltaShares = targetShares;
+                    outputAmount = targetShares;
+                } else {
+                    // Standard Amount (USDC) input
+                    usedTradeAmount = tradeAmount;
+                    const fee = usedTradeAmount * CONFIG.SWAP_FEE;
+                    netAmount = usedTradeAmount - fee;
+                    deltaShares = solveDeltaShares(P0, k, currentSupply, netAmount);
+                    outputAmount = deltaShares;
+                }
+
+                // Re-calculate Fee for records
+                const fee = usedTradeAmount * CONFIG.SWAP_FEE;
                 const lpFee = fee * CONFIG.LP_SHARE;
                 const platformFee = fee * CONFIG.PLATFORM_SHARE;
 
-                // Updates
-                await tx.user.update({
-                    where: { id: userId },
-                    data: { walletHotBalance: { decrement: tradeAmount } },
-                });
+                // LOGIC BRANCH: Are we covering a short?
+                if (currentShares < 0) {
+                    // --- COVER SHORT ---
+                    // Prevent over-covering
+                    if (currentShares + deltaShares > 0.0001) {
+                        throw new Error('Cannot flip position (Short -> Long) in one trade. Buy only enough to cover.');
+                    }
 
-                await tx.asset.update({
-                    where: { id: assetId },
-                    data: { totalSupply: { increment: deltaShares } },
-                });
+                    const cost = usedTradeAmount; // Total user needs to pay
 
-                if (asset.pool) {
-                    await tx.liquidityPool.update({
-                        where: { id: asset.pool.id },
-                        data: { totalUsdc: { increment: netAmount } },
+                    // Release Collateral
+                    const fraction = deltaShares / Math.abs(currentShares);
+                    const releasedCollateral = currentCollateral * fraction;
+
+                    // Check Balance: Wallet + Released Collateral >= Cost
+                    if (user.walletHotBalance.toNumber() + releasedCollateral < cost) {
+                        throw new Error('Insufficient collateral + wallet balance to cover.');
+                    }
+
+                    const refund = releasedCollateral - cost;
+
+                    await tx.user.update({
+                        where: { id: userId },
+                        data: { walletHotBalance: { increment: refund } }
                     });
+
+                    // Update Position
+                    await tx.position.update({
+                        where: { userId_assetId: { userId, assetId } },
+                        data: {
+                            shares: { increment: deltaShares },
+                            collateral: { decrement: releasedCollateral },
+                        }
+                    });
+
+                    // Update Asset Supply
+                    await tx.asset.update({
+                        where: { id: assetId },
+                        data: { totalSupply: { increment: deltaShares } }
+                    });
+
+                    if (asset.pool) {
+                        await tx.liquidityPool.update({
+                            where: { id: asset.pool.id },
+                            data: { totalUsdc: { increment: netAmount } }
+                        });
+                    }
+
+                } else {
+                    // --- NORMAL LONG ---
+                    if (user.walletHotBalance.lessThan(usedTradeAmount)) {
+                        throw new Error(`Insufficient funds. Need ${usedTradeAmount.toFixed(2)} USDC.`);
+                    }
+
+                    await tx.user.update({
+                        where: { id: userId },
+                        data: { walletHotBalance: { decrement: usedTradeAmount } },
+                    });
+
+                    await tx.asset.update({
+                        where: { id: assetId },
+                        data: { totalSupply: { increment: deltaShares } },
+                    });
+
+                    if (asset.pool) {
+                        await tx.liquidityPool.update({
+                            where: { id: asset.pool.id },
+                            data: { totalUsdc: { increment: netAmount } },
+                        });
+                    }
+
+                    // Create/Update Position
+                    if (position) {
+                        const oldShares = position.shares.toNumber();
+                        const oldTotalCost = oldShares * position.avgPrice.toNumber();
+                        const newTotalCost = oldTotalCost + netAmount;
+                        const newTotalShares = oldShares + deltaShares;
+                        await tx.position.update({
+                            where: { userId_assetId: { userId, assetId } },
+                            data: {
+                                shares: newTotalShares,
+                                avgPrice: newTotalCost / newTotalShares,
+                                stopLoss: sl !== undefined ? sl : undefined,
+                                takeProfit: tp !== undefined ? tp : undefined,
+                            }
+                        });
+                    } else {
+                        await tx.position.create({
+                            data: {
+                                userId, assetId,
+                                shares: deltaShares,
+                                avgPrice: netAmount / deltaShares,
+                                stopLoss: sl !== undefined ? sl : null,
+                                takeProfit: tp !== undefined ? tp : null,
+                            }
+                        });
+                    }
                 }
 
-                // Platform Fee
+                // Common Fee Updates
                 try {
                     await tx.platformTreasury.upsert({
                         where: { id: 'treasury' },
                         create: { id: 'treasury', balance: platformFee },
                         update: { balance: { increment: platformFee } },
                     });
-                } catch (err) {
-                    // Ignore if treasury table doesn't exist yet (migration issue), log it
-                    console.warn("Treasury update failed", err);
-                }
+                } catch (e) { }
 
-                // LP Fees
-                if (asset.pool) {
-                    const lps = await tx.lPShare.findMany({ where: { poolId: asset.pool.id } });
-                    const totalLpShares = asset.pool.totalLPShares.toNumber();
-                    if (totalLpShares > 0) {
-                        for (const lp of lps) {
-                            const share = lp.lpShares.toNumber() / totalLpShares;
-                            await tx.lPShare.update({
-                                where: { id: lp.id },
-                                data: { unclaimedRewards: { increment: lpFee * share } },
-                            });
-                        }
-                    }
-                }
-
-                // Record Trade
                 tradeRecord = await tx.trade.create({
                     data: {
-                        assetId,
-                        buyerId: userId,
+                        assetId, buyerId: userId,
                         quantity: deltaShares,
                         price: netAmount / deltaShares,
-                        fee,
-                        side: 'buy',
+                        fee, side: 'buy',
                         timestamp: new Date(),
                     },
                 });
 
-                // Update Position
-                const existingPosition = await tx.position.findUnique({
-                    where: { userId_assetId: { userId, assetId } },
-                });
-
-                if (existingPosition) {
-                    const oldShares = existingPosition.shares.toNumber();
-                    const oldTotalCost = oldShares * existingPosition.avgPrice.toNumber();
-                    const newTotalCost = oldTotalCost + netAmount;
-                    const newTotalShares = oldShares + deltaShares;
-                    await tx.position.update({
-                        where: { userId_assetId: { userId, assetId } },
-                        data: {
-                            shares: newTotalShares,
-                            avgPrice: newTotalCost / newTotalShares,
-                            stopLoss: sl !== undefined ? sl : undefined,
-                            takeProfit: tp !== undefined ? tp : undefined,
-                        },
-                    });
-                } else {
-                    await tx.position.create({
-                        data: {
-                            userId,
-                            assetId,
-                            shares: deltaShares,
-                            avgPrice: netAmount / deltaShares,
-                            stopLoss: sl !== undefined ? sl : null,
-                            takeProfit: tp !== undefined ? tp : null,
-                        },
-                    });
-                }
-
-                // Ledger
                 await tx.ledger.create({
                     data: {
-                        userId,
-                        deltaAmount: -tradeAmount,
-                        currency: 'USDC',
-                        reason: 'trade',
-                        refId: tradeRecord.id,
+                        userId, deltaAmount: -usedTradeAmount, currency: 'USDC', reason: 'trade', refId: tradeRecord.id,
                         metadata: { type: 'buy', assetId, shares: deltaShares },
                     },
                 });
 
             } else {
-                // --- SELL LOGIC ---
-                // User inputs SHARE amount
-                const position = await tx.position.findUnique({
-                    where: { userId_assetId: { userId, assetId } }
-                });
+                // ==========================================
+                // SELL LOGIC (Exit Long OR Open Short)
+                // ==========================================
 
-                if (!position || position.shares.lessThan(tradeAmount)) {
-                    throw new Error('Insufficient shares');
-                }
-
+                // tradeAmount is SHARES
+                const shareAmount = tradeAmount;
                 const currentSupply = asset.totalSupply.toNumber();
-                const grossUsdc = calculateSellRevenue(P0, k, currentSupply, tradeAmount);
+
+                // Calculate Revenue from Curve (Burn)
+                const grossUsdc = calculateSellRevenue(P0, k, currentSupply, shareAmount);
                 outputAmount = grossUsdc;
 
                 const fee = grossUsdc * CONFIG.SWAP_FEE;
@@ -206,86 +257,125 @@ export async function POST(req: Request) {
                 const lpFee = fee * CONFIG.LP_SHARE;
                 const platformFee = fee * CONFIG.PLATFORM_SHARE;
 
-                // Updates
-                await tx.position.update({
-                    where: { userId_assetId: { userId, assetId } },
-                    data: { shares: { decrement: tradeAmount } }
-                });
+                if (currentShares > 0) {
+                    // --- EXIT LONG ---
+                    if (currentShares < shareAmount) {
+                        // Flip not supported yet
+                        throw new Error('Insufficient shares to sell. To short, please close position first.');
+                    }
 
-                await tx.asset.update({
-                    where: { id: assetId },
-                    data: { totalSupply: { decrement: tradeAmount } }
-                });
-
-                if (asset.pool) {
-                    await tx.liquidityPool.update({
-                        where: { id: asset.pool.id },
-                        data: { totalUsdc: { decrement: grossUsdc } }
+                    await tx.position.update({
+                        where: { userId_assetId: { userId, assetId } },
+                        data: { shares: { decrement: shareAmount } }
                     });
+
+                    await tx.asset.update({
+                        where: { id: assetId },
+                        data: { totalSupply: { decrement: shareAmount } }
+                    });
+
+                    await tx.user.update({
+                        where: { id: userId },
+                        data: { walletHotBalance: { increment: netUsdc } }
+                    });
+
+                    if (asset.pool) {
+                        await tx.liquidityPool.update({
+                            where: { id: asset.pool.id },
+                            data: { totalUsdc: { decrement: grossUsdc } }
+                        });
+                    }
+
+                } else {
+                    // --- OPEN SHORT ---
+                    // Only allowed if currentShares <= 0 (already short or neutral)
+
+                    // 1. Calculate Collateral Requirement
+                    // Proceeds = grossUsdc.
+                    // User Margin = 100% of Proceeds
+                    const marginRequired = grossUsdc;
+                    const totalCollateralLock = grossUsdc + marginRequired;
+
+                    // Check Balance
+                    if (user.walletHotBalance.toNumber() < marginRequired) {
+                        throw new Error(`Insufficient funds for Short Margin. Need ${marginRequired.toFixed(2)} USDC.`);
+                    }
+
+                    // Action
+                    // 1. Lock User Margin
+                    await tx.user.update({
+                        where: { id: userId },
+                        data: { walletHotBalance: { decrement: marginRequired } }
+                    });
+
+                    // 2. Reduce Supply (Price Drops)
+                    await tx.asset.update({
+                        where: { id: assetId },
+                        data: { totalSupply: { decrement: shareAmount } }
+                    });
+
+                    // 3. Pool pays out grossUsdc... INTO Collateral
+                    if (asset.pool) {
+                        await tx.liquidityPool.update({
+                            where: { id: asset.pool.id },
+                            data: { totalUsdc: { decrement: grossUsdc } }
+                        });
+                    }
+
+                    // 4. Update/Create Position
+                    if (position) {
+                        await tx.position.update({
+                            where: { userId_assetId: { userId, assetId } },
+                            data: {
+                                shares: { decrement: shareAmount }, // Becomes negative
+                                collateral: { increment: totalCollateralLock },
+                            }
+                        });
+                    } else {
+                        await tx.position.create({
+                            data: {
+                                userId, assetId,
+                                shares: -shareAmount,
+                                avgPrice: grossUsdc / shareAmount,
+                                collateral: totalCollateralLock,
+                                stopLoss: sl !== undefined ? sl : null,
+                                takeProfit: tp !== undefined ? tp : null,
+                            }
+                        });
+                    }
                 }
 
-                await tx.user.update({
-                    where: { id: userId },
-                    data: { walletHotBalance: { increment: netUsdc } }
-                });
-
-                // Platform Fee
+                // Common Fee Updates
                 try {
                     await tx.platformTreasury.upsert({
                         where: { id: 'treasury' },
                         create: { id: 'treasury', balance: platformFee },
                         update: { balance: { increment: platformFee } },
                     });
-                } catch (err) {
-                    console.warn("Treasury update failed", err);
-                }
+                } catch (e) { }
 
-                // LP Fees
-                if (asset.pool) {
-                    const lps = await tx.lPShare.findMany({ where: { poolId: asset.pool.id } });
-                    const totalLpShares = asset.pool.totalLPShares.toNumber();
-                    if (totalLpShares > 0) {
-                        for (const lp of lps) {
-                            const share = lp.lpShares.toNumber() / totalLpShares;
-                            await tx.lPShare.update({
-                                where: { id: lp.id },
-                                data: { unclaimedRewards: { increment: lpFee * share } },
-                            });
-                        }
-                    }
-                }
 
                 tradeRecord = await tx.trade.create({
                     data: {
-                        assetId,
-                        buyerId: userId,
-                        quantity: tradeAmount,
-                        price: grossUsdc / tradeAmount,
-                        fee,
-                        side: 'sell',
+                        assetId, buyerId: userId,
+                        quantity: shareAmount,
+                        price: grossUsdc / shareAmount,
+                        fee, side: 'sell',
                         timestamp: new Date(),
                     },
                 });
 
                 await tx.ledger.create({
                     data: {
-                        userId,
-                        deltaAmount: netUsdc,
-                        currency: 'USDC',
-                        reason: 'trade',
-                        refId: tradeRecord.id,
-                        metadata: { type: 'sell', assetId, shares: tradeAmount },
+                        userId, deltaAmount: netUsdc, currency: 'USDC', reason: 'trade', refId: tradeRecord.id,
+                        metadata: { type: 'sell', assetId, shares: shareAmount },
                     },
                 });
             }
 
             return { trade: tradeRecord, outputAmount };
-        }, {
-            maxWait: 5000,
-            timeout: 10000
-        });
+        }, { maxWait: 5000, timeout: 10000 });
 
-        // Publish Event for Price Engine
         const event: TradeEvent = {
             type: 'trade',
             assetId,
@@ -296,13 +386,12 @@ export async function POST(req: Request) {
             timestamp: result.trade.timestamp.getTime(),
             volume5m: 0,
         };
-        // Fire and forget
         redis.publish('megatron:events', JSON.stringify(event)).catch(console.error);
 
         return NextResponse.json({ success: true, tradeId: result.trade.id, outputAmount: result.outputAmount });
 
     } catch (error: any) {
-        console.error('Trade execution failed:', error);
+        console.error('Trade failed:', error);
         return NextResponse.json({ error: error.message || 'Trade failed' }, { status: 500 });
     }
 }

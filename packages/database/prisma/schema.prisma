@@ -194,6 +194,7 @@ model Position {
   assetId    String
   shares     Decimal  @db.Decimal(18, 6)
   avgPrice   Decimal  @db.Decimal(18, 6)
+  collateral Decimal  @default(0) @db.Decimal(18, 6)
   stopLoss   Decimal? @db.Decimal(18, 6)
   takeProfit Decimal? @db.Decimal(18, 6)
   updatedAt  DateTime @updatedAt

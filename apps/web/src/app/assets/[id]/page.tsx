@@ -37,6 +37,7 @@ interface Asset {
         avgPrice: number;
         stopLoss: number | null;
         takeProfit: number | null;
+        collateral?: number;
     } | null;
 }
 
@@ -146,14 +147,17 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
         if (!asset?.userPosition) return;
         setIsExitingPosition(true);
         try {
+            const isShort = asset.userPosition.shares < 0;
+
+            // If Short, we BUY to cover. If Long, we SELL to exit.
+            const payload = isShort
+                ? { type: 'buy', assetId: asset.id, shares: Math.abs(asset.userPosition.shares).toString() }
+                : { type: 'sell', assetId: asset.id, amount: asset.userPosition.shares.toString() };
+
             const res = await fetch('/api/trade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'sell',
-                    assetId: asset.id,
-                    amount: asset.userPosition.shares,
-                }),
+                body: JSON.stringify(payload),
             });
             if (res.ok) {
                 setHasInitializedTargets(false);
@@ -208,14 +212,6 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
             }
         } catch (err: any) {
             alert(err.message);
-            // If invalid, the chart might still show the dragged line until refresh. 
-            // Ideally we should revert the drag in AssetChart, but AssetChart reverts on 'Cancel'. 
-            // Validating on 'Confirm' prevents the API call. 
-            // We can trigger a refresh or just let the alert stop it. 
-            // The local state won't update, so the line might snap back on next render?
-            // Actually, AssetChart local state persists until props change or cancel.
-            // If we don't update props (by not fetching/setting state), it might stay 'pending'.
-            // But we threw error, so we skipped state update.
         } finally {
             setIsUpdatingTargets(false);
         }
@@ -397,7 +393,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                     onTradeSuccess={fetchAsset}
                                 />
                                 {/* Position Card - Shows below OrderForm when position exists */}
-                                {asset.userPosition && asset.userPosition.shares > 0 && (
+                                {asset.userPosition && asset.userPosition.shares !== 0 && (
                                     <PositionCard
                                         shares={asset.userPosition.shares}
                                         avgPrice={asset.userPosition.avgPrice}
@@ -410,6 +406,7 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                                         onExitPosition={handleExitPosition}
                                         isUpdating={isUpdatingTargets}
                                         isExiting={isExitingPosition}
+                                        collateral={asset.userPosition.collateral}
                                     />
                                 )}
                             </>

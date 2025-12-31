@@ -16,6 +16,7 @@ interface PositionCardProps {
     onExitPosition: () => void;
     isUpdating?: boolean;
     isExiting?: boolean;
+    collateral?: number;
 }
 
 export function PositionCard({
@@ -30,6 +31,7 @@ export function PositionCard({
     onExitPosition,
     isUpdating = false,
     isExiting = false,
+    collateral = 0,
 }: PositionCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -84,15 +86,26 @@ export function PositionCard({
                     >
                         <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
                             {/* Position Stats */}
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${shares > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                    {shares > 0 ? 'Long' : 'Short'}
+                                </span>
+                            </div>
                             <div className="grid grid-cols-2 gap-3 text-[10px] font-mono">
                                 <div className="bg-black/30 rounded-lg p-3">
-                                    <div className="text-zinc-500 uppercase tracking-wider mb-1">Shares</div>
-                                    <div className="text-white font-bold">{shares.toFixed(4)}</div>
+                                    <div className="text-zinc-500 uppercase tracking-wider mb-1">Size</div>
+                                    <div className="text-white font-bold">{Math.abs(shares).toFixed(4)}</div>
                                 </div>
                                 <div className="bg-black/30 rounded-lg p-3">
                                     <div className="text-zinc-500 uppercase tracking-wider mb-1">Entry</div>
                                     <div className="text-white font-bold">${avgPrice.toFixed(2)}</div>
                                 </div>
+                                {shares < 0 && (
+                                    <div className="bg-black/30 rounded-lg p-3 col-span-2">
+                                        <div className="text-zinc-500 uppercase tracking-wider mb-1">Total Collateral</div>
+                                        <div className="text-white font-bold font-mono">${collateral.toFixed(2)} <span className="text-[8px] text-zinc-500 uppercase">(Locked)</span></div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* SL/TP Inputs */}
