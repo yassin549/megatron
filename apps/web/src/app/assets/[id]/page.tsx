@@ -259,10 +259,10 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
             <SubNavbar />
 
             <main className="w-full mx-auto">
-                {/* Main Grid: Fixed Layout for independent scrolling on desktop */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 lg:h-[calc(100vh-120px)] lg:overflow-hidden">
-                    {/* LEFT COLUMN - Scrollable Content */}
-                    <div className="lg:col-span-8 h-full lg:overflow-y-auto p-4 md:p-8 lg:p-12 space-y-8 no-scrollbar">
+                {/* Main Grid: Standard body scroll with sticky sidebar */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
+                    {/* LEFT COLUMN - Main Content */}
+                    <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8">
                         {/* Back Link */}
                         <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4 transition-colors group">
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -384,9 +384,9 @@ export default function AssetDetailPage({ params }: { params: { id: string } }) 
                         </div>
                     </div>
 
-                    {/* Main Sidebar - Fixed Layout within Grid */}
-                    <div className="col-span-12 lg:col-span-4 h-full relative border-l border-white/5">
-                        <div className="h-full">
+                    {/* Main Sidebar - Sticky on Desktop */}
+                    <div className="col-span-12 lg:col-span-4 relative border-l border-white/5">
+                        <div className="lg:sticky lg:top-[120px] lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar">
                             {asset && (
                                 <TradingSidebar
                                     assetId={asset.id}

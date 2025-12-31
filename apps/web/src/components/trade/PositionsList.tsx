@@ -80,7 +80,7 @@ export function PositionsList({
     });
 
     return (
-        <div className="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto no-scrollbar pb-10">
+        <div className="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar pb-10">
             {sortedPositions.map((pos) => (
                 <CompactPositionItem
                     key={pos.assetId}

@@ -62,7 +62,7 @@ export function TradingSidebar({
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 min-h-0 px-5 overflow-y-auto no-scrollbar">
+            <div className="flex-1 min-h-0 px-5 overflow-y-auto custom-scrollbar">
                 <AnimatePresence mode="wait">
                     {view === 'trade' ? (
                         <motion.div
