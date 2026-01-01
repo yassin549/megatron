@@ -472,58 +472,67 @@ export function AssetChart({
 
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
-            {/* Header / Control Pill Overlay */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl">
-                {/* SL Button */}
-                <button
-                    onClick={() => toggleTarget('stopLoss')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.stopLoss
-                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-900/40'
-                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                        }`}
-                >
-                    <Shield className="w-3.5 h-3.5" />
-                    SL
-                </button>
-
-                {/* Confirm/Cancel (Integrated) */}
-                <AnimatePresence mode="wait">
-                    {pendingUpdate && (
-                        <motion.div
-                            initial={{ width: 0, opacity: 0 }}
-                            animate={{ width: 'auto', opacity: 1 }}
-                            exit={{ width: 0, opacity: 0 }}
-                            className="flex items-center gap-1.5 overflow-hidden px-1"
+            {/* Header / Control Pill Overlay - Only visible when a position is selected */}
+            <AnimatePresence>
+                {activePositionId && (
+                    <motion.div
+                        initial={{ y: -20, opacity: 0, x: '-50%' }}
+                        animate={{ y: 0, opacity: 1, x: '-50%' }}
+                        exit={{ y: -20, opacity: 0, x: '-50%' }}
+                        className="absolute top-4 left-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl"
+                    >
+                        {/* SL Button */}
+                        <button
+                            onClick={() => toggleTarget('stopLoss')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.stopLoss
+                                ? 'bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                                : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                }`}
                         >
-                            <div className="w-px h-4 bg-white/10 mx-1" />
-                            <button
-                                onClick={handleConfirmUpdate}
-                                className="p-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg transition-all"
-                            >
-                                <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                                onClick={handleCancelUpdate}
-                                className="p-1.5 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all"
-                            >
-                                <X className="w-3.5 h-3.5" />
-                            </button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            <Shield className="w-3.5 h-3.5" />
+                            SL
+                        </button>
 
-                {/* TP Button */}
-                <button
-                    onClick={() => toggleTarget('takeProfit')}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.takeProfit
-                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
-                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                        }`}
-                >
-                    <Target className="w-3.5 h-3.5" />
-                    TP
-                </button>
-            </div>
+                        {/* Confirm/Cancel (Integrated) */}
+                        <AnimatePresence mode="wait">
+                            {pendingUpdate && (
+                                <motion.div
+                                    initial={{ width: 0, opacity: 0 }}
+                                    animate={{ width: 'auto', opacity: 1 }}
+                                    exit={{ width: 0, opacity: 0 }}
+                                    className="flex items-center gap-1.5 overflow-hidden px-1"
+                                >
+                                    <div className="w-px h-4 bg-white/10 mx-1" />
+                                    <button
+                                        onClick={handleConfirmUpdate}
+                                        className="p-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <Check className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                        onClick={handleCancelUpdate}
+                                        className="p-1.5 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* TP Button */}
+                        <button
+                            onClick={() => toggleTarget('takeProfit')}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.takeProfit
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                                : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Target className="w-3.5 h-3.5" />
+                            TP
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Original Live Header (Moved or hidden) */}
             <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
@@ -569,25 +578,6 @@ export function AssetChart({
                     </div>
                 )}
 
-                {/* Confirm/Cancel Overlay */}
-                {pendingUpdate && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex gap-2 bg-black/80 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-200">
-                        <button
-                            onClick={handleConfirmUpdate}
-                            className="bg-emerald-500 hover:bg-emerald-400 text-white p-2 rounded-lg transition-colors shadow-lg shadow-emerald-900/20"
-                            title="Confirm Change"
-                        >
-                            <Check className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={handleCancelUpdate}
-                            className="bg-zinc-700 hover:bg-zinc-600 text-white p-2 rounded-lg transition-colors"
-                            title="Cancel"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );
