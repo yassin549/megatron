@@ -1,6 +1,7 @@
 import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi } from 'lightweight-charts';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, X, Shield, Target } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChartProps {
     data: { time: string; value: number; volume?: number }[];
@@ -16,7 +17,8 @@ interface ChartProps {
         stopLoss?: number | null;
         takeProfit?: number | null;
     };
-    onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
+    onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number | null) => void;
+    side?: 'buy' | 'sell';
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
 }
@@ -26,6 +28,7 @@ export function AssetChart({
     colors,
     priceLines,
     onUpdatePosition,
+    side = 'buy',
     activePositionId,
     onSelectPosition
 }: ChartProps) {
@@ -431,6 +434,31 @@ export function AssetChart({
         return 'crosshair';
     };
 
+    const toggleTarget = (type: 'stopLoss' | 'takeProfit') => {
+        const currentPrice = data[data.length - 1]?.value || 0;
+        const entryPrice = priceLines?.entry || currentPrice;
+
+        // If target exists, cancel it
+        if ((type === 'stopLoss' && priceLines?.stopLoss) || (type === 'takeProfit' && priceLines?.takeProfit)) {
+            onUpdatePosition?.(type, null);
+            return;
+        }
+
+        // Otherwise, initialize a default target and enter pending state
+        let defaultVal = currentPrice;
+        if (type === 'stopLoss') {
+            defaultVal = side === 'buy' ? currentPrice * 0.95 : currentPrice * 1.05;
+        } else {
+            defaultVal = side === 'buy' ? currentPrice * 1.05 : currentPrice * 0.95;
+        }
+
+        const price = Number(defaultVal.toFixed(4));
+        setLocalLines(prev => ({ ...prev, [type]: price }));
+        setPendingUpdate({ type, value: price });
+        setDraggingType(type);
+        draggingTypeRef.current = type;
+    };
+
     const handleConfirmUpdate = () => {
         if (pendingUpdate) {
             onUpdatePosition?.(pendingUpdate.type, pendingUpdate.value);
@@ -440,13 +468,65 @@ export function AssetChart({
 
     const handleCancelUpdate = () => {
         setPendingUpdate(null);
-        // Effects will sync localLines back to priceLines
     };
 
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
-            {/* Header */}
-            <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-40">
+            {/* Header / Control Pill Overlay */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl">
+                {/* SL Button */}
+                <button
+                    onClick={() => toggleTarget('stopLoss')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.stopLoss
+                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <Shield className="w-3.5 h-3.5" />
+                    SL
+                </button>
+
+                {/* Confirm/Cancel (Integrated) */}
+                <AnimatePresence mode="wait">
+                    {pendingUpdate && (
+                        <motion.div
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: 'auto', opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            className="flex items-center gap-1.5 overflow-hidden px-1"
+                        >
+                            <div className="w-px h-4 bg-white/10 mx-1" />
+                            <button
+                                onClick={handleConfirmUpdate}
+                                className="p-1.5 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-lg transition-all"
+                            >
+                                <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                                onClick={handleCancelUpdate}
+                                className="p-1.5 bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white rounded-lg transition-all"
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* TP Button */}
+                <button
+                    onClick={() => toggleTarget('takeProfit')}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.takeProfit
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                        : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <Target className="w-3.5 h-3.5" />
+                    TP
+                </button>
+            </div>
+
+            {/* Original Live Header (Moved or hidden) */}
+            <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live

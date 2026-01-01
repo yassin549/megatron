@@ -80,17 +80,10 @@ export function TradingSidebar({
                                 onTradeSuccess={onTradeSuccess}
                             />
 
-                            {/* Pro-Tips / Market Status Hook */}
-                            <div className="mt-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <ShieldAlert className="w-4 h-4 text-blue-400" />
-                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Trading Intelligence</span>
-                                </div>
-                                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                                    Current volatility is <span className="text-white font-mono font-bold">NORMAL</span>.
-                                    Bonding curve depth ensures liquidity for orders up to $10,000.
-                                </p>
-                            </div>
+                            {/* Simplified Market Info */}
+                            <p className="mt-8 text-[10px] text-zinc-500 font-medium text-center px-4 leading-relaxed opacity-60 group-hover:opacity-100 transition-opacity">
+                                Current volatility is <span className="text-zinc-400">NORMAL</span>. Bonding curve depth ensures liquidity for orders up to $10,000.
+                            </p>
                         </motion.div>
                     ) : (
                         <motion.div

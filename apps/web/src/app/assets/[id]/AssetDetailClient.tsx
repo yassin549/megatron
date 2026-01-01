@@ -118,7 +118,7 @@ export function AssetDetailClient({
         return () => clearInterval(interval);
     }, [asset.id]);
 
-    const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', value: number) => {
+    const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', value: number | null) => {
         const entryPrice = asset.userPosition?.avgPrice || 0;
         const isLong = (asset.userPosition?.shares || 0) > 0;
 
@@ -128,16 +128,19 @@ export function AssetDetailClient({
         const tpValue = type === 'takeProfit' ? value : currentTp;
 
         try {
-            if (isLong) {
-                if (type === 'stopLoss' && value >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
-                if (type === 'takeProfit' && value <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
-            } else if ((asset.userPosition?.shares || 0) < 0) {
-                if (type === 'stopLoss' && value <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
-                if (type === 'takeProfit' && value >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
+            // Validation only for non-null values
+            if (value !== null) {
+                if (isLong) {
+                    if (type === 'stopLoss' && value >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
+                    if (type === 'takeProfit' && value <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
+                } else if ((asset.userPosition?.shares || 0) < 0) {
+                    if (type === 'stopLoss' && value <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
+                    if (type === 'takeProfit' && value >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
+                }
             }
 
-            if (type === 'stopLoss') setOrderStopLoss(value.toString());
-            if (type === 'takeProfit') setOrderTakeProfit(value.toString());
+            if (type === 'stopLoss') setOrderStopLoss(value?.toString() || '');
+            if (type === 'takeProfit') setOrderTakeProfit(value?.toString() || '');
 
             setIsUpdatingTargets(true);
             const res = await fetch('/api/trade/position', {
@@ -262,6 +265,7 @@ export function AssetDetailClient({
                                 takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
                             }}
                             onUpdatePosition={handleChartUpdate}
+                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
                             activePositionId={activePositionId}
                             onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                         />
