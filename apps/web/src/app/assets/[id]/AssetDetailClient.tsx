@@ -86,201 +86,253 @@ export function AssetDetailClient({
     const [asset, setAsset] = useState<Asset>(initialAsset);
     const [oracleLogs, setOracleLogs] = useState<OracleLog[]>(initialOracleLogs);
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>(initialPriceHistory);
-    const [imageError, setImageError] = useState(false);
 
     // SL/TP state
     const [orderStopLoss, setOrderStopLoss] = useState(initialAsset.userPosition?.stopLoss?.toString() || '');
     const [orderTakeProfit, setOrderTakeProfit] = useState(initialAsset.userPosition?.takeProfit?.toString() || '');
+    const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
-    const [previewLines, setPreviewLines] = useState<{ stopLoss?: number | null; takeProfit?: number | null }>({});
 
     async function refreshData() {
         try {
-            window.location.reload();
-        } catch (e) {
-            console.error(e);
+            const res = await fetch(`/api/assets/${asset.id}`, { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                setAsset(data.asset);
+                setOracleLogs(data.oracleLogs);
+                setPriceHistory(data.priceHistory);
+
+                // Sync targets if not currently updating
+                if (!isUpdatingTargets && data.asset.userPosition) {
+                    setOrderStopLoss(data.asset.userPosition.stopLoss?.toString() || '');
+                    setOrderTakeProfit(data.asset.userPosition.takeProfit?.toString() || '');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to sync asset', error);
         }
     }
 
-    const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', price: number) => {
-        console.log('Chart update', type, price);
+    useEffect(() => {
+        const interval = setInterval(refreshData, 10000);
+        return () => clearInterval(interval);
+    }, [asset.id]);
+
+    const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', value: number) => {
+        const entryPrice = asset.userPosition?.avgPrice || 0;
+        const isLong = (asset.userPosition?.shares || 0) > 0;
+
+        const currentSl = orderStopLoss ? parseFloat(orderStopLoss) : null;
+        const currentTp = orderTakeProfit ? parseFloat(orderTakeProfit) : null;
+        const slValue = type === 'stopLoss' ? value : currentSl;
+        const tpValue = type === 'takeProfit' ? value : currentTp;
+
+        try {
+            if (isLong) {
+                if (type === 'stopLoss' && value >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
+                if (type === 'takeProfit' && value <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
+            } else if ((asset.userPosition?.shares || 0) < 0) {
+                if (type === 'stopLoss' && value <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
+                if (type === 'takeProfit' && value >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
+            }
+
+            if (type === 'stopLoss') setOrderStopLoss(value.toString());
+            if (type === 'takeProfit') setOrderTakeProfit(value.toString());
+
+            setIsUpdatingTargets(true);
+            const res = await fetch('/api/trade/position', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assetId: asset.id, stopLoss: slValue, takeProfit: tpValue }),
+            });
+            if (res.ok) refreshData();
+        } catch (err: any) {
+            alert(err.message);
+        } finally {
+            setIsUpdatingTargets(false);
+        }
     };
 
-    const chartData = priceHistory.map(p => ({
-        time: p.timestamp,
-        value: p.price
-    })).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+    const chartData = priceHistory
+        .map(p => ({
+            time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any,
+            value: p.price,
+            volume: (p as any).volume || 0
+        }))
+        .sort((a, b) => (a.time as number) - (b.time as number))
+        .filter((item, index, self) =>
+            index === 0 || item.time !== self[index - 1].time
+        );
 
-    const isPositive = asset.change24h >= 0;
-    const isActive = asset.status.toLowerCase() === 'active';
-    const TypeIcon = TYPE_ICONS[asset.type] || LayoutGrid;
+    const [imgError, setImgError] = useState(false);
+    const Icon = TYPE_ICONS[asset.type] || LayoutGrid;
 
-    const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            notation: val > 1000000 ? 'compact' : 'standard'
-        }).format(val);
-    };
-
-    const formatNumber = (val: number) => {
-        return new Intl.NumberFormat('en-US', {
-            notation: val > 1000 ? 'compact' : 'standard'
-        }).format(val);
-    };
+    // ... existing refresh functions ...
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-primary/30">
-            <div className="pt-[80px] pb-20 container mx-auto px-4 max-w-7xl">
-                {/* Header Section */}
-                <div className="mb-12">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group mb-8"
-                    >
-                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-zinc-700 transition-all">
-                            <ArrowLeft className="w-4 h-4" />
-                        </div>
-                        <span className="font-mono text-[10px] uppercase tracking-[0.2em]">Back to Market</span>
-                    </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
+            {/* LEFT COLUMN - Main Content */}
+            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-6 pb-32">
 
-                    <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
-                        <div className="flex items-center gap-8">
-                            {/* Asset Image */}
-                            <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-br from-primary/30 to-purple-600/30 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-100 transition-all duration-700" />
-                                <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-[1.75rem] overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all duration-500 shadow-2xl bg-zinc-900">
-                                    <div className="absolute inset-0 flex items-center justify-center text-zinc-800 group-hover:text-primary/20 transition-colors">
-                                        <TypeIcon className="w-12 h-12" />
-                                    </div>
-                                    {asset.imageUrl && !imageError && (
-                                        <Image
-                                            src={asset.imageUrl}
-                                            alt={asset.name}
-                                            fill
-                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                            onError={() => setImageError(true)}
-                                            unoptimized={asset.imageUrl.startsWith('/uploads')}
-                                        />
-                                    )}
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div className="min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative bg-zinc-900 flex items-center justify-center">
+                                {/* Fallback Icon */}
+                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
+                                    <Icon className="w-6 h-6" />
                                 </div>
-                                <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl border flex items-center justify-center shadow-xl backdrop-blur-md ${isActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-zinc-500/10 border-zinc-500/20 text-zinc-500'
-                                    }`}>
-                                    {isActive ? <Activity className="w-5 h-5" /> : <Clock className="w-5 h-5 text-zinc-500" />}
-                                </div>
+
+                                {asset.imageUrl && !imgError ? (
+                                    <Image
+                                        src={asset.imageUrl}
+                                        alt={asset.name}
+                                        fill
+                                        priority
+                                        className="object-cover relative z-10"
+                                        onError={() => setImgError(true)}
+                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
+                                    />
+                                ) : asset.imageUrl && imgError ? (
+                                    <img
+                                        src={asset.imageUrl}
+                                        alt={asset.name}
+                                        className="object-cover w-full h-full relative z-10"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                        }}
+                                    />
+                                ) : null}
                             </div>
-
-                            {/* Name & Title */}
-                            <div>
-                                <div className="flex items-center gap-4 mb-3">
-                                    <h1 className="text-4xl lg:text-6xl font-black tracking-tight text-white">
-                                        {asset.name}
-                                    </h1>
-                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${isActive
-                                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
-                                        : 'bg-zinc-500/10 border-zinc-500/20 text-zinc-500'
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
+                                    <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] uppercase font-bold tracking-wider border whitespace-nowrap ${asset.status === 'active'
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                        : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
                                         }`}>
                                         {asset.status}
-                                    </div>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-zinc-500">
-                                    <span className="flex items-center gap-2 text-primary">
-                                        <TypeIcon className="w-5 h-5" />
-                                        <span className="uppercase tracking-[0.1em] text-xs font-bold">{asset.type}</span>
                                     </span>
-                                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-[10px] text-zinc-400">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-700 animate-pulse" />
-                                        ID: {asset.id}
-                                    </div>
+                                </div>
+                                <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-white transition-colors mb-4 mt-2 group w-fit">
+                                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                                    <span>Back to Markets</span>
+                                </Link>
+                                <div className="flex items-center gap-4 text-[10px] md:text-sm text-zinc-400 font-medium mt-1">
+                                    <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                        <Clock className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
+                                        Vol: <span className="text-zinc-200">${asset.volume24h.toLocaleString()}</span>
+                                    </span>
+                                    <span className="flex items-center gap-1.5 whitespace-nowrap">
+                                        <Users className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
+                                        Holders: <span className="text-zinc-200">{asset.holders || 0}</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
-
-                        {/* Quick Stats Block */}
-                        <div className="flex flex-col items-end gap-1">
-                            <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Live Price</div>
-                            <div className="text-5xl font-black text-white font-mono tracking-tighter">
-                                ${asset.price.toFixed(2)}
-                            </div>
-                            <div className={`flex items-center gap-1.5 text-sm font-black px-2.5 py-1 rounded-full ${isPositive ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'
-                                }`}>
-                                {isPositive ? <TrendingUp className="w-4 h-4" /> : <Activity className="w-4 h-4 rotate-180" />}
-                                {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
-                            </div>
+                    </div>
+                    <div className="flex items-end justify-between md:flex-col md:items-end gap-2 bg-black/20 p-3 md:p-0 rounded-xl md:bg-transparent border border-white/5 md:border-0">
+                        <div className="text-xl md:text-4xl font-bold text-white tracking-tighter tabular-nums">
+                            ${asset.price.toFixed(2)}
+                            {asset.status === 'funding' && <span className="text-xs md:text-lg text-yellow-500 font-normal ml-2">(Funding)</span>}
+                        </div>
+                        <div className={`text-sm md:text-base font-medium flex items-center gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {asset.change24h >= 0 ? <TrendingUp className="w-3 h-3 md:w-4 md:h-4" /> : <TrendingUp className="w-3 h-3 md:w-4 md:h-4 rotate-180" />}
+                            {(asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
                         </div>
                     </div>
                 </div>
 
-                {/* Main Content Grid */}
-                <div className="grid lg:grid-cols-[1fr,350px] gap-10 items-start">
-                    <div className="space-y-10">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            <StatCard label="Market Cap" value={formatCurrency(asset.marketCap)} />
-                            <StatCard label="24h Volume" value={formatCurrency(asset.volume24h)} />
-                            <StatCard label="Liquidity" value={formatCurrency(asset.liquidity)} icon={Bitcoin} />
-                            <StatCard label="Holders" value={formatNumber(asset.holders || 0)} icon={Users} />
-                            <StatCard label="Supply" value={formatNumber(asset.totalSupply)} icon={LayoutGrid} />
-                            <StatCard label="Confidence" value="High" icon={Trophy} color="text-indigo-400" />
+                {/* Chart Container */}
+                <div className="h-[300px] md:h-[400px] lg:h-[500px] glass-panel rounded-2xl overflow-hidden relative group shadow-2xl">
+                    {chartData.length > 0 ? (
+                        <AssetChart
+                            data={chartData}
+                            colors={{
+                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
+                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
+                                areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                textColor: '#71717a',
+                            }}
+                            priceLines={{
+                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                            }}
+                            onUpdatePosition={handleChartUpdate}
+                            activePositionId={activePositionId}
+                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                        />
+                    ) : (
+                        <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
+                            AWAITING_PRICE_DATA...
                         </div>
-
-                        {/* Chart Card */}
-                        <div className="bg-obsidian-900/50 rounded-3xl border border-white/5 p-1 overflow-hidden">
-                            <AssetChart
-                                data={chartData}
-                                colors={{
-                                    lineColor: isPositive ? '#10b981' : '#f43f5e',
-                                    areaTopColor: isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-                                    areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                    textColor: '#52525b',
-                                }}
-                                priceLines={{
-                                    entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                    stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                    takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                }}
-                                previewLines={previewLines}
-                                onUpdatePreview={(type, price) => setPreviewLines(prev => ({ ...prev, [type]: price }))}
-                                onUpdatePosition={handleChartUpdate}
-                                activePositionId={activePositionId}
-                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                            />
-                        </div>
-
-                        <AITerminal logs={oracleLogs} />
-                    </div>
-
-                    <TradingSidebar
-                        assetId={asset.id}
-                        assetName={asset.name}
-                        assetPrice={asset.price}
-                        marketPrice={asset.marketPrice}
-                        status={asset.status}
-                        onTradeSuccess={refreshData}
-                        activePositionId={activePositionId}
-                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                        previewLines={previewLines}
-                        onPreviewChange={(type, val) => setPreviewLines(prev => ({ ...prev, [type]: val }))}
-                    />
+                    )}
                 </div>
-            </div>
-        </div>
-    );
-}
 
-function StatCard({ label, value, icon: Icon, color = "text-primary" }: { label: string; value: string; icon?: any; color?: string }) {
-    return (
-        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-white/10 transition-colors group">
-            <div className="flex items-center gap-3 mb-2">
-                {Icon && (
-                    <div className={`p-1.5 rounded-lg bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-3.5 h-3.5" />
+                {/* Asset Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
+                        <span className="text-xs md:text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
+                    </div>
+                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
+                        <span className="text-xs md:text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
+                    </div>
+                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Supply</span>
+                        <span className="text-xs md:text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
+                    </div>
+                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">24h Range</span>
+                        <span className="text-[10px] md:text-sm font-bold text-white font-mono whitespace-nowrap">
+                            {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(1)}-$${asset.high24h.toFixed(1)}` : '-- / --'}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Description */}
+                {asset.description && (
+                    <div className="glass-panel p-6 rounded-xl">
+                        <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                            About this Market
+                        </h4>
+                        <p className="text-sm text-zinc-400 leading-relaxed">
+                            {asset.description}
+                        </p>
                     </div>
                 )}
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{label}</span>
+
+                {/* AI Terminal */}
+                <div>
+                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-500" />
+                        AI Market Analysis
+                    </h3>
+                    <AITerminal logs={oracleLogs} />
+                </div>
             </div>
-            <div className="text-lg font-black text-white font-mono">{value}</div>
+
+            {/* Main Sidebar - Solid Column */}
+            <div className="col-span-12 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] z-20">
+                <div className="h-full pt-36 px-6 py-6 overflow-y-auto custom-scrollbar">
+                    {asset && (
+                        <TradingSidebar
+                            assetId={asset.id}
+                            assetName={asset.name}
+                            assetPrice={asset.price}
+                            marketPrice={asset.marketPrice}
+                            status={asset.status}
+                            onTradeSuccess={refreshData}
+                            activePositionId={activePositionId}
+                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                        />
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
-

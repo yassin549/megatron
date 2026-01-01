@@ -13,8 +13,6 @@ interface Position {
     value: number;
     returnPercent: number;
     returnAbs: number;
-    stopLoss?: number | null;
-    takeProfit?: number | null;
 }
 
 interface PositionsListProps {
@@ -22,17 +20,13 @@ interface PositionsListProps {
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
     onActionSuccess?: () => void;
-    previewLines?: { stopLoss?: number | null; takeProfit?: number | null };
-    onPreviewChange?: (type: 'stopLoss' | 'takeProfit', value: number | null) => void;
 }
 
 export function PositionsList({
     currentAssetId,
     activePositionId,
     onSelectPosition,
-    onActionSuccess,
-    previewLines,
-    onPreviewChange
+    onActionSuccess
 }: PositionsListProps) {
     const [positions, setPositions] = useState<Position[]>([]);
     const [loading, setLoading] = useState(true);
@@ -98,8 +92,6 @@ export function PositionsList({
                         fetchPositions();
                         onActionSuccess?.();
                     }}
-                    previewLines={previewLines}
-                    onPreviewChange={onPreviewChange}
                 />
             ))}
         </div>

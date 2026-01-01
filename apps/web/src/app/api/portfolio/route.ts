@@ -50,9 +50,7 @@ export async function GET() {
                 currentPrice,
                 value,
                 returnPercent,
-                returnAbs,
-                stopLoss: pos.stopLoss ? Number(pos.stopLoss) : null,
-                takeProfit: pos.takeProfit ? Number(pos.takeProfit) : null
+                returnAbs
             };
         });
 

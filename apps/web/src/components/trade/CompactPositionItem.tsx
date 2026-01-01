@@ -10,8 +10,7 @@ import {
     Shield,
     Target,
     ArrowUpRight,
-    Loader2,
-    Check
+    Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -25,8 +24,6 @@ interface Position {
     value: number;
     returnPercent: number;
     returnAbs: number;
-    stopLoss?: number | null;
-    takeProfit?: number | null;
 }
 
 interface CompactPositionItemProps {
@@ -35,8 +32,6 @@ interface CompactPositionItemProps {
     isSelected: boolean;
     onSelect: () => void;
     onActionSuccess?: () => void;
-    previewLines?: { stopLoss?: number | null; takeProfit?: number | null };
-    onPreviewChange?: (type: 'stopLoss' | 'takeProfit', value: number | null) => void;
 }
 
 export function CompactPositionItem({
@@ -44,13 +39,13 @@ export function CompactPositionItem({
     isCurrentAsset,
     isSelected,
     onSelect,
-    onActionSuccess,
-    previewLines,
-    onPreviewChange
+    onActionSuccess
 }: CompactPositionItemProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
-    const [updatingTarget, setUpdatingTarget] = useState<'sl' | 'tp' | null>(null);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [stopLoss, setStopLoss] = useState('');
+    const [takeProfit, setTakeProfit] = useState('');
     const router = useRouter();
 
     const isProfit = position.returnAbs >= 0;
@@ -85,75 +80,25 @@ export function CompactPositionItem({
         }
     };
 
-    const toggleTarget = async (type: 'sl' | 'tp') => {
-        // Only allow interaction if current asset
-        if (!isCurrentAsset) return;
+    const handleUpdate = async () => {
+        setIsUpdating(true);
+        try {
+            const slValue = stopLoss ? parseFloat(stopLoss) : null;
+            const tpValue = takeProfit ? parseFloat(takeProfit) : null;
 
-        // If currently previewing this type, Save/Confirm it
-        const isPreviewing = previewLines?.[type === 'sl' ? 'stopLoss' : 'takeProfit'] !== undefined;
-
-        if (isPreviewing) {
-            // CONFIRM ACTION
-            setUpdatingTarget(type);
-            try {
-                const newVal = previewLines?.[type === 'sl' ? 'stopLoss' : 'takeProfit'];
-                const res = await fetch('/api/trade/position', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        assetId: position.assetId,
-                        stopLoss: type === 'sl' ? newVal : undefined,
-                        takeProfit: type === 'tp' ? newVal : undefined
-                    }),
-                });
-
-                if (res.ok) {
-                    onActionSuccess?.();
-                    // Clear preview
-                    onPreviewChange?.(type === 'sl' ? 'stopLoss' : 'takeProfit', null);
-                }
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setUpdatingTarget(null);
+            const res = await fetch('/api/trade/position', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assetId: position.assetId, stopLoss: slValue, takeProfit: tpValue }),
+            });
+            if (res.ok) {
+                setIsExpanded(false);
+                onActionSuccess?.();
             }
-        } else {
-            // TOGGLE ACTION
-            const currentVal = type === 'sl' ? position.stopLoss : position.takeProfit;
-
-            if (currentVal) {
-                // If value exists -> Cancel logic (unchanged, instant)
-                setUpdatingTarget(type);
-                try {
-                    const res = await fetch('/api/trade/position', {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            assetId: position.assetId,
-                            stopLoss: type === 'sl' ? null : undefined, // Explicit null to remove
-                            takeProfit: type === 'tp' ? null : undefined
-                        }),
-                    });
-                    if (res.ok) onActionSuccess?.();
-                } catch (err) {
-                    console.error(err);
-                } finally {
-                    setUpdatingTarget(null);
-                }
-            } else {
-                // If no value -> Enter Preview Mode
-                const entry = position.avgPrice;
-                let defaultVal: number;
-                if (type === 'tp') {
-                    defaultVal = isShort ? entry * 0.9 : entry * 1.1;
-                } else {
-                    defaultVal = isShort ? entry * 1.05 : entry * 0.95;
-                }
-                defaultVal = Number(defaultVal.toFixed(2));
-
-                // SET PREVIEW
-                onPreviewChange?.(type === 'sl' ? 'stopLoss' : 'takeProfit', defaultVal);
-            }
+        } catch (err: any) {
+            alert('Update failed');
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -165,22 +110,6 @@ export function CompactPositionItem({
             onSelect();
         }
     };
-
-    const hasSL = !!position.stopLoss;
-    const hasTP = !!position.takeProfit;
-
-    // Check Previews
-    const previewSL = previewLines?.stopLoss;
-    const previewTP = previewLines?.takeProfit;
-    const isPreviewSL = previewSL !== undefined && previewSL !== null;
-    const isPreviewTP = previewTP !== undefined && previewTP !== null;
-
-    // Display Values (Preview overrides stored)
-    const displaySL = isPreviewSL ? previewSL : position.stopLoss;
-    const displayTP = isPreviewTP ? previewTP : position.takeProfit;
-
-    const showSL = hasSL || isPreviewSL;
-    const showTP = hasTP || isPreviewTP;
 
     return (
         <div
@@ -204,13 +133,6 @@ export function CompactPositionItem({
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
                                 {position.assetName}
-                            </span>
-                            {/* SIDE BADGE */}
-                            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${isShort
-                                ? 'bg-rose-500/20 text-rose-400'
-                                : 'bg-emerald-500/20 text-emerald-400'
-                                }`}>
-                                {isShort ? 'SELL' : 'BUY'}
                             </span>
                             {isCurrentAsset && (
                                 <span className="text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
@@ -263,130 +185,53 @@ export function CompactPositionItem({
                                 </div>
                             </div>
 
-                            {/* Checklist Style Buttons */}
-                            <div className="space-y-2">
-                                <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest px-1">
-                                    Risk Management
+                            {/* SL/TP Controls */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-rose-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                                        <Shield className="w-3 h-3" />
+                                        Stop Loss
+                                    </label>
+                                    <input
+                                        type="number"
+                                        placeholder="Price"
+                                        value={stopLoss}
+                                        onChange={(e) => setStopLoss(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-rose-500/40 transition-all font-bold"
+                                    />
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {/* Stop Loss Button */}
-                                    <button
-                                        onClick={() => toggleTarget('sl')}
-                                        disabled={updatingTarget === 'sl'}
-                                        className={`relative group flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${hasSL
-                                            ? 'bg-rose-500/10 border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.1)]'
-                                            : isPreviewSL
-                                                ? 'bg-yellow-500/10 border-yellow-500/30' // Preview Style
-                                                : 'bg-zinc-900/40 border-dashed border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800/40'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg ${hasSL ? 'bg-rose-500 text-white' : isPreviewSL ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
-                                                <Shield className="w-3.5 h-3.5" />
-                                            </div>
-                                            <div className="text-left">
-                                                <div className={`text-[10px] font-black uppercase tracking-wider ${hasSL ? 'text-rose-400' : isPreviewSL ? 'text-yellow-500' : 'text-zinc-500'}`}>
-                                                    {hasSL ? 'Stop Loss' : isPreviewSL ? 'Confirm SL' : 'Stop Loss'}
-                                                </div>
-                                                {showSL && (
-                                                    <div className={`text-xs font-mono font-bold ${isPreviewSL ? 'text-yellow-500' : 'text-white'}`}>
-                                                        ${displaySL}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {updatingTarget === 'sl' ? (
-                                            <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
-                                        ) : (
-                                            <div className="flex items-center gap-1">
-                                                {isPreviewSL && (
-                                                    <div
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onPreviewChange?.('stopLoss', null);
-                                                        }}
-                                                        className="w-5 h-5 rounded-full flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 transition-colors z-10"
-                                                    >
-                                                        <span className="text-zinc-400">×</span>
-                                                    </div>
-                                                )}
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasSL
-                                                    ? 'bg-rose-500 border-rose-500 text-white'
-                                                    : isPreviewSL
-                                                        ? 'bg-yellow-500 border-yellow-500 text-black'
-                                                        : 'border-zinc-700 group-hover:border-zinc-500'
-                                                    }`}>
-                                                    {(hasSL || isPreviewSL) && <Check className="w-3 h-3" />}
-                                                    {!(hasSL || isPreviewSL) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </button>
-
-                                    {/* Take Profit Button */}
-                                    <button
-                                        onClick={() => toggleTarget('tp')}
-                                        disabled={updatingTarget === 'tp'}
-                                        className={`relative group flex items-center justify-between p-3 rounded-xl border transition-all duration-300 ${hasTP
-                                            ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(52,211,153,0.1)]'
-                                            : isPreviewTP
-                                                ? 'bg-yellow-500/10 border-yellow-500/30'
-                                                : 'bg-zinc-900/40 border-dashed border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800/40'
-                                            }`}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            <div className={`p-1.5 rounded-lg ${hasTP ? 'bg-emerald-500 text-white' : isPreviewTP ? 'bg-yellow-500 text-black' : 'bg-zinc-800 text-zinc-500'}`}>
-                                                <Target className="w-3.5 h-3.5" />
-                                            </div>
-                                            <div className="text-left">
-                                                <div className={`text-[10px] font-black uppercase tracking-wider ${hasTP ? 'text-emerald-400' : isPreviewTP ? 'text-yellow-500' : 'text-zinc-500'}`}>
-                                                    {hasTP ? 'Take Profit' : isPreviewTP ? 'Confirm TP' : 'Take Profit'}
-                                                </div>
-                                                {showTP && (
-                                                    <div className={`text-xs font-mono font-bold ${isPreviewTP ? 'text-yellow-500' : 'text-white'}`}>
-                                                        ${displayTP}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        {updatingTarget === 'tp' ? (
-                                            <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
-                                        ) : (
-                                            <div className="flex items-center gap-1">
-                                                {isPreviewTP && (
-                                                    <div
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            onPreviewChange?.('takeProfit', null);
-                                                        }}
-                                                        className="w-5 h-5 rounded-full flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 transition-colors z-10"
-                                                    >
-                                                        <span className="text-zinc-400">×</span>
-                                                    </div>
-                                                )}
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasTP
-                                                    ? 'bg-emerald-500 border-emerald-500 text-white'
-                                                    : isPreviewTP
-                                                        ? 'bg-yellow-500 border-yellow-500 text-black'
-                                                        : 'border-zinc-700 group-hover:border-zinc-500'
-                                                    }`}>
-                                                    {(hasTP || isPreviewTP) && <Check className="w-3 h-3" />}
-                                                    {!(hasTP || isPreviewTP) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </button>
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
+                                        <Target className="w-3 h-3" />
+                                        Take Profit
+                                    </label>
+                                    <input
+                                        type="number"
+                                        placeholder="Price"
+                                        value={takeProfit}
+                                        onChange={(e) => setTakeProfit(e.target.value)}
+                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-emerald-500/40 transition-all font-bold"
+                                    />
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleExit}
-                                disabled={isExiting}
-                                className="w-full py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-3 h-3" />}
-                                Close Position
-                            </button>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleUpdate}
+                                    disabled={isUpdating}
+                                    className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
+                                >
+                                    {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Update Targets'}
+                                </button>
+                                <button
+                                    onClick={handleExit}
+                                    disabled={isExiting}
+                                    className="flex-[0.6] py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-3 h-3" />}
+                                    Exit
+                                </button>
+                            </div>
                         </div>
                     </motion.div>
                 )}
