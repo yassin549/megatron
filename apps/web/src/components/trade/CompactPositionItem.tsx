@@ -52,6 +52,10 @@ export function CompactPositionItem({
     const isShort = position.shares < 0;
 
     const handleExit = async () => {
+        if (!position.shares || Math.abs(position.shares) < 0.000001) {
+            alert("No active position to exit.");
+            return;
+        }
         setIsExiting(true);
         try {
             const res = await fetch('/api/trade', {
@@ -110,8 +114,8 @@ export function CompactPositionItem({
     return (
         <div
             className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${isSelected
-                    ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
-                    : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-white/10'
+                ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
+                : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-white/10'
                 }`}
         >
             <button
@@ -120,8 +124,8 @@ export function CompactPositionItem({
             >
                 <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isProfit
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                            : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                        : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                         }`}>
                         {isProfit ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
                     </div>

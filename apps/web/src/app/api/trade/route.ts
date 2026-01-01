@@ -109,6 +109,10 @@ export async function POST(req: Request) {
                     outputAmount = deltaShares;
                 }
 
+                if (deltaShares <= 0.000001) {
+                    throw new Error('Trade amount too small to generate shares');
+                }
+
                 // Re-calculate Fee for records
                 const fee = usedTradeAmount * CONFIG.SWAP_FEE;
                 const lpFee = fee * CONFIG.LP_SHARE;
@@ -141,13 +145,20 @@ export async function POST(req: Request) {
                     });
 
                     // Update Position
-                    await tx.position.update({
-                        where: { userId_assetId: { userId, assetId } },
-                        data: {
-                            shares: { increment: deltaShares },
-                            collateral: { decrement: releasedCollateral },
-                        }
-                    });
+                    if (currentShares + deltaShares > -0.000001) {
+                        // Fully covered
+                        await tx.position.delete({
+                            where: { userId_assetId: { userId, assetId } }
+                        });
+                    } else {
+                        await tx.position.update({
+                            where: { userId_assetId: { userId, assetId } },
+                            data: {
+                                shares: { increment: deltaShares },
+                                collateral: { decrement: releasedCollateral },
+                            }
+                        });
+                    }
 
                     // Update Asset Supply
                     await tx.asset.update({
@@ -224,7 +235,8 @@ export async function POST(req: Request) {
 
                 tradeRecord = await tx.trade.create({
                     data: {
-                        assetId, buyerId: userId,
+                        asset: { connect: { id: assetId } },
+                        buyer: { connect: { id: userId } },
                         quantity: deltaShares,
                         price: netAmount / deltaShares,
                         fee, side: 'buy',
@@ -259,6 +271,10 @@ export async function POST(req: Request) {
                     shareAmount = solveDeltaSharesFromRevenue(P0, k, currentSupply, grossUsdc);
                 }
 
+                if (shareAmount <= 0.000001) {
+                    throw new Error('Trade amount too small to sell shares');
+                }
+
                 outputAmount = grossUsdc;
 
                 const fee = grossUsdc * CONFIG.SWAP_FEE;
@@ -273,10 +289,17 @@ export async function POST(req: Request) {
                         throw new Error('Insufficient shares to sell. To short, please close position first.');
                     }
 
-                    await tx.position.update({
-                        where: { userId_assetId: { userId, assetId } },
-                        data: { shares: { decrement: shareAmount } }
-                    });
+                    if (currentShares - shareAmount < 0.000001) {
+                        // Fully exited
+                        await tx.position.delete({
+                            where: { userId_assetId: { userId, assetId } }
+                        });
+                    } else {
+                        await tx.position.update({
+                            where: { userId_assetId: { userId, assetId } },
+                            data: { shares: { decrement: shareAmount } }
+                        });
+                    }
 
                     await tx.asset.update({
                         where: { id: assetId },
@@ -369,7 +392,8 @@ export async function POST(req: Request) {
 
                 tradeRecord = await tx.trade.create({
                     data: {
-                        assetId, buyerId: userId,
+                        asset: { connect: { id: assetId } },
+                        buyer: { connect: { id: userId } },
                         quantity: shareAmount,
                         price: grossUsdc / shareAmount,
                         fee, side: 'sell',
