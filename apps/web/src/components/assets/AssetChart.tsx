@@ -245,7 +245,45 @@ export function AssetChart({
                 title: 'TP'
             }));
         }
-        return () => lines.forEach(line => series.removePriceLine(line));
+
+        // Apply Autoscale to include lines
+        series.applyOptions({
+            autoscaleInfoProvider: (original) => {
+                const res = original();
+                if (!res || !res.priceRange) return res;
+
+                let min = res.priceRange.minValue;
+                let max = res.priceRange.maxValue;
+
+                if (priceLines?.entry) {
+                    min = Math.min(min, priceLines.entry);
+                    max = Math.max(max, priceLines.entry);
+                }
+                if (localLines.stopLoss) {
+                    min = Math.min(min, localLines.stopLoss);
+                    max = Math.max(max, localLines.stopLoss);
+                }
+                if (localLines.takeProfit) {
+                    min = Math.min(min, localLines.takeProfit);
+                    max = Math.max(max, localLines.takeProfit);
+                }
+
+                // Add some padding
+                const range = max - min;
+                return {
+                    priceRange: {
+                        minValue: min - range * 0.1,
+                        maxValue: max + range * 0.1,
+                    },
+                };
+            },
+        });
+
+        return () => {
+            lines.forEach(line => series.removePriceLine(line));
+            // Reset autoscale (optional, but good practice)
+            series.applyOptions({ autoscaleInfoProvider: undefined });
+        };
     }, [priceLines?.entry, localLines, activePositionId]);
 
     // 6. Global Dragging Logic
