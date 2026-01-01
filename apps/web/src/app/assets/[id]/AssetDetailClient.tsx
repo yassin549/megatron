@@ -173,11 +173,7 @@ export function AssetDetailClient({
         <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden relative">
             {/* LEFT COLUMN - Main Content */}
             <div className="lg:col-span-8 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12 space-y-6 pb-32">
-                {/* Back to Markets Link */}
-                <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-0 transition-colors group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    Back to Markets
-                </Link>
+
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -220,6 +216,10 @@ export function AssetDetailClient({
                                         {asset.status}
                                     </span>
                                 </div>
+                                <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-white transition-colors mb-4 mt-2 group w-fit">
+                                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+                                    <span>Back to Markets</span>
+                                </Link>
                                 <div className="flex items-center gap-4 text-[10px] md:text-sm text-zinc-400 font-medium mt-1">
                                     <span className="flex items-center gap-1.5 whitespace-nowrap">
                                         <Clock className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
@@ -317,23 +317,19 @@ export function AssetDetailClient({
             </div>
 
             {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full">
-                <div className="h-full pt-4 pb-4 flex flex-col">
-                    <div className="flex-1 overflow-y-auto custom-scrollbar">
-                        {asset && (
-                            <TradingSidebar
-                                assetId={asset.id}
-                                assetName={asset.name}
-                                assetPrice={asset.price}
-                                marketPrice={asset.marketPrice}
-                                status={asset.status}
-                                onTradeSuccess={refreshData}
-                                activePositionId={activePositionId}
-                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                            />
-                        )}
-                    </div>
-                </div>
+            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full flex flex-col justify-center px-6">
+                {asset && (
+                    <TradingSidebar
+                        assetId={asset.id}
+                        assetName={asset.name}
+                        assetPrice={asset.price}
+                        marketPrice={asset.marketPrice}
+                        status={asset.status}
+                        onTradeSuccess={refreshData}
+                        activePositionId={activePositionId}
+                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                    />
+                )}
             </div>
         </div>
     );
