@@ -37,23 +37,22 @@ export function AssetChart({
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
     // Local lines state for optimistic UI updates during drag
+    // Merges prop lines with preview lines (preview takes precedence)
     const [localLines, setLocalLines] = useState({
-        stopLoss: priceLines?.stopLoss ?? null,
-        takeProfit: priceLines?.takeProfit ?? null,
+        stopLoss: previewLines?.stopLoss ?? priceLines?.stopLoss ?? null,
+        takeProfit: previewLines?.takeProfit ?? priceLines?.takeProfit ?? null,
     });
 
-    // Pending confirmation state
-    const [pendingUpdate, setPendingUpdate] = useState<{ type: 'stopLoss' | 'takeProfit', value: number } | null>(null);
-
-    // Sync local lines with props when not dragging/pending
+    // Update local state when props change
     useEffect(() => {
-        if (!pendingUpdate) {
+        // If NOT dragging, sync with props
+        if (!draggingType) {
             setLocalLines({
-                stopLoss: priceLines?.stopLoss ?? null,
-                takeProfit: priceLines?.takeProfit ?? null,
+                stopLoss: previewLines?.stopLoss ?? priceLines?.stopLoss ?? null,
+                takeProfit: previewLines?.takeProfit ?? priceLines?.takeProfit ?? null,
             });
         }
-    }, [priceLines, pendingUpdate]);
+    }, [priceLines, previewLines, draggingType]);
 
     // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
@@ -225,24 +224,29 @@ export function AssetChart({
                 title: 'ENTRY'
             }));
         }
+
+        // Determine line styles based on whether it is a PREVIEW or COMMITTED value
+        const isPreviewSL = previewLines?.stopLoss !== undefined && previewLines?.stopLoss !== null;
+        const isPreviewTP = previewLines?.takeProfit !== undefined && previewLines?.takeProfit !== null;
+
         if (localLines.stopLoss) {
             lines.push(series.createPriceLine({
                 price: localLines.stopLoss,
-                color: '#f43f5e',
-                lineWidth: isSelected ? 2 : 1,
-                lineStyle: LineStyle.Solid,
+                color: isPreviewSL ? '#eab308' : '#f43f5e', // Yellow for preview, Red for saved
+                lineWidth: isPreviewSL ? 2 : (isSelected ? 2 : 1),
+                lineStyle: isPreviewSL ? LineStyle.Dashed : LineStyle.Solid,
                 axisLabelVisible: true,
-                title: 'SL'
+                title: isPreviewSL ? 'SL (Preview)' : 'SL'
             }));
         }
         if (localLines.takeProfit) {
             lines.push(series.createPriceLine({
                 price: localLines.takeProfit,
-                color: '#34d399',
-                lineWidth: isSelected ? 2 : 1,
-                lineStyle: LineStyle.Solid,
+                color: isPreviewTP ? '#eab308' : '#34d399', // Yellow for preview, Green for saved
+                lineWidth: isPreviewTP ? 2 : (isSelected ? 2 : 1),
+                lineStyle: isPreviewTP ? LineStyle.Dashed : LineStyle.Solid,
                 axisLabelVisible: true,
-                title: 'TP'
+                title: isPreviewTP ? 'TP (Preview)' : 'TP'
             }));
         }
 
@@ -284,7 +288,7 @@ export function AssetChart({
             // Reset autoscale (optional, but good practice)
             series.applyOptions({ autoscaleInfoProvider: undefined });
         };
-    }, [priceLines?.entry, localLines, activePositionId]);
+    }, [priceLines, previewLines, localLines, activePositionId]);
 
     // 6. Global Dragging Logic
     useEffect(() => {
@@ -309,7 +313,8 @@ export function AssetChart({
                 const type = draggingTypeRef.current;
                 const price = localLines[type];
                 if (price !== null) {
-                    setPendingUpdate({ type, value: price });
+                    // Update Parent Preview
+                    onUpdatePreview?.(type, price);
                 }
                 setDraggingType(null);
                 draggingTypeRef.current = null;
@@ -324,10 +329,9 @@ export function AssetChart({
             window.removeEventListener('mousemove', handleGlobalMouseMove);
             window.removeEventListener('mouseup', handleGlobalMouseUp);
         };
-    }, [draggingType, localLines]); // Need localLines in dep to capture latest value
+    }, [draggingType, localLines, onUpdatePreview]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (pendingUpdate) return;
         const series = seriesRef.current;
         if (!series) return;
         const rect = chartContainerRef.current?.getBoundingClientRect();
@@ -337,7 +341,6 @@ export function AssetChart({
         const threshold = 20;
 
         // Detection for axis Interaction scaling
-        // If we are in axis zones, let the chart handle it (don't preventDefault)
         if (x > rect.width - 60 || y > rect.height - 30) {
             return;
         }
@@ -371,7 +374,7 @@ export function AssetChart({
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (draggingType || pendingUpdate) return;
+        if (draggingType) return;
         const series = seriesRef.current;
         if (!series) {
             setHoverLine(null);
@@ -431,18 +434,6 @@ export function AssetChart({
         return 'crosshair';
     };
 
-    const handleConfirmUpdate = () => {
-        if (pendingUpdate) {
-            onUpdatePosition?.(pendingUpdate.type, pendingUpdate.value);
-            setPendingUpdate(null);
-        }
-    };
-
-    const handleCancelUpdate = () => {
-        setPendingUpdate(null);
-        // Effects will sync localLines back to priceLines
-    };
-
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
             {/* Header */}
@@ -486,26 +477,6 @@ export function AssetChart({
                 {draggingType && (
                     <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
                         Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
-                    </div>
-                )}
-
-                {/* Confirm/Cancel Overlay */}
-                {pendingUpdate && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 flex gap-2 bg-black/80 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-2xl animate-in fade-in zoom-in duration-200">
-                        <button
-                            onClick={handleConfirmUpdate}
-                            className="bg-emerald-500 hover:bg-emerald-400 text-white p-2 rounded-lg transition-colors shadow-lg shadow-emerald-900/20"
-                            title="Confirm Change"
-                        >
-                            <Check className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={handleCancelUpdate}
-                            className="bg-zinc-700 hover:bg-zinc-600 text-white p-2 rounded-lg transition-colors"
-                            title="Cancel"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
                     </div>
                 )}
             </div>

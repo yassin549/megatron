@@ -16,6 +16,8 @@ interface TradingSidebarProps {
     // For chart interaction
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
+    previewLines?: { stopLoss?: number | null; takeProfit?: number | null };
+    onPreviewChange?: (type: 'stopLoss' | 'takeProfit', value: number | null) => void;
 }
 
 export function TradingSidebar({
@@ -26,7 +28,9 @@ export function TradingSidebar({
     status,
     onTradeSuccess,
     activePositionId,
-    onSelectPosition
+    onSelectPosition,
+    previewLines,
+    onPreviewChange
 }: TradingSidebarProps) {
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
@@ -102,6 +106,8 @@ export function TradingSidebar({
                                 activePositionId={activePositionId}
                                 onSelectPosition={onSelectPosition}
                                 onActionSuccess={onTradeSuccess}
+                                previewLines={previewLines}
+                                onPreviewChange={onPreviewChange}
                             />
                         </motion.div>
                     )}
