@@ -9,7 +9,7 @@ export function MobileBottomNav() {
     const pathname = usePathname();
 
     const tabs = [
-        { name: 'Assets', href: '/', icon: Home },
+        { name: 'Assets', href: '/assets', icon: Home },
         { name: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
         { name: 'Wallet', href: '/wallet', icon: Wallet },
         { name: 'LP Pools', href: '/lp', icon: Layers }, // Using Layers for LP
