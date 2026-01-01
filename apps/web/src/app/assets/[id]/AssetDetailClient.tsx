@@ -5,7 +5,30 @@ import Image from 'next/image';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
-import { Clock, Activity, TrendingUp, Users } from 'lucide-react';
+import {
+    Clock,
+    Activity,
+    TrendingUp,
+    Users,
+    Trophy,
+    LineChart,
+    CloudSun,
+    Bitcoin,
+    Vote,
+    Microscope,
+    LayoutGrid
+} from 'lucide-react';
+
+const TYPE_ICONS: Record<string, any> = {
+    social: Users,
+    sports: Trophy,
+    economics: LineChart,
+    weather: CloudSun,
+    crypto: Bitcoin,
+    politics: Vote,
+    science: Microscope,
+    active: Activity
+};
 
 interface Asset {
     id: string;
@@ -140,30 +163,44 @@ export function AssetDetailClient({
         );
 
     const [imgError, setImgError] = useState(false);
+    const Icon = TYPE_ICONS[asset.type] || LayoutGrid;
 
     // ... existing refresh functions ...
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden relative bg-black">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8 pb-32">
+            <div className="lg:col-span-8 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12 space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-0">
                     <div className="min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative bg-zinc-900 flex items-center justify-center">
+                                {/* Fallback Icon */}
+                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
+                                    <Icon className="w-6 h-6" />
+                                </div>
+
                                 {asset.imageUrl && !imgError ? (
                                     <Image
                                         src={asset.imageUrl}
                                         alt={asset.name}
                                         fill
                                         priority
-                                        className="object-cover"
+                                        className="object-cover relative z-10"
                                         onError={() => setImgError(true)}
+                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
                                     />
-                                ) : (
-                                    <Activity className="w-6 h-6 text-zinc-600" />
-                                )}
+                                ) : asset.imageUrl && imgError ? (
+                                    <img
+                                        src={asset.imageUrl}
+                                        alt={asset.name}
+                                        className="object-cover w-full h-full relative z-10"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                        }}
+                                    />
+                                ) : null}
                             </div>
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -272,8 +309,8 @@ export function AssetDetailClient({
             </div>
 
             {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] lg:h-screen lg:sticky lg:top-0">
-                <div className="h-full pt-[80px] pb-4 flex flex-col">
+            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="h-full pt-4 pb-4 flex flex-col">
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
                         {asset && (
                             <TradingSidebar
