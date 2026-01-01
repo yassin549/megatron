@@ -139,25 +139,32 @@ export function AssetDetailClient({
             index === 0 || item.time !== self[index - 1].time
         );
 
+    const [imgError, setImgError] = useState(false);
+
+    // ... existing refresh functions ...
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen">
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8">
+            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-8 pb-32">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-0">
                     <div className="min-w-0">
                         <div className="flex items-center gap-3 mb-2">
-                            {asset.imageUrl && (
-                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative bg-zinc-900 flex items-center justify-center">
+                                {asset.imageUrl && !imgError ? (
                                     <Image
                                         src={asset.imageUrl}
                                         alt={asset.name}
                                         fill
                                         priority
                                         className="object-cover"
+                                        onError={() => setImgError(true)}
                                     />
-                                </div>
-                            )}
+                                ) : (
+                                    <Activity className="w-6 h-6 text-zinc-600" />
+                                )}
+                            </div>
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
                                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
@@ -265,20 +272,22 @@ export function AssetDetailClient({
             </div>
 
             {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:col-span-4 relative border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)]">
-                <div className="lg:sticky lg:top-[120px] lg:max-h-[calc(100vh-140px)] lg:overflow-y-auto custom-scrollbar">
-                    {asset && (
-                        <TradingSidebar
-                            assetId={asset.id}
-                            assetName={asset.name}
-                            assetPrice={asset.price}
-                            marketPrice={asset.marketPrice}
-                            status={asset.status}
-                            onTradeSuccess={refreshData}
-                            activePositionId={activePositionId}
-                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                        />
-                    )}
+            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] lg:h-screen lg:sticky lg:top-0">
+                <div className="h-full pt-[80px] pb-4 flex flex-col">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        {asset && (
+                            <TradingSidebar
+                                assetId={asset.id}
+                                assetName={asset.name}
+                                assetPrice={asset.price}
+                                marketPrice={asset.marketPrice}
+                                status={asset.status}
+                                onTradeSuccess={refreshData}
+                                activePositionId={activePositionId}
+                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
