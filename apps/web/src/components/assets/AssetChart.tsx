@@ -40,6 +40,10 @@ export function AssetChart({
 
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
+    // Dragging state
+    const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
+    const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
+
     // Local lines state for optimistic UI updates during drag
     // Merges prop lines with preview lines (preview takes precedence)
     const [localLines, setLocalLines] = useState({
@@ -57,10 +61,6 @@ export function AssetChart({
             });
         }
     }, [priceLines, previewLines, draggingType]);
-
-    // Dragging state
-    const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
-    const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
 
     // Hover state for cursor
     const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | null>(null);
