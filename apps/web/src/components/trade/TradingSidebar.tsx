@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { OrderForm } from './OrderForm';
 import { PositionsList } from './PositionsList';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ShieldAlert, TrendingUp } from 'lucide-react';
+import { Activity, TrendingUp } from 'lucide-react';
 
 interface TradingSidebarProps {
     assetId: string;
@@ -81,14 +81,10 @@ export function TradingSidebar({
                             />
 
                             {/* Pro-Tips / Market Status Hook */}
-                            <div className="mt-4 p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <ShieldAlert className="w-4 h-4 text-blue-400" />
-                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Trading Intelligence</span>
-                                </div>
-                                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                                    Current volatility is <span className="text-white font-mono font-bold">NORMAL</span>.
-                                    Bonding curve depth ensures liquidity for orders up to $10,000.
+                            {/* Market Status Helper */}
+                            <div className="mt-6 px-4">
+                                <p className="text-[10px] text-zinc-500 text-center leading-relaxed">
+                                    Current volatility is <span className="font-bold text-zinc-400">NORMAL</span>. Bonding curve depth ensures liquidity for orders up to $10,000.
                                 </p>
                             </div>
                         </motion.div>
