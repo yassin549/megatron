@@ -24,6 +24,8 @@ interface Position {
     value: number;
     returnPercent: number;
     returnAbs: number;
+    stopLoss?: number | null;
+    takeProfit?: number | null;
 }
 
 interface CompactPositionItemProps {
@@ -44,8 +46,14 @@ export function CompactPositionItem({
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
-    const [stopLoss, setStopLoss] = useState('');
-    const [takeProfit, setTakeProfit] = useState('');
+    const [stopLoss, setStopLoss] = useState(position.stopLoss?.toString() || '');
+    const [takeProfit, setTakeProfit] = useState(position.takeProfit?.toString() || '');
+
+    // Sync with props
+    useEffect(() => {
+        setStopLoss(position.stopLoss?.toString() || '');
+        setTakeProfit(position.takeProfit?.toString() || '');
+    }, [position.stopLoss, position.takeProfit]);
     const router = useRouter();
 
     const isProfit = position.returnAbs >= 0;
@@ -102,6 +110,24 @@ export function CompactPositionItem({
         }
     };
 
+    const handleCancelTarget = async (type: 'stopLoss' | 'takeProfit') => {
+        try {
+            const res = await fetch('/api/trade/position', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    assetId: position.assetId,
+                    [type]: null
+                }),
+            });
+            if (res.ok) {
+                onActionSuccess?.();
+            }
+        } catch (err) {
+            console.error('Failed to cancel target', err);
+        }
+    };
+
     const handleClick = () => {
         if (!isCurrentAsset) {
             router.push(`/assets/${position.assetId}`);
@@ -134,6 +160,12 @@ export function CompactPositionItem({
                             <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
                                 {position.assetName}
                             </span>
+                            <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${isShort
+                                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20'
+                                : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'
+                                }`}>
+                                {isShort ? 'Sell' : 'Buy'}
+                            </span>
                             {isCurrentAsset && (
                                 <span className="text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
                                     Current
@@ -152,7 +184,45 @@ export function CompactPositionItem({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-4">
+                    {/* Floating Checklist */}
+                    <div className="flex items-center gap-1.5 bg-black/40 p-1 rounded-lg border border-white/5">
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (position.stopLoss) {
+                                    handleCancelTarget('stopLoss');
+                                } else {
+                                    setIsExpanded(true);
+                                    onSelect();
+                                }
+                            }}
+                            className={`px-2 py-0.5 rounded text-[8px] font-black transition-all ${position.stopLoss
+                                ? 'bg-rose-500 text-white shadow-lg shadow-rose-900/20'
+                                : 'text-zinc-500 border border-white/5 hover:border-zinc-700'
+                                }`}
+                        >
+                            SL
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if (position.takeProfit) {
+                                    handleCancelTarget('takeProfit');
+                                } else {
+                                    setIsExpanded(true);
+                                    onSelect();
+                                }
+                            }}
+                            className={`px-2 py-0.5 rounded text-[8px] font-black transition-all ${position.takeProfit
+                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
+                                : 'text-zinc-500 border border-white/5 hover:border-zinc-700'
+                                }`}
+                        >
+                            TP
+                        </button>
+                    </div>
+
                     <div className="text-right hidden sm:block">
                         <div className={`text-xs font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
                             {isProfit ? '+' : ''}${position.returnAbs.toFixed(2)}

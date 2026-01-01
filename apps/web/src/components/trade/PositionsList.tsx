@@ -13,6 +13,8 @@ interface Position {
     value: number;
     returnPercent: number;
     returnAbs: number;
+    stopLoss?: number | null;
+    takeProfit?: number | null;
 }
 
 interface PositionsListProps {
