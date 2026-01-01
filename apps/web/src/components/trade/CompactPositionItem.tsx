@@ -35,6 +35,8 @@ interface CompactPositionItemProps {
     isSelected: boolean;
     onSelect: () => void;
     onActionSuccess?: () => void;
+    previewLines?: { stopLoss?: number | null; takeProfit?: number | null };
+    onPreviewChange?: (type: 'stopLoss' | 'takeProfit', value: number | null) => void;
 }
 
 export function CompactPositionItem({
@@ -42,7 +44,9 @@ export function CompactPositionItem({
     isCurrentAsset,
     isSelected,
     onSelect,
-    onActionSuccess
+    onActionSuccess,
+    previewLines,
+    onPreviewChange
 }: CompactPositionItemProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
@@ -294,14 +298,27 @@ export function CompactPositionItem({
                                         {updatingTarget === 'sl' ? (
                                             <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
                                         ) : (
-                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasSL
-                                                ? 'bg-rose-500 border-rose-500 text-white'
-                                                : isPreviewSL
-                                                    ? 'bg-yellow-500 border-yellow-500 text-black'
-                                                    : 'border-zinc-700 group-hover:border-zinc-500'
-                                                }`}>
-                                                {(hasSL || isPreviewSL) && <Check className="w-3 h-3" />}
-                                                {!(hasSL || isPreviewSL) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
+                                            <div className="flex items-center gap-1">
+                                                {isPreviewSL && (
+                                                    <div
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onPreviewChange?.('stopLoss', null);
+                                                        }}
+                                                        className="w-5 h-5 rounded-full flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 transition-colors z-10"
+                                                    >
+                                                        <span className="text-zinc-400">×</span>
+                                                    </div>
+                                                )}
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasSL
+                                                    ? 'bg-rose-500 border-rose-500 text-white'
+                                                    : isPreviewSL
+                                                        ? 'bg-yellow-500 border-yellow-500 text-black'
+                                                        : 'border-zinc-700 group-hover:border-zinc-500'
+                                                    }`}>
+                                                    {(hasSL || isPreviewSL) && <Check className="w-3 h-3" />}
+                                                    {!(hasSL || isPreviewSL) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
+                                                </div>
                                             </div>
                                         )}
                                     </button>
@@ -335,14 +352,27 @@ export function CompactPositionItem({
                                         {updatingTarget === 'tp' ? (
                                             <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
                                         ) : (
-                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasTP
-                                                ? 'bg-emerald-500 border-emerald-500 text-white'
-                                                : isPreviewTP
-                                                    ? 'bg-yellow-500 border-yellow-500 text-black'
-                                                    : 'border-zinc-700 group-hover:border-zinc-500'
-                                                }`}>
-                                                {(hasTP || isPreviewTP) && <Check className="w-3 h-3" />}
-                                                {!(hasTP || isPreviewTP) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
+                                            <div className="flex items-center gap-1">
+                                                {isPreviewTP && (
+                                                    <div
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onPreviewChange?.('takeProfit', null);
+                                                        }}
+                                                        className="w-5 h-5 rounded-full flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 transition-colors z-10"
+                                                    >
+                                                        <span className="text-zinc-400">×</span>
+                                                    </div>
+                                                )}
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border transition-all ${hasTP
+                                                    ? 'bg-emerald-500 border-emerald-500 text-white'
+                                                    : isPreviewTP
+                                                        ? 'bg-yellow-500 border-yellow-500 text-black'
+                                                        : 'border-zinc-700 group-hover:border-zinc-500'
+                                                    }`}>
+                                                    {(hasTP || isPreviewTP) && <Check className="w-3 h-3" />}
+                                                    {!(hasTP || isPreviewTP) && <div className="w-2 h-2 rounded-full bg-zinc-800 group-hover:bg-zinc-600 transition-colors" />}
+                                                </div>
                                             </div>
                                         )}
                                     </button>
