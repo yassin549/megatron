@@ -317,8 +317,8 @@ export function AssetDetailClient({
             </div>
 
             {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full">
-                <div className="sticky top-24 px-6 py-6">
+            <div className="col-span-12 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] z-20">
+                <div className="h-full pt-20 px-6 py-6 overflow-y-auto custom-scrollbar">
                     {asset && (
                         <TradingSidebar
                             assetId={asset.id}
