@@ -19,6 +19,8 @@ interface ChartProps {
     onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
+    previewLines?: { stopLoss?: number | null; takeProfit?: number | null };
+    onUpdatePreview?: (type: 'stopLoss' | 'takeProfit', price: number) => void;
 }
 
 export function AssetChart({
@@ -27,7 +29,9 @@ export function AssetChart({
     priceLines,
     onUpdatePosition,
     activePositionId,
-    onSelectPosition
+    onSelectPosition,
+    previewLines,
+    onUpdatePreview
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);

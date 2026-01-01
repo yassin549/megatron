@@ -193,7 +193,7 @@ export function AssetDetailClient({
                             onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                         />
 
-                        <AITerminal assetId={asset.id} initialLogs={oracleLogs} />
+                        <AITerminal logs={oracleLogs} />
                     </div>
 
                     <TradingSidebar
