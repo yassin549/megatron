@@ -248,7 +248,7 @@ export function AssetChart({
 
         // Apply Autoscale to include lines
         series.applyOptions({
-            autoscaleInfoProvider: (original) => {
+            autoscaleInfoProvider: (original: any) => {
                 const res = original();
                 if (!res || !res.priceRange) return res;
 
