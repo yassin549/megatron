@@ -170,9 +170,9 @@ export function AssetDetailClient({
     // ... existing refresh functions ...
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12 space-y-6 pb-32">
+            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-6 pb-32">
 
 
                 {/* Header */}
@@ -317,19 +317,21 @@ export function AssetDetailClient({
             </div>
 
             {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full flex flex-col justify-center px-6">
-                {asset && (
-                    <TradingSidebar
-                        assetId={asset.id}
-                        assetName={asset.name}
-                        assetPrice={asset.price}
-                        marketPrice={asset.marketPrice}
-                        status={asset.status}
-                        onTradeSuccess={refreshData}
-                        activePositionId={activePositionId}
-                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                    />
-                )}
+            <div className="col-span-12 lg:col-span-4 border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] h-full">
+                <div className="sticky top-24 px-6 py-6">
+                    {asset && (
+                        <TradingSidebar
+                            assetId={asset.id}
+                            assetName={asset.name}
+                            assetPrice={asset.price}
+                            marketPrice={asset.marketPrice}
+                            status={asset.status}
+                            onTradeSuccess={refreshData}
+                            activePositionId={activePositionId}
+                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );
