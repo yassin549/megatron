@@ -86,18 +86,16 @@ export function AssetDetailClient({
     const [asset, setAsset] = useState<Asset>(initialAsset);
     const [oracleLogs, setOracleLogs] = useState<OracleLog[]>(initialOracleLogs);
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>(initialPriceHistory);
+    const [imageError, setImageError] = useState(false);
 
     // SL/TP state
     const [orderStopLoss, setOrderStopLoss] = useState(initialAsset.userPosition?.stopLoss?.toString() || '');
     const [orderTakeProfit, setOrderTakeProfit] = useState(initialAsset.userPosition?.takeProfit?.toString() || '');
-    const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [previewLines, setPreviewLines] = useState<{ stopLoss?: number | null; takeProfit?: number | null }>({});
 
     async function refreshData() {
         try {
-            // Re-fetch logic if needed, or rely on SWR if we used it.
-            // For now, we can just reload the page or trigger a router refresh
             window.location.reload();
         } catch (e) {
             console.error(e);
@@ -105,7 +103,6 @@ export function AssetDetailClient({
     }
 
     const handleChartUpdate = async (type: 'stopLoss' | 'takeProfit', price: number) => {
-        // This is now handled by the preview flow, but we keep it for reference or legacy
         console.log('Chart update', type, price);
     };
 
@@ -114,84 +111,141 @@ export function AssetDetailClient({
         value: p.price
     })).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
+    const isPositive = asset.change24h >= 0;
+    const isActive = asset.status.toLowerCase() === 'active';
+    const TypeIcon = TYPE_ICONS[asset.type] || LayoutGrid;
+
+    const formatCurrency = (val: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            notation: val > 1000000 ? 'compact' : 'standard'
+        }).format(val);
+    };
+
+    const formatNumber = (val: number) => {
+        return new Intl.NumberFormat('en-US', {
+            notation: val > 1000 ? 'compact' : 'standard'
+        }).format(val);
+    };
+
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-primary/30">
-            {/* Navbar would go here if not in layout, but assuming global layout or we need to add it */}
             <div className="pt-[80px] pb-20 container mx-auto px-4 max-w-7xl">
-                <div className="mb-8">
+                {/* Header Section */}
+                <div className="mb-12">
                     <Link
                         href="/"
-                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group mb-6"
+                        className="inline-flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group mb-8"
                     >
                         <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center group-hover:border-zinc-700 transition-all">
                             <ArrowLeft className="w-4 h-4" />
                         </div>
-                        <span className="font-mono text-xs uppercase tracking-widest">Back to Market</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.2em]">Back to Market</span>
                     </Link>
 
-                    <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                        <div className="flex items-center gap-6">
+                    <div className="flex flex-col lg:flex-row gap-8 items-start justify-between">
+                        <div className="flex items-center gap-8">
+                            {/* Asset Image */}
                             <div className="relative group">
-                                <div className="absolute -inset-1 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700" />
-                                <div className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all duration-500 shadow-2xl">
-                                    <Image
-                                        src={asset.imageUrl || `https://ui-avatars.com/api/?name=${asset.name}&background=random`}
-                                        alt={asset.name}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                                    />
+                                <div className="absolute -inset-1 bg-gradient-to-br from-primary/30 to-purple-600/30 rounded-[2rem] blur-2xl opacity-50 group-hover:opacity-100 transition-all duration-700" />
+                                <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-[1.75rem] overflow-hidden border border-white/10 group-hover:border-primary/50 transition-all duration-500 shadow-2xl bg-zinc-900">
+                                    <div className="absolute inset-0 flex items-center justify-center text-zinc-800 group-hover:text-primary/20 transition-colors">
+                                        <TypeIcon className="w-12 h-12" />
+                                    </div>
+                                    {asset.imageUrl && !imageError && (
+                                        <Image
+                                            src={asset.imageUrl}
+                                            alt={asset.name}
+                                            fill
+                                            className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                            onError={() => setImageError(true)}
+                                            unoptimized={asset.imageUrl.startsWith('/uploads')}
+                                        />
+                                    )}
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-black rounded-xl border border-white/10 flex items-center justify-center text-primary shadow-xl">
-                                    {isActive ? <Activity className="w-4 h-4" /> : <Clock className="w-4 h-4 text-zinc-500" />}
+                                <div className={`absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl border flex items-center justify-center shadow-xl backdrop-blur-md ${isActive ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-zinc-500/10 border-zinc-500/20 text-zinc-500'
+                                    }`}>
+                                    {isActive ? <Activity className="w-5 h-5" /> : <Clock className="w-5 h-5 text-zinc-500" />}
                                 </div>
                             </div>
 
+                            {/* Name & Title */}
                             <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-1">
+                                <div className="flex items-center gap-4 mb-3">
+                                    <h1 className="text-4xl lg:text-6xl font-black tracking-tight text-white">
                                         {asset.name}
                                     </h1>
-                                    <div className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider border ${isActive
+                                    <div className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${isActive
                                         ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
                                         : 'bg-zinc-500/10 border-zinc-500/20 text-zinc-500'
                                         }`}>
                                         {asset.status}
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 text-sm font-medium text-zinc-400">
-                                    <span className="flex items-center gap-1.5 text-primary">
-                                        <TypeIcon className="w-4 h-4" />
-                                        <span className="uppercase tracking-wider text-xs">{asset.type}</span>
+                                <div className="flex flex-wrap items-center gap-6 text-sm font-medium text-zinc-500">
+                                    <span className="flex items-center gap-2 text-primary">
+                                        <TypeIcon className="w-5 h-5" />
+                                        <span className="uppercase tracking-[0.1em] text-xs font-bold">{asset.type}</span>
                                     </span>
-                                    <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                                    <span className="font-mono">{asset.id}</span>
+                                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 font-mono text-[10px] text-zinc-400">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-zinc-700 animate-pulse" />
+                                        ID: {asset.id}
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Quick Stats Block */}
+                        <div className="flex flex-col items-end gap-1">
+                            <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">Live Price</div>
+                            <div className="text-5xl font-black text-white font-mono tracking-tighter">
+                                ${asset.price.toFixed(2)}
+                            </div>
+                            <div className={`flex items-center gap-1.5 text-sm font-black px-2.5 py-1 rounded-full ${isPositive ? 'text-emerald-400 bg-emerald-400/10' : 'text-rose-400 bg-rose-400/10'
+                                }`}>
+                                {isPositive ? <TrendingUp className="w-4 h-4" /> : <Activity className="w-4 h-4 rotate-180" />}
+                                {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-[1fr,350px] gap-8 items-start">
-                    <div className="space-y-6">
-                        <AssetChart
-                            data={chartData}
-                            colors={{
-                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-                                areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                textColor: '#71717a',
-                            }}
-                            priceLines={{
-                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                            }}
-                            previewLines={previewLines}
-                            onUpdatePreview={(type, price) => setPreviewLines(prev => ({ ...prev, [type]: price }))}
-                            onUpdatePosition={handleChartUpdate}
-                            activePositionId={activePositionId}
-                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                        />
+                {/* Main Content Grid */}
+                <div className="grid lg:grid-cols-[1fr,350px] gap-10 items-start">
+                    <div className="space-y-10">
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            <StatCard label="Market Cap" value={formatCurrency(asset.marketCap)} />
+                            <StatCard label="24h Volume" value={formatCurrency(asset.volume24h)} />
+                            <StatCard label="Liquidity" value={formatCurrency(asset.liquidity)} icon={Bitcoin} />
+                            <StatCard label="Holders" value={formatNumber(asset.holders || 0)} icon={Users} />
+                            <StatCard label="Supply" value={formatNumber(asset.totalSupply)} icon={LayoutGrid} />
+                            <StatCard label="Confidence" value="High" icon={Trophy} color="text-indigo-400" />
+                        </div>
+
+                        {/* Chart Card */}
+                        <div className="bg-obsidian-900/50 rounded-3xl border border-white/5 p-1 overflow-hidden">
+                            <AssetChart
+                                data={chartData}
+                                colors={{
+                                    lineColor: isPositive ? '#10b981' : '#f43f5e',
+                                    areaTopColor: isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
+                                    areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                    textColor: '#52525b',
+                                }}
+                                priceLines={{
+                                    entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                    stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                    takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                }}
+                                previewLines={previewLines}
+                                onUpdatePreview={(type, price) => setPreviewLines(prev => ({ ...prev, [type]: price }))}
+                                onUpdatePosition={handleChartUpdate}
+                                activePositionId={activePositionId}
+                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                            />
+                        </div>
 
                         <AITerminal logs={oracleLogs} />
                     </div>
@@ -214,5 +268,19 @@ export function AssetDetailClient({
     );
 }
 
-const isActive = true; // Placeholder, deduced from logic
-const TypeIcon = Activity; // Placeholder
+function StatCard({ label, value, icon: Icon, color = "text-primary" }: { label: string; value: string; icon?: any; color?: string }) {
+    return (
+        <div className="p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-white/10 transition-colors group">
+            <div className="flex items-center gap-3 mb-2">
+                {Icon && (
+                    <div className={`p-1.5 rounded-lg bg-white/5 ${color} group-hover:scale-110 transition-transform`}>
+                        <Icon className="w-3.5 h-3.5" />
+                    </div>
+                )}
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{label}</span>
+            </div>
+            <div className="text-lg font-black text-white font-mono">{value}</div>
+        </div>
+    );
+}
+
