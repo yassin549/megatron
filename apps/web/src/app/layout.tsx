@@ -28,7 +28,6 @@ export default function RootLayout({
         <html lang="en" className="dark">
             <body className={inter.className}>
                 <Providers>
-                    <InitialLoader />
                     <div className="min-h-screen bg-background text-foreground flex flex-col">
                         <Navbar />
                         <div className="flex-1 pb-28 md:pb-0">

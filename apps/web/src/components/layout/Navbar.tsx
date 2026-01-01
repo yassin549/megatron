@@ -189,14 +189,6 @@ export function Navbar() {
                     </div>
                 </Link>
 
-                {/* 1.5 Desktop Navigation Links */}
-                <div className="hidden lg:flex items-center gap-6 ml-4">
-                    <Link href="/assets" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors flex items-center gap-2">
-                        <LayoutGrid className="w-4 h-4 text-primary" />
-                        Markets
-                    </Link>
-                </div>
-
                 {/* 2. Search Section */}
                 <div className="hidden md:flex flex-1 max-w-xl justify-center px-4">
                     <div className="relative w-full group search-container">
