@@ -1,48 +1,35 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function InitialLoader() {
-    const pathname = usePathname();
-    const lastPathname = useRef(pathname);
     const [progress, setProgress] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const [shouldRender, setShouldRender] = useState(true);
 
-    // Function to run the animation
-    const runAnimation = () => {
-        setProgress(0);
-        setIsVisible(true);
-        setShouldRender(true);
-
+    useEffect(() => {
         const timer = setInterval(() => {
             setProgress((prev) => {
-                const next = prev + Math.random() * 15;
+                const next = prev + Math.random() * 10;
                 if (next >= 100) {
                     clearInterval(timer);
                     return 100;
                 }
                 return next;
             });
-        }, 100);
+        }, 150);
 
-        return timer;
-    };
-
-    // Trigger on mount AND on pathname change
-    useEffect(() => {
-        const timer = runAnimation();
-        lastPathname.current = pathname;
         return () => clearInterval(timer);
-    }, [pathname]);
+    }, []);
 
     useEffect(() => {
         if (progress === 100) {
+            // Wait a bit at 100% before fading out
             const timer = setTimeout(() => {
                 setIsVisible(false);
+                // Remove from DOM after fade out animation
                 setTimeout(() => setShouldRender(false), 500);
-            }, 600);
+            }, 800); // Slightly longer pause to read text
             return () => clearTimeout(timer);
         }
     }, [progress]);
@@ -55,26 +42,35 @@ export function InitialLoader() {
                 }`}
         >
             <div className="text-center space-y-8">
+                {/* Logo */}
                 <div className="flex justify-center mb-2 overflow-visible">
-                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-700">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-1000">
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
                             className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 animate-pulse"
-                            style={{ animationDuration: '2s' }}
+                            style={{ animationDuration: '3s' }}
                         />
                     </div>
                 </div>
 
+                {/* Title with Zoom/Breathe Effect */}
                 <div className="h-20 flex items-center justify-center">
                     <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter animate-breathe">
                         MEGATRON
                     </h1>
                 </div>
 
+                {/* Tagline */}
+                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-1000">
+                    When world variables become stocks
+                </p>
+
+                {/* Progress Bar Container */}
                 <div className="w-64 h-1 bg-gray-900 rounded-full mx-auto overflow-hidden mt-8">
+                    {/* Progress Bar Fill */}
                     <div
-                        className="h-full bg-white transition-all duration-200 ease-out shadow-[0_0_10px_white]"
+                        className="h-full bg-white transition-all duration-200 ease-out"
                         style={{ width: `${progress}%` }}
                     />
                 </div>

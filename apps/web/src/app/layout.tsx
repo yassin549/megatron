@@ -35,7 +35,6 @@ export default function RootLayout({
                         </div>
                         <MobileBottomNav />
                         <RequestMarketButton />
-                        <InitialLoader />
                     </div>
                     <Analytics />
                     <SpeedInsights />
