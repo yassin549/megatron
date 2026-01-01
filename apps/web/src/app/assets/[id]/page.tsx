@@ -38,13 +38,6 @@ export default async function AssetDetailPage({ params }: { params: { id: string
             <SubNavbar />
 
             <main className="w-full mx-auto">
-                <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-12 py-4">
-                    <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-4 transition-colors group">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                        Back to Markets
-                    </Link>
-                </div>
-
                 <Suspense fallback={
                     <div className="flex items-center justify-center py-20 font-mono text-zinc-500 animate-pulse uppercase tracking-widest text-xs">
                         Loading_Dynamic_Data...

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
@@ -168,11 +170,17 @@ export function AssetDetailClient({
     // ... existing refresh functions ...
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden relative bg-black">
+        <div className="grid grid-cols-1 lg:grid-cols-12 h-screen overflow-hidden relative">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12 space-y-8 pb-32">
+            <div className="lg:col-span-8 h-full overflow-y-auto custom-scrollbar p-4 md:p-8 lg:p-12 space-y-6 pb-32">
+                {/* Back to Markets Link */}
+                <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-0 transition-colors group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    Back to Markets
+                </Link>
+
                 {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-0">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="min-w-0">
                         <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative bg-zinc-900 flex items-center justify-center">
