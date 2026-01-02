@@ -47,8 +47,8 @@ export const DEFAULT_CONFIG = {
     MAX_INSTANT_WITHDRAWAL_PCT: 0.25,
     LLM_CONFIDENCE_MIN: 0.6,
     LLM_DELTA_MAX: 10.0,
-    EMA_BETA: 0.1,
-    V0: 1000,
+    EMA_BETA: 0.3, // Faster fundamental convergence
+    V0: 500,       // Higher sensitivity to volume
     DAILY_POOL_WITHDRAWAL_PCT: 0.1,
 };
 

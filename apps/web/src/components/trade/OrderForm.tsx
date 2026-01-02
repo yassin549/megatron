@@ -154,7 +154,7 @@ export function OrderForm({
             {/* Price Info */}
             <div className="mb-4 bg-black/30 rounded-xl p-3 border border-white/5 space-y-2">
                 <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Display Price</span>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Chart Price</span>
                     <span className="text-[10px] text-white font-mono">${assetPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
