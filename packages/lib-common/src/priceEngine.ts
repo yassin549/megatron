@@ -41,11 +41,11 @@ export function calculateMarketWeight(
         throw new Error('Volume cannot be negative');
     }
 
-    // Base weight 0.2 (20%), max 0.8 (80%) on volume
-    let weight = 0.2 + 0.6 * (volRecent / (volRecent + V0));
+    // Base weight 0.5 (50%), max 0.95 (95%) on volume
+    let weight = 0.5 + 0.45 * (volRecent / (volRecent + V0));
 
-    // Clamp to [0.2, 0.85] - Allow market to have a significant say
-    weight = Math.max(0.2, Math.min(0.85, weight));
+    // Clamp to [0.5, 0.95] - Market is always the dominant factor
+    weight = Math.max(0.5, Math.min(0.95, weight));
 
     return weight;
 }

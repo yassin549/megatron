@@ -261,21 +261,21 @@ export function AssetChart({
         // Market Price Line (Subtle)
         lines.push(series.createPriceLine({
             price: marketPrice,
-            color: 'rgba(161, 161, 170, 0.4)', // Zinc-400 with opacity
+            color: 'rgba(161, 161, 170, 0.8)', // Brighter Zinc
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
             axisLabelVisible: true,
-            title: 'MARKET'
+            title: 'MARKET PRICE'
         }));
 
-        // Execution Price Line (Solid but subtle)
+        // Execution Price Line (Solid and clear)
         lines.push(series.createPriceLine({
             price: price,
-            color: 'rgba(34, 211, 238, 0.6)', // Cyan-400 with opacity
+            color: '#22d3ee', // Solid Cyan
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: 'EXECUTION'
+            title: 'EXECUTION PRICE'
         }));
 
         // Apply Autoscale to include lines
