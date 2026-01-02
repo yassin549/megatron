@@ -255,53 +255,14 @@ export function CompactPositionItem({
                                 </div>
                             </div>
 
-                            {/* SL/TP Controls */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black text-rose-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
-                                        <Shield className="w-3 h-3" />
-                                        Stop Loss
-                                    </label>
-                                    <input
-                                        type="number"
-                                        placeholder="Price"
-                                        value={stopLoss}
-                                        onChange={(e) => setStopLoss(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-rose-500/40 transition-all font-bold"
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest flex items-center gap-1.5 px-1">
-                                        <Target className="w-3 h-3" />
-                                        Take Profit
-                                    </label>
-                                    <input
-                                        type="number"
-                                        placeholder="Price"
-                                        value={takeProfit}
-                                        onChange={(e) => setTakeProfit(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-emerald-500/40 transition-all font-bold"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleUpdate}
-                                    disabled={isUpdating}
-                                    className="flex-1 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all disabled:opacity-50"
-                                >
-                                    {isUpdating ? <Loader2 className="w-3 h-3 animate-spin mx-auto" /> : 'Update Targets'}
-                                </button>
-                                <button
-                                    onClick={handleExit}
-                                    disabled={isExiting}
-                                    className="flex-[0.6] py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                                >
-                                    {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-3 h-3" />}
-                                    Exit
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleExit}
+                                disabled={isExiting}
+                                className="w-full py-3.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
+                            >
+                                {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                Exit Position
+                            </button>
                         </div>
                     </motion.div>
                 )}

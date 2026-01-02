@@ -46,17 +46,22 @@ export function AssetChart({
     });
 
     // Pending confirmation state
-    const [pendingUpdate, setPendingUpdate] = useState<{ type: 'stopLoss' | 'takeProfit', value: number } | null>(null);
+    const [pendingUpdates, setPendingUpdates] = useState<Record<'stopLoss' | 'takeProfit', number | null>>({
+        stopLoss: null,
+        takeProfit: null
+    });
+
+    const hasPending = pendingUpdates.stopLoss !== null || pendingUpdates.takeProfit !== null;
 
     // Sync local lines with props when not dragging/pending
     useEffect(() => {
-        if (!pendingUpdate) {
+        if (!hasPending) {
             setLocalLines({
                 stopLoss: priceLines?.stopLoss ?? null,
                 takeProfit: priceLines?.takeProfit ?? null,
             });
         }
-    }, [priceLines, pendingUpdate]);
+    }, [priceLines, hasPending]);
 
     // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
@@ -312,7 +317,7 @@ export function AssetChart({
                 const type = draggingTypeRef.current;
                 const price = localLines[type];
                 if (price !== null) {
-                    setPendingUpdate({ type, value: price });
+                    setPendingUpdates(prev => ({ ...prev, [type]: price }));
                 }
                 setDraggingType(null);
                 draggingTypeRef.current = null;
@@ -330,7 +335,7 @@ export function AssetChart({
     }, [draggingType, localLines]); // Need localLines in dep to capture latest value
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (pendingUpdate) return;
+        if (hasPending) return;
         const series = seriesRef.current;
         if (!series) return;
         const rect = chartContainerRef.current?.getBoundingClientRect();
@@ -374,7 +379,7 @@ export function AssetChart({
     };
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (draggingType || pendingUpdate) return;
+        if (draggingType || hasPending) return;
         const series = seriesRef.current;
         if (!series) {
             setHoverLine(null);
@@ -454,20 +459,23 @@ export function AssetChart({
 
         const price = Number(defaultVal.toFixed(4));
         setLocalLines(prev => ({ ...prev, [type]: price }));
-        setPendingUpdate({ type, value: price });
+        setPendingUpdates(prev => ({ ...prev, [type]: price }));
         setDraggingType(type);
         draggingTypeRef.current = type;
     };
 
     const handleConfirmUpdate = () => {
-        if (pendingUpdate) {
-            onUpdatePosition?.(pendingUpdate.type, pendingUpdate.value);
-            setPendingUpdate(null);
+        if (pendingUpdates.stopLoss !== null) {
+            onUpdatePosition?.('stopLoss', pendingUpdates.stopLoss);
         }
+        if (pendingUpdates.takeProfit !== null) {
+            onUpdatePosition?.('takeProfit', pendingUpdates.takeProfit);
+        }
+        setPendingUpdates({ stopLoss: null, takeProfit: null });
     };
 
     const handleCancelUpdate = () => {
-        setPendingUpdate(null);
+        setPendingUpdates({ stopLoss: null, takeProfit: null });
     };
 
     return (
@@ -495,7 +503,7 @@ export function AssetChart({
 
                         {/* Confirm/Cancel (Integrated) */}
                         <AnimatePresence mode="wait">
-                            {pendingUpdate && (
+                            {hasPending && (
                                 <motion.div
                                     initial={{ width: 0, opacity: 0 }}
                                     animate={{ width: 'auto', opacity: 1 }}
