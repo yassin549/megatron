@@ -106,6 +106,11 @@ export function AssetDetailClient({
                 if (!isUpdatingTargets && data.asset.userPosition) {
                     setOrderStopLoss(data.asset.userPosition.stopLoss?.toString() || '');
                     setOrderTakeProfit(data.asset.userPosition.takeProfit?.toString() || '');
+
+                    // Auto-select if no position is selected and this one exists
+                    if (!activePositionId) {
+                        setActivePositionId(data.asset.id);
+                    }
                 }
             }
         } catch (error) {

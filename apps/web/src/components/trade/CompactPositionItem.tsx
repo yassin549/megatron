@@ -185,42 +185,10 @@ export function CompactPositionItem({
                 </div>
 
                 <div className="flex items-center gap-4">
-                    {/* Floating Checklist */}
-                    <div className="flex items-center gap-1.5 bg-black/40 p-1 rounded-lg border border-white/5">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (position.stopLoss) {
-                                    handleCancelTarget('stopLoss');
-                                } else {
-                                    setIsExpanded(true);
-                                    onSelect();
-                                }
-                            }}
-                            className={`px-2 py-0.5 rounded text-[8px] font-black transition-all ${position.stopLoss
-                                ? 'bg-rose-500 text-white shadow-lg shadow-rose-900/20'
-                                : 'text-zinc-500 border border-white/5 hover:border-zinc-700'
-                                }`}
-                        >
-                            SL
-                        </button>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (position.takeProfit) {
-                                    handleCancelTarget('takeProfit');
-                                } else {
-                                    setIsExpanded(true);
-                                    onSelect();
-                                }
-                            }}
-                            className={`px-2 py-0.5 rounded text-[8px] font-black transition-all ${position.takeProfit
-                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-900/20'
-                                : 'text-zinc-500 border border-white/5 hover:border-zinc-700'
-                                }`}
-                        >
-                            TP
-                        </button>
+                    {/* Visual Indicators (Checklist) */}
+                    <div className="flex items-center gap-1.5 p-1">
+                        <div className={`w-1.5 h-1.5 rounded-full ${position.stopLoss ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-zinc-800'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-full ${position.takeProfit ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-zinc-800'}`} />
                     </div>
 
                     <div className="text-right hidden sm:block">
@@ -244,24 +212,37 @@ export function CompactPositionItem({
                         className="overflow-hidden border-t border-white/5 bg-black/20"
                     >
                         <div className="p-4 space-y-4">
-                            <div className="grid grid-cols-2 gap-2">
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Entry Price</div>
-                                    <div className="text-sm font-mono font-bold text-white">${position.avgPrice.toFixed(2)}</div>
+                            {/* Grid Data */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Entry</div>
+                                    <div className="text-xs font-mono font-bold text-white">${position.avgPrice.toFixed(2)}</div>
                                 </div>
-                                <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Position Size</div>
-                                    <div className="text-sm font-mono font-bold text-white">{Math.abs(position.shares).toFixed(2)} Shares</div>
+                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Size</div>
+                                    <div className="text-xs font-mono font-bold text-white">${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">TP</div>
+                                    <div className={`text-xs font-mono font-bold ${position.takeProfit ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                        {position.takeProfit ? `$${position.takeProfit.toFixed(2)}` : 'None'}
+                                    </div>
+                                </div>
+                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
+                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">SL</div>
+                                    <div className={`text-xs font-mono font-bold ${position.stopLoss ? 'text-rose-400' : 'text-zinc-600'}`}>
+                                        {position.stopLoss ? `$${position.stopLoss.toFixed(2)}` : 'None'}
+                                    </div>
                                 </div>
                             </div>
 
                             <button
                                 onClick={handleExit}
                                 disabled={isExiting}
-                                className="w-full py-3.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
+                                className="w-full py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
                             >
                                 {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                                Exit Position
+                                EXIT POSITION
                             </button>
                         </div>
                     </motion.div>

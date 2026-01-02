@@ -273,26 +273,18 @@ export function OrderForm({
                                     <TrendingDown className="w-7 h-7 text-rose-400" />
                                 )}
                             </div>
-                            <h3 className="text-xl font-black text-white mb-1 uppercase">
-                                ORDER FILLED
+                            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">
+                                DONE
                             </h3>
-                            <p className="text-zinc-400 text-sm mb-6">
-                                {successModal.shares.toFixed(4)} {assetSymbol} shares
+                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-8">
+                                {successModal.shares.toFixed(4)} {assetSymbol} units added
                             </p>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={handleCloseModal}
-                                    className="flex-1 py-3 bg-white/10 text-white rounded-xl font-bold text-sm uppercase hover:bg-white/20 transition-all"
-                                >
-                                    Close
-                                </button>
-                                <button
-                                    onClick={handleViewPortfolio}
-                                    className="flex-1 py-3 bg-white text-black rounded-xl font-bold text-sm uppercase hover:bg-zinc-200 transition-all"
-                                >
-                                    Portfolio
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleCloseModal}
+                                className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl shadow-black/20"
+                            >
+                                Continue
+                            </button>
                         </motion.div>
                     </div>
                 )}
