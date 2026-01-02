@@ -171,13 +171,19 @@ export async function executeBuy(userId: string, assetId: string, amountUsdc: nu
             const newTotalShares = oldShares + deltaShares;
             const newAvgPrice = newTotalCost / newTotalShares;
 
-            await tx.position.update({
-                where: { userId_assetId: { userId, assetId } },
-                data: {
-                    shares: newTotalShares,
-                    avgPrice: newAvgPrice,
-                },
-            });
+            if (Math.abs(newTotalShares) < 1e-8) {
+                await tx.position.delete({
+                    where: { userId_assetId: { userId, assetId } },
+                });
+            } else {
+                await tx.position.update({
+                    where: { userId_assetId: { userId, assetId } },
+                    data: {
+                        shares: newTotalShares,
+                        avgPrice: newAvgPrice,
+                    },
+                });
+            }
         } else {
             await tx.position.create({
                 data: {
@@ -294,15 +300,20 @@ export async function executeSell(userId: string, assetId: string, sharesToSell:
         // 3. Update State
 
         // 3.1 Decrement Shares (User Position)
-        // Check if full sell to delete position? Or just update.
-        // Update is safer usually to keep history or just checks.
-        // We'll update.
-        await tx.position.update({
-            where: { userId_assetId: { userId, assetId } },
-            data: {
-                shares: { decrement: sharesToSell }
-            }
-        });
+        const newShares = position.shares.toNumber() - sharesToSell;
+
+        if (Math.abs(newShares) < 1e-8) {
+            await tx.position.delete({
+                where: { userId_assetId: { userId, assetId } },
+            });
+        } else {
+            await tx.position.update({
+                where: { userId_assetId: { userId, assetId } },
+                data: {
+                    shares: newShares
+                }
+            });
+        }
 
         // 3.2 Decrement Asset Supply
         await tx.asset.update({

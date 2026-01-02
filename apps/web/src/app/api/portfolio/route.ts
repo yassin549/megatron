@@ -17,6 +17,9 @@ export async function GET() {
             where: { email: session.user.email },
             include: {
                 positions: {
+                    where: {
+                        shares: { not: 0 }
+                    },
                     include: {
                         asset: {
                             select: {

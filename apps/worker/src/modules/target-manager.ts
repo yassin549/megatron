@@ -10,7 +10,7 @@ export async function checkTargets(assetId: string, currentPrice: number) {
         const positions = await db.position.findMany({
             where: {
                 assetId,
-                shares: { not: 0 },
+                shares: { not: 0, gt: 1e-8 }, // Epsilon check to ignore "ghost" positions
                 OR: [
                     { stopLoss: { not: null } },
                     { takeProfit: { not: null } }
@@ -21,11 +21,14 @@ export async function checkTargets(assetId: string, currentPrice: number) {
 
         if (positions.length === 0) return;
 
-        console.log(`[TargetManager] Checking ${positions.length} positions for asset ${assetId} at price ${currentPrice}`);
+        console.log(`[TargetManager] Checking ${positions.length} positions for asset ${assetId} at EXECUTION price ${currentPrice}`);
 
         for (const pos of positions) {
-            const isLong = pos.shares.toNumber() > 0;
-            const shares = Math.abs(pos.shares.toNumber());
+            const sharesVal = pos.shares.toNumber();
+            if (Math.abs(sharesVal) < 1e-8) continue; // Safety skip
+
+            const isLong = sharesVal > 0;
+            const shares = Math.abs(sharesVal);
 
             let shouldClose = false;
             let reason = '';

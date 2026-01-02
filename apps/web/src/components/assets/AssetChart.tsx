@@ -13,6 +13,7 @@ interface ChartProps {
         areaBottomColor?: string;
     };
     price: number;
+    marketPrice: number;
     priceLines?: {
         entry?: number;
         stopLoss?: number | null;
@@ -28,6 +29,7 @@ export function AssetChart({
     data,
     colors,
     price,
+    marketPrice,
     priceLines,
     onUpdatePosition,
     side = 'buy',
@@ -256,14 +258,24 @@ export function AssetChart({
             }));
         }
 
-        // Market Price Line
+        // Market Price Line (Subtle)
+        lines.push(series.createPriceLine({
+            price: marketPrice,
+            color: 'rgba(161, 161, 170, 0.4)', // Zinc-400 with opacity
+            lineWidth: 1,
+            lineStyle: LineStyle.Dashed,
+            axisLabelVisible: true,
+            title: 'MARKET'
+        }));
+
+        // Execution Price Line (Solid but subtle)
         lines.push(series.createPriceLine({
             price: price,
-            color: '#22d3ee', // Cyan-400
-            lineWidth: 2,
+            color: 'rgba(34, 211, 238, 0.6)', // Cyan-400 with opacity
+            lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: 'PRICE'
+            title: 'EXECUTION'
         }));
 
         // Apply Autoscale to include lines
@@ -288,9 +300,9 @@ export function AssetChart({
                     max = Math.max(max, localLines.takeProfit);
                 }
 
-                // Always include current price
-                min = Math.min(min, price);
-                max = Math.max(max, price);
+                // Always include current prices
+                min = Math.min(min, price, marketPrice);
+                max = Math.max(max, price, marketPrice);
 
                 // Add some padding
                 const range = max - min;
@@ -308,7 +320,7 @@ export function AssetChart({
             // Reset autoscale (optional, but good practice)
             series.applyOptions({ autoscaleInfoProvider: undefined });
         };
-    }, [priceLines?.entry, localLines, activePositionId, price]);
+    }, [priceLines?.entry, localLines, activePositionId, price, marketPrice]);
 
     // 6. Global Dragging Logic
     useEffect(() => {
