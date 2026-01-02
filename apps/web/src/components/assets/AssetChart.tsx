@@ -387,19 +387,6 @@ export function AssetChart({
             return;
         }
 
-        if (priceLines?.entry) {
-            const entryY = series.priceToCoordinate(priceLines.entry);
-            if (entryY !== null && Math.abs(entryY - y) < threshold) {
-                // If not active, select it first
-                if (activePositionId === null) {
-                    onSelectPosition?.('current');
-                } else {
-                    onSelectPosition?.(null); // Click twice to toggle off if already active? (Optional)
-                }
-                e.preventDefault();
-                return;
-            }
-        }
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
@@ -418,6 +405,19 @@ export function AssetChart({
                 if (!activePositionId) onSelectPosition?.('current');
                 setDraggingType('stopLoss');
                 draggingTypeRef.current = 'stopLoss';
+                e.preventDefault();
+                return;
+            }
+        }
+        if (priceLines?.entry) {
+            const entryY = series.priceToCoordinate(priceLines.entry);
+            if (entryY !== null && Math.abs(entryY - y) < threshold) {
+                // If not active, select it first
+                if (activePositionId === null) {
+                    onSelectPosition?.('current');
+                } else {
+                    onSelectPosition?.(null); // Click twice to toggle off if already active? (Optional)
+                }
                 e.preventDefault();
                 return;
             }

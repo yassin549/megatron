@@ -10,7 +10,12 @@ export async function checkTargets(assetId: string, currentPrice: number) {
         const positions = await db.position.findMany({
             where: {
                 assetId,
-                shares: { not: 0, gt: 1e-8 }, // Epsilon check to ignore "ghost" positions
+                NOT: {
+                    shares: {
+                        gt: -1e-8,
+                        lt: 1e-8
+                    }
+                },
                 OR: [
                     { stopLoss: { not: null } },
                     { takeProfit: { not: null } }
@@ -19,9 +24,11 @@ export async function checkTargets(assetId: string, currentPrice: number) {
             include: { user: true }
         });
 
-        if (positions.length === 0) return;
+        if (positions.length === 0) {
+            return;
+        }
 
-        console.log(`[TargetManager] Checking ${positions.length} positions for asset ${assetId} at EXECUTION price ${currentPrice}`);
+        console.log(`[TargetManager] Checking ${positions.length} positions for asset ${assetId} at price ${currentPrice.toFixed(4)}`);
 
         for (const pos of positions) {
             const sharesVal = pos.shares.toNumber();
