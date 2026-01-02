@@ -228,44 +228,6 @@ export function AssetChart({
         const lines: IPriceLine[] = [];
         const isSelected = activePositionId !== null;
 
-        // Markers for floating labels
-        const labels: SeriesMarker<Time>[] = [];
-        const latestTime = data[data.length - 1]?.time;
-
-        if (latestTime) {
-            const isTooClose = Math.abs(price - marketPrice) < 0.0001; // Epsilon check
-
-            if (isTooClose) {
-                // If they are identical, just show one "consensus" label
-                labels.push({
-                    time: latestTime,
-                    position: 'inBar',
-                    color: '#22d3ee',
-                    shape: 'circle',
-                    text: 'EXECUTION & MARKET',
-                    size: 1
-                });
-            } else {
-                labels.push({
-                    time: latestTime,
-                    position: 'inBar',
-                    color: '#22d3ee',
-                    shape: 'circle',
-                    text: 'EXECUTION',
-                    size: 1
-                });
-                labels.push({
-                    time: latestTime,
-                    position: 'inBar',
-                    color: 'rgba(161, 161, 170, 0.9)',
-                    shape: 'circle',
-                    text: 'MARKET',
-                    size: 1
-                });
-            }
-        }
-        series.setMarkers(labels);
-
         // Entry Line
         if (priceLines?.entry) {
             lines.push(series.createPriceLine({
@@ -306,7 +268,7 @@ export function AssetChart({
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
             axisLabelVisible: !isTooClose, // Hide if identical to prevent overlap
-            title: isTooClose ? '' : 'MARKET'
+            title: isTooClose ? '' : ''
         }));
 
         // Execution Price Line (Solid and clear)
@@ -316,7 +278,7 @@ export function AssetChart({
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: 'EXECUTION'
+            title: ''
         }));
 
         // Apply Autoscale to include lines
