@@ -236,10 +236,10 @@ export function AssetChart({
             const isTooClose = Math.abs(price - marketPrice) < 0.0001; // Epsilon check
 
             if (isTooClose) {
-                // If they are identical, just show one "consensus" label or offset them
+                // If they are identical, just show one "consensus" label
                 labels.push({
                     time: latestTime,
-                    position: 'aboveBar',
+                    position: 'atBar',
                     color: '#22d3ee',
                     shape: 'circle',
                     text: 'EXECUTION & MARKET',
@@ -248,7 +248,7 @@ export function AssetChart({
             } else {
                 labels.push({
                     time: latestTime,
-                    position: 'aboveBar',
+                    position: 'atBar',
                     color: '#22d3ee',
                     shape: 'circle',
                     text: 'EXECUTION',
@@ -256,7 +256,7 @@ export function AssetChart({
                 });
                 labels.push({
                     time: latestTime,
-                    position: 'aboveBar',
+                    position: 'atBar',
                     color: 'rgba(161, 161, 170, 0.9)',
                     shape: 'circle',
                     text: 'MARKET',
@@ -299,13 +299,14 @@ export function AssetChart({
         }
 
         // Market Price Line (Subtle)
+        const isTooClose = Math.abs(price - marketPrice) < 0.0001;
         lines.push(series.createPriceLine({
             price: marketPrice,
             color: 'rgba(161, 161, 170, 0.8)', // Brighter Zinc
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
-            axisLabelVisible: true,
-            title: 'MARKET'
+            axisLabelVisible: !isTooClose, // Hide if identical to prevent overlap
+            title: isTooClose ? '' : 'MARKET'
         }));
 
         // Execution Price Line (Solid and clear)

@@ -98,7 +98,8 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
         // Calculate new P0 so marginalPrice(newP0, k, supply) matches the fundamental target
         // linear marginalPrice = P0 + k * supply
         // newP0 = fundamental - (k * supply)
-        const newP0 = fundamental - (k * supply);
+        let newP0 = fundamental - (k * supply);
+        if (newP0 < 0.01) newP0 = 0.01;
 
         params.P0 = newP0;
         console.log(`[PriceEngine] Shifting P0 to ${newP0.toFixed(4)} for asset ${assetId} (+${context.deltaPercent}%) to match target ${fundamental.toFixed(4)}`);

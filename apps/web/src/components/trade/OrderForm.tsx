@@ -40,7 +40,7 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const fillPrice = marketPrice || assetPrice;
+    const fillPrice = assetPrice; // Always use Execution Price for estimation
     const estimatedShares = amount ? parseFloat(amount) / fillPrice : 0;
 
     const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
