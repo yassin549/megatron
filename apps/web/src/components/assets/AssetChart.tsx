@@ -17,7 +17,7 @@ interface ChartProps {
         stopLoss?: number | null;
         takeProfit?: number | null;
     };
-    onUpdatePosition?: (type: 'stopLoss' | 'takeProfit', price: number | null) => void;
+    onUpdatePosition?: (updates: Partial<Record<'stopLoss' | 'takeProfit', number | null>>) => void;
     side?: 'buy' | 'sell';
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
@@ -68,7 +68,7 @@ export function AssetChart({
     const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
 
     // Hover state for cursor
-    const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | null>(null);
+    const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | 'entry' | null>(null);
     const [hoverAxis, setHoverAxis] = useState<'price' | 'time' | null>(null);
 
     // Profile state for coordinate-based rendering
@@ -319,6 +319,12 @@ export function AssetChart({
                 if (price !== null) {
                     setPendingUpdates(prev => ({ ...prev, [type]: price }));
                 }
+
+                // If not active, select it
+                if (!activePositionId) {
+                    onSelectPosition?.('current');
+                }
+
                 setDraggingType(null);
                 draggingTypeRef.current = null;
             }
@@ -353,7 +359,12 @@ export function AssetChart({
         if (priceLines?.entry) {
             const entryY = series.priceToCoordinate(priceLines.entry);
             if (entryY !== null && Math.abs(entryY - y) < threshold) {
-                onSelectPosition?.(activePositionId ? null : 'current');
+                // If not active, select it first
+                if (activePositionId === null) {
+                    onSelectPosition?.('current');
+                } else {
+                    onSelectPosition?.(null); // Click twice to toggle off if already active? (Optional)
+                }
                 e.preventDefault();
                 return;
             }
@@ -361,6 +372,8 @@ export function AssetChart({
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
+                // Auto-select on drag start
+                if (!activePositionId) onSelectPosition?.('current');
                 setDraggingType('takeProfit');
                 draggingTypeRef.current = 'takeProfit';
                 e.preventDefault();
@@ -370,6 +383,8 @@ export function AssetChart({
         if (localLines.stopLoss) {
             const slY = series.priceToCoordinate(localLines.stopLoss);
             if (slY !== null && Math.abs(slY - y) < threshold) {
+                // Auto-select on drag start
+                if (!activePositionId) onSelectPosition?.('current');
                 setDraggingType('stopLoss');
                 draggingTypeRef.current = 'stopLoss';
                 e.preventDefault();
@@ -409,6 +424,13 @@ export function AssetChart({
 
         setHoverAxis(null);
 
+        if (priceLines?.entry) {
+            const entryY = series.priceToCoordinate(priceLines.entry);
+            if (entryY !== null && Math.abs(entryY - y) < threshold) {
+                setHoverLine('entry');
+                return;
+            }
+        }
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
@@ -433,6 +455,7 @@ export function AssetChart({
 
     const getCursorStyle = () => {
         if (draggingType) return 'ns-resize';
+        if (hoverLine === 'entry') return 'pointer';
         if (hoverLine) return 'ns-resize';
         if (hoverAxis === 'price') return 'ns-resize';
         if (hoverAxis === 'time') return 'ew-resize';
@@ -443,9 +466,12 @@ export function AssetChart({
         const currentPrice = data[data.length - 1]?.value || 0;
         const entryPrice = priceLines?.entry || currentPrice;
 
-        // If target exists, cancel it
-        if ((type === 'stopLoss' && priceLines?.stopLoss) || (type === 'takeProfit' && priceLines?.takeProfit)) {
-            onUpdatePosition?.(type, null);
+        // If target exists in props (saved), and we aren't already pending a change for it, cancel it
+        const isSaved = type === 'stopLoss' ? !!priceLines?.stopLoss : !!priceLines?.takeProfit;
+        const isCurrentlyPending = pendingUpdates[type] !== null;
+
+        if (isSaved && !isCurrentlyPending) {
+            onUpdatePosition?.({ [type]: null });
             return;
         }
 
@@ -465,11 +491,12 @@ export function AssetChart({
     };
 
     const handleConfirmUpdate = () => {
-        if (pendingUpdates.stopLoss !== null) {
-            onUpdatePosition?.('stopLoss', pendingUpdates.stopLoss);
-        }
-        if (pendingUpdates.takeProfit !== null) {
-            onUpdatePosition?.('takeProfit', pendingUpdates.takeProfit);
+        const batch: Partial<Record<'stopLoss' | 'takeProfit', number | null>> = {};
+        if (pendingUpdates.stopLoss !== null) batch.stopLoss = pendingUpdates.stopLoss;
+        if (pendingUpdates.takeProfit !== null) batch.takeProfit = pendingUpdates.takeProfit;
+
+        if (Object.keys(batch).length > 0) {
+            onUpdatePosition?.(batch);
         }
         setPendingUpdates({ stopLoss: null, takeProfit: null });
     };
