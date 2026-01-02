@@ -10,6 +10,7 @@ import { marginalPrice } from '@megatron/lib-common';
 import { publishEvent as publishAblyEvent } from '@megatron/lib-integrations';
 import Redis from 'ioredis';
 import { CHANNELS } from '../lib/redis';
+import { checkTargets } from './target-manager';
 
 const REDIS_URL = process.env.REDIS_URL || process.env.UPSTASH_REDIS_URL || process.env.KV_URL;
 
@@ -129,6 +130,9 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
             },
         }),
     ]);
+
+    // Check targets after price update
+    await checkTargets(asset.id, displayPrice);
 
     try {
         await publishAblyEvent(`prices:${asset.id}`, 'price_tick', {

@@ -258,6 +258,7 @@ export function AssetDetailClient({
                     {chartData.length > 0 ? (
                         <AssetChart
                             data={chartData}
+                            price={asset.price}
                             colors={{
                                 lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
                                 areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',

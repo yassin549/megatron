@@ -12,6 +12,7 @@ interface ChartProps {
         areaTopColor?: string;
         areaBottomColor?: string;
     };
+    price: number;
     priceLines?: {
         entry?: number;
         stopLoss?: number | null;
@@ -26,6 +27,7 @@ interface ChartProps {
 export function AssetChart({
     data,
     colors,
+    price,
     priceLines,
     onUpdatePosition,
     side = 'buy',
@@ -254,6 +256,16 @@ export function AssetChart({
             }));
         }
 
+        // Market Price Line
+        lines.push(series.createPriceLine({
+            price: price,
+            color: '#22d3ee', // Cyan-400
+            lineWidth: 2,
+            lineStyle: LineStyle.Solid,
+            axisLabelVisible: true,
+            title: 'PRICE'
+        }));
+
         // Apply Autoscale to include lines
         series.applyOptions({
             autoscaleInfoProvider: (original: any) => {
@@ -276,6 +288,10 @@ export function AssetChart({
                     max = Math.max(max, localLines.takeProfit);
                 }
 
+                // Always include current price
+                min = Math.min(min, price);
+                max = Math.max(max, price);
+
                 // Add some padding
                 const range = max - min;
                 return {
@@ -292,7 +308,7 @@ export function AssetChart({
             // Reset autoscale (optional, but good practice)
             series.applyOptions({ autoscaleInfoProvider: undefined });
         };
-    }, [priceLines?.entry, localLines, activePositionId]);
+    }, [priceLines?.entry, localLines, activePositionId, price]);
 
     // 6. Global Dragging Logic
     useEffect(() => {

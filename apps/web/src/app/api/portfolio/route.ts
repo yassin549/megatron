@@ -21,7 +21,7 @@ export async function GET() {
                         asset: {
                             select: {
                                 name: true,
-                                lastMarketPrice: true
+                                lastDisplayPrice: true
                             }
                         }
                     }
@@ -36,7 +36,7 @@ export async function GET() {
         const positions = user.positions.map(pos => {
             const shares = Number(pos.shares);
             const avgPrice = Number(pos.avgPrice);
-            const currentPrice = Number(pos.asset.lastMarketPrice || avgPrice); // Fallback
+            const currentPrice = Number(pos.asset.lastDisplayPrice || avgPrice); // Fallback
             const value = shares * currentPrice;
             const costBasis = shares * avgPrice;
             const returnAbs = value - costBasis;
