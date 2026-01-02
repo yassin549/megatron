@@ -239,7 +239,7 @@ export function AssetChart({
                 // If they are identical, just show one "consensus" label
                 labels.push({
                     time: latestTime,
-                    position: 'atBar',
+                    position: 'inBar',
                     color: '#22d3ee',
                     shape: 'circle',
                     text: 'EXECUTION & MARKET',
@@ -248,7 +248,7 @@ export function AssetChart({
             } else {
                 labels.push({
                     time: latestTime,
-                    position: 'atBar',
+                    position: 'inBar',
                     color: '#22d3ee',
                     shape: 'circle',
                     text: 'EXECUTION',
@@ -256,7 +256,7 @@ export function AssetChart({
                 });
                 labels.push({
                     time: latestTime,
-                    position: 'atBar',
+                    position: 'inBar',
                     color: 'rgba(161, 161, 170, 0.9)',
                     shape: 'circle',
                     text: 'MARKET',
