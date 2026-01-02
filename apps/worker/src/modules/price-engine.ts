@@ -91,9 +91,17 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
 
     let fundamental = asset.lastFundamental ? asset.lastFundamental.toNumber() : P0;
 
-    // FIX #11: Use updateFundamental helper from lib-common
+    // Aggressive Sync: Shift the bonding curve (P0) on Oracle events
     if (typeof context.deltaPercent === 'number') {
         fundamental = updateFundamental(fundamental, context.deltaPercent, DEFAULT_CONFIG.EMA_BETA);
+
+        // Calculate new P0 so marginalPrice(newP0, k, supply) matches the fundamental target
+        // linear marginalPrice = P0 + k * supply
+        // newP0 = fundamental - (k * supply)
+        const newP0 = fundamental - (k * supply);
+
+        params.P0 = newP0;
+        console.log(`[PriceEngine] Shifting P0 to ${newP0.toFixed(4)} for asset ${assetId} (+${context.deltaPercent}%) to match target ${fundamental.toFixed(4)}`);
     }
 
     // FIX #10: Use volume from context if available (for trade events)
@@ -127,6 +135,7 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
                 lastMarketPrice: marketPrice,
                 lastFundamental: fundamental,
                 lastDisplayPrice: displayPrice,
+                pricingParams: params as any, // Persist shifted P0
             },
         }),
     ]);

@@ -1,4 +1,4 @@
-import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi } from 'lightweight-charts';
+import { createChart, ColorType, IChartApi, LineStyle, ISeriesApi, IPriceLine, SeriesMarker, Time } from 'lightweight-charts';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Check, X, Shield, Target } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -224,9 +224,49 @@ export function AssetChart({
         const series = seriesRef.current;
         if (!series) return;
 
-        const lines: any[] = [];
+        // 5. Create Price Lines
+        const lines: IPriceLine[] = [];
         const isSelected = activePositionId !== null;
 
+        // Markers for floating labels
+        const labels: SeriesMarker<Time>[] = [];
+        const latestTime = data[data.length - 1]?.time;
+
+        if (latestTime) {
+            const isTooClose = Math.abs(price - marketPrice) < 0.0001; // Epsilon check
+
+            if (isTooClose) {
+                // If they are identical, just show one "consensus" label or offset them
+                labels.push({
+                    time: latestTime,
+                    position: 'aboveBar',
+                    color: '#22d3ee',
+                    shape: 'circle',
+                    text: 'EXECUTION & MARKET',
+                    size: 1
+                });
+            } else {
+                labels.push({
+                    time: latestTime,
+                    position: 'aboveBar',
+                    color: '#22d3ee',
+                    shape: 'circle',
+                    text: 'EXECUTION',
+                    size: 1
+                });
+                labels.push({
+                    time: latestTime,
+                    position: 'aboveBar',
+                    color: 'rgba(161, 161, 170, 0.9)',
+                    shape: 'circle',
+                    text: 'MARKET',
+                    size: 1
+                });
+            }
+        }
+        series.setMarkers(labels);
+
+        // Entry Line
         if (priceLines?.entry) {
             lines.push(series.createPriceLine({
                 price: priceLines.entry,
@@ -265,7 +305,7 @@ export function AssetChart({
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
             axisLabelVisible: true,
-            title: 'MARKET PRICE'
+            title: 'MARKET'
         }));
 
         // Execution Price Line (Solid and clear)
@@ -275,7 +315,7 @@ export function AssetChart({
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: 'EXECUTION PRICE'
+            title: 'EXECUTION'
         }));
 
         // Apply Autoscale to include lines
