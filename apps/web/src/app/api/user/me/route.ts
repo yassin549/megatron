@@ -56,25 +56,6 @@ export async function GET() {
             },
         });
 
-        // TEMPORARY: Reinitialize simulated funds for testing
-        // This clears everything (balance, positions, LP) so the user can see their real on-chain deposit.
-        if (user && (user.walletHotBalance.toNumber() > 0 || user.positions.length > 0 || user.lpShares.length > 0)) {
-            await db.$transaction([
-                db.user.update({
-                    where: { id: user.id },
-                    data: { walletHotBalance: 0, walletColdBalance: 0 }
-                }),
-                db.position.deleteMany({ where: { userId: user.id } }),
-                db.lPShares.deleteMany({ where: { userId: user.id } })
-            ]);
-
-            // Clear current local variables to reflect in response immediately
-            (user as any).walletHotBalance = new (await import('@prisma/client')).Prisma.Decimal(0);
-            (user as any).walletColdBalance = new (await import('@prisma/client')).Prisma.Decimal(0);
-            user.positions = [];
-            user.lpShares = [];
-        }
-
         console.log('[API/user/me] User found:', user ? 'YES' : 'NO');
 
         if (!user) {

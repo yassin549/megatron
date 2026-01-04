@@ -93,7 +93,7 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
                 href="/wallet"
                 className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 ml-2 border border-white/10"
             >
-                Deposit
+                Wallet
             </Link>
         </div>
     );
