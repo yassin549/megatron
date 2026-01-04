@@ -56,6 +56,18 @@ export async function GET() {
             },
         });
 
+        // TEMPORARY: Reinitialize simulated funds for testing
+        // This sets the DB balance to zero so the user can see their real on-chain deposit.
+        if (user && (user.walletHotBalance.toNumber() > 0)) {
+            await db.user.update({
+                where: { id: user.id },
+                data: { walletHotBalance: 0, walletColdBalance: 0 }
+            });
+            // Update local object to reflect the change immediately in this response
+            (user as any).walletHotBalance = new (await import('@prisma/client')).Prisma.Decimal(0);
+            (user as any).walletColdBalance = new (await import('@prisma/client')).Prisma.Decimal(0);
+        }
+
         console.log('[API/user/me] User found:', user ? 'YES' : 'NO');
 
         if (!user) {
@@ -108,21 +120,40 @@ export async function GET() {
         }
 
         const hotBalance = user.walletHotBalance.toNumber();
-        const totalPortfolioValue = hotBalance + positionsValue + lpPositionsValue;
+        const coldBalance = user.walletColdBalance.toNumber();
+
+        // Real-time on-chain balance check for deposit address
+        let onChainDepositBalance = 0;
+        if (user.depositAddress) {
+            try {
+                const { getUsdcBalance } = await import('@megatron/lib-crypto');
+                const rpc = process.env.ARBITRUM_RPC_URL;
+                const usdc = process.env.USDC_CONTRACT_ADDRESS;
+                if (rpc && usdc) {
+                    const balanceStr = await getUsdcBalance(user.depositAddress, rpc, usdc);
+                    onChainDepositBalance = parseFloat(balanceStr);
+                }
+            } catch (err) {
+                console.warn('[API/user/me] Failed to fetch on-chain balance:', err);
+            }
+        }
+
+        const totalPortfolioValue = hotBalance + onChainDepositBalance + positionsValue + lpPositionsValue;
 
         const response = {
             id: user.id,
             email: user.email,
             walletHotBalance: user.walletHotBalance.toString(),
             walletColdBalance: user.walletColdBalance.toString(),
-            portfolioValue: totalPortfolioValue.toFixed(2), // New field for Navbar
+            onChainDepositBalance: onChainDepositBalance.toString(), // New field
+            portfolioValue: totalPortfolioValue.toFixed(2),
             depositAddress: user.depositAddress,
             isAdmin: user.isAdmin,
             createdAt: user.createdAt.toISOString(),
             positionsCount: user.positions.length
         };
 
-        console.log('[API/user/me] Returning 200 - Success');
+        console.log('[API/user/me] Returning 200 - Success (On-chain tracking active)');
         return NextResponse.json(response);
     } catch (error) {
         console.error('Get user error:', error);

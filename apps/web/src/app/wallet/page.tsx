@@ -26,6 +26,7 @@ export default function WalletPage() {
     const [walletData, setWalletData] = useState({
         hotBalance: 0,
         coldBalance: 0,
+        onChainBalance: 0,
         depositAddress: '',
         loading: true,
     });
@@ -44,6 +45,7 @@ export default function WalletPage() {
                 setWalletData({
                     hotBalance: parseFloat(data.walletHotBalance || '0'),
                     coldBalance: parseFloat(data.walletColdBalance || '0'),
+                    onChainBalance: parseFloat(data.onChainDepositBalance || '0'),
                     depositAddress: data.depositAddress || '',
                     loading: false,
                 });
@@ -196,7 +198,7 @@ export default function WalletPage() {
 
                 {/* Balance Cards */}
                 <div className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-6 mb-8">
-                    {/* Hot Wallet */}
+                    {/* Main Wallet Balance */}
                     <div className="glass-card rounded-2xl p-6 relative overflow-hidden group border border-white/5">
                         <div className="flex items-center justify-between relative z-10">
                             <div className="flex items-center gap-4">
@@ -206,15 +208,22 @@ export default function WalletPage() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-muted-foreground block mb-1">Available Balance</span>
+                                    <span className="text-sm text-muted-foreground block mb-1">Total Available Balance</span>
                                     <p className="text-3xl font-bold text-foreground font-mono">
-                                        ${walletData.hotBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        ${(walletData.hotBalance + walletData.onChainBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </p>
+                                    <div className="flex items-center gap-3 mt-1">
+                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                            <div className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
+                                            On-chain: ${walletData.onChainBalance.toFixed(2)}
+                                        </span>
+                                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                            <div className="w-1 h-1 rounded-full bg-emerald-400" />
+                                            Account: ${walletData.hotBalance.toFixed(2)}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                            <span className="text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
-                                HOT
-                            </span>
                         </div>
                         <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl" />
                     </div>
@@ -281,8 +290,8 @@ export default function WalletPage() {
                                 <button
                                     onClick={() => copyToClipboard(walletData.depositAddress)}
                                     className={`w-full py-3 font-medium rounded-xl border transition-all flex items-center justify-center gap-2 ${copied
-                                            ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-                                            : 'bg-white/5 text-foreground border-white/10 hover:bg-white/10'
+                                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                                        : 'bg-white/5 text-foreground border-white/10 hover:bg-white/10'
                                         }`}
                                 >
                                     {copied ? (
