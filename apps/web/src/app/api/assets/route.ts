@@ -43,7 +43,8 @@ export async function GET(req: Request): Promise<NextResponse> {
                     take: 1,
                     select: {
                         confidence: true,
-                        summary: true
+                        summary: true,
+                        deltaPercent: true // Added deltaPercent
                     }
                 }
             },

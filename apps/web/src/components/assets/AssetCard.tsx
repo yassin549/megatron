@@ -301,7 +301,7 @@ export function AssetCard({
                             </span>
                             {aiConfidence && (
                                 <span className="flex items-center gap-1 text-[10px] text-blue-400 font-mono">
-                                    <Zap className="w-3 h-3" /> {aiConfidence}%
+                                    <Zap className="w-3 h-3" /> {(aiConfidence * 100).toFixed(0)}%
                                 </span>
                             )}
                         </div>

@@ -68,6 +68,7 @@ export async function enrichAssets(assets: any[], userBookmarks: Set<string> = n
 
             const lastFundamental = Number(asset.lastFundamental) || null;
             const oracleLog = asset.oracleLogs?.[0];
+            const lastUpdateChange = oracleLog?.deltaPercent ? Number(oracleLog.deltaPercent) : change24h;
             const aiConfidence = Number(oracleLog?.confidence) || null;
             const aiSummary = oracleLog?.summary ?? null;
 
@@ -78,7 +79,7 @@ export async function enrichAssets(assets: any[], userBookmarks: Set<string> = n
                 type: asset.type,
                 status: asset.status as 'funding' | 'active' | 'paused',
                 price: currentPrice,
-                change24h: Math.round(change24h * 100) / 100,
+                change24h: Math.round(lastUpdateChange * 100) / 100,
                 volume24h: Math.round(volume24h * 100) / 100,
                 totalSupply: Number(asset.totalSupply),
                 softCap: Number(asset.softCap),
@@ -182,8 +183,8 @@ export async function getAssetDetail(id: string, userId?: string) {
     const pricingParams = asset.pricingParams as { P0?: number; k?: number } | null;
     const currentPrice = Number(asset.lastDisplayPrice || 0) || pricingParams?.P0 || 10;
     const oldPrice = oldPriceTick?.priceDisplay ? Number(oldPriceTick.priceDisplay) : currentPrice;
-    const change24h = oldPrice > 0 ? ((currentPrice - oldPrice) / oldPrice) * 100 : 0;
     const marketCap = currentPrice * Number(asset.totalSupply);
+    const lastDelta = oracleLogs[0]?.deltaPercent !== undefined ? Number(oracleLogs[0].deltaPercent) : change24h;
 
     let userPosition = null;
     if (userId) {
@@ -224,7 +225,7 @@ export async function getAssetDetail(id: string, userId?: string) {
             status: asset.status,
             price: currentPrice,
             marketPrice: Number(asset.lastMarketPrice || 0) || currentPrice,
-            change24h: Math.round(change24h * 100) / 100,
+            change24h: Math.round(lastDelta * 100) / 100,
             volume24h: Math.round(volume24h * 100) / 100,
             marketCap: Math.round(marketCap * 100) / 100,
             totalSupply: Number(asset.totalSupply),
