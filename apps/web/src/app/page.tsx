@@ -35,7 +35,8 @@ async function getAssets() {
                     take: 1,
                     select: {
                         confidence: true,
-                        summary: true
+                        summary: true,
+                        deltaPercent: true
                     }
                 }
             },
