@@ -183,6 +183,7 @@ export async function getAssetDetail(id: string, userId?: string) {
     const pricingParams = asset.pricingParams as { P0?: number; k?: number } | null;
     const currentPrice = Number(asset.lastDisplayPrice || 0) || pricingParams?.P0 || 10;
     const oldPrice = oldPriceTick?.priceDisplay ? Number(oldPriceTick.priceDisplay) : currentPrice;
+    const change24h = oldPrice > 0 ? ((currentPrice - oldPrice) / oldPrice) * 100 : 0;
     const marketCap = currentPrice * Number(asset.totalSupply);
     const lastDelta = oracleLogs[0]?.deltaPercent !== undefined ? Number(oracleLogs[0].deltaPercent) : change24h;
 
