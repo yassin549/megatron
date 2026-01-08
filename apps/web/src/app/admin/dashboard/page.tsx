@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
                             Platform Revenue
                         </p>
                         <p className="text-3xl font-bold mt-1">
-                            ${stats?.platformFees?.toLocaleString() ?? '--'}
+                            ${stats?.treasuryBalance?.toLocaleString() ?? '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
                             Cumulative treasury balance

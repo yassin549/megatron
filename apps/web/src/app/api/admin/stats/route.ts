@@ -24,39 +24,42 @@ export async function GET() {
         }
 
         const now = new Date();
-        const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-
         // 1. Core Stats
+        const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
         const [
             totalUsers,
             activeAssetsCount,
-            tradeStats,
-            allTimeTradeStats,
-            treasury
+            allTimeFeesResult,
+            treasury,
+            volume24hResult,
+            fees24hResult
         ] = await Promise.all([
             db.user.count(),
             db.asset.count({ where: { status: 'active' } }),
-            db.trade.findMany({
-                where: { timestamp: { gte: oneDayAgo } },
-                select: { price: true, quantity: true, fee: true }
-            }),
+            db.trade.aggregate({ _sum: { fee: true } }),
+            db.platformTreasury.findUnique({ where: { id: 'treasury' } }),
+            db.$queryRaw<{ volume: number }[]>`SELECT SUM(price * quantity) as volume FROM "Trade" WHERE timestamp >= ${oneDayAgo}`,
             db.trade.aggregate({
+                where: { timestamp: { gte: oneDayAgo } },
                 _sum: { fee: true }
-            }),
-            db.platformTreasury.findUnique({ where: { id: 'treasury' } })
+            })
         ]);
 
-        const allTimeFees = Number(allTimeTradeStats._sum.fee || 0);
+        const totalVolume24h = volume24hResult[0]?.volume ? Number(volume24hResult[0].volume) : 0;
+        const totalFees24h = Number(fees24hResult._sum.fee || 0);
+        const allTimeFees = Number(allTimeFeesResult._sum.fee || 0);
         const realPlatformRevenue = allTimeFees * MONETARY_CONFIG.PLATFORM_SHARE;
 
-        let totalVolume24h = 0;
-        let totalFees24h = 0;
-        for (const t of tradeStats) {
-            totalVolume24h += Number(t.price) * Number(t.quantity);
-            totalFees24h += Number(t.fee);
+        // 2. Health Checks
+        let dbStatus = 'Disconnected';
+        try {
+            await db.$queryRaw`SELECT 1`;
+            dbStatus = 'Connected';
+        } catch (e) {
+            console.error('Database check failed:', e);
         }
 
-        // 2. Health Checks
         let redisStatus = 'Disconnected';
         try {
             const redis = getRedisClient();
@@ -71,8 +74,10 @@ export async function GET() {
             const redis = getRedisClient();
             const heartbeat = await redis.get('worker_heartbeat');
             if (heartbeat) {
-                const diff = Date.now() - parseInt(heartbeat);
-                if (diff < 90000) { // Active if heartbeat in last 90 seconds
+                // Key expires in 60s, so existence means it's recent. 
+                // We double check the timestamp just in case.
+                const lastHeartbeat = parseInt(heartbeat);
+                if (Date.now() - lastHeartbeat < 90000) {
                     workerStatus = 'Active';
                 }
             }
@@ -90,7 +95,7 @@ export async function GET() {
                 treasuryBalance: treasury ? Number(treasury.balance) : 0
             },
             health: {
-                database: 'Connected',
+                database: dbStatus,
                 redis: redisStatus,
                 worker: workerStatus
             }
