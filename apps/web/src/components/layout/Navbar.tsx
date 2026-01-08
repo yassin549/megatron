@@ -7,11 +7,13 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
 import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid } from 'lucide-react';
 
 // Robust image component for search results
+
 function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
     const [imageError, setImageError] = useState(false);
     const [useStandardImg, setUseStandardImg] = useState(false);
@@ -57,10 +59,12 @@ function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
 export function Navbar() {
     const { data: session, status } = useSession();
     const router = useRouter();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<any[]>([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    // Mobile search state
+    const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+    const [mobileSearchResults, setMobileSearchResults] = useState<any[]>([]);
+    const [isMobileSearching, setIsMobileSearching] = useState(false);
+
+    // UI state
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
@@ -110,42 +114,40 @@ export function Navbar() {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as Element;
             if (!target.closest('.nav-popover-trigger') &&
-                !target.closest('.nav-popover-content') &&
-                !target.closest('.search-container')) {
+                !target.closest('.nav-popover-content')) {
                 setIsProfileOpen(false);
                 setIsNotifOpen(false);
                 setIsBookmarksOpen(false);
-                setIsSearchFocused(false);
             }
         };
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    // Debounced Search
+    // Debounced Search (Mobile Only)
     useEffect(() => {
-        if (!searchQuery.trim()) {
-            setSearchResults([]);
+        if (!mobileSearchQuery.trim()) {
+            setMobileSearchResults([]);
             return;
         }
 
         const timer = setTimeout(async () => {
-            setIsSearching(true);
+            setIsMobileSearching(true);
             try {
-                const res = await fetch(`/api/assets?q=${encodeURIComponent(searchQuery)}`);
+                const res = await fetch(`/api/assets?q=${encodeURIComponent(mobileSearchQuery)}`);
                 if (res.ok) {
                     const data = await res.json();
-                    setSearchResults(data.assets || []);
+                    setMobileSearchResults(data.assets || []);
                 }
             } catch (error) {
                 console.error('Search failed:', error);
             } finally {
-                setIsSearching(false);
+                setIsMobileSearching(false);
             }
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [searchQuery]);
+    }, [mobileSearchQuery]);
 
     // Lock body scroll when mobile menu is open
     useEffect(() => {
@@ -157,10 +159,11 @@ export function Navbar() {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isMobileMenuOpen]);
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleMobileSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (searchQuery.trim()) {
-            router.push(`/?q=${encodeURIComponent(searchQuery)}`);
+        if (mobileSearchQuery.trim()) {
+            router.push(`/?q=${encodeURIComponent(mobileSearchQuery)}`);
+            setIsMobileMenuOpen(false);
         }
     };
 
@@ -189,88 +192,9 @@ export function Navbar() {
                     </div>
                 </Link>
 
-                {/* 2. Search Section */}
+                {/* 2. Search Section (Desktop) */}
                 <div className="hidden md:flex flex-1 max-w-xl justify-center px-4">
-                    <div className="relative w-full group search-container">
-                        <form onSubmit={handleSearch} className="relative w-full">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                            </div>
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onFocus={() => setIsSearchFocused(true)}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Type / to search markets..."
-                                className="block w-full pl-10 pr-3 py-2 bg-obsidian-900/50 border border-white/10 text-foreground placeholder-muted-foreground rounded-lg focus:outline-none focus:bg-obsidian-800 focus:ring-1 focus:ring-primary focus:border-primary/50 text-sm transition-all duration-200"
-                            />
-                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                <kbd className="hidden sm:inline-block px-1.5 py-0.5 border border-white/10 rounded text-[10px] font-mono text-muted-foreground">
-                                    /
-                                </kbd>
-                            </div>
-                        </form>
-
-                        {/* Search Results Dropdown */}
-                        <AnimatePresence>
-                            {isSearchFocused && searchQuery.trim() && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                                    exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                                    className="absolute top-full left-0 right-0 mt-2 bg-obsidian-950/95 backdrop-blur-2xl rounded-xl overflow-hidden z-50 shadow-2xl border border-white/10"
-                                >
-                                    <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-                                        {isSearching ? (
-                                            <div className="p-8 text-center">
-                                                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                                                <p className="text-xs text-muted-foreground">Searching cosmic variables...</p>
-                                            </div>
-                                        ) : searchResults.length > 0 ? (
-                                            <div className="p-2 space-y-1">
-                                                {searchResults.map((asset) => (
-                                                    <Link
-                                                        key={asset.id}
-                                                        href={`/assets/${asset.id}`}
-                                                        onClick={() => setIsSearchFocused(false)}
-                                                        className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-all group border border-transparent hover:border-white/5"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <SearchItemImage src={asset.imageUrl} alt={asset.name} />
-                                                            <div>
-                                                                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">
-                                                                    {asset.name}
-                                                                </p>
-                                                                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
-                                                                    {asset.type}
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-sm font-bold text-white font-mono">${asset.price.toFixed(2)}</p>
-                                                            <p className={`text-[10px] font-bold font-mono ${asset.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
-                                                                {asset.change24h > 0 ? '+' : ''}{asset.change24h}%
-                                                            </p>
-                                                        </div>
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="p-12 text-center text-muted-foreground">
-                                                <Search className="w-8 h-8 mx-auto mb-3 opacity-20" />
-                                                <p className="text-sm">No variables found matching "{searchQuery}"</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="p-3 bg-white/[0.02] border-t border-white/5 text-center">
-                                        <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">
-                                            Press Enter to see all results
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
+                    <NavbarSearch />
                 </div>
 
                 {/* 3. Right Section (Desktop) */}
@@ -494,27 +418,27 @@ export function Navbar() {
                                     <div className="space-y-3">
                                         <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] px-1">Navigation</h3>
                                         <div className="relative group search-container">
-                                            <form onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} className="relative group">
+                                            <form onSubmit={handleMobileSearch} className="relative group">
                                                 <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
                                                 <input
                                                     type="text"
-                                                    value={searchQuery}
-                                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                                    value={mobileSearchQuery}
+                                                    onChange={(e) => setMobileSearchQuery(e.target.value)}
                                                     placeholder="Search markets..."
                                                     className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/[0.05] transition-all"
                                                 />
                                             </form>
 
                                             {/* Mobile Search Results */}
-                                            {searchQuery.trim() && (
+                                            {mobileSearchQuery.trim() && (
                                                 <div className="mt-4 space-y-2 max-h-[40vh] overflow-y-auto custom-scrollbar -mx-2 px-2">
-                                                    {isSearching ? (
+                                                    {isMobileSearching ? (
                                                         <div className="py-8 text-center">
                                                             <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                                                             <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Searching...</p>
                                                         </div>
-                                                    ) : searchResults.length > 0 ? (
-                                                        searchResults.map((asset) => (
+                                                    ) : mobileSearchResults.length > 0 ? (
+                                                        mobileSearchResults.map((asset) => (
                                                             <Link
                                                                 key={asset.id}
                                                                 href={`/assets/${asset.id}`}
