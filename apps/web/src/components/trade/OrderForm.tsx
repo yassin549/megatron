@@ -135,7 +135,7 @@ export function OrderForm({
                 <motion.div
                     className={`absolute inset-y-1 w-[calc(50%-4px)] rounded-md ${isBuy ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}
                     animate={{ left: isBuy ? '4px' : 'calc(50%)' }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
                 />
                 <button
                     onClick={() => setType('buy')}
@@ -240,7 +240,7 @@ export function OrderForm({
                     }`}
             >
                 {loading ? (
-                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                 ) : (
                     <>
                         {isBuy ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}

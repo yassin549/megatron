@@ -17,7 +17,7 @@ export function InitialLoader() {
                 }
                 return next;
             });
-        }, 150);
+        }, 75);
 
         return () => clearInterval(timer);
     }, []);
@@ -28,8 +28,8 @@ export function InitialLoader() {
             const timer = setTimeout(() => {
                 setIsVisible(false);
                 // Remove from DOM after fade out animation
-                setTimeout(() => setShouldRender(false), 500);
-            }, 800); // Slightly longer pause to read text
+                setTimeout(() => setShouldRender(false), 300);
+            }, 400); // Slightly longer pause to read text
             return () => clearTimeout(timer);
         }
     }, [progress]);
@@ -44,12 +44,12 @@ export function InitialLoader() {
             <div className="text-center space-y-8">
                 {/* Logo */}
                 <div className="flex justify-center mb-2 overflow-visible">
-                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-1000">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-500">
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
                             className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 animate-pulse"
-                            style={{ animationDuration: '3s' }}
+                            style={{ animationDuration: '1.5s' }}
                         />
                     </div>
                 </div>
@@ -62,7 +62,7 @@ export function InitialLoader() {
                 </div>
 
                 {/* Tagline */}
-                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-700 delay-1000">
+                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-300 delay-500">
                     When world variables become stocks
                 </p>
 

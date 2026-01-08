@@ -96,7 +96,7 @@
   }
 
   .glass-card {
-    @apply bg-card/40 backdrop-blur-lg border border-white/5 shadow-lg transition-all duration-300 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
+    @apply bg-card/40 backdrop-blur-lg border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
   }
 
   .glass-nav {
@@ -114,7 +114,7 @@
 
   /* Animation Utilities */
   .animate-in {
-    animation: animate-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: animate-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes animate-in {

@@ -168,7 +168,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className="glass-nav sticky top-0 z-50 h-16 transition-all duration-300">
+        <nav className="glass-nav sticky top-0 z-50 h-16 transition-all duration-200">
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
@@ -183,7 +183,7 @@ export function Navbar() {
                         />
                     </div>
                     <div className="flex items-center">
-                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-300">
+                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200">
                             MEGATRON
                         </span>
                         <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">

@@ -108,7 +108,7 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
             <path
                 d={fillPath}
                 fill={`url(#${gradientId})`}
-                className="transition-all duration-300"
+                className="transition-all duration-150"
             />
             <path
                 d={linePath}
@@ -117,7 +117,7 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="transition-all duration-300"
+                className="transition-all duration-150"
             />
         </svg>
     );
@@ -192,14 +192,14 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-2xl transition-all duration-500 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
+                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-2xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-4'
                         : 'flex flex-col p-4'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
@@ -268,7 +268,7 @@ export function AssetCard({
                                     alt={name}
                                     width={48}
                                     height={48}
-                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-500"
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
                                     onError={() => setImageError(true)}
                                     unoptimized={imageUrl.startsWith('/uploads')}
                                 />
@@ -278,7 +278,7 @@ export function AssetCard({
                                 <img
                                     src={imageUrl}
                                     alt={name}
-                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-500"
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                     }}
