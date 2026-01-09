@@ -33,13 +33,6 @@ export function LPFundingPanel({
     const [userBalance, setUserBalance] = useState(0);
     const [userPosition, setUserPosition] = useState<any>(null);
     const [showInfo, setShowInfo] = useState(false);
-    const [successModal, setSuccessModal] = useState<{
-        show: boolean;
-        message: string;
-        isActivation: boolean;
-        amount: string;
-        type: 'buy' | 'sell';
-    }>({ show: false, message: '', isActivation: false, amount: '', type: 'buy' });
 
     const isBuy = type === 'buy';
 
@@ -72,7 +65,7 @@ export function LPFundingPanel({
     const estimatedShares = parseFloat(amount || '0');
     const estimatedAPY = fundingProgress < 100 ? 'TBD' : '15-25%';
 
-    const { showNotification } = useNotification();
+    const { showNotification, showStatusModal } = useNotification();
 
     const handleAction = async () => {
         if (!amount || parseFloat(amount) <= 0) return;
@@ -87,16 +80,13 @@ export function LPFundingPanel({
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
 
-                setSuccessModal({
-                    show: true,
+                showStatusModal({
+                    type: 'success',
+                    title: data.activated ? 'MARKET ACTIVATED!' : 'LP SUCCESS',
                     message: data.activated
-                        ? `Market activated! You are now an LP for ${assetName}.`
-                        : `Successfully contributed $${amount} to ${assetName} pool.`,
-                    isActivation: !!data.activated,
-                    amount: amount,
-                    type: 'buy'
+                        ? `You are now an LP for ${assetName}.`
+                        : `Successfully contributed $${amount} to ${assetName} pool.`
                 });
-                showNotification('success', data.activated ? 'Market Activated!' : 'Contribution Successful');
             } else {
                 const val = parseFloat(amount);
                 const isQueue = val > (userPosition?.instantLimit || 0);
@@ -121,27 +111,27 @@ export function LPFundingPanel({
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
 
-                setSuccessModal({
-                    show: true,
+                showStatusModal({
+                    type: 'success',
+                    title: isQueue ? 'WITHDRAWAL QUEUED' : 'WITHDRAWAL SUCCESS',
                     message: isQueue
                         ? `Withdrawal of $${amount} has been queued for progressive processing.`
-                        : `Successfully withdrawn $${amount} from ${assetName} pool.`,
-                    isActivation: false,
-                    amount: amount,
-                    type: 'sell'
+                        : `Successfully withdrawn $${amount} from ${assetName} pool.`
                 });
-                showNotification('success', isQueue ? 'Withdrawal Queued' : 'Withdrawal Successful');
             }
             setAmount('');
         } catch (err: any) {
-            showNotification('error', `${isBuy ? 'Contribution' : 'Withdrawal'} failed: ${err.message || 'Unknown error'}`);
+            showStatusModal({
+                type: 'error',
+                title: 'ACTION FAILED',
+                message: err.message || 'Unknown error'
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const handleCloseModal = () => {
-        setSuccessModal(prev => ({ ...prev, show: false }));
         window.location.reload();
     };
 
@@ -392,51 +382,8 @@ export function LPFundingPanel({
                 </motion.div>
             </AnimatePresence>
 
-            {/* Success Modal */}
-            <AnimatePresence>
-                {successModal.show && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/90 backdrop-blur-xl"
-                            onClick={handleCloseModal}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-zinc-900 border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center"
-                        >
-                            <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${successModal.type === 'buy' ? 'bg-blue-500/10' : 'bg-rose-500/10'
-                                }`}>
-                                <CheckCircle2 className={`w-10 h-10 ${successModal.type === 'buy' ? 'text-blue-400' : 'text-rose-400'
-                                    }`} />
-                            </div>
-                            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">
-                                {successModal.type === 'buy' ? 'LP SUCCESS' : 'WITHDRAWAL SENT'}
-                            </h3>
-                            <p className="text-zinc-400 text-sm mb-8 leading-relaxed font-medium">
-                                {successModal.message}
-                            </p>
-                            <div className="bg-black/40 rounded-2xl p-4 mb-8 border border-white/5">
-                                <span className={`text-2xl font-mono font-black ${successModal.type === 'buy' ? 'text-blue-400' : 'text-rose-400'
-                                    }`}>
-                                    {successModal.type === 'buy' ? '+' : '-'}${successModal.amount} USDC
-                                </span>
-                            </div>
-                            <button
-                                onClick={handleCloseModal}
-                                className="w-full py-4 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.95]"
-                            >
-                                CONTINUE
-                            </button>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-        </div>
+        </AnimatePresence>
+        </div >
     );
 }
 

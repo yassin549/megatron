@@ -104,13 +104,19 @@ export function AssetDetailClient({
                 setPriceHistory(data.priceHistory);
 
                 // Sync targets if not currently updating
-                if (!isUpdatingTargets && data.asset.userPosition) {
-                    setOrderStopLoss(data.asset.userPosition.stopLoss?.toString() || '');
-                    setOrderTakeProfit(data.asset.userPosition.takeProfit?.toString() || '');
+                if (!isUpdatingTargets) {
+                    if (data.asset.userPosition && data.asset.userPosition.shares !== 0) {
+                        setOrderStopLoss(data.asset.userPosition.stopLoss?.toString() || '');
+                        setOrderTakeProfit(data.asset.userPosition.takeProfit?.toString() || '');
 
-                    // Auto-select if no position is selected and this one exists
-                    if (!activePositionId) {
-                        setActivePositionId(data.asset.id);
+                        // Auto-select if no position is selected and this one exists
+                        if (!activePositionId) {
+                            setActivePositionId(data.asset.id);
+                        }
+                    } else {
+                        // Position closed or non-existent, clear targets
+                        setOrderStopLoss('');
+                        setOrderTakeProfit('');
                     }
                 }
             }

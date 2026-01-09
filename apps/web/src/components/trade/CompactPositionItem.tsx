@@ -60,7 +60,7 @@ export function CompactPositionItem({
     const isProfit = position.returnAbs >= 0;
     const isShort = position.shares < 0;
 
-    const { showNotification } = useNotification();
+    const { showNotification, showStatusModal } = useNotification();
 
     const handleExit = async () => {
         if (!position.shares || Math.abs(position.shares) < 0.000001) {
@@ -80,13 +80,21 @@ export function CompactPositionItem({
             });
             if (res.ok) {
                 await onActionSuccess?.();
-                showNotification('success', 'Position exited successfully');
+                showStatusModal({
+                    type: 'success',
+                    title: 'EXIT SUCCESS',
+                    message: `Position in ${position.assetName} closed.`
+                });
             } else {
                 const data = await res.json();
                 throw new Error(data.error || 'Exit failed');
             }
         } catch (err: any) {
-            showNotification('error', err.message);
+            showStatusModal({
+                type: 'error',
+                title: 'EXIT FAILED',
+                message: err.message
+            });
         } finally {
             setIsExiting(false);
         }

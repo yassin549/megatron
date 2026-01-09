@@ -90,28 +90,20 @@ export function OrderForm({
             setStopLoss('');
             setTakeProfit('');
             await onTradeSuccess?.();
-            showNotification('success', 'Order executed successfully');
+            showStatusModal({
+                type: 'success',
+                title: 'DONE',
+                message: `${estimatedShares.toFixed(4)} ${assetSymbol} units added`
+            });
         } catch (err: any) {
-            showNotification('error', `Order failed: ${err.message || 'Unknown error'}`);
+            showStatusModal({
+                type: 'error',
+                title: 'ORDER FAILED',
+                message: err.message || 'Unknown error'
+            });
         } finally {
             setLoading(false);
         }
-    };
-
-    const [successModal, setSuccessModal] = useState<{
-        show: boolean;
-        type: 'buy' | 'sell';
-        amount: string;
-        shares: number;
-        tradeId: string;
-    }>({ show: false, type: 'buy', amount: '', shares: 0, tradeId: '' });
-
-    const handleCloseModal = () => {
-        setSuccessModal(prev => ({ ...prev, show: false }));
-    };
-
-    const handleViewPortfolio = () => {
-        router.push('/portfolio');
     };
 
     if (status !== 'authenticated') {
@@ -252,47 +244,6 @@ export function OrderForm({
                     </>
                 )}
             </button>
-
-            {/* Success Modal */}
-            <AnimatePresence>
-                {successModal.show && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/90 backdrop-blur-xl"
-                            onClick={handleCloseModal}
-                        />
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                            animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 max-w-xs w-full shadow-2xl text-center"
-                        >
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 ${successModal.type === 'buy' ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}>
-                                {successModal.type === 'buy' ? (
-                                    <TrendingUp className="w-7 h-7 text-emerald-400" />
-                                ) : (
-                                    <TrendingDown className="w-7 h-7 text-rose-400" />
-                                )}
-                            </div>
-                            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tighter">
-                                DONE
-                            </h3>
-                            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-8">
-                                {successModal.shares.toFixed(4)} {assetSymbol} units added
-                            </p>
-                            <button
-                                onClick={handleCloseModal}
-                                className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-xl shadow-black/20"
-                            >
-                                Continue
-                            </button>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
         </div>
     );
 }
