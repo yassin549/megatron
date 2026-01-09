@@ -114,9 +114,10 @@ export function AssetDetailClient({
                             setActivePositionId(data.asset.id);
                         }
                     } else {
-                        // Position closed or non-existent, clear targets
+                        // Position closed or non-existent, clear targets and selection
                         setOrderStopLoss('');
                         setOrderTakeProfit('');
+                        setActivePositionId(null);
                     }
                 }
             }
