@@ -47,7 +47,7 @@ export function OrderForm({
     const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
     const isHighSpread = spreadPercent > 0.05; // 5% threshold
 
-    const { showNotification } = useNotification();
+    const { showNotification, showStatusModal } = useNotification();
 
     const handleTrade = async () => {
         if (!amount) return;
