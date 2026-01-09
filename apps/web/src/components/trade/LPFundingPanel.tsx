@@ -134,7 +134,7 @@ export function LPFundingPanel({
             }
             setAmount('');
         } catch (err: any) {
-            showNotification('error', `${isBuy ? 'Contribution' : 'Withdrawal'} failed: ${err.message}`);
+            showNotification('error', `${isBuy ? 'Contribution' : 'Withdrawal'} failed: ${err.message || 'Unknown error'}`);
         } finally {
             setLoading(false);
         }

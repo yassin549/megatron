@@ -92,7 +92,7 @@ export function OrderForm({
             onTradeSuccess?.();
             showNotification('success', 'Order executed successfully');
         } catch (err: any) {
-            showNotification('error', `Order failed: ${err.message}`);
+            showNotification('error', `Order failed: ${err.message || 'Unknown error'}`);
         } finally {
             setLoading(false);
         }
