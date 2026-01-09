@@ -381,9 +381,7 @@ export function LPFundingPanel({
                     )}
                 </motion.div>
             </AnimatePresence>
-
-        </AnimatePresence>
-        </div >
+        </div>
     );
 }
 
