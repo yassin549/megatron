@@ -79,13 +79,6 @@ export function OrderForm({
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            setSuccessModal({
-                show: true,
-                type: type,
-                amount: amount,
-                shares: estimatedShares,
-                tradeId: data.tradeId
-            });
             setAmount('');
             setStopLoss('');
             setTakeProfit('');
