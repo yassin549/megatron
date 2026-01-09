@@ -73,8 +73,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
             {mounted && createPortal(
                 <>
-                    {/* Toast Container - Moved below navbar and pushed z-index higher */}
-                    <div className="fixed top-20 right-6 z-[9999] flex flex-col gap-3 pointer-events-none items-end">
+                    {/* Toast Container - Moved to bottom-right for better visibility and high z-index */}
+                    <div className="fixed bottom-6 right-6 z-[99999] flex flex-col gap-3 pointer-events-none items-end">
                         <AnimatePresence>
                             {notifications.map((n) => (
                                 <Toast

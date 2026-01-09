@@ -79,7 +79,7 @@ export function CompactPositionItem({
                 }),
             });
             if (res.ok) {
-                onActionSuccess?.();
+                await onActionSuccess?.();
                 showNotification('success', 'Position exited successfully');
             } else {
                 const data = await res.json();
@@ -105,7 +105,7 @@ export function CompactPositionItem({
             });
             if (res.ok) {
                 setIsExpanded(false);
-                onActionSuccess?.();
+                await onActionSuccess?.();
                 showNotification('success', 'Targets updated');
             }
         } catch (err: any) {
@@ -126,7 +126,7 @@ export function CompactPositionItem({
                 }),
             });
             if (res.ok) {
-                onActionSuccess?.();
+                await onActionSuccess?.();
             }
         } catch (err) {
             console.error('Failed to cancel target', err);

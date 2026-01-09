@@ -89,7 +89,7 @@ export function OrderForm({
             setAmount('');
             setStopLoss('');
             setTakeProfit('');
-            onTradeSuccess?.();
+            await onTradeSuccess?.();
             showNotification('success', 'Order executed successfully');
         } catch (err: any) {
             showNotification('error', `Order failed: ${err.message || 'Unknown error'}`);

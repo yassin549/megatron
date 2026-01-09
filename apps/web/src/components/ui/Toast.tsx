@@ -19,9 +19,9 @@ const icons = {
 };
 
 const styles = {
-    success: 'border-emerald-500/30 bg-zinc-900 shadow-emerald-500/20',
-    error: 'border-rose-500/30 bg-zinc-900 shadow-rose-500/20',
-    info: 'border-blue-500/30 bg-zinc-900 shadow-blue-500/20',
+    success: 'border-emerald-500 bg-zinc-950 shadow-emerald-500/40 text-emerald-400',
+    error: 'border-rose-500 bg-zinc-950 shadow-rose-500/40 text-rose-400',
+    info: 'border-blue-500 bg-zinc-950 shadow-blue-500/40 text-blue-400',
 };
 
 export function Toast({ type, message, onClose }: ToastProps) {

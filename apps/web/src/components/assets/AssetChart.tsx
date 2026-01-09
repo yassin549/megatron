@@ -236,7 +236,7 @@ export function AssetChart({
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Dashed,
                 axisLabelVisible: true,
-                title: 'ENTRY'
+                title: side.toUpperCase()
             }));
         }
         if (localLines.stopLoss) {
