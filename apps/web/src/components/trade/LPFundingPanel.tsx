@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Droplets, Clock, Info, CheckCircle2, X, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 interface LPFundingPanelProps {
     assetId: string;
@@ -71,6 +72,8 @@ export function LPFundingPanel({
     const estimatedShares = parseFloat(amount || '0');
     const estimatedAPY = fundingProgress < 100 ? 'TBD' : '15-25%';
 
+    const { showNotification } = useNotification();
+
     const handleAction = async () => {
         if (!amount || parseFloat(amount) <= 0) return;
         setLoading(true);
@@ -93,6 +96,7 @@ export function LPFundingPanel({
                     amount: amount,
                     type: 'buy'
                 });
+                showNotification('success', data.activated ? 'Market Activated!' : 'Contribution Successful');
             } else {
                 const val = parseFloat(amount);
                 const isQueue = val > (userPosition?.instantLimit || 0);
@@ -126,10 +130,11 @@ export function LPFundingPanel({
                     amount: amount,
                     type: 'sell'
                 });
+                showNotification('success', isQueue ? 'Withdrawal Queued' : 'Withdrawal Successful');
             }
             setAmount('');
         } catch (err: any) {
-            alert(`${isBuy ? 'Contribution' : 'Withdrawal'} failed: ${err.message}`);
+            showNotification('error', `${isBuy ? 'Contribution' : 'Withdrawal'} failed: ${err.message}`);
         } finally {
             setLoading(false);
         }

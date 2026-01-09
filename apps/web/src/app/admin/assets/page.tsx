@@ -12,6 +12,7 @@ import {
     BarChart3,
     Loader2
 } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 // Mock data
 const mockAssets = [
@@ -69,25 +70,31 @@ export default function AdminAssetsPage() {
         }
     };
 
+    const { showNotification, showConfirm } = useNotification();
+
     const handleDelete = async (id: string, name: string) => {
-        if (!confirm(`Are you sure you want to delete ${name}? This action cannot be undone.`)) return;
+        showConfirm({
+            message: `Are you sure you want to delete ${name}? This action cannot be undone.`,
+            confirmText: 'Delete',
+            onConfirm: async () => {
+                try {
+                    const res = await fetch(`/api/admin/assets?id=${id}`, {
+                        method: 'DELETE',
+                    });
 
-        try {
-            const res = await fetch(`/api/admin/assets?id=${id}`, {
-                method: 'DELETE',
-            });
-
-            if (res.ok) {
-                setAssets(prev => prev.filter(a => a.id !== id));
-                alert('Asset deleted successfully');
-            } else {
-                const data = await res.json();
-                alert(data.error || 'Failed to delete asset');
+                    if (res.ok) {
+                        setAssets(prev => prev.filter(a => a.id !== id));
+                        showNotification('success', 'Asset deleted successfully');
+                    } else {
+                        const data = await res.json();
+                        showNotification('error', data.error || 'Failed to delete asset');
+                    }
+                } catch (error) {
+                    console.error('Error deleting asset:', error);
+                    showNotification('error', 'Error deleting asset');
+                }
             }
-        } catch (error) {
-            console.error('Error deleting asset:', error);
-            alert('Error deleting asset');
-        }
+        });
     };
 
     const handleEdit = (asset: any) => {

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Shield, Target } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 interface OrderFormProps {
     assetId: string;
@@ -45,6 +46,8 @@ export function OrderForm({
 
     const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
     const isHighSpread = spreadPercent > 0.05; // 5% threshold
+
+    const { showNotification } = useNotification();
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -87,8 +90,9 @@ export function OrderForm({
             setStopLoss('');
             setTakeProfit('');
             onTradeSuccess?.();
+            showNotification('success', 'Order executed successfully');
         } catch (err: any) {
-            alert(`Order failed: ${err.message}`);
+            showNotification('error', `Order failed: ${err.message}`);
         } finally {
             setLoading(false);
         }

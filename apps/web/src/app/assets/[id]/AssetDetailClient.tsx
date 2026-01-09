@@ -20,6 +20,7 @@ import {
     Microscope,
     LayoutGrid
 } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 const TYPE_ICONS: Record<string, any> = {
     social: Users,
@@ -123,6 +124,8 @@ export function AssetDetailClient({
         return () => clearInterval(interval);
     }, [asset.id]);
 
+    const { showNotification } = useNotification();
+
     const handleChartUpdate = async (updates: Partial<Record<'stopLoss' | 'takeProfit', number | null>>) => {
         const entryPrice = asset.userPosition?.avgPrice || 0;
         const isLong = (asset.userPosition?.shares || 0) > 0;
@@ -153,9 +156,12 @@ export function AssetDetailClient({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assetId: asset.id, stopLoss: slValue, takeProfit: tpValue }),
             });
-            if (res.ok) refreshData();
+            if (res.ok) {
+                refreshData();
+                showNotification('success', 'Position targets updated');
+            }
         } catch (err: any) {
-            alert(err.message);
+            showNotification('error', err.message);
         } finally {
             setIsUpdatingTargets(false);
         }

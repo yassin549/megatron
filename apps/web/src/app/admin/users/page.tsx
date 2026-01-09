@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useNotification } from '@/context/NotificationContext';
 
 interface User {
     id: string;
@@ -100,28 +101,35 @@ export default function AdminUsersPage() {
         }
     };
 
+    const { showNotification, showConfirm } = useNotification();
+
     const handleBlacklist = async (userId: string, currentStatus: boolean) => {
         const action = currentStatus ? 'unblock' : 'block';
-        if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+        showConfirm({
+            message: `Are you sure you want to ${action} this user?`,
+            confirmText: action.charAt(0).toUpperCase() + action.slice(1),
+            onConfirm: async () => {
+                try {
+                    const res = await fetch('/api/admin/users', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, isBlacklisted: !currentStatus }),
+                    });
 
-        try {
-            const res = await fetch('/api/admin/users', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, isBlacklisted: !currentStatus }),
-            });
-
-            if (res.ok) {
-                setUsers(prev => prev.map(u =>
-                    u.id === userId ? { ...u, isBlacklisted: !currentStatus } : u
-                ));
-            } else {
-                alert(`Failed to ${action} user`);
+                    if (res.ok) {
+                        setUsers(prev => prev.map(u =>
+                            u.id === userId ? { ...u, isBlacklisted: !currentStatus } : u
+                        ));
+                        showNotification('success', `User ${action}ed successfully`);
+                    } else {
+                        showNotification('error', `Failed to ${action} user`);
+                    }
+                } catch (err) {
+                    console.error(`Error during ${action}:`, err);
+                    showNotification('error', `Error during ${action}`);
+                }
             }
-        } catch (err) {
-            console.error(`Error during ${action}:`, err);
-            alert(`Error during ${action}`);
-        }
+        });
     };
 
     if (loading && users.length === 0) {

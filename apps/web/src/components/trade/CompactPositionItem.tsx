@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useNotification } from '@/context/NotificationContext';
 
 interface Position {
     assetId: string;
@@ -59,9 +60,11 @@ export function CompactPositionItem({
     const isProfit = position.returnAbs >= 0;
     const isShort = position.shares < 0;
 
+    const { showNotification } = useNotification();
+
     const handleExit = async () => {
         if (!position.shares || Math.abs(position.shares) < 0.000001) {
-            alert("No active position to exit.");
+            showNotification('info', "No active position to exit.");
             return;
         }
         setIsExiting(true);
@@ -77,12 +80,13 @@ export function CompactPositionItem({
             });
             if (res.ok) {
                 onActionSuccess?.();
+                showNotification('success', 'Position exited successfully');
             } else {
                 const data = await res.json();
                 throw new Error(data.error || 'Exit failed');
             }
         } catch (err: any) {
-            alert(err.message);
+            showNotification('error', err.message);
         } finally {
             setIsExiting(false);
         }
@@ -102,9 +106,10 @@ export function CompactPositionItem({
             if (res.ok) {
                 setIsExpanded(false);
                 onActionSuccess?.();
+                showNotification('success', 'Targets updated');
             }
         } catch (err: any) {
-            alert('Update failed');
+            showNotification('error', 'Update failed');
         } finally {
             setIsUpdating(false);
         }

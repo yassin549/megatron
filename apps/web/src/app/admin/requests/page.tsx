@@ -9,6 +9,7 @@ import {
     X,
     Loader2
 } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 export default function AdminRequestsPage() {
     const [isAdmin, setIsAdmin] = useState(false);
@@ -41,27 +42,33 @@ export default function AdminRequestsPage() {
         checkAdmin();
     }, [router]);
 
+    const { showNotification, showConfirm } = useNotification();
+
     const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
-        if (!confirm(`Are you sure you want to ${status} this request?`)) return;
+        showConfirm({
+            message: `Are you sure you want to ${status} this request?`,
+            confirmText: status.charAt(0).toUpperCase() + status.slice(1),
+            onConfirm: async () => {
+                try {
+                    const res = await fetch('/api/admin/requests', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ requestId: id, status }),
+                    });
 
-        try {
-            const res = await fetch('/api/admin/requests', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ requestId: id, status }),
-            });
-
-            if (res.ok) {
-                setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-                alert(`Request ${status} successfully`);
-            } else {
-                const data = await res.json();
-                alert(data.error || `Failed to ${status} request`);
+                    if (res.ok) {
+                        setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+                        showNotification('success', `Request ${status} successfully`);
+                    } else {
+                        const data = await res.json();
+                        showNotification('error', data.error || `Failed to ${status} request`);
+                    }
+                } catch (error) {
+                    console.error(`Error updating request status:`, error);
+                    showNotification('error', `Error updating request`);
+                }
             }
-        } catch (error) {
-            console.error(`Error updating request status:`, error);
-            alert(`Error updating request`);
-        }
+        });
     };
 
     if (loading && requests.length === 0) {
@@ -141,8 +148,8 @@ export default function AdminRequestsPage() {
                                         <tr key={request.id} className="hover:bg-primary/5 transition-colors group">
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${type === 'Feature'
-                                                        ? 'bg-amber-500/10 text-amber-500'
-                                                        : 'bg-blue-500/10 text-blue-500'
+                                                    ? 'bg-amber-500/10 text-amber-500'
+                                                    : 'bg-blue-500/10 text-blue-500'
                                                     }`}>
                                                     {type}
                                                 </span>

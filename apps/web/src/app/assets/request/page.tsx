@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useNotification } from '@/context/NotificationContext';
 
 export default function AssetRequestPage() {
     const { data: session, status } = useSession();
@@ -33,13 +34,15 @@ export default function AssetRequestPage() {
         );
     }
 
+    const { showNotification } = useNotification();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
         // TODO: API call
         await new Promise((r) => setTimeout(r, 1000));
         setSubmitting(false);
-        alert('Request submitted! An admin will review it shortly.');
+        showNotification('success', 'Request submitted! An admin will review it shortly.');
         router.push('/assets');
     };
 
