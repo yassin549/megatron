@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { ChartBar, Trophy, LogOut, Copy, Check, PieChart, Layers, Menu, X } from 'lucide-react';
+import { ChartBar, Trophy, LogOut, Copy, Check, PieChart, Layers, Menu, X, Shield, Wallet, Settings, ExternalLink } from 'lucide-react';
+import { NavMegaCard } from '@/components/layout/NavMegaCard';
 
 interface ProfileHoverCardProps {
     isOpen?: boolean;
@@ -61,67 +62,110 @@ export function ProfileHoverCard({ isOpen: controlledIsOpen, onToggle }: Profile
                 </div>
             </button>
 
-            {/* Popover Content */}
-            {isOpen && (
-                <div className="nav-popover-content absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-xl shadow-2xl backdrop-blur-xl overflow-hidden animate-in fade-in slide-in-from-top-2 origin-top-right">
-                    {/* Header */}
-                    <div className="p-4 bg-secondary/50 border-b border-border">
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm font-bold text-foreground truncate">
-                                {session.user.email}
-                            </p>
-                            {session.user.isAdmin && (
-                                <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20 font-mono">
-                                    ADMIN
-                                </span>
-                            )}
+            <NavMegaCard
+                isOpen={isOpen}
+                onClose={() => onToggle ? onToggle() : setInternalOpen(false)}
+                title="Account"
+                description="Identity & Settings"
+                icon={Menu}
+                footer={
+                    <button
+                        onClick={() => signOut({ callbackUrl: '/' })}
+                        className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all font-bold text-xs uppercase tracking-widest group"
+                    >
+                        <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                        Log Out Session
+                    </button>
+                }
+            >
+                <div className="space-y-8">
+                    {/* Identity Header */}
+                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4">
+                            <Shield className="w-12 h-12 text-primary/10 -rotate-12 group-hover:scale-110 transition-transform" />
                         </div>
-                        <button
-                            onClick={copyId}
-                            className="flex items-center gap-1.5 mt-1 cursor-pointer hover:text-foreground text-xs text-muted-foreground transition-colors group/copy"
-                        >
-                            <span className="font-mono">
-                                {session.user.id.slice(0, 6)}...{session.user.id.slice(-4)}
-                            </span>
-                            {copied ? (
-                                <Check className="w-3 h-3 text-emerald-500" />
-                            ) : (
-                                <Copy className="w-3 h-3 opacity-0 group-hover/copy:opacity-100 transition-opacity" />
-                            )}
-                        </button>
+
+                        <div className="flex items-center gap-4 relative z-10">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl ring-2 ring-primary/20">
+                                {session.user.email?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="font-bold text-white text-lg truncate leading-tight">{session.user.name || 'Trader'}</p>
+                                <p className="text-xs text-zinc-500 truncate mt-0.5">{session.user.email}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[9px] font-black text-primary border border-primary/20 uppercase tracking-tighter">
+                                        Active
+                                    </span>
+                                    {session.user.isAdmin && (
+                                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-[9px] font-black text-amber-500 border border-amber-500/20 uppercase tracking-tighter">
+                                            Admin
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5">
+                            <button
+                                onClick={copyId}
+                                className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 hover:text-white transition-colors"
+                            >
+                                <Copy className="w-3 h-3" />
+                                {session.user.id.slice(0, 12)}...
+                                {copied && <Check className="w-3 h-3 text-emerald-500" />}
+                            </button>
+                            <Link href="/profile" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-widest">
+                                Manage <ExternalLink className="w-2.5 h-2.5" />
+                            </Link>
+                        </div>
                     </div>
 
-                    {/* Menu Items */}
-                    <div className="p-2 space-y-1">
-                        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all hover:pl-4">
-                            <ChartBar className="w-4 h-4" />
-                            Dashboard
+                    {/* Navigation Grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <Link href="/dashboard" className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
+                            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                                <ChartBar className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-bold text-white">Dashboard</span>
                         </Link>
-                        <Link href="/portfolio" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all hover:pl-4">
-                            <PieChart className="w-4 h-4" />
-                            Portfolio
+                        <Link href="/portfolio" className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                                <PieChart className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-bold text-white">Portfolio</span>
                         </Link>
-                        <Link href="/lp" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all hover:pl-4">
-                            <Layers className="w-4 h-4" />
-                            Liquidity Pools
+                        <Link href="/lp" className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
+                            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                                <Layers className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-bold text-white">Pools</span>
                         </Link>
-                        <Link href="/leaderboard" className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-all hover:pl-4">
-                            <Trophy className="w-4 h-4" />
-                            Leaderboard
+                        <Link href="/wallet" className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
+                            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+                                <Wallet className="w-4 h-4" />
+                            </div>
+                            <span className="text-xs font-bold text-white">Wallet</span>
                         </Link>
                     </div>
 
-                    <div className="p-2 border-t border-border">
-                        <button
-                            onClick={() => signOut({ callbackUrl: '/' })}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors font-medium hover:pl-4"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            Log Out
-                        </button>
+                    {/* Footer Actions */}
+                    <div className="space-y-1">
+                        <Link href="/leaderboard" className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
+                            <div className="flex items-center gap-3">
+                                <Trophy className="w-4 h-4 text-amber-500/50" />
+                                Leaderboard
+                            </div>
+                            <Check className="w-3 h-3 opacity-0 group-hover:opacity-100" />
+                        </Link>
+                        <Link href="/settings" className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
+                            <div className="flex items-center gap-3">
+                                <Settings className="w-4 h-4 text-zinc-600" />
+                                My Settings
+                            </div>
+                        </Link>
                     </div>
                 </div>
-            )}
+            </NavMegaCard>
         </div>
     );
 }

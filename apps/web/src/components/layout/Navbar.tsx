@@ -10,7 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
-import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid } from 'lucide-react';
+import { NavMegaCard } from '@/components/layout/NavMegaCard';
+import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History } from 'lucide-react';
 
 // Robust image component for search results
 
@@ -217,46 +218,64 @@ export function Navbar() {
                                     <Bookmark className="w-5 h-5" />
                                 </button>
 
-                                {isBookmarksOpen && (
-                                    <div className="nav-popover-content absolute right-0 top-full mt-2 w-72 glass-panel rounded-xl animate-in fade-in slide-in-from-top-2 origin-top-right overflow-hidden">
-                                        <div className="p-3 border-b border-white/5 flex items-center justify-between">
-                                            <h3 className="text-sm font-semibold text-white">Bookmarks</h3>
-                                            <span className="text-xs text-muted-foreground">{bookmarks.length} assets</span>
-                                        </div>
-                                        <div className="max-h-64 overflow-y-auto p-2">
-                                            {loadingBookmarks ? (
-                                                <div className="p-4 text-center text-xs text-muted-foreground animate-pulse">Loading data...</div>
-                                            ) : bookmarks.length > 0 ? (
-                                                <div className="space-y-1">
-                                                    {bookmarks.map((bm) => (
-                                                        <Link
-                                                            key={bm.id}
-                                                            href={`/assets/${bm.id}`}
-                                                            className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors group"
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded bg-obsidian-800 border border-white/5 flex items-center justify-center">
-                                                                    <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-sm font-medium text-white group-hover:text-primary transition-colors">{bm.name}</p>
-                                                                    <p className="text-xs text-muted-foreground font-mono">${bm.price.toFixed(2)}</p>
-                                                                </div>
+                                <NavMegaCard
+                                    isOpen={isBookmarksOpen}
+                                    onClose={() => setIsBookmarksOpen(false)}
+                                    title="Watchlist"
+                                    description="Saved Markets"
+                                    icon={Bookmark}
+                                    footer={
+                                        <Link
+                                            href="/bookmarks"
+                                            onClick={() => setIsBookmarksOpen(false)}
+                                            className="block w-full text-center py-2 text-xs font-bold text-primary hover:text-white transition-colors uppercase tracking-widest"
+                                        >
+                                            View all {bookmarks.length} Bookmarks
+                                        </Link>
+                                    }
+                                >
+                                    <div className="space-y-4">
+                                        {loadingBookmarks ? (
+                                            <div className="space-y-3">
+                                                {[1, 2, 3].map(i => (
+                                                    <div key={i} className="h-16 bg-white/5 rounded-2xl animate-pulse" />
+                                                ))}
+                                            </div>
+                                        ) : bookmarks.length > 0 ? (
+                                            <div className="grid gap-2">
+                                                {bookmarks.slice(0, 6).map((bm) => (
+                                                    <Link
+                                                        key={bm.id}
+                                                        href={`/assets/${bm.id}`}
+                                                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-white/5 flex items-center justify-center">
+                                                                <Star className="w-4 h-4 text-zinc-500 group-hover:text-primary transition-colors" />
                                                             </div>
-                                                            <span className={`text-xs font-mono font-bold ${bm.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
+                                                            <div>
+                                                                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{bm.name}</p>
+                                                                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">${bm.price.toFixed(2)}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <span className={`text-xs font-mono font-black ${bm.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
                                                                 {bm.change24h > 0 ? '+' : ''}{bm.change24h.toFixed(2)}%
                                                             </span>
-                                                        </Link>
-                                                    ))}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-20 text-center flex flex-col items-center">
+                                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                                    <Bookmark className="w-6 h-6 text-zinc-600" />
                                                 </div>
-                                            ) : (
-                                                <div className="py-8 text-center text-muted-foreground text-sm">
-                                                    No bookmarks yet
-                                                </div>
-                                            )}
-                                        </div>
+                                                <p className="text-sm text-zinc-500">No bookmarked markets</p>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
+                                </NavMegaCard>
                             </div>
 
                             {/* Notifications Popover */}
@@ -274,17 +293,45 @@ export function Navbar() {
                                     <span className="absolute top-2 right-2 w-2 h-2 bg-neon-emerald rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></span>
                                 </button>
 
-                                {isNotifOpen && (
-                                    <div className="nav-popover-content absolute right-0 top-full mt-2 w-80 glass-panel rounded-xl animate-in fade-in slide-in-from-top-2 origin-top-right overflow-hidden p-4">
-                                        <h3 className="text-sm font-semibold mb-3 text-white">Activity Stream</h3>
-                                        <div className="space-y-3">
-                                            <div className="py-8 text-center text-muted-foreground text-sm flex flex-col items-center">
-                                                <Activity className="w-8 h-8 opacity-20 mb-2" />
-                                                <p>No recent activity detected</p>
+                                <NavMegaCard
+                                    isOpen={isNotifOpen}
+                                    onClose={() => setIsNotifOpen(false)}
+                                    title="Activity"
+                                    description="Neural Updates"
+                                    icon={Activity}
+                                    footer={
+                                        <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-600 font-mono uppercase tracking-[0.2em]">
+                                            <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
+                                            Monitoring Live Oracle Events
+                                        </div>
+                                    }
+                                >
+                                    <div className="space-y-6">
+                                        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                                            <div className="flex items-start gap-4">
+                                                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                    <History className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-bold text-white">System Status</h4>
+                                                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                                                        The Neural Engine is currently analyzing 2,400+ world variables in real-time.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Recent events</h5>
+                                            <div className="py-12 text-center flex flex-col items-center">
+                                                <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center mb-3">
+                                                    <Activity className="w-5 h-5 text-zinc-800" />
+                                                </div>
+                                                <p className="text-[11px] text-zinc-600 uppercase tracking-wider">Passive mode active</p>
                                             </div>
                                         </div>
                                     </div>
-                                )}
+                                </NavMegaCard>
                             </div>
 
                             {/* Profile Popover */}
