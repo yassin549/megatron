@@ -43,13 +43,19 @@ export default function AdminDashboardPage() {
 
     const fetchDashboardData = async () => {
         try {
-            const res = await fetch('/api/admin/stats');
+            const password = localStorage.getItem('megatron_admin_password');
+            const res = await fetch('/api/admin/stats', {
+                headers: {
+                    'X-Admin-Password': password || ''
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setStats(data.stats);
                 setHealth(data.health);
             } else if (res.status === 401) {
                 localStorage.removeItem('megatron_admin');
+                localStorage.removeItem('megatron_admin_password');
                 router.push('/admin/login');
             }
         } catch (err) {
@@ -104,22 +110,22 @@ export default function AdminDashboardPage() {
                         </p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
-                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                        <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Total Volume (24h)
                         </p>
-                        <p className="text-3xl font-bold mt-1">
-                            ${stats?.totalVolume24h?.toLocaleString() ?? '--'}
+                        <p className="text-3xl font-bold mt-1 text-white">
+                            {stats?.totalVolume24h !== undefined ? `$${stats.totalVolume24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
                             Global trade volume
                         </p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
-                        <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
+                        <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Platform Revenue
                         </p>
-                        <p className="text-3xl font-bold mt-1">
-                            ${stats?.treasuryBalance?.toLocaleString() ?? '--'}
+                        <p className="text-3xl font-bold mt-1 text-neon-emerald">
+                            {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--'}
                         </p>
                         <p className="text-xs text-muted-foreground mt-2">
                             Cumulative treasury balance

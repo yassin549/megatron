@@ -31,6 +31,7 @@ export default function AdminLoginPage() {
 
             // Store admin session in localStorage (simple approach)
             localStorage.setItem('megatron_admin', 'true');
+            localStorage.setItem('megatron_admin_password', password);
             router.push('/admin/dashboard');
         } catch (err) {
             setError('An error occurred. Please try again.');

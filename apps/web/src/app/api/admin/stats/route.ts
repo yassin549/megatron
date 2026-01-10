@@ -5,21 +5,30 @@ import { authOptions } from '@/lib/auth';
 import { getRedisClient } from '@megatron/lib-integrations';
 import { MONETARY_CONFIG } from '@megatron/lib-common';
 
-async function isAdmin() {
+async function isAdmin(req: Request) {
+    // 1. Check Session (Standard)
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return false;
+    if (session?.user?.id) {
+        const user = await db.user.findUnique({
+            where: { id: session.user.id },
+            select: { isAdmin: true }
+        });
+        if (user?.isAdmin) return true;
+    }
 
-    const user = await db.user.findUnique({
-        where: { id: session.user.id },
-        select: { isAdmin: true }
-    });
+    // 2. Check Header (Admin Dashboard Specific)
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const headerPassword = req.headers.get('X-Admin-Password');
+    if (adminPassword && headerPassword === adminPassword) {
+        return true;
+    }
 
-    return user?.isAdmin === true;
+    return false;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        if (!await isAdmin()) {
+        if (!await isAdmin(req)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
