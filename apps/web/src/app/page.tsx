@@ -76,7 +76,7 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
 
             <SubNavbar />
 
-            <main className="max-w-[1240px] mx-auto px-4 sm:px-6 py-8 relative z-10">
+            <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 relative z-10">
                 {/* Guest Welcome Banner - Server Rendered */}
                 {showHero && (
                     <div className="mb-8 md:mb-16 relative overflow-hidden rounded-3xl border border-white/10 group animate-in slide-in-from-bottom-4 duration-700">

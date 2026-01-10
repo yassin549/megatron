@@ -97,7 +97,7 @@ export default function BookmarksPage() {
 
             <SubNavbar />
 
-            <main className="max-w-[1240px] mx-auto px-4 sm:px-6 py-8 relative z-10">
+            <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 relative z-10">
                 {/* Back Link */}
                 <Link href="/" className="inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-white mb-8 transition-colors group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
