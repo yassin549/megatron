@@ -52,19 +52,7 @@ export default function LoginPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-obsidian-900 to-obsidian-950" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-[url('/grid-pattern.svg')] opacity-20 pointer-events-none animate-pulse-slow" />
 
-                <div className="relative z-10">
-                    <Link href="/" className="flex items-center gap-3 w-fit group">
-                        <div className="w-10 h-10 relative">
-                            <Image
-                                src="/images/megatron-logo.jpg"
-                                alt="Megatron Logo"
-                                fill
-                                className="object-contain mix-blend-screen filter brightness-110 contrast-125"
-                            />
-                        </div>
-                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors">MEGATRON</span>
-                    </Link>
-                </div>
+                <div className="relative z-10" />
 
                 <div className="relative z-10 max-w-lg">
                     <motion.div
@@ -97,16 +85,6 @@ export default function LoginPage() {
 
                 <div className="w-full max-w-[400px] space-y-8">
                     <div className="text-center lg:text-left">
-                        <Link href="/" className="lg:hidden inline-block mb-8">
-                            <div className="w-12 h-12 relative mx-auto">
-                                <Image
-                                    src="/images/megatron-logo.jpg"
-                                    alt="Megatron Logo"
-                                    fill
-                                    className="object-contain mix-blend-screen filter brightness-110 contrast-125"
-                                />
-                            </div>
-                        </Link>
                         <h1 className="text-3xl font-bold text-white tracking-tight">Welcome back</h1>
                         <p className="text-muted-foreground mt-2">Enter your credentials to access your account</p>
                     </div>
