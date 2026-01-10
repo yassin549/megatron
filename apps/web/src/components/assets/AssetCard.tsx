@@ -192,14 +192,14 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-2xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
+                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-sm transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
                     } ${viewMode === 'list'
-                        ? 'flex items-center gap-6 p-4'
-                        : 'flex flex-col p-4'
+                        ? 'flex items-center gap-6 p-3'
+                        : 'flex flex-col p-3'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
@@ -211,7 +211,7 @@ export function AssetCard({
                             animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
                             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                             transition={{ duration: 0.2 }}
-                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-2xl border border-white/10"
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-sm border border-white/10"
                         >
                             {/* Bookmark Button - Top Right */}
                             <motion.button
@@ -254,7 +254,7 @@ export function AssetCard({
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-xl bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
+                        <div className={`relative overflow-hidden rounded bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
