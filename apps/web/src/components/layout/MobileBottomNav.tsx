@@ -22,7 +22,7 @@ export function MobileBottomNav() {
 
     return (
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 pointer-events-none">
-            <nav className="glass-nav rounded-2xl flex items-center justify-around p-2 shadow-[0_0_20px_rgba(0,0,0,0.5)] pointer-events-auto bg-obsidian-900/80 border border-white/10">
+            <nav className="glass-nav rounded-2xl flex items-center justify-around p-2 shadow-[0_0_20px_rgba(0,0,0,0.5)] pointer-events-auto bg-obsidian-900 border border-white/10">
                 {tabs.map((tab) => {
                     const isActive = pathname === tab.href || (tab.href !== '/' && pathname.startsWith(tab.href));
                     const Icon = tab.icon;

@@ -135,7 +135,7 @@ export function NavbarSearch() {
                         initial={{ opacity: 0, y: 10, scale: 0.98 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-obsidian-950/95 backdrop-blur-2xl rounded-xl overflow-hidden z-50 shadow-2xl border border-white/10"
+                        className="absolute top-full left-0 right-0 mt-2 bg-obsidian-950 overflow-hidden z-50 shadow-2xl border border-white/10"
                     >
                         <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
                             {isSearching ? (
