@@ -92,15 +92,15 @@
 
   /* Glassmorphism Classes */
   .glass-panel {
-    @apply bg-card/60 backdrop-blur-xl border border-white/5 shadow-2xl;
+    @apply bg-card border border-white/5 shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-card/40 backdrop-blur-lg border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
+    @apply bg-card border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
   }
 
   .glass-nav {
-    @apply bg-background/80 backdrop-blur-2xl border-b border-white/5;
+    @apply bg-background border-b border-white/5 shadow-lg;
   }
 
   /* Text Effects */

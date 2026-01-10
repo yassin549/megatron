@@ -192,14 +192,14 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-sm transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
+                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
-                <div className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
@@ -211,7 +211,7 @@ export function AssetCard({
                             animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
                             exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
                             transition={{ duration: 0.2 }}
-                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-sm border border-white/10"
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-md border border-white/10"
                         >
                             {/* Bookmark Button - Top Right */}
                             <motion.button

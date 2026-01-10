@@ -39,16 +39,16 @@ export function StatusModal({ type, message, onClose, title }: StatusModalProps)
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="relative bg-zinc-950 border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center"
+                className="relative bg-zinc-950 border border-white/10 rounded-2xl p-8 max-w-sm w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center"
             >
                 <button
                     onClick={onClose}
-                    className="absolute right-6 top-6 p-2 rounded-xl hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"
+                    className="absolute right-6 top-6 p-2 rounded-lg hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"
                 >
                     <X className="w-5 h-5" />
                 </button>
 
-                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${styles[type]}`}>
+                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 ${styles[type]}`}>
                     {icons[type]}
                 </div>
 
@@ -62,7 +62,7 @@ export function StatusModal({ type, message, onClose, title }: StatusModalProps)
 
                 <button
                     onClick={onClose}
-                    className="w-full py-4 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.95]"
+                    className="w-full py-4 bg-white text-black rounded-xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all active:scale-[0.95]"
                 >
                     CONTINUE
                 </button>

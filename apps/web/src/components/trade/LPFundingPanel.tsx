@@ -137,7 +137,7 @@ export function LPFundingPanel({
 
     if (status !== 'authenticated') {
         return (
-            <div className="bg-zinc-900 border border-white/5 rounded-2xl p-8 text-center backdrop-blur-xl shadow-2xl">
+            <div className="bg-zinc-900 border border-white/5 rounded-xl p-8 text-center shadow-2xl">
                 <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <Droplets className="w-8 h-8 text-blue-400" />
                 </div>
@@ -155,7 +155,7 @@ export function LPFundingPanel({
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-3 md:p-4 backdrop-blur-xl md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-3 md:p-4 md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
             {/* Tabs */}
             <div className="flex bg-black/40 rounded-lg p-0.5 mb-3 relative border border-white/5">
                 <motion.div
@@ -289,7 +289,7 @@ export function LPFundingPanel({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all"
+                                className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all"
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-medium">
                                 USDC
@@ -318,7 +318,7 @@ export function LPFundingPanel({
                     </div>
 
                     {/* Summary Card */}
-                    <div className="flex justify-between items-center bg-black/40 border border-white/5 rounded-xl p-3 mb-4">
+                    <div className="flex justify-between items-center bg-black/40 border border-white/5 rounded-lg p-3 mb-4">
                         <span className="text-[9px] text-zinc-500 uppercase tracking-wide">
                             {isBuy ? 'Shares to Receive' : 'Execution'}
                         </span>
@@ -331,7 +331,7 @@ export function LPFundingPanel({
                     <button
                         onClick={handleAction}
                         disabled={!amount || parseFloat(amount) <= 0 || loading}
-                        className={`w-full py-3 rounded-xl font-semibold text-[10px] md:text-xs tracking-wide shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
+                        className={`w-full py-3 rounded-lg font-semibold text-[10px] md:text-xs tracking-wide shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
                             ${isBuy
                                 ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-900/30 hover:from-blue-500 hover:to-blue-400'
                                 : 'bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-rose-900/30 hover:from-rose-500 hover:to-rose-400'

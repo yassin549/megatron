@@ -187,7 +187,7 @@ export function Navbar() {
                         <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200">
                             MEGATRON
                         </span>
-                        <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                        <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
                             BETA
                         </span>
                     </div>
@@ -428,7 +428,7 @@ export function Navbar() {
                                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
                                     {/* 1. Account Identity */}
                                     {status === 'authenticated' ? (
-                                        <div className="relative p-5 rounded-2xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
+                                        <div className="relative p-5 rounded-xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-primary/20">
                                                     {session?.user?.email?.[0].toUpperCase()}

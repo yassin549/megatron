@@ -101,7 +101,7 @@ export function OrderForm({
 
     if (status !== 'authenticated') {
         return (
-            <div className="bg-zinc-900 border border-white/5 rounded-2xl p-6 text-center backdrop-blur-xl shadow-2xl">
+            <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 text-center shadow-2xl">
                 <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
                     <TrendingUp className="w-6 h-6 text-emerald-400" />
                 </div>
@@ -118,7 +118,7 @@ export function OrderForm({
     }
 
     return (
-        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl p-4 backdrop-blur-xl shadow-xl">
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-4 shadow-xl">
             {/* Buy/Sell Tabs */}
             <div className="flex bg-black/40 rounded-lg p-1 mb-4 relative border border-white/5">
                 <motion.div
@@ -178,7 +178,7 @@ export function OrderForm({
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-lg font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
+                        className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-lg font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
                     />
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-bold">
                         USDC
@@ -222,7 +222,7 @@ export function OrderForm({
             <button
                 onClick={handleTrade}
                 disabled={!amount || loading}
-                className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wide transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
+                className={`w-full py-3 rounded-lg font-bold text-xs uppercase tracking-wide transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
                     ${isBuy
                         ? 'bg-gradient-to-r from-emerald-600 to-emerald-400 text-white'
                         : 'bg-gradient-to-r from-rose-600 to-rose-400 text-white'
