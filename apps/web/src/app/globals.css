@@ -48,7 +48,7 @@
     --input: 217 33% 15%;
     --ring: 224 76% 48%;
 
-    --radius: 0px;
+    --radius: 4px;
     /* 12px */
   }
 }
@@ -81,7 +81,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-secondary rounded-none hover:bg-primary/50 transition-colors;
+    @apply bg-secondary rounded-md hover:bg-primary/50 transition-colors;
   }
 }
 
