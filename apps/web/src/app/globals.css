@@ -92,7 +92,8 @@
 
   /* Glassmorphism Classes - Refined for Premium Feel */
   .glass-panel {
-    @apply bg-card/80 backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.8)];
+    @apply bg-card/80 backdrop-blur-xl border border-white/[0.08];
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
   }
 
   .glass-card {
