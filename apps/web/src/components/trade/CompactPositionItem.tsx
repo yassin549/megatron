@@ -11,8 +11,7 @@ import {
     Target,
     ArrowUpRight,
     Loader2,
-    X,
-    LogOut
+    X
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
