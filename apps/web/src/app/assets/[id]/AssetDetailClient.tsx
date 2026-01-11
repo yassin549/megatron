@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
@@ -18,9 +19,11 @@ import {
     Bitcoin,
     Vote,
     Microscope,
-    LayoutGrid
+    LayoutGrid,
+    Zap
 } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const TYPE_ICONS: Record<string, any> = {
     social: Users,
@@ -93,6 +96,12 @@ export function AssetDetailClient({
     const [orderTakeProfit, setOrderTakeProfit] = useState(initialAsset.userPosition?.takeProfit?.toString() || '');
     const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
+    const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     async function refreshData() {
         try {
@@ -340,8 +349,8 @@ export function AssetDetailClient({
                 </div>
             </div>
 
-            {/* Main Sidebar - Solid Column */}
-            <div className="col-span-12 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] z-20">
+            {/* Main Sidebar - Desktop Only (lg:block) */}
+            <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] z-20">
                 <div className="h-full pt-36 px-6 py-6 overflow-y-auto custom-scrollbar">
                     {asset && (
                         <TradingSidebar
@@ -357,6 +366,89 @@ export function AssetDetailClient({
                     )}
                 </div>
             </div>
+
+            {/* Mobile Floating Button & Overlay */}
+            {mounted && createPortal(
+                <>
+                    {/* Floating Square Button */}
+                    <div className="lg:hidden fixed bottom-32 right-4 z-[60]">
+                        <motion.button
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setIsMobileTradeOpen(true)}
+                            className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-white/20"
+                        >
+                            <TrendingUp className="w-6 h-6" />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-zinc-900 flex items-center justify-center">
+                                <Plus className="w-2.5 h-2.5 text-white" />
+                            </div>
+                        </motion.button>
+                    </div>
+
+                    <AnimatePresence>
+                        {isMobileTradeOpen && (
+                            <>
+                                {/* Backdrop */}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsMobileTradeOpen(false)}
+                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+                                />
+
+                                {/* Overlay Card */}
+                                <div className="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none px-4">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        className="bg-zinc-950/95 border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl rounded-[32px] w-full max-w-[400px] flex flex-col pointer-events-auto overflow-hidden relative max-h-[85vh]"
+                                    >
+                                        {/* Header */}
+                                        <div className="p-6 pb-2 flex items-center justify-between border-b border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-primary/10 rounded-xl">
+                                                    <Zap className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <h3 className="font-black text-white text-lg tracking-tight uppercase">Trading Desk</h3>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsMobileTradeOpen(false)}
+                                                className="p-2 rounded-full hover:bg-white/5 text-zinc-400"
+                                            >
+                                                <X className="w-6 h-6" />
+                                            </button>
+                                        </div>
+
+                                        {/* Sidebar Content */}
+                                        <div className="flex-1 overflow-y-auto py-2">
+                                            <TradingSidebar
+                                                assetId={asset.id}
+                                                assetName={asset.name}
+                                                assetPrice={asset.price}
+                                                marketPrice={asset.marketPrice}
+                                                status={asset.status}
+                                                onTradeSuccess={() => {
+                                                    refreshData();
+                                                }}
+                                                activePositionId={activePositionId}
+                                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                            />
+                                        </div>
+
+                                        {/* Decoration */}
+                                        <div className="h-2 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                                    </motion.div>
+                                </div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </>,
+                document.body
+            )}
         </div>
     );
 }
