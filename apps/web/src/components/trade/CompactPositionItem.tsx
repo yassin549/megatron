@@ -20,6 +20,19 @@ import { useNotification } from '@/context/NotificationContext';
 import { GradualExitModal } from './GradualExitModal';
 import { MONETARY_CONFIG } from '@megatron/lib-common';
 
+interface Position {
+    assetId: string;
+    assetName: string;
+    shares: number;
+    avgPrice: number;
+    currentPrice: number;
+    value: number;
+    returnPercent: number;
+    returnAbs: number;
+    stopLoss?: number | null;
+    takeProfit?: number | null;
+}
+
 interface TimedExit {
     id: string;
     assetId: string;
