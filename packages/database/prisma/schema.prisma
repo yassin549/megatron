@@ -189,7 +189,20 @@ model Trade {
   @@index([assetId, timestamp])
   @@index([buyerId])
 }
-
+model Position {
+  id         String   @id @default(uuid())
+  userId     String
+  assetId    String
+  shares     Decimal  @db.Decimal(18, 6)
+  avgPrice   Decimal  @db.Decimal(18, 6)
+  collateral Decimal  @default(0) @db.Decimal(18, 6)
+  stopLoss   Decimal? @db.Decimal(18, 6)
+  takeProfit Decimal? @db.Decimal(18, 6)
+  updatedAt  DateTime @updatedAt
+  
+  user       User   @relation(fields: [userId], references: [id])
+  asset      Asset  @relation(fields: [assetId], references: [id])
+  
   @@unique([userId, assetId])
   @@index([userId])
 }

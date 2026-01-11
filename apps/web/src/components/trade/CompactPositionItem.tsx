@@ -10,27 +10,30 @@ import {
     Shield,
     Target,
     ArrowUpRight,
-    Loader2
+    Loader2,
+    X,
+    LogOut
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useNotification } from '@/context/NotificationContext';
 
-interface Position {
+import { GradualExitModal } from './GradualExitModal';
+import { MONETARY_CONFIG } from '@megatron/lib-common';
+
+interface TimedExit {
+    id: string;
     assetId: string;
-    assetName: string;
-    shares: number;
-    avgPrice: number;
-    currentPrice: number;
-    value: number;
-    returnPercent: number;
-    returnAbs: number;
-    stopLoss?: number | null;
-    takeProfit?: number | null;
+    totalShares: number;
+    sharesExited: number;
+    chunksTotal: number;
+    chunksCompleted: number;
+    status: string;
 }
 
 interface CompactPositionItemProps {
     position: Position;
+    timedExit?: TimedExit;
     isCurrentAsset: boolean;
     isSelected: boolean;
     onSelect: () => void;
@@ -39,6 +42,7 @@ interface CompactPositionItemProps {
 
 export function CompactPositionItem({
     position,
+    timedExit,
     isCurrentAsset,
     isSelected,
     onSelect,
@@ -47,6 +51,8 @@ export function CompactPositionItem({
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExiting, setIsExiting] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+    const [showGradualModal, setShowGradualModal] = useState(false);
     const [stopLoss, setStopLoss] = useState(position.stopLoss?.toString() || '');
     const [takeProfit, setTakeProfit] = useState(position.takeProfit?.toString() || '');
 
@@ -62,12 +68,34 @@ export function CompactPositionItem({
 
     const { showNotification, showStatusModal } = useNotification();
 
-    const handleExit = async () => {
+    const handleExit = async (isGradualOverride = false) => {
         if (!position.shares || Math.abs(position.shares) < 0.000001) {
             showNotification('info', "No active position to exit.");
             return;
         }
+
+        // --- LIQUIDITY CHECK FOR GRADUAL EXIT ---
+        if (!isGradualOverride && !isShort) { // Only recommend for large long sells for now
+            try {
+                const assetRes = await fetch(`/api/assets/${position.assetId}`);
+                if (assetRes.ok) {
+                    const assetData = await assetRes.json();
+                    const poolLiquidity = assetData.asset?.pool?.liquidityUsdc || 0;
+                    const exitValue = position.value;
+                    const impactRatio = exitValue / poolLiquidity;
+
+                    if (impactRatio > MONETARY_CONFIG.MAX_INSTANT_EXIT_POOL_RATIO) {
+                        setShowGradualModal(true);
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('Failed to check liquidity', err);
+            }
+        }
+
         setIsExiting(true);
+        setShowGradualModal(false);
         try {
             const res = await fetch('/api/trade', {
                 method: 'POST',
@@ -75,15 +103,19 @@ export function CompactPositionItem({
                 body: JSON.stringify({
                     type: isShort ? 'buy' : 'sell',
                     assetId: position.assetId,
-                    shares: Math.abs(position.shares).toString()
+                    shares: Math.abs(position.shares).toString(),
+                    isGradual: isGradualOverride,
+                    chunks: 10
                 }),
             });
             if (res.ok) {
                 await onActionSuccess?.();
                 showStatusModal({
                     type: 'success',
-                    title: 'EXIT SUCCESS',
-                    message: `Position in ${position.assetName} closed.`
+                    title: isGradualOverride ? 'GRADUAL EXIT STARTED' : 'EXIT SUCCESS',
+                    message: isGradualOverride
+                        ? `Position in ${position.assetName} will be closed over 50 minutes.`
+                        : `Position in ${position.assetName} closed.`
                 });
             } else {
                 const data = await res.json();
@@ -97,6 +129,26 @@ export function CompactPositionItem({
             });
         } finally {
             setIsExiting(false);
+        }
+    };
+
+    const handleCancelExit = async () => {
+        if (!timedExit) return;
+        setIsCancelling(true);
+        try {
+            const res = await fetch('/api/trade/timed-exit/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ timedExitId: timedExit.id }),
+            });
+            if (res.ok) {
+                await onActionSuccess?.();
+                showNotification('success', 'Gradual exit cancelled');
+            }
+        } catch (err) {
+            console.error('Failed to cancel exit', err);
+        } finally {
+            setIsCancelling(false);
         }
     };
 
@@ -150,6 +202,8 @@ export function CompactPositionItem({
         }
     };
 
+    const exitProgress = timedExit ? (timedExit.chunksCompleted / timedExit.chunksTotal) * 100 : 0;
+
     return (
         <div
             className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${isSelected
@@ -179,6 +233,11 @@ export function CompactPositionItem({
                                 }`}>
                                 {isShort ? 'Sell' : 'Buy'}
                             </span>
+                            {timedExit && (
+                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-md animate-pulse">
+                                    Exiting ({timedExit.chunksCompleted}/{timedExit.chunksTotal})
+                                </span>
+                            )}
                             {isCurrentAsset && (
                                 <span className="text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
                                     Current
@@ -216,6 +275,18 @@ export function CompactPositionItem({
                 </div>
             </button>
 
+            {timedExit && (
+                <div className="px-4 pb-4">
+                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${exitProgress}%` }}
+                            className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                        />
+                    </div>
+                </div>
+            )}
+
             <AnimatePresence>
                 {isExpanded && isCurrentAsset && (
                     <motion.div
@@ -249,18 +320,40 @@ export function CompactPositionItem({
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleExit}
-                                disabled={isExiting}
-                                className="w-full py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
-                            >
-                                {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                                EXIT POSITION
-                            </button>
+                            {timedExit ? (
+                                <button
+                                    onClick={handleCancelExit}
+                                    disabled={isCancelling}
+                                    className="w-full py-3 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    {isCancelling ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-4 h-4" />}
+                                    CANCEL GRADUAL EXIT
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleExit()}
+                                    disabled={isExiting}
+                                    className="w-full py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
+                                >
+                                    {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-4 h-4" />}
+                                    EXIT POSITION
+                                </button>
+                            )}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Gradual Exit Slippage Warning Modal */}
+            <GradualExitModal
+                isOpen={showGradualModal}
+                onClose={() => setShowGradualModal(false)}
+                onConfirmGradual={() => handleExit(true)}
+                onConfirmInstant={() => handleExit(false)}
+                assetName={position.assetName}
+                shareAmount={Math.abs(position.shares)}
+                estimatedValue={position.value}
+                isLoading={isExiting}
+            />
         </div>
     );
 }
