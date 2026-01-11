@@ -18,9 +18,15 @@ import { createPortal } from 'react-dom';
 
 type FeedbackMode = 'menu' | 'market' | 'feature';
 
+import { usePathname } from 'next/navigation';
+
 export function RequestMarketButton() {
+    const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [mode, setMode] = useState<FeedbackMode>('menu');
+
+    // Hide on mobile for asset detail pages to avoid collision with trading button
+    const isAssetPage = pathname?.startsWith('/assets/') && pathname !== '/assets/request';
 
     // Form States
     const [title, setTitle] = useState('');
@@ -183,7 +189,7 @@ export function RequestMarketButton() {
                 whileHover="hover"
                 whileTap="tap"
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-32 right-4 md:bottom-8 md:right-8 z-[60] group"
+                className={`fixed bottom-32 right-4 md:bottom-8 md:right-8 z-[60] group ${isAssetPage ? 'hidden md:block' : ''}`}
             >
                 <div className={`relative flex items-center justify-center p-4 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.3)] backdrop-blur-xl border border-white/20 transition-all duration-300 ${isOpen
                     ? 'bg-zinc-900 text-white'
