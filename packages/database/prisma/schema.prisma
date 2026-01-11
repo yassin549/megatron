@@ -32,6 +32,7 @@ model User {
   withdrawalRequests WithdrawalRequest[]
   pendingDeposits    PendingDeposit[]
   bookmarks          Bookmark[]
+  timedExits         TimedExit[]
   
   @@index([email])
 }
@@ -87,6 +88,7 @@ model Asset {
   priceTicks         PriceTick[]
   oracleLogs         OracleLog[]
   bookmarks          Bookmark[]
+  timedExits         TimedExit[]
   
   @@index([status])
   @@index([type])
@@ -188,21 +190,29 @@ model Trade {
   @@index([buyerId])
 }
 
-model Position {
-  id         String   @id @default(uuid())
-  userId     String
-  assetId    String
-  shares     Decimal  @db.Decimal(18, 6)
-  avgPrice   Decimal  @db.Decimal(18, 6)
-  collateral Decimal  @default(0) @db.Decimal(18, 6)
-  stopLoss   Decimal? @db.Decimal(18, 6)
-  takeProfit Decimal? @db.Decimal(18, 6)
-  updatedAt  DateTime @updatedAt
-  
-  user       User   @relation(fields: [userId], references: [id])
-  asset      Asset  @relation(fields: [assetId], references: [id])
-  
   @@unique([userId, assetId])
+  @@index([userId])
+}
+
+model TimedExit {
+  id              String   @id @default(uuid())
+  userId          String
+  assetId         String
+  totalShares     Decimal  @db.Decimal(18, 6)
+  sharesExited    Decimal  @default(0) @db.Decimal(18, 6)
+  chunksTotal     Int
+  chunksCompleted Int      @default(0)
+  intervalMs      Int      @default(300000) // Default 5 mins
+  status          String   @default("active") // active, completed, cancelled, failed
+  lastError       String?
+  nextExecutionAt DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id])
+  asset           Asset    @relation(fields: [assetId], references: [id])
+
+  @@index([status, nextExecutionAt])
   @@index([userId])
 }
 

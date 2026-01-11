@@ -24,6 +24,16 @@ interface PositionsListProps {
     onActionSuccess?: () => void;
 }
 
+interface TimedExit {
+    id: string;
+    assetId: string;
+    totalShares: number;
+    sharesExited: number;
+    chunksTotal: number;
+    chunksCompleted: number;
+    status: string;
+}
+
 export function PositionsList({
     currentAssetId,
     activePositionId,
@@ -31,25 +41,35 @@ export function PositionsList({
     onActionSuccess
 }: PositionsListProps) {
     const [positions, setPositions] = useState<Position[]>([]);
+    const [timedExits, setTimedExits] = useState<TimedExit[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchPositions = async () => {
+    const fetchData = async () => {
         try {
-            const res = await fetch('/api/portfolio');
-            if (res.ok) {
-                const data = await res.json();
-                setPositions(data.positions || []);
+            const [posRes, timedRes] = await Promise.all([
+                fetch('/api/portfolio'),
+                fetch('/api/portfolio/timed-exits')
+            ]);
+
+            if (posRes.ok) {
+                const posData = await posRes.json();
+                setPositions(posData.positions || []);
+            }
+
+            if (timedRes.ok) {
+                const timedData = await timedRes.json();
+                setTimedExits(timedData.timedExits || []);
             }
         } catch (err) {
-            console.error('Failed to fetch positions', err);
+            console.error('Failed to fetch positions/timed-exits', err);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchPositions();
-        const interval = setInterval(fetchPositions, 15000);
+        fetchData();
+        const interval = setInterval(fetchData, 15000);
         return () => clearInterval(interval);
     }, []);
 
@@ -87,11 +107,12 @@ export function PositionsList({
                 <CompactPositionItem
                     key={pos.assetId}
                     position={pos}
+                    timedExit={timedExits.find(te => te.assetId === pos.assetId)}
                     isCurrentAsset={pos.assetId === currentAssetId}
                     isSelected={pos.assetId === activePositionId}
                     onSelect={() => onSelectPosition?.(pos.assetId)}
                     onActionSuccess={() => {
-                        fetchPositions();
+                        fetchData();
                         onActionSuccess?.();
                     }}
                 />

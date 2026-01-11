@@ -9,6 +9,7 @@ import { processWithdrawalQueue, checkFundingDeadlines } from './jobs/lp-jobs';
 import { runSweeper } from './jobs/sweeper';
 import { startLlmScheduler } from './modules/llm-pipeline';
 import { startPriceEngine } from './modules/price-engine';
+import { processGradualExits } from './modules/exits-processor';
 
 import { getRedisClient } from '@megatron/lib-integrations';
 
@@ -60,7 +61,12 @@ async function startWorker() {
         runSweeper().catch(err => console.error('Sweeper error:', err));
     }, 10 * 60 * 1000);
 
-    // 5. Heartbeat (Every 30s)
+    // 5. Gradual Exits (Every 1 minute)
+    setInterval(() => {
+        processGradualExits().catch(err => console.error('Gradual exit process error:', err));
+    }, 60 * 1000);
+
+    // 6. Heartbeat (Every 30s)
     setInterval(sendHeartbeat, 30000);
 
     // Initial run

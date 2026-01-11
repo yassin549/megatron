@@ -24,7 +24,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const { type, assetId, amount, stopLoss, takeProfit } = body;
+    const { type, assetId, amount, stopLoss, takeProfit, isGradual, chunks = 10 } = body;
     // Guidelines:
     // BUY: amount is USDC usually. IF 'shares' provided in body, amounts to specific shares.
     // SELL: amount is SHARES.
@@ -44,6 +44,53 @@ export async function POST(req: Request) {
     const tradeAmount = amount ? parseFloat(amount) : 0;
     const sl = stopLoss !== undefined ? parseFloat(stopLoss) : undefined;
     const tp = takeProfit !== undefined ? parseFloat(takeProfit) : undefined;
+
+    // --- GRADUAL EXIT LOGIC ---
+    if (isGradual && type === 'sell' && body.shares) {
+        const shareAmount = parseFloat(body.shares);
+        try {
+            const result = await db.$transaction(async (tx: any) => {
+                const asset = await tx.asset.findUnique({
+                    where: { id: assetId },
+                    include: { pool: true },
+                });
+
+                if (!asset || !asset.pool) throw new Error('Asset or Liquidity Pool not found');
+
+                // Check if user has enough shares
+                const position = await tx.position.findUnique({
+                    where: { userId_assetId: { userId, assetId } }
+                });
+                if (!position || position.shares.toNumber() < shareAmount) {
+                    throw new Error('Insufficient shares for gradual exit');
+                }
+
+                // Check if there's already an active timed exit
+                const activeTimedExit = await tx.timedExit.findFirst({
+                    where: { userId, assetId, status: 'active' }
+                });
+                if (activeTimedExit) throw new Error('A gradual exit is already in progress for this asset');
+
+                // Create TimedExit Record
+                const timedExit = await tx.timedExit.create({
+                    data: {
+                        userId,
+                        assetId,
+                        totalShares: shareAmount,
+                        chunksTotal: chunks,
+                        intervalMs: 300000, // 5 minutes
+                        nextExecutionAt: new Date(), // Start immediately
+                    }
+                });
+
+                return timedExit;
+            });
+
+            return NextResponse.json({ success: true, timedExitId: result.id, isGradual: true });
+        } catch (error: any) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+    }
 
     try {
         const result = await db.$transaction(async (tx: any) => {

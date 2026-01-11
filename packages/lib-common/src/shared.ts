@@ -58,6 +58,7 @@ export const MONETARY_CONFIG = {
     PLATFORM_SHARE: 0.1,     // 10% of fee goes to Platform Treasury
     MAX_INSTANT_WITHDRAWAL_PCT: 0.25, // 25% of vested amount can be withdrawn instantly
     MAX_PRICE_SPREAD_WARNING: 0.05,  // 5% spread warning threshold
+    MAX_INSTANT_EXIT_POOL_RATIO: 0.05, // 5% of pool liquidity max for instant exit
 };
 
 export const VESTING_MILESTONES: VestingSchedule[] = [
