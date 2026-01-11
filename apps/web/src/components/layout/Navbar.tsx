@@ -169,7 +169,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className="glass-nav sticky top-0 z-50 h-16 transition-all duration-300">
+        <nav className="glass-nav sticky top-0 z-50 h-16 transition-all duration-200">
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
@@ -428,17 +428,16 @@ export function Navbar() {
                                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
                                     {/* 1. Account Identity */}
                                     {status === 'authenticated' ? (
-                                        <div className="relative p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-white/10 shadow-xl overflow-hidden group">
-                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                            <div className="flex items-center gap-4 relative z-10">
-                                                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-primary/10">
+                                        <div className="relative p-5 rounded-xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-primary/20">
                                                     {session?.user?.email?.[0].toUpperCase()}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="font-bold text-white truncate text-base">{session?.user?.email?.split('@')[0]}</p>
-                                                    <p className="flex items-center gap-1.5 text-[9px] text-primary font-black uppercase tracking-[0.2em] mt-1">
+                                                    <p className="font-bold text-white truncate text-sm">{session?.user?.email}</p>
+                                                    <p className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
                                                         <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                                                        Level 1 Trader
+                                                        Verified Trader
                                                     </p>
                                                 </div>
                                             </div>

@@ -90,18 +90,17 @@
     text-wrap: balance;
   }
 
-  /* Glassmorphism Classes - Refined for Premium Feel */
+  /* Glassmorphism Classes */
   .glass-panel {
-    @apply bg-card/80 backdrop-blur-xl border border-white/[0.08];
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    @apply bg-card border border-white/5 shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-card/60 backdrop-blur-md border border-white/[0.05] shadow-lg transition-all duration-300 hover:bg-card/80 hover:border-white/20 hover:shadow-primary/10;
+    @apply bg-card border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
   }
 
   .glass-nav {
-    @apply bg-background/80 backdrop-blur-md border-b border-white/[0.05] shadow-xl;
+    @apply bg-background border-b border-white/5 shadow-lg;
   }
 
   /* Text Effects */
@@ -115,62 +114,19 @@
 
   /* Animation Utilities */
   .animate-in {
-    animation: animate-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: animate-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes animate-in {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(10px);
     }
 
     to {
       opacity: 1;
       transform: translateY(0);
     }
-  }
-
-  /* Price Flash Animations */
-  @keyframes flash-up {
-    0% {
-      background-color: rgba(16, 185, 129, 0.2);
-    }
-
-    100% {
-      background-color: transparent;
-    }
-  }
-
-  @keyframes flash-down {
-    0% {
-      background-color: rgba(244, 63, 94, 0.2);
-    }
-
-    100% {
-      background-color: transparent;
-    }
-  }
-
-  .animate-flash-up {
-    animation: flash-up 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .animate-flash-down {
-    animation: flash-down 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  @keyframes shimmer {
-    from {
-      transform: translateX(-100%);
-    }
-
-    to {
-      transform: translateX(100%);
-    }
-  }
-
-  .animate-shimmer {
-    animation: shimmer 2s infinite linear;
   }
 
   .fill-mode-backwards {

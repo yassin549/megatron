@@ -55,9 +55,8 @@ export function TradingSidebar({
                         onClick={() => setView('positions')}
                         className={`flex-1 py-2.5 text-[10px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'positions' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                        <Activity className={`w-3.5 h-3.5 ${view === 'positions' ? 'animate-pulse' : ''}`} />
+                        <Activity className="w-3.5 h-3.5" />
                         Positions
-                        <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                     </button>
                 </div>
             </div>

@@ -47,19 +47,19 @@ export function NavMegaCard({
                             stiffness: 400, // Very snappy
                             mass: 0.5
                         }}
-                        className="w-[380px] h-[520px] glass-panel rounded-3xl overflow-hidden flex flex-col nav-popover-content border-white/20 shadow-[0_32px_80px_-12px_rgba(0,0,0,0.9)]"
+                        className="w-[380px] h-[520px] bg-obsidian-900 border border-white/10 rounded-lg shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col nav-popover-content"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-white/5 bg-white/[0.02]">
                             <div className="flex items-start justify-between">
-                                <div className="flex gap-4 items-center">
+                                <div className="flex gap-4">
                                     {Icon && (
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                                        <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                                             <Icon className="w-6 h-6 text-primary" />
                                         </div>
                                     )}
                                     <div>
-                                        <h3 className="text-xl font-bold text-white tracking-tight leading-none">{title}</h3>
+                                        <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
                                         {description && (
                                             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-widest font-mono">
                                                 {description}

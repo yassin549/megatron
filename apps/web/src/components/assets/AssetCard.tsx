@@ -192,16 +192,15 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-2xl transition-all duration-500 overflow-hidden relative ${isHovering ? 'border-primary/50 shadow-[0_0_40px_rgba(59,130,246,0.15)] bg-obsidian-800/90' : 'hover:border-white/10'
+                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
                     } ${viewMode === 'list'
-                        ? 'flex items-center gap-6 p-4'
-                        : 'flex flex-col p-4'
+                        ? 'flex items-center gap-6 p-3'
+                        : 'flex flex-col p-3'
                     }`}
             >
-                {/* Border Beam Effect on Hover - Premium Technical Feel */}
-                <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer" style={{ animationDuration: '3s' }} />
-                    <div className="absolute bottom-0 right-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer" style={{ animationDuration: '3s', animationDirection: 'reverse' }} />
+                {/* Border Beam Effect on Hover */}
+                <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
                 {/* Hover Description Overlay */}
@@ -232,7 +231,7 @@ export function AssetCard({
                                 initial={{ opacity: 0, y: 5 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.05 }}
-                                className="text-xl font-bold text-white mb-3 leading-tight tracking-tight pt-4"
+                                className="text-xl font-bold text-white mb-3 leading-tight pt-4"
                             >
                                 {name}
                             </motion.h3>
@@ -313,10 +312,10 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-lg font-black text-white font-mono tracking-tighter">
+                        <div className="text-lg font-bold text-white font-mono tracking-tight">
                             ${price.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-[10px] font-black font-mono ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                        <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%

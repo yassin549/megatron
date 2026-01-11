@@ -367,73 +367,86 @@ export function AssetDetailClient({
                 </div>
             </div>
 
-            {/* Mobile Bottom Sheet Social/Trade - Native Pattern */}
+            {/* Mobile Floating Button & Overlay */}
             {mounted && createPortal(
-                <AnimatePresence>
-                    {isMobileTradeOpen && (
-                        <div className="fixed inset-0 z-[100] md:hidden flex flex-col justify-end">
-                            {/* Backdrop */}
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                onClick={() => setIsMobileTradeOpen(false)}
-                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                            />
+                <>
+                    {/* Floating Square Button */}
+                    <div className="lg:hidden fixed bottom-32 right-4 z-[60]">
+                        <motion.button
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => setIsMobileTradeOpen(true)}
+                            className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-white/20"
+                        >
+                            <TrendingUp className="w-6 h-6" />
+                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-zinc-900 flex items-center justify-center">
+                                <Plus className="w-2.5 h-2.5 text-white" />
+                            </div>
+                        </motion.button>
+                    </div>
 
-                            {/* Bottom Sheet */}
-                            <motion.div
-                                initial={{ y: "100%" }}
-                                animate={{ y: 0 }}
-                                exit={{ y: "100%" }}
-                                transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
-                                className="relative bg-obsidian-950 border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)] rounded-t-[32px] w-full max-h-[90dvh] flex flex-col overflow-hidden"
-                            >
-                                {/* Handle Bar */}
-                                <div className="h-1.5 w-12 bg-white/20 rounded-full mx-auto mt-3 mb-1" />
+                    <AnimatePresence>
+                        {isMobileTradeOpen && (
+                            <>
+                                {/* Backdrop */}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setIsMobileTradeOpen(false)}
+                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+                                />
 
-                                {/* Header */}
-                                <div className="px-6 py-4 flex items-center justify-between border-b border-white/5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="p-2 bg-primary/10 rounded-xl">
-                                            <Zap className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold text-white text-lg leading-tight">Trading Desk</h3>
-                                            <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-widest">{asset.name}</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => setIsMobileTradeOpen(false)}
-                                        className="p-2 rounded-full bg-white/5 text-zinc-400"
+                                {/* Overlay Card */}
+                                <div className="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none px-4">
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                        className="bg-zinc-950/95 border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl rounded-[32px] w-full max-w-[400px] flex flex-col pointer-events-auto overflow-hidden relative max-h-[85vh]"
                                     >
-                                        <X className="w-5 h-5" />
-                                    </button>
-                                </div>
+                                        {/* Header */}
+                                        <div className="p-6 pb-2 flex items-center justify-between border-b border-white/5">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-primary/10 rounded-xl">
+                                                    <Zap className="w-5 h-5 text-primary" />
+                                                </div>
+                                                <h3 className="font-black text-white text-lg tracking-tight uppercase">Trading Desk</h3>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsMobileTradeOpen(false)}
+                                                className="p-2 rounded-full hover:bg-white/5 text-zinc-400"
+                                            >
+                                                <X className="w-6 h-6" />
+                                            </button>
+                                        </div>
 
-                                {/* Content */}
-                                <div className="flex-1 overflow-y-auto px-2 py-4 pb-12">
-                                    <TradingSidebar
-                                        assetId={asset.id}
-                                        assetName={asset.name}
-                                        assetPrice={asset.price}
-                                        marketPrice={asset.marketPrice}
-                                        status={asset.status}
-                                        onTradeSuccess={() => {
-                                            refreshData();
-                                            // Optional: close on success for better UX
-                                        }}
-                                        activePositionId={activePositionId}
-                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                    />
-                                </div>
+                                        {/* Sidebar Content */}
+                                        <div className="flex-1 overflow-y-auto py-2">
+                                            <TradingSidebar
+                                                assetId={asset.id}
+                                                assetName={asset.name}
+                                                assetPrice={asset.price}
+                                                marketPrice={asset.marketPrice}
+                                                status={asset.status}
+                                                onTradeSuccess={() => {
+                                                    refreshData();
+                                                }}
+                                                activePositionId={activePositionId}
+                                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                            />
+                                        </div>
 
-                                {/* Safe Area Spacer for Bottom Nav */}
-                                <div className="h-20 flex-shrink-0" />
-                            </motion.div>
-                        </div>
-                    )}
-                </AnimatePresence>,
+                                        {/* Decoration */}
+                                        <div className="h-2 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                                    </motion.div>
+                                </div>
+                            </>
+                        )}
+                    </AnimatePresence>
+                </>,
                 document.body
             )}
         </div>
