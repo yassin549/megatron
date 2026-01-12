@@ -361,14 +361,7 @@ export function Navbar() {
 
                 {/* 4. Mobile Toggle */}
                 <div className="md:hidden flex items-center gap-3">
-                    {status === 'authenticated' && (
-                        <div
-                            className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-lg ring-1 ring-white/10"
-                            onClick={() => setIsMobileMenuOpen(true)}
-                        >
-                            {session?.user?.email?.[0].toUpperCase() || 'U'}
-                        </div>
-                    )}
+
                     <button
                         onClick={() => setIsMobileMenuOpen(true)}
                         className="p-2 text-muted-foreground hover:text-white"
@@ -427,22 +420,7 @@ export function Navbar() {
                                 {/* Drawer Scrollable Content */}
                                 <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 custom-scrollbar">
                                     {/* 1. Account Identity */}
-                                    {status === 'authenticated' ? (
-                                        <div className="relative p-5 rounded-xl bg-gradient-to-br from-primary/10 via-obsidian-900 to-obsidian-900 border border-primary/20 shadow-inner group">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-lg ring-2 ring-primary/20">
-                                                    {session?.user?.email?.[0].toUpperCase()}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="font-bold text-white truncate text-sm">{session?.user?.email}</p>
-                                                    <p className="flex items-center gap-1.5 text-[10px] text-primary font-bold uppercase tracking-widest mt-0.5">
-                                                        <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
-                                                        Verified Trader
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
+                                    {!(status === 'authenticated') && (
                                         <div className="grid grid-cols-2 gap-3">
                                             <Link
                                                 href="/login"
