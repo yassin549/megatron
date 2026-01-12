@@ -79,46 +79,7 @@ export function ProfileHoverCard({ isOpen: controlledIsOpen, onToggle }: Profile
                 }
             >
                 <div className="space-y-8">
-                    {/* Identity Header */}
-                    <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/10 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4">
-                            <Shield className="w-12 h-12 text-primary/10 -rotate-12 group-hover:scale-110 transition-transform" />
-                        </div>
 
-                        <div className="flex items-center gap-4 relative z-10">
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold text-2xl shadow-xl ring-2 ring-primary/20">
-                                {session.user.email?.[0]?.toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                                <p className="font-bold text-white text-lg truncate leading-tight">{session.user.name || 'Trader'}</p>
-                                <p className="text-xs text-zinc-500 truncate mt-0.5">{session.user.email}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[9px] font-black text-primary border border-primary/20 uppercase tracking-tighter">
-                                        Active
-                                    </span>
-                                    {session.user.isAdmin && (
-                                        <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-[9px] font-black text-amber-500 border border-amber-500/20 uppercase tracking-tighter">
-                                            Admin
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex items-center justify-between pt-4 border-t border-white/5">
-                            <button
-                                onClick={copyId}
-                                className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 hover:text-white transition-colors"
-                            >
-                                <Copy className="w-3 h-3" />
-                                {session.user.id.slice(0, 12)}...
-                                {copied && <Check className="w-3 h-3 text-emerald-500" />}
-                            </button>
-                            <Link href="/profile" className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 uppercase tracking-widest">
-                                Manage <ExternalLink className="w-2.5 h-2.5" />
-                            </Link>
-                        </div>
-                    </div>
 
                     {/* Navigation Grid */}
                     <div className="grid grid-cols-2 gap-3">
