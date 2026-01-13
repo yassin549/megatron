@@ -69,25 +69,25 @@ export function TradingSidebar({
                 </div>
             </div>
 
-            {/* Market Stats Grid - Refined */}
+            {/* Market Stats Grid - Ultra Minimalist (No Boxes) */}
             {stats && (
                 <div className="px-6 py-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3.5 transition-all hover:bg-white/[0.04] group/stat shadow-sm">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.15em] font-black group-hover/stat:text-zinc-400 transition-colors">Market Cap</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight">${(stats.marketCap / 1000000).toFixed(2)}M</span>
+                    <div className="grid grid-cols-2 gap-y-6 gap-x-12">
+                        <div className="transition-all group/stat">
+                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Market Cap</span>
+                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">${(stats.marketCap / 1000000).toFixed(2)}M</span>
                         </div>
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3.5 transition-all hover:bg-white/[0.04] group/stat shadow-sm">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.15em] font-black group-hover/stat:text-zinc-400 transition-colors">Liquidity</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight">${stats.liquidity.toLocaleString()}</span>
+                        <div className="transition-all group/stat">
+                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Liquidity</span>
+                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">${stats.liquidity.toLocaleString()}</span>
                         </div>
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3.5 transition-all hover:bg-white/[0.04] group/stat shadow-sm">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.15em] font-black group-hover/stat:text-zinc-400 transition-colors">Supply</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight">{(stats.supply / 1000).toFixed(1)}K</span>
+                        <div className="transition-all group/stat">
+                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Supply</span>
+                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">{(stats.supply / 1000).toFixed(1)}K</span>
                         </div>
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-3.5 transition-all hover:bg-white/[0.04] group/stat shadow-sm">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.15em] font-black group-hover/stat:text-zinc-400 transition-colors">24h Range</span>
-                            <span className="text-[10px] font-black text-white font-mono leading-none tracking-tighter">
+                        <div className="transition-all group/stat">
+                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">24h Range</span>
+                            <span className="text-xs font-black text-white font-mono tracking-tighter leading-none">
                                 {stats.low24h && stats.high24h ? `$${stats.low24h.toFixed(1)}-$${stats.high24h.toFixed(1)}` : '-- / --'}
                             </span>
                         </div>
