@@ -23,6 +23,7 @@ interface ChartProps {
     side?: 'buy' | 'sell';
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
+    watermarkText?: string;
 }
 
 export function AssetChart({
@@ -34,7 +35,8 @@ export function AssetChart({
     onUpdatePosition,
     side = 'buy',
     activePositionId,
-    onSelectPosition
+    onSelectPosition,
+    watermarkText
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -113,11 +115,20 @@ export function AssetChart({
                 background: { type: ColorType.Solid, color: colors?.backgroundColor || 'transparent' },
                 textColor: colors?.textColor || '#9CA3AF',
             },
+            watermark: {
+                visible: !!watermarkText,
+                fontSize: 48,
+                horzAlign: 'center',
+                vertAlign: 'center',
+                color: 'rgba(255, 255, 255, 0.05)',
+                text: watermarkText || '',
+                fontFamily: 'Inter, sans-serif',
+            },
             width: chartContainerRef.current.clientWidth,
             height: chartContainerRef.current.clientHeight || 400,
             grid: {
-                vertLines: { color: 'rgba(255, 255, 255, 0.03)' },
-                horzLines: { color: 'rgba(255, 255, 255, 0.03)' },
+                vertLines: { color: 'rgba(255, 255, 255, 0.02)' },
+                horzLines: { color: 'rgba(255, 255, 255, 0.02)' },
             },
             leftPriceScale: { visible: false },
             rightPriceScale: {
@@ -180,7 +191,7 @@ export function AssetChart({
             window.removeEventListener('resize', handleResize);
             chart.remove();
         };
-    }, [colors]);
+    }, [colors, watermarkText]);
 
     // 3. Update Data
     useEffect(() => {
@@ -600,7 +611,7 @@ export function AssetChart({
                 )}
             </AnimatePresence>
 
-            {/* Original Live Header (Moved or hidden) */}
+            {/* Original Live Header */}
             <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />

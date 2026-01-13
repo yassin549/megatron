@@ -273,44 +273,12 @@ export function AssetDetailClient({
                                     {/* Chart Container */}
                                     <div className="flex-1 min-h-[500px] relative group bg-black/10">
 
-                                        {/* INTERNAL ASSET OVERLAY (Floating in chart) */}
-                                        <div className="absolute top-8 left-8 z-20 flex items-center gap-4 bg-black/20 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/5 pointer-events-none">
-                                            <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 relative bg-zinc-900/50 p-0.5">
-                                                {asset.imageUrl && !imgError ? (
-                                                    <Image
-                                                        src={asset.imageUrl.startsWith('/') ? asset.imageUrl : `/${asset.imageUrl}`}
-                                                        alt={asset.name}
-                                                        fill
-                                                        className="object-cover rounded-lg"
-                                                        onError={() => setImgError(true)}
-                                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-zinc-700">
-                                                        <Icon className="w-4 h-4" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <div className="flex items-center gap-2 mb-0.5">
-                                                    <span className="text-lg font-black text-white tracking-tighter leading-none">{asset.name}</span>
-                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-1 py-0.5 rounded-md border ${asset.status === 'active' ? 'text-emerald-500 border-emerald-500/20 bg-emerald-500/5' : 'text-yellow-500 border-yellow-500/20 bg-yellow-500/5'}`}>
-                                                        {asset.status}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 text-[9px] text-zinc-500 font-bold uppercase tracking-tight">
-                                                    <span>VOL: ${(asset.volume24h / 1000).toFixed(1)}K</span>
-                                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                                                    <span className="flex items-center gap-1">LIVE</span>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         {chartData.length > 0 ? (
                                             <AssetChart
                                                 data={chartData}
                                                 price={asset.price}
                                                 marketPrice={asset.marketPrice}
+                                                watermarkText={asset.name.toUpperCase()}
                                                 colors={{
                                                     lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
                                                     areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
@@ -477,4 +445,3 @@ export function AssetDetailClient({
         </div>
     );
 }
-
