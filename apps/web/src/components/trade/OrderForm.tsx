@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Shield, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Shield, Target } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 
 interface OrderFormProps {
@@ -24,7 +24,6 @@ export function OrderForm({
     onTradeSuccess,
 }: OrderFormProps) {
     const { status } = useSession();
-    const router = useRouter();
     const [type, setType] = useState<'buy' | 'sell'>('buy');
     const [amount, setAmount] = useState('');
     const [stopLoss, setStopLoss] = useState('');
@@ -41,13 +40,12 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const fillPrice = assetPrice; // Always use Execution Price for estimation
+    const fillPrice = assetPrice;
     const estimatedShares = amount ? parseFloat(amount) / fillPrice : 0;
-
     const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
-    const isHighSpread = spreadPercent > 0.05; // 5% threshold
+    const isHighSpread = spreadPercent > 0.05;
 
-    const { showNotification, showStatusModal } = useNotification();
+    const { showStatusModal } = useNotification();
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -56,13 +54,12 @@ export function OrderForm({
             const slValue = stopLoss ? parseFloat(stopLoss) : null;
             const tpValue = takeProfit ? parseFloat(takeProfit) : null;
 
-            // Trade Logic Validation
             if (isBuy) {
-                if (slValue !== null && slValue >= fillPrice) throw new Error('For Buy positions, Stop Loss must be below Entry Price.');
-                if (tpValue !== null && tpValue <= fillPrice) throw new Error('For Buy positions, Take Profit must be above Entry Price.');
+                if (slValue !== null && slValue >= fillPrice) throw new Error('SL must be below Entry Price.');
+                if (tpValue !== null && tpValue <= fillPrice) throw new Error('TP must be above Entry Price.');
             } else {
-                if (slValue !== null && slValue <= fillPrice) throw new Error('For Sell positions, Stop Loss must be above Entry Price.');
-                if (tpValue !== null && tpValue >= fillPrice) throw new Error('For Sell positions, Take Profit must be below Entry Price.');
+                if (slValue !== null && slValue <= fillPrice) throw new Error('SL must be above Entry Price.');
+                if (tpValue !== null && tpValue >= fillPrice) throw new Error('TP must be below Entry Price.');
             }
 
             const res = await fetch('/api/trade', {
@@ -102,15 +99,12 @@ export function OrderForm({
     if (status !== 'authenticated') {
         return (
             <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 text-center shadow-2xl">
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <TrendingUp className="w-6 h-6 text-emerald-400" />
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <TrendingUp className="w-5 h-5 text-emerald-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Trade Assets</h3>
-                <p className="text-zinc-400 text-sm mb-6">Sign in to start trading.</p>
-                <Link
-                    href="/login"
-                    className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all text-sm"
-                >
+                <h3 className="text-base font-bold text-white mb-2">Trade Assets</h3>
+                <p className="text-zinc-400 text-xs mb-4">Sign in to start trading.</p>
+                <Link href="/login" className="flex items-center justify-center w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all text-xs">
                     Connect Wallet
                 </Link>
             </div>
@@ -118,58 +112,48 @@ export function OrderForm({
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-xl p-4 shadow-xl">
-            {/* Buy/Sell Tabs */}
-            <div className="flex bg-black/40 rounded-lg p-1 mb-4 relative border border-white/5">
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-3 shadow-xl space-y-3">
+            {/* Buy/Sell Tabs - Compact */}
+            <div className="flex bg-black/40 rounded-lg p-0.5 relative border border-white/5">
                 <motion.div
-                    className={`absolute inset-y-1 w-[calc(50%-4px)] rounded-md ${isBuy ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}
-                    animate={{ left: isBuy ? '4px' : 'calc(50%)' }}
-                    transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    className={`absolute inset-y-0.5 w-[calc(50%-2px)] rounded-md ${isBuy ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}
+                    animate={{ left: isBuy ? '2px' : 'calc(50%)' }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-2 text-xs font-bold relative z-10 transition-colors uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500'}`}
+                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-colors uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500'}`}
                 >
                     BUY
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-2 text-xs font-bold relative z-10 transition-colors uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500'}`}
+                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-colors uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500'}`}
                 >
                     SELL
                 </button>
             </div>
 
-            {/* Price Info */}
-            <div className="mb-4 bg-black/30 rounded-xl p-3 border border-white/5 space-y-2">
-                <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Market Price</span>
-                    <span className="text-[10px] text-white font-mono">${marketPrice.toFixed(2)}</span>
+            {/* Price Info - Ultra Compact */}
+            <div className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 space-y-1">
+                <div className="flex justify-between items-center opacity-60">
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market</span>
+                    <span className="text-[9px] text-white font-mono font-bold">${marketPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-zinc-500 font-bold uppercase">Execution Price</span>
-                    <span className={`text-[10px] font-mono font-bold ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Execution</span>
+                    <span className={`text-[9px] font-mono font-black ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
                         ${assetPrice.toFixed(2)}
                     </span>
                 </div>
-                {isHighSpread && (
-                    <div className="flex items-start gap-2 pt-1 border-t border-white/5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1 flex-shrink-0 animate-pulse" />
-                        <p className="text-[9px] text-amber-500/80 leading-tight">
-                            High spread between chart price and execution engine. You will be filled at the execution price.
-                        </p>
-                    </div>
-                )}
             </div>
 
-            {/* Amount Input */}
-            <div className="mb-4">
-                <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase">
-                        Order Amount
-                    </span>
-                    <span className="text-[10px] text-zinc-400">
-                        Max: <span className="text-white font-mono">${userBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+            {/* Amount Input - Tightened */}
+            <div>
+                <div className="flex justify-between items-center mb-1 px-1">
+                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-tighter">Amount</span>
+                    <span className="text-[8px] text-zinc-500 font-bold">
+                        Max: <span className="text-zinc-300 font-mono">${userBalance.toFixed(1)}</span>
                     </span>
                 </div>
                 <div className="relative">
@@ -178,62 +162,58 @@ export function OrderForm({
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-lg font-mono text-white placeholder-zinc-700 focus:outline-none focus:border-blue-500/40 transition-all font-bold"
+                        className="w-full bg-black/40 border border-white/5 rounded-lg pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/30 transition-all font-black"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-bold">
-                        USDC
-                    </span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600 font-black">USDC</span>
                 </div>
             </div>
 
-            {/* SL/TP Inputs */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
+            {/* SL/TP Inputs - Horizontal & Slim */}
+            <div className="grid grid-cols-2 gap-2">
                 <div>
-                    <label className="text-[9px] font-bold text-rose-500/70 uppercase flex items-center gap-1 mb-1 px-1">
-                        <Shield className="w-2.5 h-2.5" />
-                        Stop Loss
+                    <label className="text-[8px] font-black text-rose-500/50 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
+                        <Shield className="w-2.5 h-2.5" /> SL
                     </label>
                     <input
                         type="number"
                         step="0.01"
                         value={stopLoss}
                         onChange={(e) => setStopLoss(e.target.value)}
-                        placeholder="Price"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-rose-500/40 transition-all"
+                        placeholder="0.00"
+                        className="w-full bg-black/40 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
                     />
                 </div>
                 <div>
-                    <label className="text-[9px] font-bold text-emerald-500/70 uppercase flex items-center gap-1 mb-1 px-1">
-                        <Target className="w-2.5 h-2.5" />
-                        Take Profit
+                    <label className="text-[8px] font-black text-emerald-500/50 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
+                        <Target className="w-2.5 h-2.5" /> TP
                     </label>
                     <input
                         type="number"
                         step="0.01"
                         value={takeProfit}
                         onChange={(e) => setTakeProfit(e.target.value)}
-                        placeholder="Price"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-emerald-500/40 transition-all"
+                        placeholder="0.00"
+                        className="w-full bg-black/40 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
                     />
                 </div>
             </div>
 
-            {/* Trade Button */}
+            {/* Trade Button - Low Profile */}
             <button
                 onClick={handleTrade}
                 disabled={!amount || loading}
-                className={`w-full py-3 rounded-lg font-bold text-xs uppercase tracking-wide transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
+                className={`w-full py-2.5 rounded-lg font-black text-[10px] uppercase tracking-[0.15em] transition-all active:scale-[0.97] disabled:opacity-20 disabled:grayscale flex items-center justify-center gap-2 shadow-lg shadow-black/20
                     ${isBuy
-                        ? 'bg-gradient-to-r from-emerald-600 to-emerald-400 text-white'
-                        : 'bg-gradient-to-r from-rose-600 to-rose-400 text-white'
+                        ? 'bg-emerald-500 text-black'
+                        : 'bg-rose-500 text-black'
                     }`}
             >
                 {loading ? (
-                    <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.5 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                    <div className="w-3.5 h-3.5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                 ) : (
                     <>
-                        {isBuy ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                        {isBuy ? 'BUY' : 'SELL'}
+                        {isBuy ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
+                        {isBuy ? 'Place Buy' : 'Place Sell'}
                     </>
                 )}
             </button>

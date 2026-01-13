@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { ArrowLeft, X, Plus, Brain } from 'lucide-react';
+import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
@@ -91,18 +91,12 @@ export function AssetDetailClient({
                 setOracleLogs(data.oracleLogs);
                 setPriceHistory(data.priceHistory);
 
-                // Sync targets if not currently updating
                 if (!isUpdatingTargets) {
                     if (data.asset.userPosition && data.asset.userPosition.shares !== 0) {
                         setOrderStopLoss(data.asset.userPosition.stopLoss?.toString() || '');
                         setOrderTakeProfit(data.asset.userPosition.takeProfit?.toString() || '');
-
-                        // Auto-select if no position is selected and this one exists
-                        if (!activePositionId) {
-                            setActivePositionId(data.asset.id);
-                        }
+                        if (!activePositionId) setActivePositionId(data.asset.id);
                     } else {
-                        // Position closed or non-existent, clear targets and selection
                         setOrderStopLoss('');
                         setOrderTakeProfit('');
                         setActivePositionId(null);
@@ -129,15 +123,14 @@ export function AssetDetailClient({
         const tpValue = 'takeProfit' in updates ? updates.takeProfit! : (orderTakeProfit ? parseFloat(orderTakeProfit) : null);
 
         try {
-            // Validation
             for (const [type, value] of Object.entries(updates)) {
                 if (value !== null) {
                     if (isLong) {
-                        if (type === 'stopLoss' && value >= entryPrice) throw new Error('For Long positions, Stop Loss must be below Entry Price.');
-                        if (type === 'takeProfit' && value <= entryPrice) throw new Error('For Long positions, Take Profit must be above Entry Price.');
+                        if (type === 'stopLoss' && value >= entryPrice) throw new Error('SL must be below Entry Price.');
+                        if (type === 'takeProfit' && value <= entryPrice) throw new Error('TP must be above Entry Price.');
                     } else if ((asset.userPosition?.shares || 0) < 0) {
-                        if (type === 'stopLoss' && value <= entryPrice) throw new Error('For Short positions, Stop Loss must be above Entry Price.');
-                        if (type === 'takeProfit' && value >= entryPrice) throw new Error('For Short positions, Take Profit must be below Entry Price.');
+                        if (type === 'stopLoss' && value <= entryPrice) throw new Error('SL must be above Entry Price.');
+                        if (type === 'takeProfit' && value >= entryPrice) throw new Error('TP must be below Entry Price.');
                     }
                 }
             }
@@ -153,7 +146,7 @@ export function AssetDetailClient({
             });
             if (res.ok) {
                 refreshData();
-                showNotification('success', 'Position targets updated');
+                showNotification('success', 'Targets updated');
             }
         } catch (err: any) {
             showNotification('error', err.message);
@@ -174,16 +167,16 @@ export function AssetDetailClient({
         );
 
     return (
-        <div className="min-h-screen bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
+        <div className="h-screen w-screen bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
             {/* Background Effects */}
             <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 h-screen w-screen relative z-10 overflow-hidden">
                 {/* LEFT COLUMN - Main Content */}
-                <div className="lg:col-span-8 flex flex-col h-screen relative border-r border-white/5 bg-black/20">
+                <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
 
-                    {/* TOP NAVIGATION & TAB TOGGLE */}
+                    {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
                     <div className="h-[72px] border-b border-white/5 px-6 md:px-10 flex items-center justify-between gap-6 z-30 shrink-0">
                         <div className="flex items-center gap-6">
                             <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
@@ -203,14 +196,14 @@ export function AssetDetailClient({
                                 />
                                 <button
                                     onClick={() => setActiveTab('chart')}
-                                    className={`flex-1 py-1.5 text-[10px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
                                 >
                                     <TrendingUp className={`w-3.5 h-3.5 ${activeTab === 'chart' ? 'opacity-100' : 'opacity-40'}`} />
                                     Market Chart
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('analysis')}
-                                    className={`flex-1 py-1.5 text-[10px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'analysis' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'analysis' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                                 >
                                     <Activity className={`w-3.5 h-3.5 ${activeTab === 'analysis' ? 'opacity-100' : 'opacity-40'}`} />
                                     Neural Logs
@@ -233,8 +226,8 @@ export function AssetDetailClient({
                         </div>
                     </div>
 
-                    {/* CONTENT AREA - Pure Full-Tab View */}
-                    <div className="flex-1 overflow-hidden relative">
+                    {/* CONTENT AREA - Full Tab locked */}
+                    <div className="flex-1 overflow-hidden relative h-[calc(100vh-72px)]">
                         <AnimatePresence mode="wait">
                             {activeTab === 'chart' ? (
                                 <motion.div
@@ -243,7 +236,7 @@ export function AssetDetailClient({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="w-full h-full"
+                                    className="w-full h-full overflow-hidden"
                                 >
                                     {chartData.length > 0 ? (
                                         <AssetChart
@@ -281,9 +274,9 @@ export function AssetDetailClient({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="w-full h-full"
+                                    className="w-full h-full overflow-hidden"
                                 >
-                                    {/* Pure Terminal Stream - Full Tab */}
+                                    {/* Pure Terminal Stream - Only scroll here */}
                                     <AITerminal logs={oracleLogs} />
                                 </motion.div>
                             )}
@@ -291,8 +284,8 @@ export function AssetDetailClient({
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN - Trading Sidebar (Desktop) */}
-                <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40">
+                {/* RIGHT COLUMN - Trading Sidebar (Desktop) - Locked Height */}
+                <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
                     <div className="h-full pt-[72px] flex flex-col">
                         {asset && (
                             <TradingSidebar
@@ -323,7 +316,7 @@ export function AssetDetailClient({
                             <motion.button
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setIsMobileTradeOpen(true)}
-                                className="w-16 h-16 bg-primary text-white flex items-center justify-center rounded-[24px] shadow-[0_20px_50px_rgba(59,130,246,0.3)] border border-white/10"
+                                className="w-16 h-16 bg-primary text-white flex items-center justify-center rounded-[24px] border border-white/10"
                             >
                                 <TrendingUp className="w-7 h-7" />
                                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-black rounded-full border-2 border-zinc-900 flex items-center justify-center">
@@ -369,9 +362,7 @@ export function AssetDetailClient({
                                                     assetPrice={asset.price}
                                                     marketPrice={asset.marketPrice}
                                                     status={asset.status}
-                                                    onTradeSuccess={() => {
-                                                        refreshData();
-                                                    }}
+                                                    onTradeSuccess={() => { refreshData(); }}
                                                     activePositionId={activePositionId}
                                                     onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                                 />

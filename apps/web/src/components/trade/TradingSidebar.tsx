@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { OrderForm } from './OrderForm';
 import { PositionsList } from './PositionsList';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ShieldAlert, TrendingUp } from 'lucide-react';
+import { Activity, TrendingUp } from 'lucide-react';
 
 interface TradingSidebarProps {
     assetId: string;
@@ -39,55 +39,55 @@ export function TradingSidebar({
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
     return (
-        <div className="flex flex-col h-auto max-h-full w-full">
-            {/* Perspective Tabs (Premium Toggle) - Padded at top */}
-            <div className="px-6 pt-8 pb-3">
-                <div className="flex bg-black/40 rounded-2xl p-1 border border-white/5 relative shadow-inner">
+        <div className="flex flex-col h-full w-full overflow-hidden">
+            {/* Perspective Tabs - Tightened Top Padding */}
+            <div className="px-6 pt-4 pb-2">
+                <div className="flex bg-black/40 rounded-xl p-0.5 border border-white/5 relative shadow-inner">
                     <motion.div
-                        className="absolute inset-y-1 bg-zinc-800 rounded-xl shadow-lg border border-white/10"
+                        className="absolute inset-y-0.5 bg-zinc-800 rounded-lg shadow-lg border border-white/5"
                         initial={false}
                         animate={{
-                            left: view === 'trade' ? '4px' : '50%',
-                            width: 'calc(50% - 4px)'
+                            left: view === 'trade' ? '2px' : '50%',
+                            width: 'calc(50% - 2px)'
                         }}
                         transition={{ type: "spring", stiffness: 400, damping: 35 }}
                     />
                     <button
                         onClick={() => setView('trade')}
-                        className={`flex-1 py-2 text-[10px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'trade' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`flex-1 py-2 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'trade' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                        <TrendingUp className="w-3.5 h-3.5" />
+                        <TrendingUp className="w-3 h-3" />
                         Trade
                     </button>
                     <button
                         onClick={() => setView('positions')}
-                        className={`flex-1 py-2 text-[10px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'positions' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        className={`flex-1 py-2 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'positions' ? 'text-emerald-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                     >
-                        <Activity className="w-3.5 h-3.5" />
+                        <Activity className="w-3 h-3" />
                         Positions
                     </button>
                 </div>
             </div>
 
-            {/* Market Stats Grid - Ultra Minimalist (No Boxes) */}
+            {/* Market Stats Grid - Compressed Layout */}
             {stats && (
-                <div className="px-6 py-4">
-                    <div className="grid grid-cols-2 gap-y-6 gap-x-12">
+                <div className="px-6 py-2">
+                    <div className="grid grid-cols-2 gap-y-3 gap-x-8">
                         <div className="transition-all group/stat">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Market Cap</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">${(stats.marketCap / 1000000).toFixed(2)}M</span>
+                            <span className="text-[8px] text-zinc-500 block mb-0.5 uppercase tracking-tighter font-black opacity-60">Market Cap</span>
+                            <span className="text-xs font-black text-white font-mono tracking-tight leading-none">${(stats.marketCap / 1000000).toFixed(2)}M</span>
                         </div>
                         <div className="transition-all group/stat">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Liquidity</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">${stats.liquidity.toLocaleString()}</span>
+                            <span className="text-[8px] text-zinc-500 block mb-0.5 uppercase tracking-tighter font-black opacity-60">Liquidity</span>
+                            <span className="text-xs font-black text-white font-mono tracking-tight leading-none">${stats.liquidity.toLocaleString()}</span>
                         </div>
                         <div className="transition-all group/stat">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">Supply</span>
-                            <span className="text-sm font-black text-white font-mono tracking-tight leading-none">{(stats.supply / 1000).toFixed(1)}K</span>
+                            <span className="text-[8px] text-zinc-500 block mb-0.5 uppercase tracking-tighter font-black opacity-60">Supply</span>
+                            <span className="text-xs font-black text-white font-mono tracking-tight leading-none">{(stats.supply / 1000).toFixed(1)}K</span>
                         </div>
                         <div className="transition-all group/stat">
-                            <span className="text-[9px] text-zinc-500 block mb-1 uppercase tracking-[0.1em] font-black group-hover/stat:text-zinc-400 transition-colors opacity-60">24h Range</span>
-                            <span className="text-xs font-black text-white font-mono tracking-tighter leading-none">
+                            <span className="text-[8px] text-zinc-500 block mb-0.5 uppercase tracking-tighter font-black opacity-60">24h Range</span>
+                            <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">
                                 {stats.low24h && stats.high24h ? `$${stats.low24h.toFixed(1)}-$${stats.high24h.toFixed(1)}` : '-- / --'}
                             </span>
                         </div>
@@ -95,16 +95,17 @@ export function TradingSidebar({
                 </div>
             )}
 
-            {/* Content Area */}
-            <div className="flex-1 min-h-0 px-6 overflow-y-auto custom-scrollbar">
+            {/* Content Area - Lock Down Scroll */}
+            <div className="flex-1 px-6 pt-2 pb-4 overflow-hidden">
                 <AnimatePresence mode="wait">
                     {view === 'trade' ? (
                         <motion.div
                             key="trade"
-                            initial={{ opacity: 0, x: -10 }}
+                            initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
+                            exit={{ opacity: 0, x: 5 }}
                             transition={{ duration: 0.15 }}
+                            className="h-full flex flex-col"
                         >
                             <OrderForm
                                 assetId={assetId}
@@ -114,19 +115,19 @@ export function TradingSidebar({
                                 onTradeSuccess={onTradeSuccess}
                             />
 
-                            {/* Simplified Market Info */}
-                            <p className="mt-8 text-[10px] text-zinc-500 font-medium text-center px-4 leading-relaxed opacity-60 group-hover:opacity-100 transition-opacity">
-                                Current volatility is <span className="text-zinc-400">NORMAL</span>. Bonding curve depth ensures liquidity for orders up to $10,000.
-                            </p>
+                            {/* Ultra Minimalist Market Context */}
+                            <div className="mt-4 text-center">
+                                <span className="text-[8px] text-zinc-600 font-black uppercase tracking-[0.2em] opacity-40">Volatility: NORMAL</span>
+                            </div>
                         </motion.div>
                     ) : (
                         <motion.div
                             key="positions"
-                            initial={{ opacity: 0, x: 10 }}
+                            initial={{ opacity: 0, x: 5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
+                            exit={{ opacity: 0, x: -5 }}
                             transition={{ duration: 0.15 }}
-                            className="h-full"
+                            className="h-full overflow-y-auto custom-scrollbar"
                         >
                             <PositionsList
                                 currentAssetId={assetId}
