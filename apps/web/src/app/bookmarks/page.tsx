@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
-import { SubNavbar } from '@/components/layout/SubNavbar';
 import { Bookmark, Search, ArrowLeft, Loader2, Heart, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -95,7 +94,7 @@ export default function BookmarksPage() {
             <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
 
-            <SubNavbar />
+
 
             <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 relative z-10">
                 {/* Back Link */}

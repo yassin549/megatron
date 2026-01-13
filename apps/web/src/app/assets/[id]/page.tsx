@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getAssetDetail } from '@/lib/assets';
-import { SubNavbar } from '@/components/layout/SubNavbar';
 import { AssetDetailClient } from './AssetDetailClient';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -35,7 +34,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
 
     return (
         <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
-            <SubNavbar />
+
 
             <main className="w-full mx-auto">
                 <Suspense fallback={

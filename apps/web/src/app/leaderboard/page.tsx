@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { SubNavbar } from '@/components/layout/SubNavbar';
 import { Trophy, Medal, TrendingUp, Shield } from 'lucide-react';
 
 interface LeaderboardEntry {
@@ -42,7 +41,6 @@ export default function LeaderboardPage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-black">
-                <SubNavbar />
                 <div className="flex items-center justify-center h-[calc(100vh-100px)]">
                     <div className="text-gray-500 font-mono animate-pulse">CALCULATING_RANKINGS...</div>
                 </div>
@@ -52,7 +50,6 @@ export default function LeaderboardPage() {
 
     return (
         <div className="min-h-screen bg-black text-gray-200">
-            <SubNavbar />
 
             <main className="max-w-5xl mx-auto px-4 py-12">
                 <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">

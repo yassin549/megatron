@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { SubNavbar } from '@/components/layout/SubNavbar';
 import { PieChart, DollarSign, Wallet, TrendingUp, ArrowRight, ArrowUpRight, ArrowDownRight, Layers, Droplets, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -150,7 +149,6 @@ export default function PortfolioPage() {
     if (status === 'unauthenticated') {
         return (
             <div className="min-h-screen bg-background text-foreground">
-                <SubNavbar />
                 <div className="flex flex-col items-center justify-center h-[calc(100vh-160px)] text-center px-4">
                     <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mb-6 border border-border">
                         <Wallet className="w-8 h-8 text-muted-foreground" />
@@ -173,7 +171,6 @@ export default function PortfolioPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-500">
-            <SubNavbar />
 
             <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
                 <div className="flex items-center justify-between mb-6 md:mb-8">

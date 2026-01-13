@@ -1,11 +1,10 @@
-import { SubNavbar } from '@/components/layout/SubNavbar';
 import { Target, Shield, Zap, Brain, Globe, Users } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage() {
     return (
         <div className="min-h-screen bg-black text-gray-200">
-            <SubNavbar />
+
 
             <main>
                 {/* Hero Section */}
