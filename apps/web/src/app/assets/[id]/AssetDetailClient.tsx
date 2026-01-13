@@ -97,6 +97,7 @@ export function AssetDetailClient({
     const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'chart' | 'analysis'>('chart');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -263,90 +264,126 @@ export function AssetDetailClient({
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-end justify-between md:flex-col md:items-end gap-2 bg-black/20 p-3 md:p-0 rounded-xl md:bg-transparent border border-white/5 md:border-0">
-                        <div className="text-xl md:text-4xl font-bold text-white tracking-tighter tabular-nums">
-                            ${asset.price.toFixed(2)}
-                            {asset.status === 'funding' && <span className="text-xs md:text-lg text-yellow-500 font-normal ml-2">(Funding)</span>}
-                        </div>
-                        <div className={`text-sm md:text-base font-medium flex items-center gap-1.5 ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {asset.change24h >= 0 ? <TrendingUp className="w-3 h-3 md:w-4 md:h-4" /> : <TrendingUp className="w-3 h-3 md:w-4 md:h-4 rotate-180" />}
-                            {(asset.change24h > 0 ? '+' : '') + asset.change24h.toFixed(2)}%
-                        </div>
+                </div>
+
+                {/* TAB NAVIGATION */}
+                <div className="border-b border-white/5 bg-zinc-950/20 sticky top-[64px] z-30 backdrop-blur-sm -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12">
+                    <div className="flex items-center gap-8">
+                        <button
+                            onClick={() => setActiveTab('chart')}
+                            className={`py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                            Chart
+                            {activeTab === 'chart' && (
+                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('analysis')}
+                            className={`py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === 'analysis' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                            Market Analysis
+                            {activeTab === 'analysis' && (
+                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                            )}
+                        </button>
                     </div>
                 </div>
 
-                {/* Chart Container */}
-                <div className="h-[300px] md:h-[400px] lg:h-[500px] glass-panel rounded-2xl overflow-hidden relative group shadow-2xl">
-                    {chartData.length > 0 ? (
-                        <AssetChart
-                            data={chartData}
-                            price={asset.price}
-                            marketPrice={asset.marketPrice}
-                            colors={{
-                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-                                areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                textColor: '#71717a',
-                            }}
-                            priceLines={{
-                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                            }}
-                            onUpdatePosition={handleChartUpdate}
-                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                            activePositionId={activePositionId}
-                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                        />
+                <AnimatePresence mode="wait">
+                    {activeTab === 'chart' ? (
+                        <motion.div
+                            key="chart-view"
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 10 }}
+                            transition={{ duration: 0.2 }}
+                            className="space-y-6 pt-6"
+                        >
+                            {/* Chart Container */}
+                            <div className="h-[300px] md:h-[400px] lg:h-[500px] glass-panel rounded-2xl overflow-hidden relative group shadow-2xl">
+                                {chartData.length > 0 ? (
+                                    <AssetChart
+                                        data={chartData}
+                                        price={asset.price}
+                                        marketPrice={asset.marketPrice}
+                                        colors={{
+                                            lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
+                                            areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
+                                            areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                            textColor: '#71717a',
+                                        }}
+                                        priceLines={{
+                                            entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                            stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                            takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                        }}
+                                        onUpdatePosition={handleChartUpdate}
+                                        side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                        activePositionId={activePositionId}
+                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                    />
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
+                                        AWAITING_PRICE_DATA...
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Asset Stats Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
+                                    <span className="text-xs md:text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
+                                </div>
+                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
+                                    <span className="text-xs md:text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
+                                </div>
+                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Supply</span>
+                                    <span className="text-xs md:text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
+                                </div>
+                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
+                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">24h Range</span>
+                                    <span className="text-[10px] md:text-sm font-bold text-white font-mono whitespace-nowrap">
+                                        {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(1)}-$${asset.high24h.toFixed(1)}` : '-- / --'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Description */}
+                            {asset.description && (
+                                <div className="glass-panel p-6 rounded-xl">
+                                    <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                                        About this Market
+                                    </h4>
+                                    <p className="text-sm text-zinc-400 leading-relaxed">
+                                        {asset.description}
+                                    </p>
+                                </div>
+                            )}
+                        </motion.div>
                     ) : (
-                        <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
-                            AWAITING_PRICE_DATA...
-                        </div>
+                        <motion.div
+                            key="analysis-view"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="pt-6"
+                        >
+                            {/* AI Terminal */}
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Activity className="w-5 h-5 text-blue-500" />
+                                    AI Market Analysis
+                                </h3>
+                                <AITerminal logs={oracleLogs} />
+                            </div>
+                        </motion.div>
                     )}
-                </div>
-
-                {/* Asset Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
-                        <span className="text-xs md:text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
-                    </div>
-                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
-                        <span className="text-xs md:text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
-                    </div>
-                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Supply</span>
-                        <span className="text-xs md:text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
-                    </div>
-                    <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                        <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">24h Range</span>
-                        <span className="text-[10px] md:text-sm font-bold text-white font-mono whitespace-nowrap">
-                            {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(1)}-$${asset.high24h.toFixed(1)}` : '-- / --'}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Description */}
-                {asset.description && (
-                    <div className="glass-panel p-6 rounded-xl">
-                        <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                            About this Market
-                        </h4>
-                        <p className="text-sm text-zinc-400 leading-relaxed">
-                            {asset.description}
-                        </p>
-                    </div>
-                )}
-
-                {/* AI Terminal */}
-                <div>
-                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-blue-500" />
-                        AI Market Analysis
-                    </h3>
-                    <AITerminal logs={oracleLogs} />
-                </div>
+                </AnimatePresence>
             </div>
 
             {/* Main Sidebar - Desktop Only (lg:block) */}
