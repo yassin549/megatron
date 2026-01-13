@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, X, Plus } from 'lucide-react';
+import { ArrowLeft, X, Plus, Brain } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
@@ -198,197 +198,210 @@ export function AssetDetailClient({
     const [imgError, setImgError] = useState(false);
     const Icon = TYPE_ICONS[asset.type] || LayoutGrid;
 
-    // ... existing refresh functions ...
-
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative">
+        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative overflow-hidden bg-black selection:bg-primary/30">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 p-4 md:p-8 lg:p-12 space-y-6 pb-32">
+            <div className="lg:col-span-8 flex flex-col h-screen relative border-r border-white/5">
 
+                {/* TAB NAVIGATION - Sleek Pill Toggle */}
+                <div className="h-16 border-b border-white/5 bg-zinc-950/40 backdrop-blur-xl px-4 md:px-8 flex items-center justify-between gap-4 z-30 shrink-0">
+                    <div className="flex items-center gap-4">
+                        <Link href="/" className="p-2 text-zinc-500 hover:text-white transition-all bg-white/5 rounded-xl hover:bg-white/10 active:scale-95 group">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
 
-                {/* Header */}
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg overflow-hidden border border-white/10 flex-shrink-0 relative bg-zinc-900 flex items-center justify-center">
-                                {/* Fallback Icon */}
-                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
-                                    <Icon className="w-6 h-6" />
-                                </div>
+                        <div className="flex bg-black/60 rounded-xl p-1 border border-white/10 relative w-[240px] md:w-[320px] shadow-inner">
+                            <motion.div
+                                className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-xl border border-white/10"
+                                initial={false}
+                                animate={{
+                                    left: activeTab === 'chart' ? '4px' : '50%',
+                                    width: 'calc(50% - 4px)'
+                                }}
+                                transition={{ type: "spring", stiffness: 450, damping: 38 }}
+                            />
+                            <button
+                                onClick={() => setActiveTab('chart')}
+                                className={`flex-1 py-1.5 text-[10px] md:text-xs font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                <TrendingUp className={`w-3.5 h-3.5 transition-transform ${activeTab === 'chart' ? 'scale-110' : 'scale-100'}`} />
+                                <span className="hidden sm:inline">Market</span> Chart
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('analysis')}
+                                className={`flex-1 py-1.5 text-[10px] md:text-xs font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'analysis' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                <Activity className={`w-3.5 h-3.5 transition-transform ${activeTab === 'analysis' ? 'scale-110' : 'scale-100'}`} />
+                                <span className="hidden sm:inline">Neural</span> Analysis
+                            </button>
+                        </div>
+                    </div>
 
-                                {asset.imageUrl && !imgError ? (
-                                    <Image
-                                        src={asset.imageUrl}
-                                        alt={asset.name}
-                                        fill
-                                        priority
-                                        className="object-cover relative z-10"
-                                        onError={() => setImgError(true)}
-                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
-                                    />
-                                ) : asset.imageUrl && imgError ? (
-                                    <img
-                                        src={asset.imageUrl}
-                                        alt={asset.name}
-                                        className="object-cover w-full h-full relative z-10"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                        }}
-                                    />
-                                ) : null}
-                            </div>
-                            <div className="min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight break-words">{asset.name}</h1>
-                                    <span className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] uppercase font-bold tracking-wider border whitespace-nowrap ${asset.status === 'active'
-                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                        : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-                                        }`}>
-                                        {asset.status}
-                                    </span>
-                                </div>
-                                <Link href="/" className="inline-flex items-center gap-2 text-xs font-medium text-zinc-500 hover:text-white transition-colors mb-4 mt-2 group w-fit">
-                                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
-                                    <span>Back to Markets</span>
-                                </Link>
-                                <div className="flex items-center gap-4 text-[10px] md:text-sm text-zinc-400 font-medium mt-1">
-                                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                                        <Clock className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
-                                        Vol: <span className="text-zinc-200">${asset.volume24h.toLocaleString()}</span>
-                                    </span>
-                                    <span className="flex items-center gap-1.5 whitespace-nowrap">
-                                        <Users className="w-3 h-3 md:w-4 md:h-4 text-zinc-500" />
-                                        Holders: <span className="text-zinc-200">{asset.holders || 0}</span>
-                                    </span>
-                                </div>
-                            </div>
+                    {/* Compact Price Display */}
+                    <div className="hidden sm:flex items-center gap-6 px-4 py-2 bg-white/[0.03] border border-white/10 rounded-2xl shadow-lg">
+                        <div className="flex flex-col items-end">
+                            <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter leading-none mb-1">Index Price</span>
+                            <span className="text-sm font-black text-white leading-none tabular-nums">${asset.price.toFixed(2)}</span>
+                        </div>
+                        <div className="w-[1px] h-6 bg-white/10" />
+                        <div className="flex flex-col">
+                            <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter leading-none mb-1">24h Change</span>
+                            <span className={`text-sm font-black leading-none tabular-nums ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* TAB NAVIGATION */}
-                <div className="border-b border-white/5 bg-zinc-950/20 sticky top-[64px] z-30 backdrop-blur-sm -mx-4 md:-mx-8 lg:-mx-12 px-4 md:px-8 lg:px-12">
-                    <div className="flex items-center gap-8">
-                        <button
-                            onClick={() => setActiveTab('chart')}
-                            className={`py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
-                        >
-                            Chart
-                            {activeTab === 'chart' && (
-                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('analysis')}
-                            className={`py-4 text-xs font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === 'analysis' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
-                        >
-                            Market Analysis
-                            {activeTab === 'analysis' && (
-                                <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                            )}
-                        </button>
-                    </div>
-                </div>
+                {/* SCROLLABLE CONTENT AREA */}
+                <div className="flex-1 overflow-y-auto custom-scrollbar bg-black relative">
+                    <AnimatePresence mode="wait">
+                        {activeTab === 'chart' ? (
+                            <motion.div
+                                key="chart-view"
+                                initial={{ opacity: 0, scale: 0.99, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.99, y: -10 }}
+                                transition={{ duration: 0.2, ease: "easeOut" }}
+                                className="flex flex-col h-full"
+                            >
+                                {/* Chart Container with Overlay Header */}
+                                <div className="h-[calc(100vh-64px)] min-h-[500px] relative group bg-zinc-950/20">
+                                    {/* INTERNAL CHART HEADER OVERLAY */}
+                                    <div className="absolute top-8 left-8 z-20 pointer-events-none">
+                                        <div className="flex items-center gap-5 bg-black/60 backdrop-blur-3xl p-5 rounded-[28px] border border-white/10 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)]">
+                                            <div className="w-14 h-14 rounded-2xl border border-white/10 flex-shrink-0 relative overflow-hidden bg-zinc-900/50 flex items-center justify-center p-0.5 shadow-2xl">
+                                                <div className="absolute inset-0 flex items-center justify-center text-zinc-800">
+                                                    <Icon className="w-8 h-8 opacity-20" />
+                                                </div>
+                                                {asset.imageUrl && !imgError ? (
+                                                    <Image
+                                                        src={asset.imageUrl.startsWith('/') ? asset.imageUrl : `/${asset.imageUrl}`}
+                                                        alt={asset.name}
+                                                        fill
+                                                        priority
+                                                        className="object-cover rounded-xl relative z-10"
+                                                        onError={() => setImgError(true)}
+                                                        unoptimized={asset.imageUrl.startsWith('/uploads')}
+                                                    />
+                                                ) : asset.imageUrl && imgError ? (
+                                                    <img
+                                                        src={asset.imageUrl}
+                                                        alt={asset.name}
+                                                        className="object-cover w-full h-full rounded-xl relative z-10"
+                                                    />
+                                                ) : null}
+                                            </div>
+                                            <div className="pr-4">
+                                                <div className="flex items-center gap-2 mb-1.5">
+                                                    <h1 className="text-2xl md:text-3xl font-black text-white tracking-tighter leading-none">{asset.name}</h1>
+                                                    <span className={`px-2 py-0.5 rounded-md text-[8px] uppercase font-black tracking-widest border shadow-lg ${asset.status === 'active'
+                                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                                        : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+                                                        }`}>
+                                                        {asset.status}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Activity className="w-3.5 h-3.5 text-zinc-500" />
+                                                        <span className="text-sm font-mono font-bold text-zinc-400">Vol: ${(asset.volume24h / 1000).toFixed(1)}K</span>
+                                                    </div>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                                                    <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-black uppercase tracking-widest">
+                                                        <Clock className="w-3.5 h-3.5" />
+                                                        Real-time
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                <AnimatePresence mode="wait">
-                    {activeTab === 'chart' ? (
-                        <motion.div
-                            key="chart-view"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="space-y-6 pt-6"
-                        >
-                            {/* Chart Container */}
-                            <div className="h-[300px] md:h-[400px] lg:h-[500px] glass-panel rounded-2xl overflow-hidden relative group shadow-2xl">
-                                {chartData.length > 0 ? (
-                                    <AssetChart
-                                        data={chartData}
-                                        price={asset.price}
-                                        marketPrice={asset.marketPrice}
-                                        colors={{
-                                            lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                            areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-                                            areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                            textColor: '#71717a',
-                                        }}
-                                        priceLines={{
-                                            entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                            stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                            takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                        }}
-                                        onUpdatePosition={handleChartUpdate}
-                                        side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                        activePositionId={activePositionId}
-                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                    />
-                                ) : (
-                                    <div className="h-full flex items-center justify-center text-zinc-600 font-mono text-sm tracking-wider">
-                                        AWAITING_PRICE_DATA...
+                                    {chartData.length > 0 ? (
+                                        <AssetChart
+                                            data={chartData}
+                                            price={asset.price}
+                                            marketPrice={asset.marketPrice}
+                                            colors={{
+                                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
+                                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.12)' : 'rgba(244, 63, 94, 0.12)',
+                                                areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                                textColor: '#4b5563',
+                                            }}
+                                            priceLines={{
+                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                            }}
+                                            onUpdatePosition={handleChartUpdate}
+                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                            activePositionId={activePositionId}
+                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                        />
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center bg-black/40">
+                                            <div className="w-12 h-12 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                            <div className="text-zinc-600 font-black text-[10px] tracking-[0.4em] uppercase">Syncing_Real-Time_Aggregates...</div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Context Area (Bottom) */}
+                                {asset.description && (
+                                    <div className="p-8 md:p-16 bg-neutral-950/80 border-t border-white/5">
+                                        <div className="max-w-4xl mx-auto">
+                                            <div className="flex flex-col gap-8">
+                                                <div className="inline-flex items-center gap-4">
+                                                    <div className="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+                                                    <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Market Context & Intelligence</h4>
+                                                </div>
+                                                <p className="text-xl text-zinc-300 font-medium leading-relaxed tracking-tight">
+                                                    {asset.description}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
-                            </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="analysis-view"
+                                initial={{ opacity: 0, y: 15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -15 }}
+                                transition={{ duration: 0.25, ease: "easeOut" }}
+                                className="p-6 md:p-12 h-full flex flex-col items-center bg-black"
+                            >
+                                <div className="max-w-5xl w-full">
+                                    <div className="flex items-center justify-between mb-12">
+                                        <div className="flex items-center gap-5">
+                                            <div className="p-4 bg-blue-500/10 rounded-2xl border border-blue-500/20 shadow-[0_0_30px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/10">
+                                                <Brain className="w-7 h-7 text-blue-500" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic leading-none mb-1.5">Neural Oracle</h3>
+                                                <span className="text-[11px] text-zinc-500 font-black uppercase tracking-[0.3em]">Real-time probabilistic state verification</span>
+                                            </div>
+                                        </div>
+                                        <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl">
+                                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                            <span className="text-[11px] text-emerald-500 font-black uppercase tracking-widest">Live Integration</span>
+                                        </div>
+                                    </div>
 
-                            {/* Asset Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Market Cap</span>
-                                    <span className="text-xs md:text-sm font-bold text-white font-mono">${(asset.marketCap / 1000000).toFixed(2)}M</span>
+                                    <div className="glass-panel rounded-[40px] p-1.5 bg-white/[0.01] border border-white/5 shadow-3xl overflow-hidden ring-1 ring-white/[0.05]">
+                                        <AITerminal logs={oracleLogs} />
+                                    </div>
                                 </div>
-                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Liquidity</span>
-                                    <span className="text-xs md:text-sm font-bold text-white font-mono">${asset.liquidity.toLocaleString()}</span>
-                                </div>
-                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">Supply</span>
-                                    <span className="text-xs md:text-sm font-bold text-white font-mono">{(asset.totalSupply / 1000).toFixed(1)}K</span>
-                                </div>
-                                <div className="glass-card p-3 md:p-4 rounded-xl hover:bg-white/5 transition-colors">
-                                    <span className="text-[10px] text-zinc-500 block mb-0.5 md:mb-1 uppercase tracking-wider font-semibold">24h Range</span>
-                                    <span className="text-[10px] md:text-sm font-bold text-white font-mono whitespace-nowrap">
-                                        {asset.low24h && asset.high24h ? `$${asset.low24h.toFixed(1)}-$${asset.high24h.toFixed(1)}` : '-- / --'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            {asset.description && (
-                                <div className="glass-panel p-6 rounded-xl">
-                                    <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                                        About this Market
-                                    </h4>
-                                    <p className="text-sm text-zinc-400 leading-relaxed">
-                                        {asset.description}
-                                    </p>
-                                </div>
-                            )}
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="analysis-view"
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="pt-6"
-                        >
-                            {/* AI Terminal */}
-                            <div>
-                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                    <Activity className="w-5 h-5 text-blue-500" />
-                                    AI Market Analysis
-                                </h3>
-                                <AITerminal logs={oracleLogs} />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
-            {/* Main Sidebar - Desktop Only (lg:block) */}
-            <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-900/40 backdrop-blur-3xl shadow-[-20px_0_30px_rgba(0,0,0,0.1)] z-20">
-                <div className="h-full pt-36 px-6 py-6 overflow-y-auto custom-scrollbar">
+            {/* RIGHT COLUMN - Trading Sidebar (Desktop) */}
+            <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-zinc-950/20 backdrop-blur-4xl shadow-[-40px_0_80px_rgba(0,0,0,0.6)] z-40">
+                <div className="h-full pt-16 flex flex-col">
                     {asset && (
                         <TradingSidebar
                             assetId={asset.id}
@@ -396,6 +409,13 @@ export function AssetDetailClient({
                             assetPrice={asset.price}
                             marketPrice={asset.marketPrice}
                             status={asset.status}
+                            stats={{
+                                marketCap: asset.marketCap,
+                                liquidity: asset.liquidity,
+                                supply: asset.totalSupply,
+                                low24h: asset.low24h,
+                                high24h: asset.high24h
+                            }}
                             onTradeSuccess={refreshData}
                             activePositionId={activePositionId}
                             onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
@@ -404,22 +424,22 @@ export function AssetDetailClient({
                 </div>
             </div>
 
-            {/* Mobile Floating Button & Overlay */}
+            {/* Mobile Fixed Elements */}
             {mounted && createPortal(
                 <>
-                    {/* Floating Square Button */}
-                    <div className="lg:hidden fixed bottom-32 right-4 z-[60]">
+                    {/* Mobile Floating Button */}
+                    <div className="lg:hidden fixed bottom-8 right-6 z-[60]">
                         <motion.button
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
+                            initial={{ scale: 0, opacity: 0, rotate: -30 }}
+                            animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => setIsMobileTradeOpen(true)}
-                            className="w-14 h-14 bg-primary text-white flex items-center justify-center rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] border border-white/20"
+                            className="w-16 h-16 bg-primary text-white flex items-center justify-center rounded-[24px] shadow-[0_24px_48px_rgba(59,130,246,0.5)] border border-white/20 active:bg-blue-600 transition-all font-black"
                         >
-                            <TrendingUp className="w-6 h-6" />
-                            <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-zinc-900 flex items-center justify-center">
-                                <Plus className="w-2.5 h-2.5 text-white" />
+                            <TrendingUp className="w-8 h-8" />
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-black rounded-full border-2 border-zinc-900 flex items-center justify-center shadow-2xl">
+                                <Plus className="w-3.5 h-3.5 text-primary" />
                             </div>
                         </motion.button>
                     </div>
@@ -427,47 +447,53 @@ export function AssetDetailClient({
                     <AnimatePresence>
                         {isMobileTradeOpen && (
                             <>
-                                {/* Backdrop */}
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     onClick={() => setIsMobileTradeOpen(false)}
-                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70]"
+                                    className="fixed inset-0 bg-black/85 backdrop-blur-xl z-[70]"
                                 />
-
-                                {/* Overlay Card */}
-                                <div className="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none px-4">
+                                <div className="fixed inset-0 z-[80] flex items-end justify-center pointer-events-none pb-4 px-4 overflow-hidden">
                                     <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                                        className="bg-zinc-950/95 border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl rounded-[32px] w-full max-w-[400px] flex flex-col pointer-events-auto overflow-hidden relative max-h-[85vh]"
+                                        initial={{ y: "100%", opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: "100%", opacity: 0 }}
+                                        transition={{ type: "spring", stiffness: 350, damping: 35 }}
+                                        className="bg-black/95 border border-white/10 shadow-[0_-40px_100px_rgba(0,0,0,1)] rounded-[50px] w-full max-w-[480px] flex flex-col pointer-events-auto overflow-hidden relative max-h-[92vh] ring-1 ring-white/10"
                                     >
-                                        {/* Header */}
-                                        <div className="p-6 pb-2 flex items-center justify-between border-b border-white/5">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-primary/10 rounded-xl">
-                                                    <Zap className="w-5 h-5 text-primary" />
+                                        <div className="p-8 pb-3 flex items-center justify-between border-b border-white/5">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-2.5 bg-primary/10 rounded-2xl border border-primary/20">
+                                                    <Zap className="w-6 h-6 text-primary" />
                                                 </div>
-                                                <h3 className="font-black text-white text-lg tracking-tight uppercase">Trading Desk</h3>
+                                                <div>
+                                                    <h3 className="font-black text-white text-xl tracking-tighter uppercase italic leading-none mb-1">Trade Desk</h3>
+                                                    <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Megatron Terminal v1.0</span>
+                                                </div>
                                             </div>
                                             <button
                                                 onClick={() => setIsMobileTradeOpen(false)}
-                                                className="p-2 rounded-full hover:bg-white/5 text-zinc-400"
+                                                className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-zinc-400 transition-all active:scale-90"
                                             >
                                                 <X className="w-6 h-6" />
                                             </button>
                                         </div>
 
-                                        {/* Sidebar Content */}
-                                        <div className="flex-1 overflow-y-auto py-2">
+                                        <div className="flex-1 overflow-y-auto py-4 px-4 custom-scrollbar">
                                             <TradingSidebar
                                                 assetId={asset.id}
                                                 assetName={asset.name}
                                                 assetPrice={asset.price}
                                                 marketPrice={asset.marketPrice}
                                                 status={asset.status}
+                                                stats={{
+                                                    marketCap: asset.marketCap,
+                                                    liquidity: asset.liquidity,
+                                                    supply: asset.totalSupply,
+                                                    low24h: asset.low24h,
+                                                    high24h: asset.high24h
+                                                }}
                                                 onTradeSuccess={() => {
                                                     refreshData();
                                                 }}
@@ -475,9 +501,6 @@ export function AssetDetailClient({
                                                 onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                             />
                                         </div>
-
-                                        {/* Decoration */}
-                                        <div className="h-2 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
                                     </motion.div>
                                 </div>
                             </>
@@ -489,3 +512,4 @@ export function AssetDetailClient({
         </div>
     );
 }
+

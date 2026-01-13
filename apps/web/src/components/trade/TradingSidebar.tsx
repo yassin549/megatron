@@ -12,6 +12,13 @@ interface TradingSidebarProps {
     assetPrice: number;
     marketPrice: number;
     status: string;
+    stats?: {
+        marketCap: number;
+        liquidity: number;
+        supply: number;
+        low24h?: number;
+        high24h?: number;
+    };
     onTradeSuccess?: () => void;
     // For chart interaction
     activePositionId?: string | null;
@@ -24,6 +31,7 @@ export function TradingSidebar({
     assetPrice,
     marketPrice,
     status,
+    stats,
     onTradeSuccess,
     activePositionId,
     onSelectPosition
@@ -60,6 +68,32 @@ export function TradingSidebar({
                     </button>
                 </div>
             </div>
+
+            {/* Market Stats Grid - NEW */}
+            {stats && (
+                <div className="px-5 py-4">
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 transition-colors hover:bg-white/[0.04]">
+                            <span className="text-[10px] text-zinc-500 block mb-0.5 uppercase tracking-wider font-bold">Market Cap</span>
+                            <span className="text-xs font-bold text-white font-mono">${(stats.marketCap / 1000000).toFixed(2)}M</span>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 transition-colors hover:bg-white/[0.04]">
+                            <span className="text-[10px] text-zinc-500 block mb-0.5 uppercase tracking-wider font-bold">Liquidity</span>
+                            <span className="text-xs font-bold text-white font-mono">${stats.liquidity.toLocaleString()}</span>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 transition-colors hover:bg-white/[0.04]">
+                            <span className="text-[10px] text-zinc-500 block mb-0.5 uppercase tracking-wider font-bold">Supply</span>
+                            <span className="text-xs font-bold text-white font-mono">{(stats.supply / 1000).toFixed(1)}K</span>
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-2.5 transition-colors hover:bg-white/[0.04]">
+                            <span className="text-[10px] text-zinc-500 block mb-0.5 uppercase tracking-wider font-bold">24h Range</span>
+                            <span className="text-[9px] font-bold text-white font-mono leading-none">
+                                {stats.low24h && stats.high24h ? `$${stats.low24h.toFixed(1)}-$${stats.high24h.toFixed(1)}` : '-- / --'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Content Area */}
             <div className="flex-1 min-h-0 px-5 overflow-y-auto custom-scrollbar">
