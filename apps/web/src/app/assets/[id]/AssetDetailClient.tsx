@@ -2,39 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, X, Plus, Brain } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import {
-    Clock,
     Activity,
     TrendingUp,
-    Users,
-    Trophy,
-    LineChart,
-    CloudSun,
-    Bitcoin,
-    Vote,
-    Microscope,
-    LayoutGrid,
     Zap
 } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const TYPE_ICONS: Record<string, any> = {
-    social: Users,
-    sports: Trophy,
-    economics: LineChart,
-    weather: CloudSun,
-    crypto: Bitcoin,
-    politics: Vote,
-    science: Microscope,
-    active: Activity
-};
 
 interface Asset {
     id: string;
@@ -49,7 +28,6 @@ interface Asset {
     marketCap: number;
     totalSupply: number;
     liquidity: number;
-    holders?: number;
     imageUrl?: string;
     low24h?: number;
     high24h?: number;
@@ -195,27 +173,24 @@ export function AssetDetailClient({
             index === 0 || item.time !== self[index - 1].time
         );
 
-    const [imgError, setImgError] = useState(false);
-    const Icon = TYPE_ICONS[asset.type] || LayoutGrid;
-
     return (
         <div className="min-h-screen bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
-            {/* Background Effects - Synced with Landing Page */}
+            {/* Background Effects */}
             <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-screen relative z-10">
                 {/* LEFT COLUMN - Main Content */}
-                <div className="lg:col-span-8 flex flex-col h-screen relative border-r border-white/5">
+                <div className="lg:col-span-8 flex flex-col h-screen relative border-r border-white/5 bg-black/20">
 
                     {/* TOP NAVIGATION & TAB TOGGLE */}
-                    <div className="h-[72px] border-b border-white/5 bg-background/40 backdrop-blur-3xl px-6 md:px-10 flex items-center justify-between gap-6 z-30 shrink-0">
+                    <div className="h-[72px] border-b border-white/5 px-6 md:px-10 flex items-center justify-between gap-6 z-30 shrink-0">
                         <div className="flex items-center gap-6">
                             <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
                                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                             </Link>
 
-                            {/* Main Tab Switch (Synced with Buy/Sell style) */}
+                            {/* Main Tab Switch */}
                             <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 relative w-[240px] md:w-[320px] shadow-inner">
                                 <motion.div
                                     className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-sm border border-white/5"
@@ -243,7 +218,7 @@ export function AssetDetailClient({
                             </div>
                         </div>
 
-                        {/* Minimalist Metrics (No Boxes) */}
+                        {/* Minimalist Metrics */}
                         <div className="hidden md:flex items-center gap-8">
                             <div className="flex flex-col items-end">
                                 <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
@@ -258,8 +233,8 @@ export function AssetDetailClient({
                         </div>
                     </div>
 
-                    {/* CONTENT AREA */}
-                    <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+                    {/* CONTENT AREA - Pure Full-Tab View */}
+                    <div className="flex-1 overflow-hidden relative">
                         <AnimatePresence mode="wait">
                             {activeTab === 'chart' ? (
                                 <motion.div
@@ -268,80 +243,48 @@ export function AssetDetailClient({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="flex flex-col h-full"
+                                    className="w-full h-full"
                                 >
-                                    {/* Chart Container */}
-                                    <div className="flex-1 min-h-[500px] relative group bg-black/10">
-
-                                        {chartData.length > 0 ? (
-                                            <AssetChart
-                                                data={chartData}
-                                                price={asset.price}
-                                                marketPrice={asset.marketPrice}
-                                                watermarkText={asset.name.toUpperCase()}
-                                                colors={{
-                                                    lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
-                                                    areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                                    textColor: '#52525b',
-                                                }}
-                                                priceLines={{
-                                                    entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                    stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                    takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                                }}
-                                                onUpdatePosition={handleChartUpdate}
-                                                side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                                activePositionId={activePositionId}
-                                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                            />
-                                        ) : (
-                                            <div className="h-full flex flex-col items-center justify-center">
-                                                <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
-                                                <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Market Context */}
-                                    {asset.description && (
-                                        <div className="p-10 border-t border-white/5 bg-background/20 backdrop-blur-3xl">
-                                            <div className="max-w-4xl">
-                                                <div className="flex items-center gap-3 mb-6 opacity-60">
-                                                    <div className="w-0.5 h-3.5 bg-zinc-600 rounded-full" />
-                                                    <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Contextual Analysis</h4>
-                                                </div>
-                                                <p className="text-lg text-zinc-400 font-medium leading-relaxed tracking-tight">
-                                                    {asset.description}
-                                                </p>
-                                            </div>
+                                    {chartData.length > 0 ? (
+                                        <AssetChart
+                                            data={chartData}
+                                            price={asset.price}
+                                            marketPrice={asset.marketPrice}
+                                            watermarkText={asset.name.toUpperCase()}
+                                            colors={{
+                                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
+                                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
+                                                areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                                textColor: '#52525b',
+                                            }}
+                                            priceLines={{
+                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                            }}
+                                            onUpdatePosition={handleChartUpdate}
+                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                            activePositionId={activePositionId}
+                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                        />
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                            <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
                                         </div>
                                     )}
                                 </motion.div>
                             ) : (
                                 <motion.div
                                     key="analysis-view"
-                                    initial={{ opacity: 0, scale: 0.995 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    exit={{ opacity: 0, scale: 0.995 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="p-10"
+                                    className="w-full h-full"
                                 >
-                                    <div className="max-w-5xl mx-auto">
-                                        <div className="flex items-center gap-6 mb-12">
-                                            <div className="p-4 bg-blue-500/5 rounded-2xl border border-blue-500/10 shadow-inner">
-                                                <Brain className="w-6 h-6 text-blue-500/80" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-2xl font-black text-white tracking-tighter uppercase italic mb-1">Neural Stream</h3>
-                                                <span className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em] opacity-60">Synthesized probability data for {asset.name}</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white/[0.01] border border-white/5 rounded-[40px] overflow-hidden shadow-2xl ring-1 ring-white/5">
-                                            <AITerminal logs={oracleLogs} />
-                                        </div>
-                                    </div>
+                                    {/* Pure Terminal Stream - Full Tab */}
+                                    <AITerminal logs={oracleLogs} />
                                 </motion.div>
                             )}
                         </AnimatePresence>

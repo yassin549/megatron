@@ -1,6 +1,6 @@
 'use client';
 
-import { Terminal, Shield, ExternalLink, Clock } from 'lucide-react';
+import { Shield, ExternalLink } from 'lucide-react';
 
 interface OracleLog {
     id: string;
@@ -18,77 +18,60 @@ interface AITerminalProps {
 
 export function AITerminal({ logs }: AITerminalProps) {
     return (
-        <div className="bg-black/80 border border-white/10 rounded-xl overflow-hidden font-mono text-sm shadow-2xl backdrop-blur-md">
-            {/* Terminal Header */}
-            <div className="bg-white/5 border-b border-white/10 p-3 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-400">
-                    <Terminal className="w-4 h-4" />
-                    <span className="text-xs font-semibold tracking-wider">ORACLE_ANALYSIS_STREAM</span>
-                </div>
-                <div className="flex gap-1.5">
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/50" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/50" />
-                </div>
-            </div>
-
-            {/* Terminal Content */}
-            <div className="p-4 max-h-[400px] overflow-y-auto space-y-4">
+        <div className="font-mono text-sm h-full">
+            {/* Terminal Content - Pure Stream */}
+            <div className="p-4 md:p-8 h-full overflow-y-auto space-y-6 custom-scrollbar">
                 {logs.length === 0 ? (
-                    <div className="text-gray-500 p-4 text-center animate-pulse">
-                        Waiting for initial analysis stream...
+                    <div className="text-zinc-600 p-8 text-center animate-pulse font-black uppercase tracking-[0.2em] text-[10px]">
+                        Establishing_Neural_Sync...
                     </div>
                 ) : (
-                    logs.map((log, i) => {
-                        console.log('Rendering log:', log.id, 'Reasoning present:', !!log.reasoning, log.reasoning);
-                        return (
-                            <div key={log.id} className="border-l-2 border-white/10 pl-4 py-1 animate-in slide-in-from-left-2 fade-in duration-300">
-
-                                {/* Metadata */}
-                                <div className="flex items-center gap-3 mb-1 text-xs">
-                                    <span className="text-gray-500">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
-                                    <span className={`font-bold ${log.deltaPercent >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                        IMPACT: {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
-                                    </span>
-                                    <div className="flex items-center gap-1 text-blue-400">
-                                        <Shield className="w-3 h-3" />
-                                        <span>CONF: {(log.confidence * 100).toFixed(0)}%</span>
-                                    </div>
+                    logs.map((log) => (
+                        <div key={log.id} className="border-l border-white/10 pl-6 py-2 animate-in slide-in-from-left-2 fade-in duration-300">
+                            {/* Metadata */}
+                            <div className="flex items-center gap-4 mb-2 text-xs">
+                                <span className="text-zinc-600 font-bold">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                                <span className={`font-black tracking-tighter ${log.deltaPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    IMPACT: {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
+                                </span>
+                                <div className="flex items-center gap-1.5 text-blue-400/60">
+                                    <Shield className="w-3.5 h-3.5" />
+                                    <span className="font-black">CONF: {(log.confidence * 100).toFixed(0)}%</span>
                                 </div>
+                            </div>
 
-                                {/* Summary & Reasoning */}
-                                <div className="mb-2 space-y-2">
-                                    <p className="text-white font-medium">
-                                        <span className="text-blue-500 mr-2">$</span>
-                                        {log.summary}
-                                    </p>
-                                    {log.reasoning && (
-                                        <div className="text-xs text-gray-400 pl-4 border-l border-white/10 italic">
-                                            "{log.reasoning}"
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Sources */}
-                                {log.sourceUrls.length > 0 && (
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {log.sourceUrls.slice(0, 3).map((url, idx) => (
-                                            <a
-                                                key={idx}
-                                                href={url}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="inline-flex items-center gap-1 text-[10px] text-gray-500 hover:text-white transition-colors bg-white/5 px-2 py-0.5 rounded border border-white/5 hover:border-white/20"
-                                            >
-                                                <ExternalLink className="w-2.5 h-2.5" />
-                                                SOURCE_{idx + 1}
-                                            </a>
-                                        ))}
+                            {/* Summary & Reasoning */}
+                            <div className="mb-3 space-y-2">
+                                <p className="text-white font-bold leading-relaxed tracking-tight text-base">
+                                    <span className="text-blue-500 mr-2">$</span>
+                                    {log.summary}
+                                </p>
+                                {log.reasoning && (
+                                    <div className="text-[13px] text-zinc-500 pl-5 border-l border-white/10 italic leading-relaxed font-medium">
+                                        {log.reasoning}
                                     </div>
                                 )}
                             </div>
-                        );
-                    })
+
+                            {/* Sources */}
+                            {log.sourceUrls.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    {log.sourceUrls.slice(0, 3).map((url, idx) => (
+                                        <a
+                                            key={idx}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1.5 text-[9px] text-zinc-500 hover:text-white transition-all bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/5 hover:border-white/10 font-black uppercase tracking-widest shadow-sm"
+                                        >
+                                            <ExternalLink className="w-2.5 h-2.5 opacity-40" />
+                                            Source_{idx + 1}
+                                        </a>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))
                 )}
             </div>
         </div>
