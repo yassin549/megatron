@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
+import { OrderBook } from '@/components/assets/OrderBook';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import {
     Activity,
@@ -236,36 +237,44 @@ export function AssetDetailClient({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="w-full h-full overflow-hidden"
+                                    className="w-full h-full flex overflow-hidden"
                                 >
-                                    {chartData.length > 0 ? (
-                                        <AssetChart
-                                            data={chartData}
-                                            price={asset.price}
-                                            marketPrice={asset.marketPrice}
-                                            watermarkText={asset.name.toUpperCase()}
-                                            colors={{
-                                                lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                                areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
-                                                areaBottomColor: 'rgba(0, 0, 0, 0)',
-                                                textColor: '#52525b',
-                                            }}
-                                            priceLines={{
-                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                            }}
-                                            onUpdatePosition={handleChartUpdate}
-                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                            activePositionId={activePositionId}
-                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                        />
-                                    ) : (
-                                        <div className="h-full flex flex-col items-center justify-center">
-                                            <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
-                                            <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
-                                        </div>
-                                    )}
+                                    {/* Orderbook (25%) */}
+                                    <div className="w-[25%] h-full hidden md:block">
+                                        <OrderBook assetPrice={asset.price} />
+                                    </div>
+
+                                    {/* Chart (75%) */}
+                                    <div className="flex-1 h-full overflow-hidden">
+                                        {chartData.length > 0 ? (
+                                            <AssetChart
+                                                data={chartData}
+                                                price={asset.price}
+                                                marketPrice={asset.marketPrice}
+                                                watermarkText={asset.name.toUpperCase()}
+                                                colors={{
+                                                    lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
+                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
+                                                    areaBottomColor: 'rgba(0, 0, 0, 0)',
+                                                    textColor: '#52525b',
+                                                }}
+                                                priceLines={{
+                                                    entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                    stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                    takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                                }}
+                                                onUpdatePosition={handleChartUpdate}
+                                                side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                                activePositionId={activePositionId}
+                                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                            />
+                                        ) : (
+                                            <div className="h-full flex flex-col items-center justify-center">
+                                                <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                                <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </motion.div>
                             ) : (
                                 <motion.div
