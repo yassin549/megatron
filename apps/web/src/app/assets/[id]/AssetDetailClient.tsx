@@ -167,12 +167,12 @@ export function AssetDetailClient({
         );
 
     return (
-        <div className="h-screen w-screen bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
+        <div className="h-[calc(100vh-64px)] w-full bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
             {/* Background Effects */}
             <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
             <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 h-screen w-screen relative z-10 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-12 h-full relative z-10 overflow-hidden">
                 {/* LEFT COLUMN - Main Content */}
                 <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
 
@@ -227,7 +227,7 @@ export function AssetDetailClient({
                     </div>
 
                     {/* CONTENT AREA - Full Tab locked */}
-                    <div className="flex-1 overflow-hidden relative h-[calc(100vh-72px)]">
+                    <div className="flex-1 overflow-hidden relative">
                         <AnimatePresence mode="wait">
                             {activeTab === 'chart' ? (
                                 <motion.div
@@ -285,7 +285,7 @@ export function AssetDetailClient({
                 </div>
 
                 {/* RIGHT COLUMN - Trading Sidebar (Desktop) - Locked Height */}
-                <div className="hidden lg:block lg:col-span-4 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:w-[33.3333%] border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
+                <div className="hidden lg:block lg:col-span-4 h-full border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
                     <div className="h-full pt-[72px] flex flex-col">
                         {asset && (
                             <TradingSidebar

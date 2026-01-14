@@ -33,10 +33,8 @@ export default async function AssetDetailPage({ params }: { params: { id: string
     }
 
     return (
-        <div className="min-h-screen bg-background text-gray-200 selection:bg-blue-500/30">
-
-
-            <main className="w-full mx-auto">
+        <div className="h-full bg-background text-gray-200 selection:bg-blue-500/30 overflow-hidden">
+            <main className="w-full h-full">
                 <Suspense fallback={
                     <div className="flex items-center justify-center py-20 font-mono text-zinc-500 animate-pulse uppercase tracking-widest text-xs">
                         Loading_Dynamic_Data...
