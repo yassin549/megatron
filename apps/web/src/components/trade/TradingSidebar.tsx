@@ -40,31 +40,48 @@ export function TradingSidebar({
 
     return (
         <div className="flex flex-col h-full w-full overflow-hidden p-3 gap-3">
-            {/* Header / Tabs Module */}
-            <div className="bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl shrink-0">
-                <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
-                    <motion.div
-                        className="absolute inset-y-0.5 bg-zinc-800 rounded-lg shadow-lg border border-white/5"
-                        initial={false}
-                        animate={{
-                            left: view === 'trade' ? '2px' : '50%',
-                            width: 'calc(50% - 2px)'
-                        }}
-                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                    />
+            {/* Header / Tabs Module - Institutional Underline Style */}
+            <div className="bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl shrink-0 h-10 flex items-center justify-center">
+                <div className="flex gap-8 h-full px-4">
                     <button
                         onClick={() => setView('trade')}
-                        className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'trade' ? 'text-primary' : 'text-zinc-600 hover:text-zinc-400'}`}
+                        className={`group relative flex items-center h-full transition-all duration-300 text-[9px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'trade'
+                            ? 'text-white'
+                            : 'text-zinc-600 hover:text-zinc-400'
+                            }`}
                     >
-                        <TrendingUp className="w-3 h-3" />
-                        Execute
+                        <div className="flex items-center gap-2 relative z-10">
+                            <TrendingUp className={`w-3.5 h-3.5 ${view === 'trade' ? 'text-primary' : 'opacity-40'}`} />
+                            <span>Execute</span>
+                        </div>
+                        {view === 'trade' ? (
+                            <motion.div
+                                layoutId="sidebar-underline"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                            />
+                        ) : (
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                        )}
                     </button>
                     <button
                         onClick={() => setView('positions')}
-                        className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase flex items-center justify-center gap-2 ${view === 'positions' ? 'text-emerald-400' : 'text-zinc-600 hover:text-zinc-400'}`}
+                        className={`group relative flex items-center h-full transition-all duration-300 text-[9px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'positions'
+                            ? 'text-white'
+                            : 'text-zinc-600 hover:text-zinc-400'
+                            }`}
                     >
-                        <Activity className="w-3 h-3" />
-                        Vault
+                        <div className="flex items-center gap-2 relative z-10">
+                            <Activity className={`w-3.5 h-3.5 ${view === 'positions' ? 'text-emerald-400' : 'opacity-40'}`} />
+                            <span>Vault</span>
+                        </div>
+                        {view === 'positions' ? (
+                            <motion.div
+                                layoutId="sidebar-underline"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                            />
+                        ) : (
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-emerald-500/0 group-hover:bg-emerald-500/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                        )}
                     </button>
                 </div>
             </div>

@@ -155,25 +155,44 @@ export function OrderForm({
                 </button>
             </div>
 
-            {/* Market/Limit Tabs */}
-            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 group/tabs">
-                <motion.div
-                    className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg bg-zinc-800/50 border border-white/5"
-                    animate={{ left: orderType === 'market' ? '2px' : 'calc(50%)' }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-                <button
-                    onClick={() => setOrderType('market')}
-                    className={`flex-1 py-1 text-[8px] font-black tracking-widest relative z-10 transition-colors uppercase ${orderType === 'market' ? 'text-zinc-200' : 'text-zinc-600'}`}
-                >
-                    MARKET
-                </button>
-                <button
-                    onClick={() => setOrderType('limit')}
-                    className={`flex-1 py-1 text-[8px] font-black tracking-widest relative z-10 transition-colors uppercase ${orderType === 'limit' ? 'text-zinc-200' : 'text-zinc-600'}`}
-                >
-                    LIMIT
-                </button>
+            {/* Market/Limit Tabs - Institutional Underline Style */}
+            <div className="flex justify-center h-8 items-center border-b border-white/[0.03] mb-2">
+                <div className="flex gap-6 h-full">
+                    <button
+                        onClick={() => setOrderType('market')}
+                        className={`group relative flex items-center h-full transition-all duration-300 text-[8px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${orderType === 'market'
+                            ? 'text-white'
+                            : 'text-zinc-600 hover:text-zinc-400'
+                            }`}
+                    >
+                        <span className="relative z-10">Market</span>
+                        {orderType === 'market' ? (
+                            <motion.div
+                                layoutId="order-type-underline"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-400 shadow-[0_0_8px_rgba(161,161,170,0.4)]"
+                            />
+                        ) : (
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-zinc-400/0 group-hover:bg-zinc-400/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setOrderType('limit')}
+                        className={`group relative flex items-center h-full transition-all duration-300 text-[8px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${orderType === 'limit'
+                            ? 'text-white'
+                            : 'text-zinc-600 hover:text-zinc-400'
+                            }`}
+                    >
+                        <span className="relative z-10">Limit</span>
+                        {orderType === 'limit' ? (
+                            <motion.div
+                                layoutId="order-type-underline"
+                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-zinc-400 shadow-[0_0_8px_rgba(161,161,170,0.4)]"
+                            />
+                        ) : (
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-zinc-400/0 group-hover:bg-zinc-400/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Price Info - Modular Snapshot */}

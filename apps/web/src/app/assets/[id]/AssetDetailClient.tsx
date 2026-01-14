@@ -186,31 +186,48 @@ export function AssetDetailClient({
                             </Link>
                         </div>
 
-                        {/* Center: Main Tab Switch */}
-                        <div className="absolute left-1/2 -translate-x-1/2">
-                            <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 relative w-[240px] md:w-[320px] shadow-inner">
-                                <motion.div
-                                    className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-sm border border-white/5"
-                                    initial={false}
-                                    animate={{
-                                        left: activeTab === 'chart' ? '4px' : 'calc(50%)',
-                                        width: 'calc(50% - 4px)'
-                                    }}
-                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                />
+                        {/* Center: Main Tab Switch - Institutional Underline Style */}
+                        <div className="absolute left-1/2 -translate-x-1/2 flex items-center h-full">
+                            <div className="flex gap-10 h-full">
                                 <button
                                     onClick={() => setActiveTab('chart')}
-                                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'chart' ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                    className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${activeTab === 'chart'
+                                        ? 'text-white'
+                                        : 'text-zinc-600 hover:text-zinc-400'
+                                        }`}
                                 >
-                                    <TrendingUp className={`w-3.5 h-3.5 ${activeTab === 'chart' ? 'opacity-100' : 'opacity-40'}`} />
-                                    Market Chart
+                                    <div className="flex items-center gap-2 relative z-10">
+                                        <TrendingUp className={`w-3.5 h-3.5 ${activeTab === 'chart' ? 'text-primary' : 'opacity-40'}`} />
+                                        <span>Market_Chart</span>
+                                    </div>
+                                    {activeTab === 'chart' ? (
+                                        <motion.div
+                                            layoutId="header-underline"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
+                                        />
+                                    ) : (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('analysis')}
-                                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-all uppercase flex items-center justify-center gap-2 ${activeTab === 'analysis' ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                                    className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${activeTab === 'analysis'
+                                        ? 'text-white'
+                                        : 'text-zinc-600 hover:text-zinc-400'
+                                        }`}
                                 >
-                                    <Activity className={`w-3.5 h-3.5 ${activeTab === 'analysis' ? 'opacity-100' : 'opacity-40'}`} />
-                                    Neural Logs
+                                    <div className="flex items-center gap-2 relative z-10">
+                                        <Activity className={`w-3.5 h-3.5 ${activeTab === 'analysis' ? 'text-blue-400' : 'opacity-40'}`} />
+                                        <span>Neural_Logs</span>
+                                    </div>
+                                    {activeTab === 'analysis' ? (
+                                        <motion.div
+                                            layoutId="header-underline"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
+                                        />
+                                    ) : (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                    )}
                                 </button>
                             </div>
                         </div>
