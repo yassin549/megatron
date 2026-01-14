@@ -178,13 +178,16 @@ export function AssetDetailClient({
                 <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
 
                     {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
-                    <div className="h-[72px] border-b border-white/5 px-6 md:px-10 flex items-center justify-between gap-6 z-30 shrink-0">
-                        <div className="flex items-center gap-6">
+                    <div className="h-[72px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
+                        {/* Start: Back Button */}
+                        <div className="flex-1 flex justify-start">
                             <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
                                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                             </Link>
+                        </div>
 
-                            {/* Main Tab Switch */}
+                        {/* Center: Main Tab Switch */}
+                        <div className="absolute left-1/2 -translate-x-1/2">
                             <div className="flex bg-black/40 rounded-xl p-1 border border-white/5 relative w-[240px] md:w-[320px] shadow-inner">
                                 <motion.div
                                     className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-sm border border-white/5"
@@ -212,17 +215,19 @@ export function AssetDetailClient({
                             </div>
                         </div>
 
-                        {/* Minimalist Metrics */}
-                        <div className="hidden md:flex items-center gap-8">
-                            <div className="flex flex-col items-end">
-                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
-                                <span className="text-sm font-black text-white tabular-nums leading-none">${asset.price.toFixed(2)}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
-                                <span className={`text-sm font-black tabular-nums leading-none ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
-                                </span>
+                        {/* End: Minimalist Metrics */}
+                        <div className="flex-1 flex justify-end">
+                            <div className="hidden md:flex items-center gap-8">
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
+                                    <span className="text-sm font-black text-white tabular-nums leading-none">${asset.price.toFixed(2)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
+                                    <span className={`text-sm font-black tabular-nums leading-none ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
