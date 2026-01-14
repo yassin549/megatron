@@ -84,11 +84,11 @@ export function PositionsList({
 
     if (positions.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-600 p-8 text-center glass-panel rounded-2xl">
-                <Layers className="w-8 h-8 opacity-20 mb-4" />
-                <h4 className="text-sm font-bold text-zinc-400 mb-1 uppercase tracking-tight">No Active Assets</h4>
-                <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
-                    You don't have any open positions yet. Start trading to track your portfolio.
+            <div className="flex flex-col items-center justify-center py-12 text-zinc-600 bg-black/20 rounded-xl border border-white/5">
+                <Layers className="w-6 h-6 opacity-20 mb-3" />
+                <h4 className="text-[10px] font-black text-zinc-500 mb-1 uppercase tracking-widest">Vault_Empty</h4>
+                <p className="text-[9px] text-zinc-600 leading-relaxed font-bold uppercase tracking-tight opacity-40">
+                    No active positions found
                 </p>
             </div>
         );
@@ -102,7 +102,7 @@ export function PositionsList({
     });
 
     return (
-        <div className="space-y-3 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar pb-10">
+        <div className="space-y-2 h-full overflow-y-auto custom-scrollbar pr-1">
             {sortedPositions.map((pos) => (
                 <CompactPositionItem
                     key={pos.assetId}

@@ -133,32 +133,32 @@ export function OrderForm({
     }
 
     return (
-        <div className="bg-zinc-900 border border-white/5 rounded-xl p-3 shadow-xl space-y-3">
-            {/* Buy/Sell Tabs - Compact */}
-            <div className="flex bg-black/40 rounded-lg p-0.5 relative border border-white/5">
+        <div className="space-y-3">
+            {/* Buy/Sell Tabs - Institutional Style */}
+            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
                 <motion.div
-                    className={`absolute inset-y-0.5 w-[calc(50%-2px)] rounded-md ${isBuy ? 'bg-emerald-500/20' : 'bg-rose-500/20'}`}
+                    className={`absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg shadow-md border border-white/5 ${isBuy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}
                     animate={{ left: isBuy ? '2px' : 'calc(50%)' }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-colors uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-500'}`}
+                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-600'}`}
                 >
                     BUY
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-widest relative z-10 transition-colors uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500'}`}
+                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-600'}`}
                 >
                     SELL
                 </button>
             </div>
 
             {/* Market/Limit Tabs */}
-            <div className="flex bg-black/40 rounded-lg p-0.5 relative border border-white/5 mx-1">
+            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 group/tabs">
                 <motion.div
-                    className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-md bg-white/[0.03]"
+                    className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg bg-zinc-800/50 border border-white/5"
                     animate={{ left: orderType === 'market' ? '2px' : 'calc(50%)' }}
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                 />
@@ -176,64 +176,65 @@ export function OrderForm({
                 </button>
             </div>
 
-            {/* Price Info - Ultra Compact */}
-            <div className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 space-y-1">
+            {/* Price Info - Modular Snapshot */}
+            <div className="bg-black/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center opacity-60">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market</span>
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market_Index</span>
                     <span className="text-[9px] text-white font-mono font-bold">${marketPrice.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Execution</span>
-                    <span className={`text-[9px] font-mono font-black ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
+                <div className="flex justify-between items-center border-t border-white/[0.03] pt-1.5">
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution_Est</span>
+                    <span className={`text-[10px] font-mono font-black ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
                         ${assetPrice.toFixed(2)}
                     </span>
                 </div>
             </div>
 
-            {/* Limit Price Input - Only for Limit orders */}
-            {orderType === 'limit' && (
+            {/* Amount & Limit Logic */}
+            <div className="space-y-2">
+                {orderType === 'limit' && (
+                    <div>
+                        <div className="flex justify-between items-center mb-1 px-1">
+                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Target_Price</span>
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                placeholder="0.00"
+                                className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
+                            />
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
+                        </div>
+                    </div>
+                )}
+
                 <div>
                     <div className="flex justify-between items-center mb-1 px-1">
-                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-tighter">Limit Price</span>
+                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Allocated_Capital</span>
+                        <span className="text-[8px] text-zinc-600 font-bold tracking-tighter">
+                            AVL: <span className="text-zinc-400 font-mono">${userBalance.toFixed(1)}</span>
+                        </span>
                     </div>
                     <div className="relative">
                         <input
                             type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className="w-full bg-black/40 border border-white/5 rounded-lg pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/30 transition-all font-black"
+                            className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600 font-black">USDC</span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
                     </div>
-                </div>
-            )}
-
-            {/* Amount Input - Tightened */}
-            <div>
-                <div className="flex justify-between items-center mb-1 px-1">
-                    <span className="text-[8px] font-black text-zinc-500 uppercase tracking-tighter">Amount</span>
-                    <span className="text-[8px] text-zinc-500 font-bold">
-                        Max: <span className="text-zinc-300 font-mono">${userBalance.toFixed(1)}</span>
-                    </span>
-                </div>
-                <div className="relative">
-                    <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.00"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/30 transition-all font-black"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600 font-black">USDC</span>
                 </div>
             </div>
 
             {/* SL/TP Inputs - Horizontal & Slim */}
             <div className="grid grid-cols-2 gap-2">
                 <div>
-                    <label className="text-[8px] font-black text-rose-500/50 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Shield className="w-2.5 h-2.5" /> SL
+                    <label className="text-[8px] font-black text-rose-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
+                        <Shield className="w-2.5 h-2.5" /> Stop_Loss
                     </label>
                     <input
                         type="number"
@@ -241,12 +242,12 @@ export function OrderForm({
                         value={stopLoss}
                         onChange={(e) => setStopLoss(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
+                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
                     />
                 </div>
                 <div>
-                    <label className="text-[8px] font-black text-emerald-500/50 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Target className="w-2.5 h-2.5" /> TP
+                    <label className="text-[8px] font-black text-emerald-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
+                        <Target className="w-2.5 h-2.5" /> Take_Profit
                     </label>
                     <input
                         type="number"
@@ -254,19 +255,19 @@ export function OrderForm({
                         value={takeProfit}
                         onChange={(e) => setTakeProfit(e.target.value)}
                         placeholder="0.00"
-                        className="w-full bg-black/40 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
+                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
                     />
                 </div>
             </div>
 
-            {/* Trade Button - Low Profile */}
+            {/* Execution Button */}
             <button
                 onClick={handleTrade}
                 disabled={!amount || loading}
-                className={`w-full py-2.5 rounded-lg font-black text-[10px] uppercase tracking-[0.15em] transition-all active:scale-[0.97] disabled:opacity-20 disabled:grayscale flex items-center justify-center gap-2 shadow-lg shadow-black/20
+                className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.97] disabled:opacity-20 flex items-center justify-center gap-2 shadow-2xl
                     ${isBuy
-                        ? 'bg-emerald-500 text-black'
-                        : 'bg-rose-500 text-black'
+                        ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                        : 'bg-rose-500 text-black hover:bg-rose-400'
                     }`}
             >
                 {loading ? (
@@ -274,7 +275,7 @@ export function OrderForm({
                 ) : (
                     <>
                         {isBuy ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                        {isBuy ? 'Place Buy' : 'Place Sell'}
+                        {isBuy ? 'Submit_Buy' : 'Submit_Sell'}
                     </>
                 )}
             </button>
