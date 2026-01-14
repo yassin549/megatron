@@ -315,9 +315,8 @@ export function AssetDetailClient({
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN - Trading Sidebar (Desktop) - Locked Height */}
                 <div className="hidden lg:block lg:col-span-4 h-full border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
-                    <div className="h-full pt-[72px] flex flex-col">
+                    <div className="h-full flex flex-col">
                         {asset && (
                             <TradingSidebar
                                 assetId={asset.id}
