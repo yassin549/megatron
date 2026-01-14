@@ -237,7 +237,7 @@ export function AssetDetailClient({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="w-full h-full flex overflow-hidden"
+                                    className="w-full h-full flex overflow-hidden p-3 gap-3"
                                 >
                                     {/* Orderbook (25%) */}
                                     <div className="w-[25%] h-full hidden md:block">
@@ -245,7 +245,7 @@ export function AssetDetailClient({
                                     </div>
 
                                     {/* Chart (75%) */}
-                                    <div className="flex-1 h-full overflow-hidden">
+                                    <div className="flex-1 h-full overflow-hidden border border-white/5 bg-black/40 rounded-2xl shadow-2xl relative">
                                         {chartData.length > 0 ? (
                                             <AssetChart
                                                 data={chartData}

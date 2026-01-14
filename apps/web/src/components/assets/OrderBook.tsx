@@ -47,16 +47,16 @@ export function OrderBook({ assetPrice }: OrderBookProps) {
     );
 
     return (
-        <div className="h-full flex flex-col bg-black/40 border-r border-white/5 font-mono text-[10px] select-none overflow-hidden">
+        <div className="h-full flex flex-col bg-black/40 border border-white/5 rounded-2xl font-mono text-[10px] select-none overflow-hidden shadow-2xl">
             {/* Header */}
-            <div className="grid grid-cols-3 px-3 py-2 border-b border-white/5 text-zinc-500 font-black uppercase tracking-tighter">
+            <div className="grid grid-cols-3 px-3 py-2 border-b border-white/5 text-zinc-500 font-black uppercase tracking-tighter bg-white/[0.02]">
                 <span>Price</span>
                 <span className="text-right">Size</span>
                 <span className="text-right">Sum</span>
             </div>
 
             {/* Asks (Sells) - Red */}
-            <div className="flex-1 flex flex-col-reverse justify-end overflow-hidden custom-scrollbar">
+            <div className="flex-1 flex flex-col-reverse justify-end overflow-hidden custom-scrollbar py-1">
                 {asks.map((order, i) => (
                     <div key={`ask-${i}`} className="relative group hover:bg-white/[0.02] cursor-pointer h-[18px] flex items-center">
                         <div
@@ -88,7 +88,7 @@ export function OrderBook({ assetPrice }: OrderBookProps) {
             </div>
 
             {/* Bids (Buys) - Green */}
-            <div className="flex-1 overflow-hidden custom-scrollbar">
+            <div className="flex-1 overflow-hidden custom-scrollbar py-1">
                 {bids.map((order, i) => (
                     <div key={`bid-${i}`} className="relative group hover:bg-white/[0.02] cursor-pointer h-[18px] flex items-center">
                         <div
