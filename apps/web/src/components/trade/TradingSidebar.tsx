@@ -86,44 +86,41 @@ export function TradingSidebar({
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden p-3 gap-3">
-                {/* Asset Status Module */}
-                {stats && (
-                    <div className="bg-black/40 border border-white/5 rounded-2xl p-3 shadow-2xl shrink-0">
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between border-b border-white/[0.03] pb-2 mb-2">
-                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Market_Status</span>
-                                <div className="flex gap-1">
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500/20" />
-                                </div>
+            <div className="flex-1 flex flex-col overflow-hidden p-3 pt-1 gap-3">
+                {/* Terminal Module - Main Content */}
+                <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl overflow-hidden flex flex-col relative">
+
+                    {/* High-Density Status Ribbon - Single Line Aligned */}
+                    {stats && (
+                        <div className="flex items-center gap-6 px-4 py-2 bg-white/[0.02] border-b border-white/5 overflow-x-auto no-scrollbar shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[7px] font-black text-primary uppercase tracking-widest">Market_Status</span>
+                                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                             </div>
-                            <div className="grid grid-cols-2 gap-y-3 gap-x-4">
-                                <div>
-                                    <span className="text-[8px] text-zinc-600 block mb-0.5 uppercase tracking-tighter font-black">Mkt_Cap</span>
-                                    <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">${(stats.marketCap / 1000000).toFixed(2)}M</span>
+
+                            <div className="flex items-center gap-4 text-[9px] font-mono whitespace-nowrap">
+                                <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
+                                    <span className="text-zinc-600 font-bold uppercase text-[7px]">Mkt_Cap:</span>
+                                    <span className="text-white font-black">${(stats.marketCap / 1000000).toFixed(2)}M</span>
                                 </div>
-                                <div>
-                                    <span className="text-[8px] text-zinc-600 block mb-0.5 uppercase tracking-tighter font-black">Liquidity</span>
-                                    <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">${stats.liquidity.toLocaleString()}</span>
+                                <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
+                                    <span className="text-zinc-600 font-bold uppercase text-[7px]">Liquidity:</span>
+                                    <span className="text-white font-black">${stats.liquidity.toLocaleString()}</span>
                                 </div>
-                                <div>
-                                    <span className="text-[8px] text-zinc-600 block mb-0.5 uppercase tracking-tighter font-black">Supply</span>
-                                    <span className="text-[10px] font-black text-white font-mono tracking-tighter leading-none">{(stats.supply / 1000).toFixed(1)}K</span>
+                                <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
+                                    <span className="text-zinc-600 font-bold uppercase text-[7px]">Supply:</span>
+                                    <span className="text-white font-black">{(stats.supply / 1000).toFixed(1)}K</span>
                                 </div>
-                                <div>
-                                    <span className="text-[8px] text-zinc-600 block mb-0.5 uppercase tracking-tighter font-black">24h_Range</span>
-                                    <span className="text-[9px] font-black text-zinc-300 font-mono tracking-tighter leading-none">
+                                <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
+                                    <span className="text-zinc-600 font-bold uppercase text-[7px]">24h_Range:</span>
+                                    <span className="text-zinc-300 font-black">
                                         {stats.low24h && stats.high24h ? `$${stats.low24h.toFixed(1)}-$${stats.high24h.toFixed(1)}` : '--/--'}
                                     </span>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {/* Terminal Module - Main Content */}
-                <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl overflow-hidden flex flex-col relative">
                     <div className="flex-1 overflow-hidden p-2">
                         <AnimatePresence mode="wait">
                             {view === 'trade' ? (
