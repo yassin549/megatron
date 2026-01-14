@@ -198,7 +198,7 @@ export function AssetDetailClient({
                                 >
                                     <div className="flex items-center gap-2 relative z-10">
                                         <TrendingUp className={`w-3.5 h-3.5 ${activeTab === 'chart' ? 'text-primary' : 'opacity-40'}`} />
-                                        <span>Market_Chart</span>
+                                        <span>Market Chart</span>
                                     </div>
                                     {activeTab === 'chart' ? (
                                         <motion.div
@@ -218,7 +218,7 @@ export function AssetDetailClient({
                                 >
                                     <div className="flex items-center gap-2 relative z-10">
                                         <Activity className={`w-3.5 h-3.5 ${activeTab === 'analysis' ? 'text-blue-400' : 'opacity-40'}`} />
-                                        <span>Neural_Logs</span>
+                                        <span>Neural Logs</span>
                                     </div>
                                     {activeTab === 'analysis' ? (
                                         <motion.div

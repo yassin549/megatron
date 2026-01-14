@@ -52,7 +52,7 @@ export function TradingSidebar({
                     >
                         <div className="flex items-center gap-2 relative z-10">
                             <TrendingUp className={`w-3.5 h-3.5 ${view === 'trade' ? 'text-primary' : 'opacity-40'}`} />
-                            <span>Execute</span>
+                            <span>Trade</span>
                         </div>
                         {view === 'trade' ? (
                             <motion.div
@@ -72,7 +72,7 @@ export function TradingSidebar({
                     >
                         <div className="flex items-center gap-2 relative z-10">
                             <Activity className={`w-3.5 h-3.5 ${view === 'positions' ? 'text-emerald-400' : 'opacity-40'}`} />
-                            <span>Vault</span>
+                            <span>Positions</span>
                         </div>
                         {view === 'positions' ? (
                             <motion.div

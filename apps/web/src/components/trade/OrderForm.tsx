@@ -165,7 +165,7 @@ export function OrderForm({
                             : 'text-zinc-600 hover:text-zinc-400'
                             }`}
                     >
-                        <span className="relative z-10">Market</span>
+                        <span className="relative z-10">MARKET</span>
                         {orderType === 'market' ? (
                             <motion.div
                                 layoutId="order-type-underline"
@@ -182,7 +182,7 @@ export function OrderForm({
                             : 'text-zinc-600 hover:text-zinc-400'
                             }`}
                     >
-                        <span className="relative z-10">Limit</span>
+                        <span className="relative z-10">LIMIT</span>
                         {orderType === 'limit' ? (
                             <motion.div
                                 layoutId="order-type-underline"
@@ -198,11 +198,11 @@ export function OrderForm({
             {/* Price Info - Modular Snapshot */}
             <div className="bg-black/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center opacity-60">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market_Index</span>
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market Index</span>
                     <span className="text-[9px] text-white font-mono font-bold">${marketPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center border-t border-white/[0.03] pt-1.5">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution_Est</span>
+                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution Est</span>
                     <span className={`text-[10px] font-mono font-black ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
                         ${assetPrice.toFixed(2)}
                     </span>
@@ -214,7 +214,7 @@ export function OrderForm({
                 {orderType === 'limit' && (
                     <div>
                         <div className="flex justify-between items-center mb-1 px-1">
-                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Target_Price</span>
+                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Limit Price</span>
                         </div>
                         <div className="relative">
                             <input
@@ -231,7 +231,7 @@ export function OrderForm({
 
                 <div>
                     <div className="flex justify-between items-center mb-1 px-1">
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Allocated_Capital</span>
+                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Amount</span>
                         <span className="text-[8px] text-zinc-600 font-bold tracking-tighter">
                             AVL: <span className="text-zinc-400 font-mono">${userBalance.toFixed(1)}</span>
                         </span>
@@ -253,7 +253,7 @@ export function OrderForm({
             <div className="grid grid-cols-2 gap-2">
                 <div>
                     <label className="text-[8px] font-black text-rose-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Shield className="w-2.5 h-2.5" /> Stop_Loss
+                        <Shield className="w-2.5 h-2.5" /> Stop Loss
                     </label>
                     <input
                         type="number"
@@ -266,7 +266,7 @@ export function OrderForm({
                 </div>
                 <div>
                     <label className="text-[8px] font-black text-emerald-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Target className="w-2.5 h-2.5" /> Take_Profit
+                        <Target className="w-2.5 h-2.5" /> Take Profit
                     </label>
                     <input
                         type="number"
@@ -294,7 +294,7 @@ export function OrderForm({
                 ) : (
                     <>
                         {isBuy ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                        {isBuy ? 'Submit_Buy' : 'Submit_Sell'}
+                        {isBuy ? 'Place Buy' : 'Place Sell'}
                     </>
                 )}
             </button>
