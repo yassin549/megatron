@@ -33,6 +33,7 @@ model User {
   pendingDeposits    PendingDeposit[]
   bookmarks          Bookmark[]
   timedExits         TimedExit[]
+  orders             Order[]
   
   @@index([email])
 }
@@ -89,6 +90,7 @@ model Asset {
   oracleLogs         OracleLog[]
   bookmarks          Bookmark[]
   timedExits         TimedExit[]
+  orders             Order[]
   
   @@index([status])
   @@index([type])
@@ -188,6 +190,25 @@ model Trade {
   
   @@index([assetId, timestamp])
   @@index([buyerId])
+}
+
+model Order {
+  id                String   @id @default(uuid())
+  userId            String
+  assetId           String
+  side              String   // 'buy' or 'sell'
+  price             Decimal  @db.Decimal(18, 6)
+  initialQuantity   Decimal  @db.Decimal(18, 6)
+  remainingQuantity Decimal  @db.Decimal(18, 6)
+  status            String   @default("open") // open, filled, cancelled
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id])
+  asset             Asset    @relation(fields: [assetId], references: [id])
+
+  @@index([assetId, status, side, price])
+  @@index([userId])
 }
 model Position {
   id         String   @id @default(uuid())

@@ -246,7 +246,7 @@ export function AssetDetailClient({
                                 >
                                     {/* Orderbook (25%) */}
                                     <div className="w-[25%] h-full hidden md:block">
-                                        <OrderBook assetPrice={asset.price} />
+                                        <OrderBook assetId={asset.id} assetPrice={asset.price} />
                                     </div>
 
                                     {/* Chart (75%) */}

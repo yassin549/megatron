@@ -25,7 +25,9 @@ export function OrderForm({
 }: OrderFormProps) {
     const { status } = useSession();
     const [type, setType] = useState<'buy' | 'sell'>('buy');
+    const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
     const [amount, setAmount] = useState('');
+    const [price, setPrice] = useState('');
     const [stopLoss, setStopLoss] = useState('');
     const [takeProfit, setTakeProfit] = useState('');
     const [loading, setLoading] = useState(false);
@@ -54,27 +56,46 @@ export function OrderForm({
             const slValue = stopLoss ? parseFloat(stopLoss) : null;
             const tpValue = takeProfit ? parseFloat(takeProfit) : null;
 
-            if (isBuy) {
-                if (slValue !== null && slValue >= fillPrice) throw new Error('SL must be below Entry Price.');
-                if (tpValue !== null && tpValue <= fillPrice) throw new Error('TP must be above Entry Price.');
-            } else {
-                if (slValue !== null && slValue <= fillPrice) throw new Error('SL must be above Entry Price.');
-                if (tpValue !== null && tpValue >= fillPrice) throw new Error('TP must be below Entry Price.');
-            }
+            if (orderType === 'market') {
+                if (isBuy) {
+                    if (slValue !== null && slValue >= fillPrice) throw new Error('SL must be below Entry Price.');
+                    if (tpValue !== null && tpValue <= fillPrice) throw new Error('TP must be above Entry Price.');
+                } else {
+                    if (slValue !== null && slValue <= fillPrice) throw new Error('SL must be above Entry Price.');
+                    if (tpValue !== null && tpValue >= fillPrice) throw new Error('TP must be below Entry Price.');
+                }
 
-            const res = await fetch('/api/trade', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: type,
-                    assetId: assetId,
-                    amount: parseFloat(amount),
-                    stopLoss: slValue,
-                    takeProfit: tpValue,
-                })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
+                const res = await fetch('/api/trade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: type,
+                        assetId: assetId,
+                        amount: parseFloat(amount),
+                        stopLoss: slValue,
+                        takeProfit: tpValue,
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+            } else {
+                // Limit Order
+                const priceValue = parseFloat(price);
+                if (isNaN(priceValue) || priceValue <= 0) throw new Error('Invalid limit price');
+
+                const res = await fetch('/api/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        assetId,
+                        side: type,
+                        price: priceValue,
+                        quantity: parseFloat(amount) / priceValue, // For limit orders, amount is usually USDC, but the API expects quantity. 
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error);
+            }
 
             setAmount('');
             setStopLoss('');
@@ -134,6 +155,27 @@ export function OrderForm({
                 </button>
             </div>
 
+            {/* Market/Limit Tabs */}
+            <div className="flex bg-black/40 rounded-lg p-0.5 relative border border-white/5 mx-1">
+                <motion.div
+                    className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-md bg-white/[0.03]"
+                    animate={{ left: orderType === 'market' ? '2px' : 'calc(50%)' }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+                <button
+                    onClick={() => setOrderType('market')}
+                    className={`flex-1 py-1 text-[8px] font-black tracking-widest relative z-10 transition-colors uppercase ${orderType === 'market' ? 'text-zinc-200' : 'text-zinc-600'}`}
+                >
+                    MARKET
+                </button>
+                <button
+                    onClick={() => setOrderType('limit')}
+                    className={`flex-1 py-1 text-[8px] font-black tracking-widest relative z-10 transition-colors uppercase ${orderType === 'limit' ? 'text-zinc-200' : 'text-zinc-600'}`}
+                >
+                    LIMIT
+                </button>
+            </div>
+
             {/* Price Info - Ultra Compact */}
             <div className="bg-black/30 rounded-lg px-2.5 py-2 border border-white/5 space-y-1">
                 <div className="flex justify-between items-center opacity-60">
@@ -147,6 +189,25 @@ export function OrderForm({
                     </span>
                 </div>
             </div>
+
+            {/* Limit Price Input - Only for Limit orders */}
+            {orderType === 'limit' && (
+                <div>
+                    <div className="flex justify-between items-center mb-1 px-1">
+                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-tighter">Limit Price</span>
+                    </div>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            placeholder="0.00"
+                            className="w-full bg-black/40 border border-white/5 rounded-lg pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/30 transition-all font-black"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-600 font-black">USDC</span>
+                    </div>
+                </div>
+            )}
 
             {/* Amount Input - Tightened */}
             <div>
