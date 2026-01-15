@@ -124,7 +124,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             {/* Asks (Sells) - Red */}
             <div className="flex-1 flex flex-col-reverse justify-end overflow-hidden custom-scrollbar py-1">
                 <AnimatePresence initial={false}>
-                    {asks.map((order, i) => (
+                    {processedAsks.map((order, i) => (
                         <motion.div
                             key={`ask-${order.price}`}
                             initial={{ opacity: 0, x: -5 }}
@@ -163,7 +163,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             {/* Bids (Buys) - Green */}
             <div className="flex-1 overflow-hidden custom-scrollbar py-1">
                 <AnimatePresence initial={false}>
-                    {bids.map((order, i) => (
+                    {processedBids.map((order, i) => (
                         <motion.div
                             key={`bid-${order.price}`}
                             initial={{ opacity: 0, x: -5 }}
