@@ -24,47 +24,57 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             const res = await fetch(`/api/order?assetId=${assetId}`);
             if (res.ok) {
                 const data = await res.json();
+                const rawAsks: any[] = data.asks || [];
+                const rawBids: any[] = data.bids || [];
 
-                // Process asks to calculate cumulative total
-                let askTotal = 0;
-                const processedAsks = (data.asks || []).map((o: any) => {
-                    askTotal += o.amount;
-                    return { ...o, total: askTotal };
-                });
+                // 1. Determine Grid Step (0.1% of assetPrice, rounded to 2 decimals)
+                const step = Math.max(0.01, Number((assetPrice * 0.001).toFixed(2)));
 
-                // Process bids to calculate cumulative total
-                let bidTotal = 0;
-                const processedBids = (data.bids || []).map((o: any) => {
-                    bidTotal += o.amount;
-                    return { ...o, total: bidTotal };
-                });
+                // 2. Generate Fixed Levels
+                const gridAsks: OrderBookEntry[] = [];
+                const gridBids: OrderBookEntry[] = [];
 
-                setAsks(processedAsks.reverse().slice(-8)); // Show bottom 8 asks
-                setBids(processedBids.slice(0, 8)); // Show top 8 bids
+                // Asks (Above Mark Price)
+                for (let i = 1; i <= 7; i++) {
+                    const price = Number((assetPrice + (i * step)).toFixed(2));
+                    // Binning: Find real orders that fall into this bucket (simple nearest or exact for now)
+                    // In a real exchange, this would be more complex, but for MVP we match nearest.
+                    const amount = rawAsks
+                        .filter(o => Math.abs(o.price - price) <= step / 2)
+                        .reduce((acc, curr) => acc + curr.amount, 0);
 
-                // If both are empty, provide reference levels
-                if (processedAsks.length === 0 && processedBids.length === 0) {
-                    const referenceAsks = [];
-                    const referenceBids = [];
-                    const step = assetPrice * 0.001; // 0.1% steps
-
-                    for (let i = 1; i <= 8; i++) {
-                        referenceAsks.push({
-                            price: assetPrice + (i * step),
-                            amount: 0,
-                            total: 0,
-                            isReference: true
-                        });
-                        referenceBids.push({
-                            price: assetPrice - (i * step),
-                            amount: 0,
-                            total: 0,
-                            isReference: true
-                        });
-                    }
-                    setAsks(referenceAsks.reverse());
-                    setBids(referenceBids);
+                    gridAsks.push({ price, amount, total: 0 });
                 }
+
+                // Bids (Below Mark Price)
+                for (let i = 1; i <= 7; i++) {
+                    const price = Number((assetPrice - (i * step)).toFixed(2));
+                    const amount = rawBids
+                        .filter(o => Math.abs(o.price - price) <= step / 2)
+                        .reduce((acc, curr) => acc + curr.amount, 0);
+
+                    gridBids.push({ price, amount, total: 0 });
+                }
+
+                // 3. Calculate Cumulative Totals
+                let currentAskTotal = 0;
+                // gridAsks are already sorted 1..7 (ascending price), for the UI (top to bottom) we want descending price
+                const sortedAsks = [...gridAsks].sort((a, b) => b.price - a.price);
+                // But total should accumulate from the best price (lowest ask)
+                let askSum = 0;
+                const asksWithTotal = [...gridAsks].map(a => {
+                    askSum += a.amount;
+                    return { ...a, total: askSum };
+                });
+
+                let bidSum = 0;
+                const bidsWithTotal = gridBids.map(b => {
+                    bidSum += b.amount;
+                    return { ...b, total: bidSum };
+                });
+
+                setAsks(asksWithTotal.reverse()); // Reverse back to descending for the top half
+                setBids(bidsWithTotal);
             }
         } catch (error) {
             console.error('Failed to fetch orderbook', error);
@@ -127,8 +137,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
                                 <span className="text-rose-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{(order as any).isReference ? '--' : order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{(order as any).isReference ? '--' : order.total.toFixed(0)}</span>
+                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : order.amount.toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : order.total.toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}
@@ -166,8 +176,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
                                 <span className="text-emerald-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{(order as any).isReference ? '--' : order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{(order as any).isReference ? '--' : order.total.toFixed(0)}</span>
+                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : order.amount.toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : order.total.toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}
