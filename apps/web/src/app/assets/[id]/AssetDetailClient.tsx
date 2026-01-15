@@ -178,7 +178,7 @@ export function AssetDetailClient({
                 <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
 
                     {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
-                    <div className="h-[72px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
+                    <div className="h-[58px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
                         {/* Start: Back Button */}
                         <div className="flex-1 flex justify-start">
                             <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">

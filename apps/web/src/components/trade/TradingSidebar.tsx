@@ -40,8 +40,8 @@ export function TradingSidebar({
 
     return (
         <div className="flex flex-col h-full w-full overflow-hidden">
-            {/* Header / Tabs Module - Aligned with Chart Header (h-72) */}
-            <div className="h-[72px] border-b border-white/5 flex items-center justify-center shrink-0 bg-black/20">
+            {/* Header / Tabs Module - Aligned with Chart Header (h-58) */}
+            <div className="h-[58px] border-b border-white/5 flex items-center justify-center shrink-0 bg-black/20">
                 <div className="flex gap-10 h-full px-6">
                     <button
                         onClick={() => setView('trade')}

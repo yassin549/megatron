@@ -41,6 +41,30 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
 
                 setAsks(processedAsks.reverse().slice(-12)); // Show bottom 12 asks
                 setBids(processedBids.slice(0, 12)); // Show top 12 bids
+
+                // If both are empty, provide reference levels
+                if (processedAsks.length === 0 && processedBids.length === 0) {
+                    const referenceAsks = [];
+                    const referenceBids = [];
+                    const step = assetPrice * 0.001; // 0.1% steps
+
+                    for (let i = 1; i <= 10; i++) {
+                        referenceAsks.push({
+                            price: assetPrice + (i * step),
+                            amount: 0,
+                            total: 0,
+                            isReference: true
+                        });
+                        referenceBids.push({
+                            price: assetPrice - (i * step),
+                            amount: 0,
+                            total: 0,
+                            isReference: true
+                        });
+                    }
+                    setAsks(referenceAsks.reverse());
+                    setBids(referenceBids);
+                }
             }
         } catch (error) {
             console.error('Failed to fetch orderbook', error);
@@ -103,8 +127,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
                                 <span className="text-rose-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{order.total.toFixed(0)}</span>
+                                <span className="text-right text-zinc-400">{(order as any).isReference ? '--' : order.amount.toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{(order as any).isReference ? '--' : order.total.toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}
@@ -142,8 +166,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
                                 <span className="text-emerald-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{order.total.toFixed(0)}</span>
+                                <span className="text-right text-zinc-400">{(order as any).isReference ? '--' : order.amount.toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{(order as any).isReference ? '--' : order.total.toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}
