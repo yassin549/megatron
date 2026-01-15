@@ -10,7 +10,7 @@ interface AssetInfoWidgetProps {
     type?: string;
 }
 
-export function AssetProfileWidget({ name, imageUrl, type }: AssetProfileWidgetProps) {
+export function AssetInfoWidget({ name, imageUrl, type }: AssetInfoWidgetProps) {
     return (
         <div className="bg-black/40 border border-white/5 rounded-2xl p-4 shadow-2xl relative overflow-hidden group">
             {/* Background Accent */}
@@ -39,7 +39,7 @@ export function AssetProfileWidget({ name, imageUrl, type }: AssetProfileWidgetP
             {/* Subtle bottom detail */}
             <div className="mt-3 flex items-center gap-2">
                 <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent" />
-                <span className="text-[7px] font-mono text-zinc-600 uppercase tracking-widest whitespace-nowrap opacity-40">Profile_Active</span>
+                <span className="text-[7px] font-mono text-zinc-600 uppercase tracking-widest whitespace-nowrap opacity-40">Asset_Active</span>
             </div>
         </div>
     );

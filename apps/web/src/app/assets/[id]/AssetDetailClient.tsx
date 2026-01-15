@@ -264,7 +264,7 @@ export function AssetDetailClient({
                                 >
                                     {/* Sidebar Stats & Orderbook (25%) */}
                                     <div className="w-[25%] h-full hidden md:flex flex-col gap-3 overflow-hidden">
-                                        <AssetProfileWidget
+                                        <AssetInfoWidget
                                             name={asset.name}
                                             imageUrl={asset.imageUrl}
                                             type={asset.type}
