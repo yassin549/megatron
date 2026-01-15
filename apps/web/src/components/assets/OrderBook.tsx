@@ -39,8 +39,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                     return { ...o, total: bidTotal };
                 });
 
-                setAsks(processedAsks.reverse().slice(-12)); // Show bottom 12 asks
-                setBids(processedBids.slice(0, 12)); // Show top 12 bids
+                setAsks(processedAsks.reverse().slice(-8)); // Show bottom 8 asks
+                setBids(processedBids.slice(0, 8)); // Show top 8 bids
 
                 // If both are empty, provide reference levels
                 if (processedAsks.length === 0 && processedBids.length === 0) {
@@ -48,7 +48,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                     const referenceBids = [];
                     const step = assetPrice * 0.001; // 0.1% steps
 
-                    for (let i = 1; i <= 10; i++) {
+                    for (let i = 1; i <= 8; i++) {
                         referenceAsks.push({
                             price: assetPrice + (i * step),
                             amount: 0,

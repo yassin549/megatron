@@ -7,6 +7,7 @@ import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderBook } from '@/components/assets/OrderBook';
+import { AssetProfileWidget } from '@/components/assets/AssetProfileWidget';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import {
     Activity,
@@ -261,9 +262,16 @@ export function AssetDetailClient({
                                     transition={{ duration: 0.2 }}
                                     className="w-full h-full flex overflow-hidden p-3 gap-3"
                                 >
-                                    {/* Orderbook (25%) */}
-                                    <div className="w-[25%] h-full hidden md:block">
-                                        <OrderBook assetId={asset.id} assetPrice={asset.price} />
+                                    {/* Sidebar Stats & Orderbook (25%) */}
+                                    <div className="w-[25%] h-full hidden md:flex flex-col gap-3 overflow-hidden">
+                                        <AssetProfileWidget
+                                            name={asset.name}
+                                            imageUrl={asset.imageUrl}
+                                            type={asset.type}
+                                        />
+                                        <div className="flex-1 overflow-hidden">
+                                            <OrderBook assetId={asset.id} assetPrice={asset.price} />
+                                        </div>
                                     </div>
 
                                     {/* Chart (75%) */}
