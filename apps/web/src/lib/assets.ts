@@ -170,7 +170,7 @@ export async function getAssetDetail(id: string, userId?: string) {
     const priceHistory = await db.priceTick.findMany({
         where: { assetId: id },
         orderBy: { timestamp: 'desc' },
-        take: 100,
+        take: 500,
         select: {
             timestamp: true,
             priceDisplay: true,
