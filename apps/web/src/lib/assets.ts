@@ -251,6 +251,25 @@ export async function getAssetDetail(id: string, userId?: string) {
                 stopLoss: userPosition.stopLoss ? Number(userPosition.stopLoss) : null,
                 takeProfit: userPosition.takeProfit ? Number(userPosition.takeProfit) : null,
             } : null,
+            userTrades: userId ? (await db.trade.findMany({
+                where: {
+                    assetId: id,
+                    buyerId: userId,
+                },
+                orderBy: { timestamp: 'desc' },
+                take: 50,
+                select: {
+                    price: true,
+                    quantity: true,
+                    side: true,
+                    timestamp: true,
+                }
+            })).map((t: any) => ({
+                price: Number(t.price),
+                quantity: Number(t.quantity),
+                side: t.side as 'buy' | 'sell',
+                time: Math.floor(t.timestamp.getTime() / 1000),
+            })) : [],
         },
         oracleLogs: oracleLogs.map((log: any) => {
             let reasoning = null;

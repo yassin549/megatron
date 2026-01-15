@@ -40,6 +40,12 @@ interface Asset {
         stopLoss: number | null;
         takeProfit: number | null;
     } | null;
+    userTrades?: Array<{
+        time: number;
+        price: number;
+        quantity: number;
+        side: 'buy' | 'sell';
+    }>;
 }
 
 interface OracleLog {
@@ -294,6 +300,7 @@ export function AssetDetailClient({
                                                     stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
                                                     takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
                                                 }}
+                                                userTrades={asset.userTrades}
                                                 onUpdatePosition={handleChartUpdate}
                                                 side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
                                                 activePositionId={activePositionId}

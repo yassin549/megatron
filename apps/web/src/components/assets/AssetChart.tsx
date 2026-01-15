@@ -24,6 +24,12 @@ interface ChartProps {
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
     watermarkText?: string;
+    userTrades?: Array<{
+        time: number;
+        price: number;
+        quantity: number;
+        side: 'buy' | 'sell';
+    }>;
 }
 
 export function AssetChart({
@@ -36,7 +42,8 @@ export function AssetChart({
     side = 'buy',
     activePositionId,
     onSelectPosition,
-    watermarkText
+    watermarkText,
+    userTrades = []
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
@@ -246,7 +253,7 @@ export function AssetChart({
                 color: isSelected ? 'rgba(59, 130, 246, 0.8)' : 'rgba(255, 255, 255, 0.3)',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Dashed,
-                axisLabelVisible: true,
+                axisLabelVisible: false, // Hidden axis tag for entry
                 title: side.toUpperCase()
             }));
         }
@@ -256,7 +263,7 @@ export function AssetChart({
                 color: '#f43f5e',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Solid,
-                axisLabelVisible: true,
+                axisLabelVisible: false, // Hidden axis tag for SL
                 title: 'SL'
             }));
         }
@@ -266,7 +273,7 @@ export function AssetChart({
                 color: '#34d399',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Solid,
-                axisLabelVisible: true,
+                axisLabelVisible: false, // Hidden axis tag for TP
                 title: 'TP'
             }));
         }
@@ -334,9 +341,28 @@ export function AssetChart({
             // Reset autoscale (optional, but good practice)
             series.applyOptions({ autoscaleInfoProvider: undefined });
         };
-    }, [priceLines?.entry, localLines, activePositionId, price, marketPrice]);
+    }, [priceLines?.entry, localLines, activePositionId, price, marketPrice, userTrades]);
 
-    // 6. Global Dragging Logic
+    // 6. Set Trade Markers
+    useEffect(() => {
+        if (!seriesRef.current || !userTrades.length) {
+            seriesRef.current?.setMarkers([]);
+            return;
+        }
+
+        const markers: SeriesMarker<Time>[] = userTrades.map(trade => ({
+            time: trade.time as Time,
+            position: trade.side === 'buy' ? 'belowBar' : 'aboveBar',
+            color: trade.side === 'buy' ? '#34d399' : '#f43f5e',
+            shape: trade.side === 'buy' ? 'arrowUp' : 'arrowDown',
+            text: trade.side.toUpperCase(),
+            size: 1,
+        }));
+
+        seriesRef.current.setMarkers(markers.sort((a, b) => (a.time as number) - (b.time as number)));
+    }, [userTrades]);
+
+    // 7. Global Dragging Logic
     useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => {
             if (!draggingTypeRef.current || !seriesRef.current || !chartContainerRef.current) return;
