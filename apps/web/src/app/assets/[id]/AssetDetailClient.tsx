@@ -33,6 +33,7 @@ interface Asset {
     imageUrl?: string;
     low24h?: number;
     high24h?: number;
+    pricingParams?: { P0: number; k: number };
     userPosition?: {
         shares: number;
         avgPrice: number;
@@ -331,6 +332,8 @@ export function AssetDetailClient({
                                 assetName={asset.name}
                                 assetPrice={asset.price}
                                 marketPrice={asset.marketPrice}
+                                totalSupply={asset.totalSupply}
+                                pricingParams={asset.pricingParams}
                                 status={asset.status}
                                 stats={{
                                     marketCap: asset.marketCap,

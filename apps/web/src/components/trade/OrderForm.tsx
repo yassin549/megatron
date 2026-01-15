@@ -14,6 +14,8 @@ interface OrderFormProps {
     marketPrice: number;
     assetSymbol?: string;
     onTradeSuccess?: () => void;
+    totalSupply?: number;
+    pricingParams?: { P0: number; k: number };
 }
 
 export function OrderForm({
@@ -22,6 +24,8 @@ export function OrderForm({
     marketPrice,
     assetSymbol = 'Share',
     onTradeSuccess,
+    totalSupply = 0,
+    pricingParams = { P0: 10, k: 0.01 }
 }: OrderFormProps) {
     const { status } = useSession();
     const [type, setType] = useState<'buy' | 'sell'>('buy');
@@ -42,10 +46,47 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const fillPrice = assetPrice;
-    const estimatedShares = amount ? parseFloat(amount) / fillPrice : 0;
-    const spreadPercent = Math.abs(fillPrice - assetPrice) / assetPrice;
-    const isHighSpread = spreadPercent > 0.05;
+    const SWAP_FEE = 0.005; // Match MONETARY_CONFIG.SWAP_FEE from lib-common (0.5%)
+
+    // Bonding Curve Stats
+    const P0 = pricingParams?.P0 ?? 10;
+    const k = pricingParams?.k ?? 0.01;
+    const S = totalSupply;
+
+    // Calculate Estimated Fill Price
+    const executionEst = (() => {
+        if (orderType === 'limit') return parseFloat(price) || assetPrice;
+        if (!amount || parseFloat(amount) <= 0) return assetPrice;
+
+        const usdc = parseFloat(amount);
+        if (isBuy) {
+            // ΔS = (-b + √(b² - 4ac)) / 2a
+            const netUsdc = usdc * (1 - SWAP_FEE);
+            const a = k / 2;
+            const b = P0 + k * S;
+            const c = -netUsdc;
+            const discriminant = b * b - 4 * a * c;
+            if (discriminant < 0) return assetPrice;
+            const deltaS = (-b + Math.sqrt(discriminant)) / (2 * a);
+            return netUsdc / deltaS;
+        } else {
+            // ΔS = (b - √(b² - 4ac)) / (2a)
+            // where a = -k/2, b = (P0 + k*S), c = -A
+            // Gross USDC is the amount entered by the user
+            const a = k / 2;
+            const b = -(P0 + k * S);
+            const c = usdc;
+            const discriminant = b * b - 4 * a * c;
+            if (discriminant < 0) return assetPrice;
+            // Solve for shares to sell that yield user's USDC amount
+            const deltaS = (-b - Math.sqrt(discriminant)) / (2 * a);
+            return usdc / deltaS;
+        }
+    })();
+
+    const slippage = ((executionEst - assetPrice) / assetPrice) * 100;
+    const isHighSlippage = Math.abs(slippage) > 2;
+    const estimatedShares = amount ? parseFloat(amount) / executionEst : 0;
 
     const { showStatusModal } = useNotification();
 
@@ -58,11 +99,11 @@ export function OrderForm({
 
             if (orderType === 'market') {
                 if (isBuy) {
-                    if (slValue !== null && slValue >= fillPrice) throw new Error('SL must be below Entry Price.');
-                    if (tpValue !== null && tpValue <= fillPrice) throw new Error('TP must be above Entry Price.');
+                    if (slValue !== null && slValue >= executionEst) throw new Error('SL must be below Entry Price.');
+                    if (tpValue !== null && tpValue <= executionEst) throw new Error('TP must be above Entry Price.');
                 } else {
-                    if (slValue !== null && slValue <= fillPrice) throw new Error('SL must be above Entry Price.');
-                    if (tpValue !== null && tpValue >= fillPrice) throw new Error('TP must be below Entry Price.');
+                    if (slValue !== null && slValue <= executionEst) throw new Error('SL must be above Entry Price.');
+                    if (tpValue !== null && tpValue >= executionEst) throw new Error('TP must be below Entry Price.');
                 }
 
                 const res = await fetch('/api/trade', {
@@ -184,9 +225,16 @@ export function OrderForm({
                 </div>
                 <div className="flex justify-between items-center border-t border-white/[0.03] pt-1.5">
                     <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution Est</span>
-                    <span className={`text-[10px] font-mono font-black ${isHighSpread ? 'text-amber-400' : 'text-emerald-400'}`}>
-                        ${assetPrice.toFixed(2)}
-                    </span>
+                    <div className="flex flex-col items-end">
+                        <span className={`text-[10px] font-mono font-black ${isHighSlippage ? 'text-amber-400' : 'text-emerald-400'}`}>
+                            ${executionEst.toFixed(2)}
+                        </span>
+                        {amount && parseFloat(amount) > 0 && (
+                            <span className={`text-[7px] font-bold ${isHighSlippage ? 'text-amber-500/50' : 'text-zinc-600'}`}>
+                                ({slippage >= 0 ? '+' : ''}{slippage.toFixed(2)}% Slippage)
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -212,7 +260,7 @@ export function OrderForm({
 
                 <div>
                     <div className="flex justify-between items-center mb-1 px-1">
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Amount</span>
+                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Amount (USDC)</span>
                         <span className="text-[8px] text-zinc-600 font-bold tracking-tighter">
                             AVL: <span className="text-zinc-400 font-mono">${userBalance.toFixed(1)}</span>
                         </span>
@@ -223,7 +271,7 @@ export function OrderForm({
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
+                            className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-primary/30 transition-all font-black shadow-inner"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
                     </div>

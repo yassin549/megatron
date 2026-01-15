@@ -271,25 +271,25 @@ export function AssetChart({
             }));
         }
 
-        // Market Price Line (Subtle)
-        const isTooClose = Math.abs(price - marketPrice) < 0.0001;
+        // Index Price Line (Subtle)
+        const isIndexTooClose = Math.abs(price - marketPrice) < 0.0001;
         lines.push(series.createPriceLine({
             price: marketPrice,
-            color: 'rgba(161, 161, 170, 0.8)', // Brighter Zinc
+            color: 'rgba(161, 161, 170, 0.4)', // Faded Zinc
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
-            axisLabelVisible: !isTooClose, // Hide if identical to prevent overlap
-            title: isTooClose ? '' : ''
+            axisLabelVisible: !isIndexTooClose,
+            title: isIndexTooClose ? '' : 'INDEX'
         }));
 
-        // Execution Price Line (Solid and clear)
+        // Execution Est Line (Cyan - represents where they trade)
         lines.push(series.createPriceLine({
             price: price,
-            color: '#22d3ee', // Solid Cyan
+            color: '#22d3ee', // Cyan
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: ''
+            title: 'EXEC EST'
         }));
 
         // Apply Autoscale to include lines

@@ -23,6 +23,8 @@ interface TradingSidebarProps {
     // For chart interaction
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
+    totalSupply?: number;
+    pricingParams?: { P0: number; k: number };
 }
 
 export function TradingSidebar({
@@ -34,7 +36,9 @@ export function TradingSidebar({
     stats,
     onTradeSuccess,
     activePositionId,
-    onSelectPosition
+    onSelectPosition,
+    totalSupply,
+    pricingParams
 }: TradingSidebarProps) {
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
@@ -139,6 +143,8 @@ export function TradingSidebar({
                                             marketPrice={marketPrice}
                                             assetSymbol={assetName}
                                             onTradeSuccess={onTradeSuccess}
+                                            totalSupply={totalSupply}
+                                            pricingParams={pricingParams}
                                         />
                                     </div>
 
