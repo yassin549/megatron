@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
 
-interface AssetProfileWidgetProps {
+interface AssetInfoWidgetProps {
     name: string;
     imageUrl?: string;
     type?: string;

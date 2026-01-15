@@ -7,7 +7,7 @@ import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
 import { OrderBook } from '@/components/assets/OrderBook';
-import { AssetProfileWidget } from '@/components/assets/AssetProfileWidget';
+import { AssetInfoWidget } from '@/components/assets/AssetProfileWidget';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import {
     Activity,
