@@ -15,8 +15,8 @@ interface OrderBookProps {
 }
 
 export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
-    const [bids, setBids] = useState<OrderBookEntry[]>([]);
-    const [asks, setAsks] = useState<OrderBookEntry[]>([]);
+    const [rawBids, setRawBids] = useState<any[]>([]);
+    const [rawAsks, setRawAsks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     async function fetchOrderBook() {
@@ -24,57 +24,8 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             const res = await fetch(`/api/order?assetId=${assetId}`);
             if (res.ok) {
                 const data = await res.json();
-                const rawAsks: any[] = data.asks || [];
-                const rawBids: any[] = data.bids || [];
-
-                // 1. Determine Grid Step (0.1% of assetPrice, rounded to 2 decimals)
-                const step = Math.max(0.01, Number((assetPrice * 0.001).toFixed(2)));
-
-                // 2. Generate Fixed Levels
-                const gridAsks: OrderBookEntry[] = [];
-                const gridBids: OrderBookEntry[] = [];
-
-                // Asks (Above Mark Price)
-                for (let i = 1; i <= 7; i++) {
-                    const price = Number((assetPrice + (i * step)).toFixed(2));
-                    // Binning: Find real orders that fall into this bucket (simple nearest or exact for now)
-                    // In a real exchange, this would be more complex, but for MVP we match nearest.
-                    const amount = rawAsks
-                        .filter(o => Math.abs(o.price - price) <= step / 2)
-                        .reduce((acc, curr) => acc + curr.amount, 0);
-
-                    gridAsks.push({ price, amount, total: 0 });
-                }
-
-                // Bids (Below Mark Price)
-                for (let i = 1; i <= 7; i++) {
-                    const price = Number((assetPrice - (i * step)).toFixed(2));
-                    const amount = rawBids
-                        .filter(o => Math.abs(o.price - price) <= step / 2)
-                        .reduce((acc, curr) => acc + curr.amount, 0);
-
-                    gridBids.push({ price, amount, total: 0 });
-                }
-
-                // 3. Calculate Cumulative Totals
-                let currentAskTotal = 0;
-                // gridAsks are already sorted 1..7 (ascending price), for the UI (top to bottom) we want descending price
-                const sortedAsks = [...gridAsks].sort((a, b) => b.price - a.price);
-                // But total should accumulate from the best price (lowest ask)
-                let askSum = 0;
-                const asksWithTotal = [...gridAsks].map(a => {
-                    askSum += a.amount;
-                    return { ...a, total: askSum };
-                });
-
-                let bidSum = 0;
-                const bidsWithTotal = gridBids.map(b => {
-                    bidSum += b.amount;
-                    return { ...b, total: bidSum };
-                });
-
-                setAsks(asksWithTotal.reverse()); // Reverse back to descending for the top half
-                setBids(bidsWithTotal);
+                setRawAsks(data.asks || []);
+                setRawBids(data.bids || []);
             }
         } catch (error) {
             console.error('Failed to fetch orderbook', error);
@@ -84,27 +35,69 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
     }
 
     useEffect(() => {
+        setLoading(true);
         fetchOrderBook();
-        const interval = setInterval(fetchOrderBook, 5000); // Poll every 5 seconds
+        const interval = setInterval(fetchOrderBook, 5000);
         return () => clearInterval(interval);
     }, [assetId]);
 
+    const { processedAsks, processedBids } = useMemo(() => {
+        if (!assetPrice || assetPrice <= 0) return { processedAsks: [], processedBids: [] };
+
+        const step = Math.max(0.01, Number((assetPrice * 0.001).toFixed(2)));
+        const gridAsks: OrderBookEntry[] = [];
+        const gridBids: OrderBookEntry[] = [];
+
+        for (let i = 1; i <= 7; i++) {
+            const price = Number((assetPrice + (i * step)).toFixed(2));
+            const amount = rawAsks
+                .filter(o => Math.abs(o.price - price) <= step / 2)
+                .reduce((acc, curr) => acc + curr.amount, 0);
+            gridAsks.push({ price, amount, total: 0 });
+        }
+
+        for (let i = 1; i <= 7; i++) {
+            const price = Number((assetPrice - (i * step)).toFixed(2));
+            const amount = rawBids
+                .filter(o => Math.abs(o.price - price) <= step / 2)
+                .reduce((acc, curr) => acc + curr.amount, 0);
+            gridBids.push({ price, amount, total: 0 });
+        }
+
+        let askSum = 0;
+        const asksWithTotal = [...gridAsks].map(a => {
+            askSum += a.amount;
+            return { ...a, total: askSum };
+        });
+
+        let bidSum = 0;
+        const bidsWithTotal = gridBids.map(b => {
+            bidSum += b.amount;
+            return { ...b, total: bidSum };
+        });
+
+        return {
+            processedAsks: asksWithTotal.reverse(),
+            processedBids: bidsWithTotal
+        };
+    }, [assetPrice, rawAsks, rawBids]);
+
     const spread = useMemo(() => {
-        if (asks.length === 0 || bids.length === 0) return { val: 0, pct: 0 };
-        const bestAsk = asks[asks.length - 1].price;
-        const bestBid = bids[0].price;
+        if (processedAsks.length === 0 || processedBids.length === 0) return { val: 0, pct: 0 };
+        const bestAsk = processedAsks[processedAsks.length - 1].price;
+        const bestBid = processedBids[0].price;
         const val = bestAsk - bestBid;
         const pct = (val / bestAsk) * 100;
         return { val, pct };
-    }, [asks, bids]);
+    }, [processedAsks, processedBids]);
 
     const maxTotal = useMemo(() => {
-        const askMax = asks.length > 0 ? Math.max(...asks.map(a => a.total)) : 0;
-        const bidMax = bids.length > 0 ? Math.max(...bids.map(b => b.total)) : 0;
+        const askMax = processedAsks.length > 0 ? Math.max(...processedAsks.map(a => a.total)) : 0;
+        const bidMax = processedBids.length > 0 ? Math.max(...processedBids.map(b => b.total)) : 0;
         return Math.max(askMax, bidMax, 1);
-    }, [asks, bids]);
+    }, [processedAsks, processedBids]);
 
-    if (loading && bids.length === 0 && asks.length === 0) {
+    if (loading && rawBids.length === 0 && rawAsks.length === 0) {
         return (
             <div className="h-full flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-2xl animate-pulse">
                 <span className="text-[9px] text-zinc-600 font-black tracking-widest uppercase">Syncing_Book...</span>
