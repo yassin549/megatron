@@ -217,51 +217,47 @@ export function CompactPositionItem({
     const exitProgress = timedExit ? (timedExit.chunksCompleted / timedExit.chunksTotal) * 100 : 0;
 
     return (
+    return (
         <div
-            className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${isSelected
+            className={`group relative overflow-hidden rounded-[4px] border transition-all duration-300 ${isSelected
                 ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                 : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-white/10'
                 }`}
         >
             <button
                 onClick={handleClick}
-                className="w-full p-4 flex items-center justify-between text-left"
+                className="w-full p-3 flex items-center justify-between text-left"
             >
                 <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isProfit
+                    <div className={`w-8 h-8 rounded-[4px] flex items-center justify-center border ${isProfit
                         ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
                         : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
                         }`}>
-                        {isProfit ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                        {isProfit ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-bold text-white group-hover:text-primary transition-colors">
+                            <span className="text-xs font-black text-white group-hover:text-primary transition-colors uppercase tracking-tight">
                                 {position.assetName}
                             </span>
-                            <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${isShort
+                            <span className={`text-[7px] font-black uppercase tracking-wider px-1 py-0.5 rounded-sm ${isShort
                                 ? 'bg-rose-500/20 text-rose-400 border border-rose-500/20'
                                 : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20'
                                 }`}>
-                                {isShort ? 'Sell' : 'Buy'}
+                                {isShort ? 'SHORT' : 'LONG'}
                             </span>
                             {timedExit && (
-                                <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-md animate-pulse">
-                                    Exiting ({timedExit.chunksCompleted}/{timedExit.chunksTotal})
-                                </span>
-                            )}
-                            {isCurrentAsset && (
-                                <span className="text-[8px] font-black uppercase tracking-tighter px-1.5 py-0.5 bg-primary/20 text-primary rounded-md">
-                                    Current
+                                <span className="text-[7px] font-black uppercase tracking-widest px-1 py-0.5 bg-amber-500/20 text-amber-500 border border-amber-500/20 rounded-sm animate-pulse">
+                                    EXIT_PROGRESS ({timedExit.chunksCompleted}/{timedExit.chunksTotal})
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className={`text-[10px] font-mono font-bold ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            <span className={`text-[10px] font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
                                 {isProfit ? '+' : ''}{position.returnPercent.toFixed(2)}%
                             </span>
-                            <span className="text-[10px] text-zinc-600 font-mono">•</span>
-                            <span className="text-[10px] text-zinc-400 font-mono">
+                            <span className="text-[10px] text-zinc-800 font-mono">/</span>
+                            <span className="text-[10px] text-zinc-500 font-mono font-bold tracking-tighter">
                                 ${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </span>
                         </div>
@@ -269,27 +265,27 @@ export function CompactPositionItem({
                 </div>
 
                 <div className="flex items-center gap-4">
-                    {/* Visual Indicators (Checklist) */}
-                    <div className="flex items-center gap-1.5 p-1">
-                        <div className={`w-1.5 h-1.5 rounded-full ${position.stopLoss ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-zinc-800'}`} />
-                        <div className={`w-1.5 h-1.5 rounded-full ${position.takeProfit ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-zinc-800'}`} />
+                    {/* Visual Indicators (Instrument Checklist) */}
+                    <div className="flex items-center gap-1 p-0.5">
+                        <div className={`w-1 h-3 rounded-full ${position.stopLoss ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-zinc-800'}`} />
+                        <div className={`w-1 h-3 rounded-full ${position.takeProfit ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-zinc-800'}`} />
                     </div>
 
                     <div className="text-right hidden sm:block">
-                        <div className={`text-xs font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isProfit ? '+' : ''}${position.returnAbs.toFixed(2)}
+                        <div className={`text-[11px] font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {isProfit ? '+' : ''}${position.returnAbs.toFixed(1)}
                         </div>
-                        <div className="text-[9px] text-zinc-500 font-mono uppercase tracking-widest">
-                            Net Return
+                        <div className="text-[7px] text-zinc-600 font-black uppercase tracking-[0.2em] leading-none mt-0.5">
+                            NET_PnL
                         </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-zinc-600 group-hover:text-white transition-all ${isExpanded ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-3 h-3 text-zinc-700 group-hover:text-white transition-all ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
             </button>
 
             {timedExit && (
-                <div className="px-4 pb-4">
-                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                <div className="px-3 pb-3">
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                         <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${exitProgress}%` }}
@@ -305,29 +301,29 @@ export function CompactPositionItem({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden border-t border-white/5 bg-black/20"
+                        className="overflow-hidden border-t border-white/5 bg-black/40"
                     >
-                        <div className="p-4 space-y-4">
-                            {/* Grid Data */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Entry</div>
-                                    <div className="text-xs font-mono font-bold text-white">${position.avgPrice.toFixed(2)}</div>
+                        <div className="p-3 space-y-3">
+                            {/* Grid Data - Technical View */}
+                            <div className="grid grid-cols-4 gap-1.5">
+                                <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
+                                    <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">Entry</div>
+                                    <div className="text-[10px] font-mono font-black text-white">${position.avgPrice.toFixed(2)}</div>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">Size</div>
-                                    <div className="text-xs font-mono font-bold text-white">${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                                <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
+                                    <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">Size</div>
+                                    <div className="text-[10px] font-mono font-black text-white">${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">TP</div>
-                                    <div className={`text-xs font-mono font-bold ${position.takeProfit ? 'text-emerald-400' : 'text-zinc-600'}`}>
-                                        {position.takeProfit ? `$${position.takeProfit.toFixed(2)}` : 'None'}
+                                <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
+                                    <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">TP</div>
+                                    <div className={`text-[10px] font-mono font-black ${position.takeProfit ? 'text-emerald-400' : 'text-zinc-800'}`}>
+                                        {position.takeProfit ? `$${position.takeProfit.toFixed(2)}` : 'OFF'}
                                     </div>
                                 </div>
-                                <div className="p-2.5 rounded-xl bg-white/5 border border-white/5">
-                                    <div className="text-[8px] text-zinc-500 font-bold uppercase tracking-widest mb-0.5">SL</div>
-                                    <div className={`text-xs font-mono font-bold ${position.stopLoss ? 'text-rose-400' : 'text-zinc-600'}`}>
-                                        {position.stopLoss ? `$${position.stopLoss.toFixed(2)}` : 'None'}
+                                <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
+                                    <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">SL</div>
+                                    <div className={`text-[10px] font-mono font-black ${position.stopLoss ? 'text-rose-400' : 'text-zinc-800'}`}>
+                                        {position.stopLoss ? `$${position.stopLoss.toFixed(2)}` : 'OFF'}
                                     </div>
                                 </div>
                             </div>
@@ -336,19 +332,19 @@ export function CompactPositionItem({
                                 <button
                                     onClick={handleCancelExit}
                                     disabled={isCancelling}
-                                    className="w-full py-3 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-amber-500 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="w-full py-2.5 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 text-amber-500 rounded-md text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                                 >
-                                    {isCancelling ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-4 h-4" />}
-                                    CANCEL GRADUAL EXIT
+                                    {isCancelling ? <Loader2 className="w-3 h-3 animate-spin" /> : <X className="w-3 h-3" />}
+                                    CANCEL_GRADUAL_EXIT
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleExit()}
                                     disabled={isExiting}
-                                    className="w-full py-3 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-rose-900/10"
+                                    className="w-full py-2.5 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-md text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-[0_0_20px_rgba(244,63,94,0.05)]"
                                 >
-                                    {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-4 h-4" />}
-                                    EXIT POSITION
+                                    {isExiting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LogOut className="w-3 h-3" />}
+                                    EXIT_POSITION_INSTANT
                                 </button>
                             )}
                         </div>

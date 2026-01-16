@@ -62,7 +62,7 @@ export function AITerminal({ logs }: AITerminalProps) {
                                             href={url}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="inline-flex items-center gap-1.5 text-[9px] text-zinc-500 hover:text-white transition-all bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/5 hover:border-white/10 font-black uppercase tracking-widest shadow-sm"
+                                            className="inline-flex items-center gap-1.5 text-[9px] text-zinc-500 hover:text-white transition-all bg-white/[0.03] px-2.5 py-1 rounded-sm border border-white/5 hover:border-white/10 font-black uppercase tracking-widest shadow-sm"
                                         >
                                             <ExternalLink className="w-2.5 h-2.5 opacity-40" />
                                             Source_{idx + 1}

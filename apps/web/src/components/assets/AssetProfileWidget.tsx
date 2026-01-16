@@ -12,13 +12,13 @@ interface AssetInfoWidgetProps {
 
 export function AssetInfoWidget({ name, imageUrl, type }: AssetInfoWidgetProps) {
     return (
-        <div className="bg-black/40 border border-white/5 rounded-2xl p-4 shadow-2xl relative overflow-hidden group">
+        <div className="bg-black/40 border border-white/5 rounded-[4px] p-4 shadow-2xl relative overflow-hidden group">
             {/* Background Accent */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-[40px] -mr-12 -mt-12 group-hover:bg-primary/10 transition-colors duration-500" />
 
             <div className="flex items-center gap-4 relative z-10">
                 {/* Image / Icon container */}
-                <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-primary/30 transition-colors">
+                <div className="w-12 h-12 rounded-sm bg-white/[0.03] border border-white/10 flex items-center justify-center overflow-hidden shrink-0 group-hover:border-primary/30 transition-colors">
                     {imageUrl ? (
                         <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                     ) : (
