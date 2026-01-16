@@ -217,7 +217,6 @@ export function CompactPositionItem({
     const exitProgress = timedExit ? (timedExit.chunksCompleted / timedExit.chunksTotal) * 100 : 0;
 
     return (
-    return (
         <div
             className={`group relative overflow-hidden rounded-[4px] border transition-all duration-300 ${isSelected
                 ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
