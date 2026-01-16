@@ -85,6 +85,7 @@ export function AssetDetailClient({
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'chart' | 'analysis'>('chart');
+    const [executionEst, setExecutionEst] = useState<number>(initialAsset.price);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -286,8 +287,9 @@ export function AssetDetailClient({
                                         {chartData.length > 0 ? (
                                             <AssetChart
                                                 data={chartData}
-                                                price={asset.price}
+                                                marginalPrice={asset.price}
                                                 marketPrice={asset.marketPrice}
+                                                predictedPrice={executionEst}
                                                 watermarkText={asset.name.toUpperCase()}
                                                 colors={{
                                                     lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
@@ -350,6 +352,7 @@ export function AssetDetailClient({
                                     high24h: asset.high24h
                                 }}
                                 onTradeSuccess={refreshData}
+                                onExecutionPriceChange={setExecutionEst}
                                 activePositionId={activePositionId}
                                 onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                             />
@@ -411,6 +414,7 @@ export function AssetDetailClient({
                                                     marketPrice={asset.marketPrice}
                                                     status={asset.status}
                                                     onTradeSuccess={() => { refreshData(); }}
+                                                    onExecutionPriceChange={setExecutionEst}
                                                     activePositionId={activePositionId}
                                                     onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                                 />

@@ -20,6 +20,7 @@ interface TradingSidebarProps {
         high24h?: number;
     };
     onTradeSuccess?: () => void;
+    onExecutionPriceChange?: (price: number) => void;
     // For chart interaction
     activePositionId?: string | null;
     onSelectPosition?: (assetId: string | null) => void;
@@ -35,6 +36,7 @@ export function TradingSidebar({
     status,
     stats,
     onTradeSuccess,
+    onExecutionPriceChange,
     activePositionId,
     onSelectPosition,
     totalSupply,
@@ -143,6 +145,7 @@ export function TradingSidebar({
                                             marketPrice={marketPrice}
                                             assetSymbol={assetName}
                                             onTradeSuccess={onTradeSuccess}
+                                            onExecutionPriceChange={onExecutionPriceChange}
                                             totalSupply={totalSupply}
                                             pricingParams={pricingParams}
                                         />

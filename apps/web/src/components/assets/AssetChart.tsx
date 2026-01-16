@@ -12,8 +12,9 @@ interface ChartProps {
         areaTopColor?: string;
         areaBottomColor?: string;
     };
-    price: number;
+    marginalPrice: number;
     marketPrice: number;
+    predictedPrice?: number;
     priceLines?: {
         entry?: number;
         stopLoss?: number | null;
@@ -35,8 +36,9 @@ interface ChartProps {
 export function AssetChart({
     data,
     colors,
-    price,
+    marginalPrice,
     marketPrice,
+    predictedPrice,
     priceLines,
     onUpdatePosition,
     side = 'buy',
@@ -47,18 +49,26 @@ export function AssetChart({
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<IChartApi | null>(null);
-    const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
+    const seriesRef = useRef<ISeriesApi<"Area"> | null>(null);
+    const [activeTimeframe, setActiveTimeframe] = useState<'1m' | '15m' | '1h' | '1d' | '1w' | 'all'>('all');
+
+    const timeframes = [
+        { label: '1m', value: 60 },
+        { label: '15m', value: 15 * 60 },
+        { label: '1h', value: 60 * 60 },
+        { label: '1d', value: 24 * 60 * 60 },
+        { label: '1w', value: 7 * 24 * 60 * 60 },
+        { label: 'All', value: 0 },
+    ];
     const volumeSeriesRef = useRef<ISeriesApi<'Histogram'> | null>(null);
 
     const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
-    // Local lines state for optimistic UI updates during drag
     const [localLines, setLocalLines] = useState({
         stopLoss: priceLines?.stopLoss ?? null,
         takeProfit: priceLines?.takeProfit ?? null,
     });
 
-    // Pending confirmation state
     const [pendingUpdates, setPendingUpdates] = useState<Record<'stopLoss' | 'takeProfit', number | null>>({
         stopLoss: null,
         takeProfit: null
@@ -66,7 +76,6 @@ export function AssetChart({
 
     const hasPending = pendingUpdates.stopLoss !== null || pendingUpdates.takeProfit !== null;
 
-    // Sync local lines with props when not dragging/pending
     useEffect(() => {
         if (!hasPending) {
             setLocalLines({
@@ -76,18 +85,14 @@ export function AssetChart({
         }
     }, [priceLines, hasPending]);
 
-    // Dragging state
     const [draggingType, setDraggingType] = useState<'stopLoss' | 'takeProfit' | null>(null);
     const draggingTypeRef = useRef<'stopLoss' | 'takeProfit' | null>(null);
 
-    // Hover state for cursor
     const [hoverLine, setHoverLine] = useState<'stopLoss' | 'takeProfit' | 'entry' | null>(null);
     const [hoverAxis, setHoverAxis] = useState<'price' | 'time' | null>(null);
 
-    // Profile state for coordinate-based rendering
     const [profileBars, setProfileBars] = useState<{ top: number; height: number; width: number }[]>([]);
 
-    // 1. Calculate Volume Profile Bins
     const volumeProfileBins = useMemo(() => {
         if (!data.length) return [];
         const prices = data.map(d => d.value);
@@ -113,7 +118,6 @@ export function AssetChart({
         return bins.map(b => ({ ...b, width: (b.volume / maxVol) * 100 }));
     }, [data]);
 
-    // 2. Initialize Chart
     useEffect(() => {
         if (!chartContainerRef.current) return;
 
@@ -200,7 +204,6 @@ export function AssetChart({
         };
     }, [colors, watermarkText]);
 
-    // 3. Update Data
     useEffect(() => {
         if (!seriesRef.current || !volumeSeriesRef.current || !data.length) return;
 
@@ -216,7 +219,6 @@ export function AssetChart({
         chartRef.current?.timeScale().fitContent();
     }, [data]);
 
-    // 4. Map Profile Bins to Coordinates
     useEffect(() => {
         const series = seriesRef.current;
         if (!series || !volumeProfileBins.length) return;
@@ -237,23 +239,43 @@ export function AssetChart({
         return () => clearTimeout(timer);
     }, [volumeProfileBins, chartSize, data]);
 
-    // 5. Price Line Management (Use localLines)
+    useEffect(() => {
+        if (!chartRef.current || !data.length || activeTimeframe === 'all') {
+            chartRef.current?.timeScale().fitContent();
+            return;
+        }
+
+        const timeframeObj = timeframes.find(tf => tf.label.toLowerCase() === activeTimeframe.toLowerCase());
+        if (!timeframeObj || timeframeObj.value === 0) {
+            chartRef.current.timeScale().fitContent();
+            return;
+        }
+
+        const lastPoint = data[data.length - 1];
+        // data.time might be string, need to convert to Unix timestamp if so
+        const lastTime = typeof lastPoint.time === 'string' ? Math.floor(new Date(lastPoint.time).getTime() / 1000) : (lastPoint.time as any as number);
+        const startTime = lastTime - timeframeObj.value;
+
+        chartRef.current.timeScale().setVisibleRange({
+            from: startTime as Time,
+            to: lastTime as Time,
+        });
+    }, [activeTimeframe, data]);
+
     useEffect(() => {
         const series = seriesRef.current;
         if (!series) return;
 
-        // 5. Create Price Lines
         const lines: IPriceLine[] = [];
         const isSelected = activePositionId !== null;
 
-        // Entry Line
         if (priceLines?.entry) {
             lines.push(series.createPriceLine({
                 price: priceLines.entry,
                 color: isSelected ? 'rgba(59, 130, 246, 0.8)' : 'rgba(255, 255, 255, 0.3)',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Dashed,
-                axisLabelVisible: false, // Hidden axis tag for entry
+                axisLabelVisible: false,
                 title: side.toUpperCase()
             }));
         }
@@ -263,7 +285,7 @@ export function AssetChart({
                 color: '#f43f5e',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Solid,
-                axisLabelVisible: false, // Hidden axis tag for SL
+                axisLabelVisible: false,
                 title: 'SL'
             }));
         }
@@ -273,33 +295,31 @@ export function AssetChart({
                 color: '#34d399',
                 lineWidth: isSelected ? 2 : 1,
                 lineStyle: LineStyle.Solid,
-                axisLabelVisible: false, // Hidden axis tag for TP
+                axisLabelVisible: false,
                 title: 'TP'
             }));
         }
 
-        // Index Price Line (Subtle)
-        const isIndexTooClose = Math.abs(price - marketPrice) < 0.0001;
+        const isIndexTooClose = Math.abs(marginalPrice - marketPrice) < 0.0001;
         lines.push(series.createPriceLine({
             price: marketPrice,
-            color: 'rgba(161, 161, 170, 0.4)', // Faded Zinc
+            color: 'rgba(161, 161, 170, 0.4)',
             lineWidth: 1,
             lineStyle: LineStyle.Dashed,
             axisLabelVisible: !isIndexTooClose,
             title: isIndexTooClose ? '' : 'INDEX'
         }));
 
-        // Execution Est Line (Cyan - represents where they trade)
+        const execPrice = predictedPrice || marginalPrice;
         lines.push(series.createPriceLine({
-            price: price,
-            color: '#22d3ee', // Cyan
+            price: execPrice,
+            color: '#22d3ee',
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
             title: 'EXEC EST'
         }));
 
-        // Apply Autoscale to include lines
         series.applyOptions({
             autoscaleInfoProvider: (original: any) => {
                 const res = original();
@@ -321,11 +341,9 @@ export function AssetChart({
                     max = Math.max(max, localLines.takeProfit);
                 }
 
-                // Always include current prices
-                min = Math.min(min, price, marketPrice);
-                max = Math.max(max, price, marketPrice);
+                min = Math.min(min, execPrice, marketPrice);
+                max = Math.max(max, execPrice, marketPrice);
 
-                // Add some padding
                 const range = max - min;
                 return {
                     priceRange: {
@@ -338,12 +356,10 @@ export function AssetChart({
 
         return () => {
             lines.forEach(line => series.removePriceLine(line));
-            // Reset autoscale (optional, but good practice)
             series.applyOptions({ autoscaleInfoProvider: undefined });
         };
-    }, [priceLines?.entry, localLines, activePositionId, price, marketPrice, userTrades]);
+    }, [priceLines?.entry, localLines, activePositionId, marginalPrice, predictedPrice, marketPrice, userTrades]);
 
-    // 6. Set Trade Markers
     useEffect(() => {
         if (!seriesRef.current || !userTrades.length) {
             seriesRef.current?.setMarkers([]);
@@ -362,7 +378,6 @@ export function AssetChart({
         seriesRef.current.setMarkers(markers.sort((a, b) => (a.time as number) - (b.time as number)));
     }, [userTrades]);
 
-    // 7. Global Dragging Logic
     useEffect(() => {
         const handleGlobalMouseMove = (e: MouseEvent) => {
             if (!draggingTypeRef.current || !seriesRef.current || !chartContainerRef.current) return;
@@ -371,24 +386,22 @@ export function AssetChart({
             if (y < 0 || y > rect.height) return;
             const newPrice = seriesRef.current.coordinateToPrice(y);
             if (newPrice !== null) {
-                const price = Number(newPrice.toFixed(4));
+                const priceValue = Number(newPrice.toFixed(4));
                 setLocalLines(prev => ({
                     ...prev,
-                    [draggingTypeRef.current!]: price
+                    [draggingTypeRef.current!]: priceValue
                 }));
             }
         };
 
         const handleGlobalMouseUp = () => {
             if (draggingTypeRef.current && seriesRef.current && chartContainerRef.current) {
-                // Determine final price
                 const type = draggingTypeRef.current;
-                const price = localLines[type];
-                if (price !== null) {
-                    setPendingUpdates(prev => ({ ...prev, [type]: price }));
+                const priceVal = localLines[type];
+                if (priceVal !== null) {
+                    setPendingUpdates(prev => ({ ...prev, [type]: priceVal }));
                 }
 
-                // If not active, select it
                 if (!activePositionId) {
                     onSelectPosition?.('current');
                 }
@@ -406,7 +419,7 @@ export function AssetChart({
             window.removeEventListener('mousemove', handleGlobalMouseMove);
             window.removeEventListener('mouseup', handleGlobalMouseUp);
         };
-    }, [draggingType, localLines]); // Need localLines in dep to capture latest value
+    }, [draggingType, localLines, activePositionId, onSelectPosition]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (hasPending) return;
@@ -418,8 +431,6 @@ export function AssetChart({
         const y = e.clientY - rect.top;
         const threshold = 20;
 
-        // Detection for axis Interaction scaling
-        // If we are in axis zones, let the chart handle it (don't preventDefault)
         if (x > rect.width - 60 || y > rect.height - 30) {
             return;
         }
@@ -427,7 +438,6 @@ export function AssetChart({
         if (localLines.takeProfit) {
             const tpY = series.priceToCoordinate(localLines.takeProfit);
             if (tpY !== null && Math.abs(tpY - y) < threshold) {
-                // Auto-select on drag start
                 if (!activePositionId) onSelectPosition?.('current');
                 setDraggingType('takeProfit');
                 draggingTypeRef.current = 'takeProfit';
@@ -438,7 +448,6 @@ export function AssetChart({
         if (localLines.stopLoss) {
             const slY = series.priceToCoordinate(localLines.stopLoss);
             if (slY !== null && Math.abs(slY - y) < threshold) {
-                // Auto-select on drag start
                 if (!activePositionId) onSelectPosition?.('current');
                 setDraggingType('stopLoss');
                 draggingTypeRef.current = 'stopLoss';
@@ -449,11 +458,10 @@ export function AssetChart({
         if (priceLines?.entry) {
             const entryY = series.priceToCoordinate(priceLines.entry);
             if (entryY !== null && Math.abs(entryY - y) < threshold) {
-                // If not active, select it first
                 if (activePositionId === null) {
                     onSelectPosition?.('current');
                 } else {
-                    onSelectPosition?.(null); // Click twice to toggle off if already active? (Optional)
+                    onSelectPosition?.(null);
                 }
                 e.preventDefault();
                 return;
@@ -476,14 +484,12 @@ export function AssetChart({
         const y = e.clientY - rect.top;
         const threshold = 15;
 
-        // Time axis check (bottom)
         if (y > rect.height - 30 && x < rect.width - 60) {
             setHoverAxis('time');
             setHoverLine(null);
             return;
         }
 
-        // Price axis check (right)
         if (x > rect.width - 60 && y < rect.height - 30) {
             setHoverAxis('price');
             setHoverLine(null);
@@ -530,32 +536,29 @@ export function AssetChart({
         return 'crosshair';
     };
 
-    const toggleTarget = (type: 'stopLoss' | 'takeProfit') => {
-        const currentPrice = data[data.length - 1]?.value || 0;
-        const entryPrice = priceLines?.entry || currentPrice;
+    const toggleTarget = (targetType: 'stopLoss' | 'takeProfit') => {
+        const currentMktPrice = data[data.length - 1]?.value || 0;
 
-        // If target exists in props (saved), and we aren't already pending a change for it, cancel it
-        const isSaved = type === 'stopLoss' ? !!priceLines?.stopLoss : !!priceLines?.takeProfit;
-        const isCurrentlyPending = pendingUpdates[type] !== null;
+        const isSaved = targetType === 'stopLoss' ? !!priceLines?.stopLoss : !!priceLines?.takeProfit;
+        const isCurrentlyPending = pendingUpdates[targetType] !== null;
 
         if (isSaved && !isCurrentlyPending) {
-            onUpdatePosition?.({ [type]: null });
+            onUpdatePosition?.({ [targetType]: null });
             return;
         }
 
-        // Otherwise, initialize a default target and enter pending state
-        let defaultVal = currentPrice;
-        if (type === 'stopLoss') {
-            defaultVal = side === 'buy' ? currentPrice * 0.95 : currentPrice * 1.05;
+        let defaultVal = currentMktPrice;
+        if (targetType === 'stopLoss') {
+            defaultVal = side === 'buy' ? currentMktPrice * 0.95 : currentMktPrice * 1.05;
         } else {
-            defaultVal = side === 'buy' ? currentPrice * 1.05 : currentPrice * 0.95;
+            defaultVal = side === 'buy' ? currentMktPrice * 1.05 : currentMktPrice * 0.95;
         }
 
-        const price = Number(defaultVal.toFixed(4));
-        setLocalLines(prev => ({ ...prev, [type]: price }));
-        setPendingUpdates(prev => ({ ...prev, [type]: price }));
-        setDraggingType(type);
-        draggingTypeRef.current = type;
+        const priceValue = Number(defaultVal.toFixed(4));
+        setLocalLines(prev => ({ ...prev, [targetType]: priceValue }));
+        setPendingUpdates(prev => ({ ...prev, [targetType]: priceValue }));
+        setDraggingType(targetType);
+        draggingTypeRef.current = targetType;
     };
 
     const handleConfirmUpdate = () => {
@@ -575,7 +578,6 @@ export function AssetChart({
 
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
-            {/* Header / Control Pill Overlay - Only visible when a position is selected */}
             <AnimatePresence>
                 {activePositionId && (
                     <motion.div
@@ -584,7 +586,6 @@ export function AssetChart({
                         exit={{ y: -20, opacity: 0, x: '-50%' }}
                         className="absolute top-4 left-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl"
                     >
-                        {/* SL Button */}
                         <button
                             onClick={() => toggleTarget('stopLoss')}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.stopLoss
@@ -596,7 +597,6 @@ export function AssetChart({
                             SL
                         </button>
 
-                        {/* Confirm/Cancel (Integrated) */}
                         <AnimatePresence mode="wait">
                             {hasPending && (
                                 <motion.div
@@ -622,7 +622,6 @@ export function AssetChart({
                             )}
                         </AnimatePresence>
 
-                        {/* TP Button */}
                         <button
                             onClick={() => toggleTarget('takeProfit')}
                             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${priceLines?.takeProfit
@@ -637,7 +636,6 @@ export function AssetChart({
                 )}
             </AnimatePresence>
 
-            {/* Original Live Header */}
             <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -645,7 +643,6 @@ export function AssetChart({
                 </span>
             </div>
 
-            {/* Chart Area */}
             <div
                 className="flex-1 relative"
                 onMouseDown={handleMouseDown}
@@ -653,13 +650,24 @@ export function AssetChart({
                 onMouseLeave={handleMouseLeave}
                 style={{ cursor: getCursorStyle() }}
             >
-                {/* Interaction Layer - Labels and Lines */}
-                <div className="absolute inset-0 pointer-events-none z-20" />
+                <div className="absolute top-3 left-3 z-20 flex gap-1.5 p-1 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shadow-2xl">
+                    {timeframes.map((tf) => (
+                        <button
+                            key={tf.label}
+                            onClick={() => setActiveTimeframe(tf.label.toLowerCase() as any)}
+                            className={`px-2 py-1 text-[9px] font-black tracking-tighter uppercase rounded transition-all duration-200 ${activeTimeframe === tf.label.toLowerCase()
+                                    ? 'bg-primary/20 text-primary shadow-[0_0_10px_rgba(59,130,246,0.2)]'
+                                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                                }`}
+                        >
+                            {tf.label}
+                        </button>
+                    ))}
+                </div>
 
                 <div ref={chartContainerRef} className="w-full h-full" />
 
-                {/* Volume Profile Overlay */}
-                <div className="absolute left-0 top-0 bottom-0 w-48 pointer-events-none z-10">
+                <div className="absolute left-0 top-0 bottom-0 w-48 pointer-events-none z-10 flex flex-col justify-start">
                     {profileBars.map((bar, i) => (
                         <div
                             key={i}
@@ -673,15 +681,13 @@ export function AssetChart({
                         />
                     ))}
                 </div>
-
-                {/* Drag Indicator */}
-                {draggingType && (
-                    <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
-                        Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
-                    </div>
-                )}
-
             </div>
+
+            {draggingType && (
+                <div className="absolute top-4 right-20 z-40 px-3 py-1 bg-blue-600 rounded text-[10px] font-black text-white uppercase tracking-widest animate-pulse shadow-xl border border-blue-400/30">
+                    Adjusting {draggingType === 'stopLoss' ? 'Stop Loss' : 'Take Profit'}
+                </div>
+            )}
         </div>
     );
 }

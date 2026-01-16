@@ -14,6 +14,7 @@ interface OrderFormProps {
     marketPrice: number;
     assetSymbol?: string;
     onTradeSuccess?: () => void;
+    onExecutionPriceChange?: (price: number) => void;
     totalSupply?: number;
     pricingParams?: { P0: number; k: number };
 }
@@ -24,6 +25,7 @@ export function OrderForm({
     marketPrice,
     assetSymbol = 'Share',
     onTradeSuccess,
+    onExecutionPriceChange,
     totalSupply = 0,
     pricingParams = { P0: 10, k: 0.01 }
 }: OrderFormProps) {
@@ -83,6 +85,10 @@ export function OrderForm({
             return usdc / deltaS;
         }
     })();
+
+    useEffect(() => {
+        onExecutionPriceChange?.(executionEst);
+    }, [executionEst, onExecutionPriceChange]);
 
     const slippage = ((executionEst - assetPrice) / assetPrice) * 100;
     const isHighSlippage = Math.abs(slippage) > 2;
