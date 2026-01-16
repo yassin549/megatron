@@ -151,7 +151,11 @@ export function AssetChart({
 
     useEffect(() => {
         if (chartRef.current && kLineData.length > 0) {
-            chartRef.current.setDataList(kLineData);
+            chartRef.current.setDataLoader({
+                getBars: (params) => {
+                    params.callback(kLineData, false);
+                }
+            });
         }
     }, [kLineData]);
 
