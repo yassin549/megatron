@@ -317,7 +317,7 @@ export function AssetChart({
             lineWidth: 1,
             lineStyle: LineStyle.Solid,
             axisLabelVisible: true,
-            title: 'EXEC EST'
+            title: ''
         }));
 
         series.applyOptions({
@@ -656,8 +656,8 @@ export function AssetChart({
                             key={tf.label}
                             onClick={() => setActiveTimeframe(tf.label.toLowerCase() as any)}
                             className={`px-2 py-1 text-[9px] font-black tracking-tighter uppercase rounded transition-all duration-200 ${activeTimeframe === tf.label.toLowerCase()
-                                    ? 'bg-primary/20 text-primary shadow-[0_0_10px_rgba(59,130,246,0.2)]'
-                                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                                ? 'bg-primary/20 text-primary shadow-[0_0_10px_rgba(59,130,246,0.2)]'
+                                : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
                                 }`}
                         >
                             {tf.label}
