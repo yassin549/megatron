@@ -158,9 +158,6 @@ export function AssetChart({
                 params.callback(kLineData, false);
             }
         });
-
-        // Trigger immediate load
-        chart.loadMore(() => { });
     }, [kLineData]);
 
     useEffect(() => {
