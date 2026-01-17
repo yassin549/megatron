@@ -151,7 +151,7 @@ export function AssetChart({
 
     useEffect(() => {
         if (chartRef.current && kLineData.length > 0) {
-            chartRef.current.applyNewData(kLineData);
+            chartRef.current.applyMoreData(kLineData);
         }
     }, [kLineData]);
 
