@@ -283,7 +283,7 @@ export function AssetDetailClient({
                                     </div>
 
                                     {/* Chart (75%) */}
-                                    <div className="flex-1 h-full overflow-hidden border border-white/5 bg-black/40 rounded-2xl shadow-2xl relative">
+                                    <div className="flex-1 h-full min-h-0 overflow-hidden border border-white/5 bg-black/40 rounded-2xl shadow-2xl relative">
                                         {chartData.length > 0 ? (
                                             <AssetChart
                                                 data={chartData}

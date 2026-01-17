@@ -318,18 +318,19 @@ export function OrderForm({
             <button
                 onClick={handleTrade}
                 disabled={!amount || loading}
-                className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.97] disabled:opacity-20 flex items-center justify-center gap-2 shadow-2xl
+                className={`btn-animated w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.97] disabled:opacity-20 flex items-center justify-center gap-2 shadow-2xl
                     ${isBuy
                         ? 'bg-emerald-500 text-black hover:bg-emerald-400'
                         : 'bg-rose-500 text-black hover:bg-rose-400'
                     }`}
             >
+                <div className={`btn-animated-overlay ${isBuy ? 'bg-white/20' : 'bg-white/20'}`} />
                 {loading ? (
                     <div className="w-3.5 h-3.5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
                 ) : (
                     <>
-                        {isBuy ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
-                        {isBuy ? 'Place Buy' : 'Place Sell'}
+                        {isBuy ? <ArrowUpRight className="w-3.5 h-3.5 relative z-10" /> : <ArrowDownRight className="w-3.5 h-3.5 relative z-10" />}
+                        <span className="relative z-10">{isBuy ? 'Place Buy' : 'Place Sell'}</span>
                     </>
                 )}
             </button>

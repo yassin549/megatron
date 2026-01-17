@@ -331,21 +331,22 @@ export function LPFundingPanel({
                     <button
                         onClick={handleAction}
                         disabled={!amount || parseFloat(amount) <= 0 || loading}
-                        className={`w-full py-3 rounded-lg font-semibold text-[10px] md:text-xs tracking-wide shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
+                        className={`btn-animated w-full py-3 rounded-lg font-semibold text-[10px] md:text-xs tracking-wide shadow-xl transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2
                             ${isBuy
                                 ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-900/30 hover:from-blue-500 hover:to-blue-400'
                                 : 'bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow-rose-900/30 hover:from-rose-500 hover:to-rose-400'
                             }`}
                     >
+                        <div className="btn-animated-overlay bg-white/15" />
                         {loading ? (
-                            <span className="flex items-center gap-3">
+                            <span className="flex items-center gap-3 relative z-10">
                                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
                                 Processing...
                             </span>
                         ) : (
                             <>
-                                {isBuy ? <Droplets className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                                {isBuy ? 'Deploy Capital' : 'Withdraw'}
+                                {isBuy ? <Droplets className="w-4 h-4 relative z-10" /> : <ArrowDownRight className="w-4 h-4 relative z-10" />}
+                                <span className="relative z-10">{isBuy ? 'Deploy Capital' : 'Withdraw'}</span>
                             </>
                         )}
                     </button>

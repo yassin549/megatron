@@ -142,6 +142,19 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Button Animations - Slide-up overlay effect */
+  .btn-animated {
+    @apply relative overflow-hidden;
+  }
+
+  .btn-animated-overlay {
+    @apply absolute inset-0 translate-y-full transition-transform duration-300;
+  }
+
+  .btn-animated:hover .btn-animated-overlay {
+    @apply translate-y-0;
+  }
 }
 
 @layer base {

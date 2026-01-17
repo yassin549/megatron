@@ -145,17 +145,19 @@ export function PositionCard({
                                 <button
                                     onClick={onUpdateTargets}
                                     disabled={isUpdating}
-                                    className="flex-1 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-widest bg-white/10 text-white hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="btn-animated flex-1 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-widest bg-white/10 text-white hover:bg-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isUpdating ? 'Saving...' : 'Update'}
+                                    <div className="btn-animated-overlay bg-white/10" />
+                                    <span className="relative z-10">{isUpdating ? 'Saving...' : 'Update'}</span>
                                 </button>
                                 <button
                                     onClick={onExitPosition}
                                     disabled={isExiting}
-                                    className="flex-1 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="btn-animated flex-1 py-2.5 rounded-lg font-bold text-[10px] uppercase tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    <LogOut className="w-3 h-3" />
-                                    {isExiting ? 'Exiting...' : 'Exit'}
+                                    <div className="btn-animated-overlay bg-white/10" />
+                                    <LogOut className="w-3 h-3 relative z-10" />
+                                    <span className="relative z-10">{isExiting ? 'Exiting...' : 'Exit'}</span>
                                 </button>
                             </div>
                         </div>

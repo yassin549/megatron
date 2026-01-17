@@ -81,9 +81,10 @@ export function GradualExitModal({
                             <button
                                 onClick={onConfirmGradual}
                                 disabled={isLoading}
-                                className="w-full text-left p-4 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group relative overflow-hidden"
+                                className="btn-animated w-full text-left p-4 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group relative overflow-hidden"
                             >
-                                <div className="flex items-start gap-4">
+                                <div className="btn-animated-overlay bg-primary/10" />
+                                <div className="flex items-start gap-4 relative z-10">
                                     <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
                                         <Clock className="w-6 h-6" />
                                     </div>
@@ -97,7 +98,7 @@ export function GradualExitModal({
                                         </p>
                                     </div>
                                 </div>
-                                <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                     <ArrowRight className="w-4 h-4 text-primary" />
                                 </div>
                             </button>
@@ -106,9 +107,10 @@ export function GradualExitModal({
                             <button
                                 onClick={onConfirmInstant}
                                 disabled={isLoading}
-                                className="w-full text-left p-4 rounded-2xl bg-zinc-800/50 border border-white/5 hover:bg-zinc-800 transition-all group"
+                                className="btn-animated w-full text-left p-4 rounded-2xl bg-zinc-800/50 border border-white/5 hover:bg-zinc-800 transition-all group"
                             >
-                                <div className="flex items-start gap-4">
+                                <div className="btn-animated-overlay bg-white/10" />
+                                <div className="flex items-start gap-4 relative z-10">
                                     <div className="w-12 h-12 rounded-xl bg-zinc-700/50 flex items-center justify-center text-zinc-400 group-hover:bg-rose-500/20 group-hover:text-rose-400 transition-colors">
                                         <Wallet className="w-6 h-6" />
                                     </div>

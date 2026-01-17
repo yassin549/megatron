@@ -373,7 +373,7 @@ export function AssetChart({
                 )}
             </AnimatePresence>
 
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-2 p-1.5 bg-black/40 backdrop-blur-md border border-white/5 rounded-xl shadow-2xl">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl">
                 <button
                     onClick={() => setActiveTool(null)}
                     className={`p-2 rounded-lg transition-all ${!activeTool ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
@@ -405,7 +405,7 @@ export function AssetChart({
                 </button>
             </div>
 
-            <div className="absolute top-3 left-14 z-20 flex gap-1.5 p-1 bg-black/40 backdrop-blur-md border border-white/5 rounded-lg shadow-2xl">
+            <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
                 {timeframes.map((tf) => (
                     <button
                         key={tf.label}
