@@ -150,9 +150,17 @@ export function AssetChart({
     }, [colors]);
 
     useEffect(() => {
-        if (chartRef.current && kLineData.length > 0) {
-            chartRef.current.applyMoreData(kLineData);
-        }
+        const chart = chartRef.current;
+        if (!chart || kLineData.length === 0) return;
+
+        chart.setDataLoader({
+            getBars: (params) => {
+                params.callback(kLineData, false);
+            }
+        });
+
+        // Trigger immediate load
+        chart.loadMore(() => { });
     }, [kLineData]);
 
     useEffect(() => {
