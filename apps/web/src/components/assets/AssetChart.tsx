@@ -151,10 +151,18 @@ export function AssetChart({
 
     useEffect(() => {
         const chart = chartRef.current;
-        if (!chart || kLineData.length === 0) return;
+        if (!chart || kLineData.length === 0) {
+            console.log('[AssetChart] Skipping data load:', { hasChart: !!chart, dataLength: kLineData.length });
+            return;
+        }
+
+        console.log('[AssetChart] Setting data loader with', kLineData.length, 'data points');
+        console.log('[AssetChart] First data point:', kLineData[0]);
+        console.log('[AssetChart] Last data point:', kLineData[kLineData.length - 1]);
 
         chart.setDataLoader({
             getBars: (params) => {
+                console.log('[AssetChart] getBars callback invoked!', params);
                 params.callback(kLineData, false);
             }
         });
