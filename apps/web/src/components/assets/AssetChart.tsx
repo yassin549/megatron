@@ -94,6 +94,11 @@ export function AssetChart({
     }, [data]);
 
     const subscribeBarRef = useRef<((data: KLineData) => void) | null>(null);
+    const dataRef = useRef(data);
+
+    useEffect(() => {
+        dataRef.current = data;
+    }, [data]);
 
     // Initial chart setup and robust data loading
     useEffect(() => {
@@ -144,33 +149,59 @@ export function AssetChart({
 
             chart.setDataLoader({
                 getBars: (params) => {
-                    // Filter based on period if needed, or just return full history for now
-                    // In a real app, you might fetch specific ranges here.
-                    // For now, we assume `klineData` (from props) has what we need.
-
-                    // IMPORTANT: We need to access the LATEST klineData, not the stale closure one.
-                    // However, getBars is usually called on init. 
-                    // To keep it simple, we will return the data passed in the callback params or just return immediately
-                    // since we will likely pre-poppulate or use a ref for data if strictly needed.
-                    // But actually, getBars expects us to call params.callback(data).
-
-                    // We'll trust the outer scope's latest klineData if this effect re-runs,
-                    // BUT this effect only runs on mount/colors change. 
-                    // So klineData might be stale here if we don't include it in deps.
-                    // If we include it in deps, we re-init chart on every update -> FLICKER.
-
-                    // SOLUTION: The chart init should allow setSymbol to trigger getBars.
-                    // We can return a loading state or just the current known data.
-                    // Ideally, getBars fetches from an API. Here we are driven by props.
-                    // We can just return the current prop data.
-                    params.callback(data.map(d => ({
+                    const rawData = dataRef.current.map(d => ({
                         timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
                         open: d.value,
                         high: d.value,
                         low: d.value,
                         close: d.value,
                         volume: d.volume || 0
-                    })), false);
+                    }));
+
+                    const periodSeconds = params.period.span * (
+                        params.period.type === 'minute' ? 60 :
+                            params.period.type === 'hour' ? 3600 :
+                                params.period.type === 'day' ? 86400 :
+                                    params.period.type === 'week' ? 604800 : 0
+                    );
+
+                    let finalData = rawData;
+
+                    if (periodSeconds > 60) {
+                        // Aggregate
+                        const aggregated: KLineData[] = [];
+                        let currentBar: KLineData | null = null;
+
+                        // Sort to ensure chronological order
+                        const sortedData = [...rawData].sort((a, b) => a.timestamp - b.timestamp);
+
+                        sortedData.forEach(point => {
+                            const timestamp = Math.floor(point.timestamp / (periodSeconds * 1000)) * (periodSeconds * 1000);
+
+                            if (!currentBar || currentBar.timestamp !== timestamp) {
+                                if (currentBar) aggregated.push(currentBar);
+                                currentBar = {
+                                    timestamp,
+                                    open: point.open,
+                                    high: point.high,
+                                    low: point.low,
+                                    close: point.close,
+                                    volume: point.volume
+                                };
+                            } else {
+                                if (currentBar) {
+                                    currentBar.high = Math.max(currentBar.high, point.high);
+                                    currentBar.low = Math.min(currentBar.low, point.low);
+                                    currentBar.close = point.close;
+                                    currentBar.volume = (currentBar.volume || 0) + (point.volume || 0);
+                                }
+                            }
+                        });
+                        if (currentBar) aggregated.push(currentBar);
+                        finalData = aggregated;
+                    }
+
+                    params.callback(finalData, false);
                 },
                 subscribeBar: (params) => {
                     // Capture the callback so we can feed it data later
@@ -198,11 +229,33 @@ export function AssetChart({
     }, [colors, watermarkText]); // Re-init primarily if visual config or symbol identity changes
 
     // Reactive Data Updates WITHOUT Re-initialization
+    // Reactive Data Updates WITHOUT Re-initialization
     useEffect(() => {
         if (!kLineData.length || !subscribeBarRef.current) return;
 
         const lastPoint = kLineData[kLineData.length - 1];
-        // Feed the new/updated last point to the chart via subscription
+
+        const chart = chartRef.current;
+        const period = chart?.getPeriod();
+
+        if (period) {
+            const periodSeconds = period.span * (
+                period.type === 'minute' ? 60 :
+                    period.type === 'hour' ? 3600 :
+                        period.type === 'day' ? 86400 :
+                            period.type === 'week' ? 604800 : 0
+            );
+
+            if (periodSeconds > 60) {
+                const timestamp = Math.floor(lastPoint.timestamp / (periodSeconds * 1000)) * (periodSeconds * 1000);
+                subscribeBarRef.current({
+                    ...lastPoint,
+                    timestamp
+                });
+                return;
+            }
+        }
+
         subscribeBarRef.current(lastPoint);
     }, [kLineData]);
 
