@@ -291,12 +291,12 @@ export function AssetDetailClient({
                                                 marketPrice={asset.marketPrice}
                                                 predictedPrice={executionEst}
                                                 watermarkText={asset.name.toUpperCase()}
-                                                colors={{
+                                                colors={useMemo(() => ({
                                                     lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
                                                     areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.06)' : 'rgba(244, 63, 94, 0.06)',
                                                     areaBottomColor: 'rgba(0, 0, 0, 0)',
                                                     textColor: '#52525b',
-                                                }}
+                                                }), [asset.change24h])}
                                                 priceLines={{
                                                     entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
                                                     stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,

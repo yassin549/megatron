@@ -84,12 +84,29 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
 
     const spread = useMemo(() => {
         if (processedAsks.length === 0 || processedBids.length === 0) return { val: 0, pct: 0 };
+
+        // Find best ask/bid with actual volume
+        const activeAsk = processedAsks.slice().reverse().find(a => a.amount > 0);
+        const activeBid = processedBids.find(b => b.amount > 0);
+
+        // If no active orders, return 0 or maybe just fallback to grid top? 
+        // User complaint is "incorrectly shown". If no orders, spread should probably be -- or 0.
+        // Let's sticking to the "Grid Spread" ONLY if we have actual liquidity, otherwise 0.
+        if (!activeAsk && !activeBid) return { val: 0, pct: 0 };
+
+        // If we have some orders but not both sides, we can't calculate a real spread.
+        // But if we want to show the "theoretical" spread based on the grid:
+        // The user issue suggests the theoretical spread is confusing.
+        // So let's force 0 if no orders.
+        const hasOrders = rawAsks.length > 0 || rawBids.length > 0;
+        if (!hasOrders) return { val: 0, pct: 0 };
+
         const bestAsk = processedAsks[processedAsks.length - 1].price;
         const bestBid = processedBids[0].price;
         const val = bestAsk - bestBid;
         const pct = (val / bestAsk) * 100;
         return { val, pct };
-    }, [processedAsks, processedBids]);
+    }, [processedAsks, processedBids, rawAsks.length, rawBids.length]);
 
     const maxTotal = useMemo(() => {
         const askMax = processedAsks.length > 0 ? Math.max(...processedAsks.map(a => a.total)) : 0;
