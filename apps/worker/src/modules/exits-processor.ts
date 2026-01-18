@@ -28,6 +28,12 @@ export async function processGradualExits() {
                     where: { id: exit.id }
                 });
 
+                // Check if asset is active - if not (e.g. 'funding', 'paused'), skip this cycle but don't error
+                if (exit.asset.status !== 'active') {
+                    console.log(`Skipping exit ${exit.id} - asset ${exit.asset.name} is ${exit.asset.status}`);
+                    return;
+                }
+
                 if (!currentExit || currentExit.status !== 'active') return;
 
                 const remainingChunks = currentExit.chunksTotal - currentExit.chunksCompleted;
@@ -55,6 +61,9 @@ export async function processGradualExits() {
                 // To keep it simple and robust, we'll execute the trade OUTSIDE this transaction 
                 // but update the TimedExit record based on the trade result.
             });
+
+            // If we skipped because of asset status, we continue to next exit
+            if (exit.asset.status !== 'active') continue;
 
             // Re-fetch to ensure we have latest state
             const currentExit = await db.timedExit.findUnique({ where: { id: exit.id } });

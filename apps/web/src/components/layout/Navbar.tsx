@@ -102,6 +102,17 @@ export function Navbar() {
         }
     }, [status]);
 
+    // Fetch System Stats
+    const [assetCount, setAssetCount] = useState<number | null>(null);
+    useEffect(() => {
+        fetch('/api/stats/system')
+            .then(res => res.json())
+            .then(data => {
+                if (data.assetCount) setAssetCount(data.assetCount);
+            })
+            .catch(err => console.error('Failed to load stats', err));
+    }, []);
+
     // Close menus on route change
     useEffect(() => {
         setIsProfileOpen(false);
@@ -315,7 +326,7 @@ export function Navbar() {
                                                 <div>
                                                     <h4 className="text-sm font-bold text-white">System Status</h4>
                                                     <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                                                        The Neural Engine is currently analyzing 2,400+ world variables in real-time.
+                                                        The Neural Engine is currently analyzing {assetCount ? assetCount.toLocaleString() : '2,400'} world variables in real-time.
                                                     </p>
                                                 </div>
                                             </div>
