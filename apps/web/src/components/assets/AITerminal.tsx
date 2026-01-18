@@ -33,12 +33,12 @@ export function AITerminal({ logs }: AITerminalProps) {
                                 {/* Metadata */}
                                 <div className="flex items-center gap-4 mb-2 text-xs">
                                     <span className="text-zinc-600 font-bold">[{log.createdAt ? new Date(log.createdAt).toLocaleTimeString() : '00:00'}]</span>
-                                    <span className={`font-black tracking-tighter ${log.deltaPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        IMPACT: {log.deltaPercent >= 0 ? '+' : ''}{(log.deltaPercent || 0).toFixed(2)}%
+                                    <span className={`font-black tracking-tighter ${Number(log.deltaPercent || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        IMPACT: {Number(log.deltaPercent || 0) >= 0 ? '+' : ''}{Number(log.deltaPercent || 0).toFixed(2)}%
                                     </span>
                                     <div className="flex items-center gap-1.5 text-blue-400/60">
                                         <Shield className="w-3.5 h-3.5" />
-                                        <span className="font-black">CONF: {((log.confidence || 0) * 100).toFixed(0)}%</span>
+                                        <span className="font-black">CONF: {(Number(log.confidence || 0) * 100).toFixed(0)}%</span>
                                     </div>
                                 </div>
 
