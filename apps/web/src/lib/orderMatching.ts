@@ -5,7 +5,7 @@ import { TradeEvent, MONETARY_CONFIG } from '@megatron/lib-common';
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 export async function matchOrder(orderId: string, tx: any) {
-    const order = await tx.order.findUnique({
+    const order = await tx.limitOrder.findUnique({
         where: { id: orderId },
         include: { asset: true, user: true }
     });
@@ -18,7 +18,7 @@ export async function matchOrder(orderId: string, tx: any) {
     // Find matching orders
     // If buy: find sells with price <= order.price, order by price ASC, createdAt ASC
     // If sell: find buys with price >= order.price, order by price DESC, createdAt ASC
-    const matchingOrders = await tx.order.findMany({
+    const matchingOrders = await tx.limitOrder.findMany({
         where: {
             assetId: order.assetId,
             side: oppositeSide,
@@ -81,7 +81,7 @@ export async function matchOrder(orderId: string, tx: any) {
         });
 
         // 4. Update Orders
-        await tx.order.update({
+        await tx.limitOrder.update({
             where: { id: match.id },
             data: {
                 remainingQuantity: { decrement: executeQty },
@@ -106,7 +106,7 @@ export async function matchOrder(orderId: string, tx: any) {
     }
 
     // Final update for the original order
-    await tx.order.update({
+    await tx.limitOrder.update({
         where: { id: order.id },
         data: {
             remainingQuantity: remainingQty,

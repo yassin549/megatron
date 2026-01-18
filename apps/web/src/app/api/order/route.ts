@@ -56,7 +56,7 @@ export async function POST(req: Request) {
             }
 
             // 2. Create Order
-            const order = await tx.order.create({
+            const order = await tx.limitOrder.create({
                 data: {
                     userId,
                     assetId,
@@ -91,7 +91,7 @@ export async function GET(req: Request) {
 
     try {
         // Fetch open orders and aggregate for the orderbook
-        const orders = await db.order.findMany({
+        const orders = await db.limitOrder.findMany({
             where: { assetId, status: 'open' },
             orderBy: [{ price: 'desc' }, { createdAt: 'asc' }]
         });

@@ -15,7 +15,7 @@ export async function DELETE(
     const { orderId } = params;
 
     try {
-        const order = await db.order.findUnique({
+        const order = await db.limitOrder.findUnique({
             where: { id: orderId }
         });
 
@@ -31,7 +31,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Cannot cancel non-open order' }, { status: 400 });
         }
 
-        await db.order.update({
+        await db.limitOrder.update({
             where: { id: orderId },
             data: { status: 'cancelled' }
         });

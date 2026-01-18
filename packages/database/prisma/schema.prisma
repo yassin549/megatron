@@ -33,7 +33,7 @@ model User {
   pendingDeposits    PendingDeposit[]
   bookmarks          Bookmark[]
   timedExits         TimedExit[]
-  orders             Order[]
+  limitOrders        LimitOrder[]
   
   @@index([email])
 }
@@ -90,7 +90,7 @@ model Asset {
   oracleLogs         OracleLog[]
   bookmarks          Bookmark[]
   timedExits         TimedExit[]
-  orders             Order[]
+  limitOrders        LimitOrder[]
   
   @@index([status])
   @@index([type])
@@ -192,7 +192,8 @@ model Trade {
   @@index([buyerId])
 }
 
-model Order {
+// LimitOrder model (Renamed from Order to avoid reserved keyword conflicts)
+model LimitOrder {
   id                String   @id @default(uuid())
   userId            String
   assetId           String
@@ -209,6 +210,7 @@ model Order {
 
   @@index([assetId, status, side, price])
   @@index([userId])
+  @@map("limit_orders") // Explicit table name
 }
 model Position {
   id         String   @id @default(uuid())
