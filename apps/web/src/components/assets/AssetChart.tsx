@@ -169,8 +169,8 @@ export function AssetChart({
 
                     if (periodSeconds > 60) {
                         // Aggregate
-                        const aggregated: KLineData[] = [];
-                        let currentBar: KLineData | null = null;
+                        const aggregated: typeof rawData = [];
+                        let currentBar: typeof rawData[0] | null = null;
 
                         // Sort to ensure chronological order
                         const sortedData = [...rawData].sort((a, b) => a.timestamp - b.timestamp);
@@ -193,7 +193,7 @@ export function AssetChart({
                                     currentBar.high = Math.max(currentBar.high, point.high);
                                     currentBar.low = Math.min(currentBar.low, point.low);
                                     currentBar.close = point.close;
-                                    currentBar.volume = (currentBar.volume || 0) + (point.volume || 0);
+                                    currentBar.volume = (currentBar.volume) + (point.volume);
                                 }
                             }
                         });
