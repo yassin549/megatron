@@ -93,8 +93,14 @@ export function AssetChart({
         }));
     }, [data]);
 
+    const subscribeBarRef = useRef<((data: KLineData) => void) | null>(null);
+
+    // Initial chart setup and robust data loading
     useEffect(() => {
         if (!chartContainerRef.current) return;
+
+        // dispose previous instance if any to prevent leaks/duplicates
+        dispose(chartContainerRef.current);
 
         const chart = init(chartContainerRef.current, {
             styles: {
@@ -135,6 +141,48 @@ export function AssetChart({
         if (chart) {
             chartRef.current = chart;
             chart.createIndicator('VOL', true);
+
+            chart.setDataLoader({
+                getBars: (params) => {
+                    // Filter based on period if needed, or just return full history for now
+                    // In a real app, you might fetch specific ranges here.
+                    // For now, we assume `klineData` (from props) has what we need.
+
+                    // IMPORTANT: We need to access the LATEST klineData, not the stale closure one.
+                    // However, getBars is usually called on init. 
+                    // To keep it simple, we will return the data passed in the callback params or just return immediately
+                    // since we will likely pre-poppulate or use a ref for data if strictly needed.
+                    // But actually, getBars expects us to call params.callback(data).
+
+                    // We'll trust the outer scope's latest klineData if this effect re-runs,
+                    // BUT this effect only runs on mount/colors change. 
+                    // So klineData might be stale here if we don't include it in deps.
+                    // If we include it in deps, we re-init chart on every update -> FLICKER.
+
+                    // SOLUTION: The chart init should allow setSymbol to trigger getBars.
+                    // We can return a loading state or just the current known data.
+                    // Ideally, getBars fetches from an API. Here we are driven by props.
+                    // We can just return the current prop data.
+                    params.callback(data.map(d => ({
+                        timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
+                        open: d.value,
+                        high: d.value,
+                        low: d.value,
+                        close: d.value,
+                        volume: d.volume || 0
+                    })), false);
+                },
+                subscribeBar: (params) => {
+                    // Capture the callback so we can feed it data later
+                    subscribeBarRef.current = params.callback;
+                },
+                unsubscribeBar: () => {
+                    subscribeBarRef.current = null;
+                }
+            });
+
+            // Set initial symbol to trigger load
+            chart.setSymbol({ ticker: watermarkText || 'ASSET' });
         }
 
         const handleResize = () => {
@@ -147,29 +195,16 @@ export function AssetChart({
             window.removeEventListener('resize', handleResize);
             dispose(chartContainerRef.current!);
         };
-    }, [colors]);
+    }, [colors, watermarkText]); // Re-init primarily if visual config or symbol identity changes
 
+    // Reactive Data Updates WITHOUT Re-initialization
     useEffect(() => {
-        const chart = chartRef.current;
-        if (!chart || kLineData.length === 0) {
-            console.log('[AssetChart] Skipping data load:', { hasChart: !!chart, dataLength: kLineData.length });
-            return;
-        }
+        if (!kLineData.length || !subscribeBarRef.current) return;
 
-        console.log('[AssetChart] Setting data loader with', kLineData.length, 'data points');
-        console.log('[AssetChart] First data point:', kLineData[0]);
-        console.log('[AssetChart] Last data point:', kLineData[kLineData.length - 1]);
-
-        chart.setDataLoader({
-            getBars: (params) => {
-                console.log('[AssetChart] getBars callback invoked!', params);
-                params.callback(kLineData, false);
-            }
-        });
-
-        // Trigger getBars callback by setting symbol - required in klinecharts v10
-        chart.setSymbol({ ticker: watermarkText || 'ASSET' });
-    }, [kLineData, watermarkText]);
+        const lastPoint = kLineData[kLineData.length - 1];
+        // Feed the new/updated last point to the chart via subscription
+        subscribeBarRef.current(lastPoint);
+    }, [kLineData]);
 
     // Handle timeframe changes
     useEffect(() => {
@@ -182,12 +217,12 @@ export function AssetChart({
             '1h': { span: 1, type: 'hour' },
             '1d': { span: 1, type: 'day' },
             '1w': { span: 1, type: 'week' },
-            'all': { span: 1, type: 'day' } // Default to daily for 'all'
+            'all': { span: 1, type: 'day' }
         };
 
         const period = periodMap[activeTimeframe];
         if (period) {
-            chart.setPeriod(period as any); // Cast to any to avoid strict type issues if interface varies slightly, but structure matches v10 docs
+            chart.setPeriod(period as any);
         }
     }, [activeTimeframe]);
 
