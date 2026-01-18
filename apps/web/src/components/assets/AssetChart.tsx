@@ -176,18 +176,18 @@ export function AssetChart({
         const chart = chartRef.current;
         if (!chart) return;
 
-        const periodMap: Record<string, { multiplier: number; timespan: string }> = {
-            '1m': { multiplier: 1, timespan: 'minute' },
-            '15m': { multiplier: 15, timespan: 'minute' },
-            '1h': { multiplier: 1, timespan: 'hour' },
-            '1d': { multiplier: 1, timespan: 'day' },
-            '1w': { multiplier: 1, timespan: 'week' },
-            'all': { multiplier: 1, timespan: 'day' } // Default to daily for 'all'
+        const periodMap: Record<string, { span: number; type: string }> = {
+            '1m': { span: 1, type: 'minute' },
+            '15m': { span: 15, type: 'minute' },
+            '1h': { span: 1, type: 'hour' },
+            '1d': { span: 1, type: 'day' },
+            '1w': { span: 1, type: 'week' },
+            'all': { span: 1, type: 'day' } // Default to daily for 'all'
         };
 
         const period = periodMap[activeTimeframe];
         if (period) {
-            chart.setPeriod(period);
+            chart.setPeriod(period as any); // Cast to any to avoid strict type issues if interface varies slightly, but structure matches v10 docs
         }
     }, [activeTimeframe]);
 
