@@ -166,7 +166,30 @@ export function AssetChart({
                 params.callback(kLineData, false);
             }
         });
-    }, [kLineData]);
+
+        // Trigger getBars callback by setting symbol - required in klinecharts v10
+        chart.setSymbol({ ticker: watermarkText || 'ASSET' });
+    }, [kLineData, watermarkText]);
+
+    // Handle timeframe changes
+    useEffect(() => {
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        const periodMap: Record<string, { multiplier: number; timespan: string }> = {
+            '1m': { multiplier: 1, timespan: 'minute' },
+            '15m': { multiplier: 15, timespan: 'minute' },
+            '1h': { multiplier: 1, timespan: 'hour' },
+            '1d': { multiplier: 1, timespan: 'day' },
+            '1w': { multiplier: 1, timespan: 'week' },
+            'all': { multiplier: 1, timespan: 'day' } // Default to daily for 'all'
+        };
+
+        const period = periodMap[activeTimeframe];
+        if (period) {
+            chart.setPeriod(period);
+        }
+    }, [activeTimeframe]);
 
     useEffect(() => {
         const chart = chartRef.current;
