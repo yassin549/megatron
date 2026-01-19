@@ -165,12 +165,21 @@ export function AssetDetailClient({
         }
     };
 
-    const chartData = priceHistory
-        .map(p => ({
-            time: Math.floor(new Date(p.timestamp).getTime() / 1000) as any,
-            value: p.price,
-            volume: (p as any).volume || 0
-        }))
+    const chartData = (priceHistory || [])
+        .map(p => {
+            let time = 0;
+            try {
+                const d = new Date(p.timestamp);
+                time = isNaN(d.getTime()) ? 0 : Math.floor(d.getTime() / 1000);
+            } catch (e) { }
+
+            return {
+                time: time as any,
+                value: Number(p.price || 0),
+                volume: Number((p as any).volume || 0)
+            };
+        })
+        .filter(d => d.time > 0)
         .sort((a, b) => (a.time as number) - (b.time as number))
         .filter((item, index, self) =>
             index === 0 || item.time !== self[index - 1].time
@@ -246,12 +255,12 @@ export function AssetDetailClient({
                             <div className="hidden md:flex items-center gap-8">
                                 <div className="flex flex-col items-end">
                                     <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
-                                    <span className="text-sm font-black text-white tabular-nums leading-none">${asset.price.toFixed(2)}</span>
+                                    <span className="text-sm font-black text-white tabular-nums leading-none">${Number(asset.price || 0).toFixed(2)}</span>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
-                                    <span className={`text-sm font-black tabular-nums leading-none ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
+                                    <span className={`text-sm font-black tabular-nums leading-none ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
                                     </span>
                                 </div>
                             </div>

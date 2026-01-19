@@ -281,9 +281,9 @@ export async function getAssetDetail(id: string, userId?: string) {
                 id: log.id,
                 deltaPercent: Number(log.deltaPercent),
                 confidence: Number(log.confidence),
-                summary: log.summary,
-                reasoning: reasoning,
-                sourceUrls: log.sourceUrls as string[],
+                summary: log.summary ? String(log.summary) : null,
+                reasoning: reasoning ? String(reasoning) : null,
+                sourceUrls: Array.isArray(log.sourceUrls) ? log.sourceUrls.map(String) : [],
                 createdAt: log.createdAt.toISOString(),
             };
         }),
