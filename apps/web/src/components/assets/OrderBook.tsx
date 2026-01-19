@@ -42,25 +42,26 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
     }, [assetId]);
 
     const { processedAsks, processedBids } = useMemo(() => {
-        if (!assetPrice || assetPrice <= 0) return { processedAsks: [], processedBids: [] };
+        const priceNum = Number(assetPrice || 0);
+        if (priceNum <= 0) return { processedAsks: [], processedBids: [] };
 
-        const step = Math.max(0.01, Number((assetPrice * 0.001).toFixed(2)));
+        const step = Math.max(0.01, Number((priceNum * 0.001).toFixed(2)));
         const gridAsks: OrderBookEntry[] = [];
         const gridBids: OrderBookEntry[] = [];
 
         for (let i = 1; i <= 7; i++) {
-            const price = Number((assetPrice + (i * step)).toFixed(2));
+            const price = Number((priceNum + (i * step)).toFixed(2));
             const amount = rawAsks
-                .filter(o => Math.abs(o.price - price) <= step / 2)
-                .reduce((acc, curr) => acc + curr.amount, 0);
+                .filter(o => Math.abs(Number(o.price || 0) - price) <= step / 2)
+                .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
             gridAsks.push({ price, amount, total: 0 });
         }
 
         for (let i = 1; i <= 7; i++) {
-            const price = Number((assetPrice - (i * step)).toFixed(2));
+            const price = Number((priceNum - (i * step)).toFixed(2));
             const amount = rawBids
-                .filter(o => Math.abs(o.price - price) <= step / 2)
-                .reduce((acc, curr) => acc + curr.amount, 0);
+                .filter(o => Math.abs(Number(o.price || 0) - price) <= step / 2)
+                .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
             gridBids.push({ price, amount, total: 0 });
         }
 
@@ -85,26 +86,13 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
     const spread = useMemo(() => {
         if (processedAsks.length === 0 || processedBids.length === 0) return { val: 0, pct: 0 };
 
-        // Find best ask/bid with actual volume
-        const activeAsk = processedAsks.slice().reverse().find(a => a.amount > 0);
-        const activeBid = processedBids.find(b => b.amount > 0);
-
-        // If no active orders, return 0 or maybe just fallback to grid top? 
-        // User complaint is "incorrectly shown". If no orders, spread should probably be -- or 0.
-        // Let's sticking to the "Grid Spread" ONLY if we have actual liquidity, otherwise 0.
-        if (!activeAsk && !activeBid) return { val: 0, pct: 0 };
-
-        // If we have some orders but not both sides, we can't calculate a real spread.
-        // But if we want to show the "theoretical" spread based on the grid:
-        // The user issue suggests the theoretical spread is confusing.
-        // So let's force 0 if no orders.
         const hasOrders = rawAsks.length > 0 || rawBids.length > 0;
         if (!hasOrders) return { val: 0, pct: 0 };
 
         const bestAsk = processedAsks[processedAsks.length - 1].price;
         const bestBid = processedBids[0].price;
         const val = bestAsk - bestBid;
-        const pct = (val / bestAsk) * 100;
+        const pct = bestAsk > 0 ? (val / bestAsk) * 100 : 0;
         return { val, pct };
     }, [processedAsks, processedBids, rawAsks.length, rawBids.length]);
 
@@ -146,9 +134,9 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
-                                <span className="text-rose-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : order.total.toFixed(0)}</span>
+                                <span className="text-rose-400 font-bold">${Number(order.price || 0).toFixed(2)}</span>
+                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : Number(order.amount || 0).toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : Number(order.total || 0).toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}
@@ -158,14 +146,14 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             {/* Price & Spread Info */}
             <div className="px-3 py-2 border-y border-white/10 bg-white/[0.02] flex items-center justify-between">
                 <div className="flex flex-col">
-                    <span className="text-sm font-black text-white leading-none">${assetPrice.toFixed(2)}</span>
+                    <span className="text-sm font-black text-white leading-none">${Number(assetPrice || 0).toFixed(2)}</span>
                     <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-tighter mt-0.5">Mark Price</span>
                 </div>
                 <div className="text-right">
                     <span className="text-zinc-500 uppercase font-bold tracking-tighter">Spread</span>
                     <div className="flex items-center gap-1.5 justify-end mt-0.5">
-                        <span className="text-white font-bold">${spread.val.toFixed(2)}</span>
-                        <span className="text-zinc-600">({spread.pct.toFixed(2)}%)</span>
+                        <span className="text-white font-bold">${Number(spread.val || 0).toFixed(2)}</span>
+                        <span className="text-zinc-600">({Number(spread.pct || 0).toFixed(2)}%)</span>
                     </div>
                 </div>
             </div>
@@ -185,9 +173,9 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
-                                <span className="text-emerald-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : order.amount.toFixed(1)}</span>
-                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : order.total.toFixed(0)}</span>
+                                <span className="text-emerald-400 font-bold">${Number(order.price || 0).toFixed(2)}</span>
+                                <span className="text-right text-zinc-400">{order.amount === 0 ? '--' : Number(order.amount || 0).toFixed(1)}</span>
+                                <span className="text-right text-zinc-500">{order.amount === 0 ? '--' : Number(order.total || 0).toFixed(0)}</span>
                             </div>
                         </motion.div>
                     ))}

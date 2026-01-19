@@ -227,17 +227,17 @@ export function OrderForm({
             <div className="bg-black/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center opacity-60">
                     <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market Index</span>
-                    <span className="text-[9px] text-white font-mono font-bold">${marketPrice.toFixed(2)}</span>
+                    <span className="text-[9px] text-white font-mono font-bold">${Number(marketPrice || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center border-t border-white/[0.03] pt-1.5">
                     <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution Est</span>
                     <div className="flex flex-col items-end">
                         <span className={`text-[10px] font-mono font-black ${isHighSlippage ? 'text-amber-400' : 'text-emerald-400'}`}>
-                            ${executionEst.toFixed(2)}
+                            ${Number(executionEst || 0).toFixed(2)}
                         </span>
                         {amount && parseFloat(amount) > 0 && (
                             <span className={`text-[7px] font-bold ${isHighSlippage ? 'text-amber-500/50' : 'text-zinc-600'}`}>
-                                ({slippage >= 0 ? '+' : ''}{slippage.toFixed(2)}% Slippage)
+                                ({Number(slippage || 0) >= 0 ? '+' : ''}{Number(slippage || 0).toFixed(2)}% Slippage)
                             </span>
                         )}
                     </div>

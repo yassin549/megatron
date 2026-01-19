@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { AITerminal } from '@/components/assets/AITerminal';
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { OrderBook } from '@/components/assets/OrderBook';
 import { AssetInfoWidget } from '@/components/assets/AssetProfileWidget';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
@@ -335,7 +336,9 @@ export function AssetDetailClient({
                                     className="w-full h-full overflow-hidden"
                                 >
                                     {/* Pure Terminal Stream - Only scroll here */}
-                                    <AITerminal logs={oracleLogs} />
+                                    <ErrorBoundary name="Neural Logs">
+                                        <AITerminal logs={oracleLogs} />
+                                    </ErrorBoundary>
                                 </motion.div>
                             )}
                         </AnimatePresence>

@@ -107,20 +107,20 @@ export function TradingSidebar({
                             <div className="flex items-center gap-4 text-[9px] font-mono whitespace-nowrap">
                                 <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
                                     <span className="text-zinc-600 font-bold uppercase text-[7px]">Mkt_Cap:</span>
-                                    <span className="text-white font-black">${(stats.marketCap / 1000000).toFixed(2)}M</span>
+                                    <span className="text-white font-black">${(Number(stats.marketCap || 0) / 1000000).toFixed(2)}M</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
                                     <span className="text-zinc-600 font-bold uppercase text-[7px]">Liquidity:</span>
-                                    <span className="text-white font-black">${stats.liquidity.toLocaleString()}</span>
+                                    <span className="text-white font-black">${Number(stats.liquidity || 0).toLocaleString()}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
                                     <span className="text-zinc-600 font-bold uppercase text-[7px]">Supply:</span>
-                                    <span className="text-white font-black">{(stats.supply / 1000).toFixed(1)}K</span>
+                                    <span className="text-white font-black">{(Number(stats.supply || 0) / 1000).toFixed(1)}K</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 border-l border-white/10 pl-4">
                                     <span className="text-zinc-600 font-bold uppercase text-[7px]">24h_Range:</span>
                                     <span className="text-zinc-300 font-black">
-                                        {stats.low24h && stats.high24h ? `$${stats.low24h.toFixed(1)}-$${stats.high24h.toFixed(1)}` : '--/--'}
+                                        {stats.low24h !== undefined && stats.high24h !== undefined ? `$${Number(stats.low24h).toFixed(1)}-$${Number(stats.high24h).toFixed(1)}` : '--/--'}
                                     </span>
                                 </div>
                             </div>

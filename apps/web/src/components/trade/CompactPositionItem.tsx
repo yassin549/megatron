@@ -253,11 +253,11 @@ export function CompactPositionItem({
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                             <span className={`text-[10px] font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                {isProfit ? '+' : ''}{position.returnPercent.toFixed(2)}%
+                                {isProfit ? '+' : ''}{Number(position.returnPercent || 0).toFixed(2)}%
                             </span>
                             <span className="text-[10px] text-zinc-800 font-mono">/</span>
                             <span className="text-[10px] text-zinc-500 font-mono font-bold tracking-tighter">
-                                ${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                                ${Number(position.value || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                             </span>
                         </div>
                     </div>
@@ -272,7 +272,7 @@ export function CompactPositionItem({
 
                     <div className="text-right hidden sm:block">
                         <div className={`text-[11px] font-mono font-black ${isProfit ? 'text-emerald-400' : 'text-rose-400'}`}>
-                            {isProfit ? '+' : ''}${position.returnAbs.toFixed(1)}
+                            {isProfit ? '+' : ''}${Number(position.returnAbs || 0).toFixed(1)}
                         </div>
                         <div className="text-[7px] text-zinc-600 font-black uppercase tracking-[0.2em] leading-none mt-0.5">
                             NET_PnL
@@ -307,22 +307,22 @@ export function CompactPositionItem({
                             <div className="grid grid-cols-4 gap-1.5">
                                 <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
                                     <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">Entry</div>
-                                    <div className="text-[10px] font-mono font-black text-white">${position.avgPrice.toFixed(2)}</div>
+                                    <div className="text-[10px] font-mono font-black text-white">${Number(position.avgPrice || 0).toFixed(2)}</div>
                                 </div>
                                 <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
                                     <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">Size</div>
-                                    <div className="text-[10px] font-mono font-black text-white">${position.value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                                    <div className="text-[10px] font-mono font-black text-white">${Number(position.value || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                                 </div>
                                 <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
                                     <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">TP</div>
                                     <div className={`text-[10px] font-mono font-black ${position.takeProfit ? 'text-emerald-400' : 'text-zinc-800'}`}>
-                                        {position.takeProfit ? `$${position.takeProfit.toFixed(2)}` : 'OFF'}
+                                        {position.takeProfit ? `$${Number(position.takeProfit).toFixed(2)}` : 'OFF'}
                                     </div>
                                 </div>
                                 <div className="p-2 rounded-md bg-white/[0.02] border border-white/5">
                                     <div className="text-[7px] text-zinc-600 font-black uppercase tracking-widest mb-0.5">SL</div>
                                     <div className={`text-[10px] font-mono font-black ${position.stopLoss ? 'text-rose-400' : 'text-zinc-800'}`}>
-                                        {position.stopLoss ? `$${position.stopLoss.toFixed(2)}` : 'OFF'}
+                                        {position.stopLoss ? `$${Number(position.stopLoss).toFixed(2)}` : 'OFF'}
                                     </div>
                                 </div>
                             </div>
