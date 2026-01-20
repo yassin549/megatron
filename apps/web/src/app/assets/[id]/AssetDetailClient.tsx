@@ -303,7 +303,7 @@ export function AssetDetailClient({
                                                 watermarkText={asset.name.toUpperCase()}
                                                 colors={useMemo(() => ({
                                                     lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                                    areaTopColor: 'rgba(0, 0, 0, 0)',
+                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(244, 63, 94, 0.5)',
                                                     areaBottomColor: 'rgba(0, 0, 0, 0)',
                                                     textColor: '#52525b',
                                                 }), [asset.change24h])}

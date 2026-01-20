@@ -120,8 +120,8 @@ export function AssetChart({
                         lineColor: colors?.lineColor || '#34d399',
                         size: 2,
                         fillColor: [
-                            { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.1)' },
-                            { offset: 1, color: 'rgba(0, 0, 0, 0)' }
+                            { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
+                            { offset: 1, color: colors?.areaBottomColor || 'rgba(0, 0, 0, 0)' }
                         ]
                     }
                 },
@@ -226,7 +226,31 @@ export function AssetChart({
             window.removeEventListener('resize', handleResize);
             dispose(chartContainerRef.current!);
         };
-    }, [colors, watermarkText]); // Re-init primarily if visual config or symbol identity changes
+    }, [colors, watermarkText]); // Re-init if visual config or symbol identity changes
+
+    // Update styles reactively when colors change
+    useEffect(() => {
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        chart.setStyles({
+            candle: {
+                area: {
+                    lineColor: colors?.lineColor || '#34d399',
+                    fillColor: [
+                        { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
+                        { offset: 1, color: colors?.areaBottomColor || 'rgba(0, 0, 0, 0)' }
+                    ]
+                }
+            },
+            xAxis: {
+                tickText: { color: colors?.textColor || '#9CA3AF' }
+            },
+            yAxis: {
+                tickText: { color: colors?.textColor || '#9CA3AF' }
+            }
+        } as any);
+    }, [colors]);
 
     // Reactive Data Updates WITHOUT Re-initialization
     // Reactive Data Updates WITHOUT Re-initialization
