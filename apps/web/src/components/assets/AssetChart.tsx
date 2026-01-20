@@ -119,10 +119,14 @@ export function AssetChart({
                     area: {
                         lineColor: colors?.lineColor || '#34d399',
                         size: 2,
-                        fillColor: [
-                            { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
-                            { offset: 1, color: colors?.areaBottomColor || 'rgba(0, 0, 0, 0)' }
-                        ]
+                        fillColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)',
+                        point: {
+                            show: true,
+                            color: colors?.lineColor || '#34d399',
+                            radius: 4,
+                            rippleColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.2)',
+                            rippleRadius: 8
+                        }
                     }
                 },
                 xAxis: {
@@ -237,10 +241,11 @@ export function AssetChart({
             candle: {
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
-                    fillColor: [
-                        { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
-                        { offset: 1, color: colors?.areaBottomColor || 'rgba(0, 0, 0, 0)' }
-                    ]
+                    fillColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)',
+                    point: {
+                        color: colors?.lineColor || '#34d399',
+                        rippleColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.2)'
+                    }
                 }
             },
             xAxis: {

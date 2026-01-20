@@ -302,8 +302,8 @@ export function AssetDetailClient({
                                                 predictedPrice={executionEst}
                                                 watermarkText={asset.name.toUpperCase()}
                                                 colors={useMemo(() => ({
-                                                    lineColor: asset.change24h >= 0 ? '#34d399' : '#f43f5e',
-                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(244, 63, 94, 0.5)',
+                                                    lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
                                                     areaBottomColor: 'rgba(0, 0, 0, 0)',
                                                     textColor: '#52525b',
                                                 }), [asset.change24h])}
