@@ -120,8 +120,8 @@ export function AssetChart({
                         lineColor: colors?.lineColor || '#34d399',
                         lineSize: 2,
                         backgroundColor: [
-                            { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
-                            { offset: 1, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' }
+                            { offset: 0, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' },
+                            { offset: 1, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' }
                         ],
                         point: {
                             show: true,
@@ -244,8 +244,8 @@ export function AssetChart({
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
                     backgroundColor: [
-                        { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
-                        { offset: 1, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' }
+                        { offset: 0, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' },
+                        { offset: 1, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' }
                     ],
                     point: {
                         color: colors?.lineColor || '#34d399',
