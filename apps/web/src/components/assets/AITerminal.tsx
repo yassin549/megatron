@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Shield, ExternalLink } from 'lucide-react';
 
 interface OracleLog {
@@ -18,17 +17,11 @@ interface AITerminalProps {
 }
 
 export function AITerminal({ logs }: AITerminalProps) {
-    const [mounted, setMounted] = React.useState(false);
-
-    React.useEffect(() => {
-        setMounted(true);
-    }, []);
-
     return (
         <div className="font-mono text-sm h-full">
             {/* Terminal Content - Pure Stream */}
             <div className="p-4 md:p-8 h-full overflow-y-auto space-y-6 custom-scrollbar">
-                {!mounted || !Array.isArray(logs) || logs.length === 0 ? (
+                {!Array.isArray(logs) || logs.length === 0 ? (
                     <div className="text-zinc-600 p-8 text-center animate-pulse font-black uppercase tracking-[0.2em] text-[10px]">
                         Establishing_Neural_Sync...
                     </div>
@@ -48,10 +41,7 @@ export function AITerminal({ logs }: AITerminalProps) {
                             if (log.createdAt) {
                                 const d = new Date(log.createdAt);
                                 if (!isNaN(d.getTime())) {
-                                    // Use a stable date format to avoid hydration mismatches
-                                    dateStr = d.getHours().toString().padStart(2, '0') + ':' +
-                                        d.getMinutes().toString().padStart(2, '0') + ':' +
-                                        d.getSeconds().toString().padStart(2, '0');
+                                    dateStr = d.toLocaleTimeString();
                                 }
                             }
                         } catch (e) { }

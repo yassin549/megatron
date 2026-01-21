@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function AboutPage() {
     return (
-        <div className="min-h-screen bg-transparent text-gray-200">
+        <div className="min-h-screen bg-black text-gray-200">
 
 
             <main>
