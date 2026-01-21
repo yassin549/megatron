@@ -152,7 +152,6 @@ export function AssetChart({
 
         if (chart) {
             chartRef.current = chart;
-            chart.createIndicator('VOL', true);
 
             chart.setDataLoader({
                 getBars: (params) => {
