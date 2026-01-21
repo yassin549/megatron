@@ -170,7 +170,7 @@ export default function PortfolioPage() {
     const cashBalance = data?.cashBalance || 0;
 
     return (
-        <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-500">
+        <div className="min-h-screen bg-transparent text-foreground animate-in fade-in duration-500">
 
             <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
                 <div className="flex items-center justify-between mb-6 md:mb-8">

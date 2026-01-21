@@ -187,7 +187,7 @@ export function AssetDetailClient({
         );
 
     return (
-        <div className="h-[calc(100vh-64px)] w-full bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
+        <div className="h-[calc(100vh-64px)] w-full bg-transparent relative selection:bg-primary/20 selection:text-primary overflow-hidden">
 
             <div className="grid grid-cols-1 lg:grid-cols-12 h-full relative z-10 overflow-hidden">
                 {/* LEFT COLUMN - Main Content */}

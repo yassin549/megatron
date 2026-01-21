@@ -59,15 +59,15 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
-    /* Cosmic Grid Background */
+    @apply bg-[#030409] text-foreground antialiased selection:bg-primary/30 selection:text-white;
+    /* Clean Dark Cosmic Grid */
     background-image:
-      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%),
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
     background-position: center top;
+    background-attachment: fixed;
   }
 
   /* Custom Scrollbar */
@@ -100,7 +100,7 @@
   }
 
   .glass-nav {
-    @apply bg-background border-b border-white/5 shadow-lg;
+    @apply bg-background/70 backdrop-blur-xl border-b border-white/10 shadow-2xl;
   }
 
   /* Text Effects */
