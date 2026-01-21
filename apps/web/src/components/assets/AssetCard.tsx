@@ -185,116 +185,193 @@ export function AssetCard({
             layout
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`relative ${viewMode === 'grid' ? 'h-full' : 'w-full'} perspective-1000`}
+            whileHover={{ y: -4 }}
+            className={`relative group ${viewMode === 'grid' ? 'h-full' : 'w-full'}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full relative preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${isHovering && viewMode === 'grid' ? '[transform:rotateX(90deg)]' : ''
+                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
+                    } ${viewMode === 'list'
+                        ? 'flex items-center gap-6 p-3'
+                        : 'flex flex-col p-3'
                     }`}
             >
-                {/* FRONT FACE - Asset Info */}
-                <div className={`h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-md p-3 flex flex-col relative [backface-visibility:hidden] ${isHovering ? 'border-primary/30' : 'hover:border-white/10'
-                    } ${viewMode === 'list' ? 'flex-row items-center gap-6' : 'flex-col'}`}>
+                {/* Border Beam Effect on Hover */}
+                <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+                </div>
 
-                    {/* Header Section */}
-                    <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
-                        <div className="relative">
-                            <div className={`relative overflow-hidden rounded bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'}`}>
-                                <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
-                                    <Icon className="w-6 h-6" />
-                                </div>
-                                {imageUrl && !imageError ? (
-                                    <Image
-                                        src={imageUrl}
-                                        alt={name}
-                                        width={48}
-                                        height={48}
-                                        className="object-cover w-full h-full relative z-10"
-                                        onError={() => setImageError(true)}
-                                        unoptimized={imageUrl.startsWith('/uploads')}
-                                    />
-                                ) : null}
+                {/* Hover Description Overlay */}
+                <AnimatePresence>
+                    {isHovering && viewMode === 'grid' && (
+                        <motion.div
+                            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
+                            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+                            transition={{ duration: 0.2 }}
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-md border border-white/10"
+                        >
+                            {/* Bookmark Button - Top Right */}
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                onClick={handleToggleBookmark}
+                                className={`absolute top-3 right-3 p-2 rounded-full transition-all border ${isBookmarked
+                                    ? 'text-primary bg-primary/10 border-primary/20'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/10 border-white/10'
+                                    }`}
+                            >
+                                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                            </motion.button>
+
+                            {/* Name */}
+                            <motion.h3
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.05 }}
+                                className="text-xl font-bold text-white mb-3 leading-tight pt-4"
+                            >
+                                {name}
+                            </motion.h3>
+
+                            {/* Description */}
+                            {description && (
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.15 }}
+                                    className="text-xs text-zinc-400 font-medium leading-relaxed line-clamp-4"
+                                >
+                                    {description}
+                                </motion.p>
+                            )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Header Section */}
+                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
+                    <div className="relative">
+                        <div className={`relative overflow-hidden rounded bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
+                            }`}>
+                            {/* Fallback Icon (Always rendered underneath) */}
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
+                                <Icon className="w-6 h-6" />
                             </div>
-                            {isFunding && (
-                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-obsidian-800 animate-pulse" />
+
+                            {/* Image Layer */}
+                            {imageUrl && !imageError ? (
+                                <Image
+                                    src={imageUrl}
+                                    alt={name}
+                                    width={48}
+                                    height={48}
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
+                                    onError={() => setImageError(true)}
+                                    unoptimized={imageUrl.startsWith('/uploads')}
+                                />
+                            ) : imageUrl && imageError ? (
+                                // Fallback to standard img tag if next/image fails
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    src={imageUrl}
+                                    alt={name}
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
+                                    onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            ) : null}
+                        </div>
+                        {isFunding && (
+                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border-2 border-obsidian-800 animate-pulse" />
+                        )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                        <h3 className={`font-bold text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
+                            }`}>
+                            {name}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold bg-white/5 px-1.5 py-0.5 rounded">
+                                {type}
+                            </span>
+                            {aiConfidence && (
+                                <span className="flex items-center gap-1 text-[10px] text-blue-400 font-mono">
+                                    <Zap className="w-3 h-3" /> {(aiConfidence * 100).toFixed(0)}%
+                                </span>
                             )}
                         </div>
+                    </div>
+                </div>
 
-                        <div className="flex-1 min-w-0">
-                            <h3 className={`font-bold text-white line-clamp-2 ${viewMode === 'list' ? 'text-base' : 'text-sm'}`}>
-                                {name}
-                            </h3>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold bg-white/5 px-1.5 py-0.5 rounded">
-                                    {type}
-                                </span>
-                                {aiConfidence && (
-                                    <span className="flex items-center gap-1 text-[10px] text-blue-400 font-mono">
-                                        <Zap className="w-3 h-3" /> {(aiConfidence * 100).toFixed(0)}%
-                                    </span>
-                                )}
-                            </div>
+                {/* Metrics Section */}
+                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
+                    {/* Price Block */}
+                    <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
+                        <div className="text-lg font-bold text-white font-mono tracking-tight">
+                            ${price.toFixed(2)}
+                        </div>
+                        <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                            } ${viewMode === 'list' ? 'justify-end' : ''}`}>
+                            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                            {Math.abs(change24h).toFixed(2)}%
                         </div>
                     </div>
 
-                    {/* Metrics Section */}
-                    <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
-                        <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                            <div className="text-lg font-bold text-white font-mono tracking-tight">
-                                ${price.toFixed(2)}
-                            </div>
-                            <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'} ${viewMode === 'list' ? 'justify-end' : ''}`}>
-                                {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                                {Math.abs(change24h).toFixed(2)}%
-                            </div>
-                        </div>
-
-                        <div className={`${viewMode === 'list' ? 'hidden sm:block' : ''}`}>
-                            <AssetMiniChart
-                                data={priceHistory || []}
-                                positive={isPositive}
-                                viewMode={viewMode}
-                            />
-                        </div>
+                    {/* Chart (Hidden on small mobile list) */}
+                    <div className={`${viewMode === 'list' ? 'hidden sm:block' : ''}`}>
+                        <AssetMiniChart
+                            data={priceHistory || []}
+                            positive={isPositive}
+                            viewMode={viewMode}
+                        />
                     </div>
 
-                    {/* Grid Footer (Only in Grid Mode) */}
-                    {viewMode === 'grid' && (
-                        <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
-                                    <Activity className="w-3 h-3" />
-                                    {formatVolume(volume24h)}
-                                </div>
-                                <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
-                                    <Users className="w-3 h-3" />
-                                    {holders}
-                                </div>
+                    {/* Meta Stats (List View Only) */}
+                    {viewMode === 'list' && (
+                        <div className="hidden md:flex items-center gap-6 text-xs text-zinc-400 font-mono">
+                            <div className="flex flex-col items-end">
+                                <span className="text-[10px] uppercase text-zinc-600 font-bold">Vol</span>
+                                {formatVolume(volume24h)}
                             </div>
-                            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'text-primary fill-current' : 'text-zinc-600'}`} />
+                            <div className="flex flex-col items-end">
+                                <span className="text-[10px] uppercase text-zinc-600 font-bold">Holders</span>
+                                {holders}
+                            </div>
                         </div>
                     )}
                 </div>
 
-                {/* BACK FACE (BOTTOM) - Description */}
+                {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="absolute inset-0 bg-[#0A0B14] border border-primary/20 rounded-md p-6 flex flex-col items-center justify-center text-center [transform:rotateX(-90deg)] [backface-visibility:hidden]">
-                        <h3 className="text-base font-bold text-white mb-3">
-                            {name}
-                        </h3>
-                        {description && (
-                            <p className="text-[11px] text-zinc-400 font-medium leading-relaxed line-clamp-6">
-                                {description}
-                            </p>
-                        )}
-                        <div className="mt-6 inline-flex items-center gap-2 text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 px-4 py-2 rounded-sm border border-primary/20">
-                            Explore_Market_Node <LineChart className="w-3 h-3" />
+                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                                <Activity className="w-3 h-3" />
+                                {formatVolume(volume24h)}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                                <Users className="w-3 h-3" />
+                                {holders}
+                            </div>
                         </div>
+
+                        <button
+                            onClick={handleToggleBookmark}
+                            className={`p-1.5 rounded-lg transition-all ${isBookmarked
+                                ? 'text-neon-blue bg-blue-500/10'
+                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                        </button>
                     </div>
                 )}
             </Link>
-        </motion.div>
+        </motion.div >
     );
 }
