@@ -118,8 +118,11 @@ export function AssetChart({
                     type: 'area' as any,
                     area: {
                         lineColor: colors?.lineColor || '#34d399',
-                        size: 2,
-                        fillColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)',
+                        lineSize: 2,
+                        backgroundColor: [
+                            { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
+                            { offset: 1, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' }
+                        ],
                         point: {
                             show: true,
                             color: colors?.lineColor || '#34d399',
@@ -241,7 +244,10 @@ export function AssetChart({
             candle: {
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
-                    fillColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)',
+                    backgroundColor: [
+                        { offset: 0, color: colors?.areaTopColor || 'rgba(52, 211, 153, 0.5)' },
+                        { offset: 1, color: colors?.areaBottomColor || 'rgba(52, 211, 153, 0)' }
+                    ],
                     point: {
                         color: colors?.lineColor || '#34d399',
                         rippleColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.2)'
