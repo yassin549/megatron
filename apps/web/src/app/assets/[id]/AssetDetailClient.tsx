@@ -99,7 +99,7 @@ export function AssetDetailClient({
             if (res.ok) {
                 const data = await res.json();
                 setAsset(data.asset);
-                setOracleLogs(data.oracleLogs);
+                setOracleLogs(Array.isArray(data.oracleLogs) ? data.oracleLogs : []);
                 setPriceHistory(data.priceHistory);
 
                 if (!isUpdatingTargets) {

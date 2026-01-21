@@ -102,12 +102,13 @@ export function AssetChart({
 
     // Initial chart setup and robust data loading
     useEffect(() => {
-        if (!chartContainerRef.current) return;
+        const container = chartContainerRef.current;
+        if (!container) return;
 
         // dispose previous instance if any to prevent leaks/duplicates
-        dispose(chartContainerRef.current);
+        dispose(container);
 
-        const chart = init(chartContainerRef.current, {
+        const chart = init(container, {
             styles: {
                 grid: {
                     show: true,
@@ -230,7 +231,8 @@ export function AssetChart({
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            dispose(chartContainerRef.current!);
+            if (container) dispose(container);
+            chartRef.current = null;
         };
     }, [colors, watermarkText]); // Re-init if visual config or symbol identity changes
 

@@ -27,36 +27,48 @@ export function AITerminal({ logs }: AITerminalProps) {
                     </div>
                 ) : (
                     logs.map((log) => {
-                        if (!log || !log.id) return null;
+                        if (!log || typeof log !== 'object' || !log.id) return null;
 
-                        // Safe values
-                        const delta = Number(log.deltaPercent || 0);
-                        const conf = Number(log.confidence || 0);
-                        const summary = log.summary ? String(log.summary) : 'Analyzing...';
+                        // Safe data extraction with extreme prejudice against nulls/undefineds
+                        const delta = typeof log.deltaPercent === 'number' ? log.deltaPercent : Number(log.deltaPercent || 0);
+                        const conf = typeof log.confidence === 'number' ? log.confidence : Number(log.confidence || 0);
+
+                        // Use fallback for summary
+                        const summary = log.summary ? String(log.summary) : 'Analyzing_Neural_Stream...';
                         const reasoning = log.reasoning ? String(log.reasoning) : null;
-                        const urls = Array.isArray(log.sourceUrls) ? log.sourceUrls : [];
+
+                        // Ensure sourceUrls is an array of strings
+                        const urls = Array.isArray(log.sourceUrls)
+                            ? log.sourceUrls.filter(u => u !== null && u !== undefined).map(String)
+                            : [];
 
                         let dateStr = '00:00';
                         try {
                             if (log.createdAt) {
                                 const d = new Date(log.createdAt);
                                 if (!isNaN(d.getTime())) {
-                                    dateStr = d.toLocaleTimeString();
+                                    dateStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 }
                             }
-                        } catch (e) { }
+                        } catch (e) {
+                            console.warn('[Terminal] Date parse failed', e);
+                        }
+
+                        // Final safety check on values used for toFixed
+                        const safeDelta = isNaN(delta) ? 0 : delta;
+                        const safeConf = isNaN(conf) ? 0 : conf;
 
                         return (
                             <div key={log.id} className="border-l border-white/10 pl-6 py-2 animate-in slide-in-from-left-2 fade-in duration-300">
-                                {/* Metadata */}
+                                {/* Metadata - Robustified labels */}
                                 <div className="flex items-center gap-4 mb-2 text-xs">
                                     <span className="text-zinc-600 font-bold">[{dateStr}]</span>
-                                    <span className={`font-black tracking-tighter ${delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        IMPACT: {delta >= 0 ? '+' : ''}{delta.toFixed(2)}%
+                                    <span className={`font-black tracking-tighter ${safeDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        IMPACT: {safeDelta >= 0 ? '+' : ''}{safeDelta.toFixed(2)}%
                                     </span>
                                     <div className="flex items-center gap-1.5 text-blue-400/60">
                                         <Shield className="w-3.5 h-3.5" />
-                                        <span className="font-black">CONF: {(conf * 100).toFixed(0)}%</span>
+                                        <span className="font-black whitespace-nowrap">CONF: {(safeConf * 100).toFixed(0)}%</span>
                                     </div>
                                 </div>
 
