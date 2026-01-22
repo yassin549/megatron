@@ -73,7 +73,7 @@ export function CompactPositionItem({
         setStopLoss(position.stopLoss?.toString() || '');
         setTakeProfit(position.takeProfit?.toString() || '');
     }, [position.stopLoss, position.takeProfit]);
-    const router = useRouter();
+
 
     const isProfit = position.returnAbs >= 0;
     const isShort = position.shares < 0;
