@@ -16,9 +16,8 @@ import {
 import Link from 'next/link';
 import { useNotification } from '@/context/NotificationContext';
 
-import { useNotification } from '@/context/NotificationContext';
-
 import { GradualExitModal } from './GradualExitModal';
+
 import { MONETARY_CONFIG } from '@megatron/lib-common';
 
 interface Position {
