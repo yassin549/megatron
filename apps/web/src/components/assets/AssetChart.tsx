@@ -477,7 +477,8 @@ export function AssetChart({
                         initial={{ y: -20, opacity: 0, x: '-50%' }}
                         animate={{ y: 0, opacity: 1, x: '-50%' }}
                         exit={{ y: -20, opacity: 0, x: '-50%' }}
-                        className="absolute top-4 left-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl"
+                        className="absolute top-14 left-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl"
+
                     >
                         <button
                             onClick={() => {
