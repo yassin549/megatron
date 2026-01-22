@@ -5,13 +5,11 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 import { AssetChart } from '@/components/assets/AssetChart';
-import { AITerminal } from '@/components/assets/AITerminal';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { OrderBook } from '@/components/assets/OrderBook';
 import { AssetInfoWidget } from '@/components/assets/AssetProfileWidget';
 import { TradingSidebar } from '@/components/trade/TradingSidebar';
 import {
-    Activity,
     TrendingUp,
     Zap
 } from 'lucide-react';
@@ -85,7 +83,6 @@ export function AssetDetailClient({
     const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'chart' | 'analysis'>('chart');
     const [executionEst, setExecutionEst] = useState<number>(initialAsset.price);
     const [mounted, setMounted] = useState(false);
 
@@ -202,49 +199,11 @@ export function AssetDetailClient({
                             </Link>
                         </div>
 
-                        {/* Center: Main Tab Switch - Institutional Underline Style */}
+                        {/* Center: Asset Name */}
                         <div className="absolute left-1/2 -translate-x-1/2 flex items-center h-full">
-                            <div className="flex gap-10 h-full">
-                                <button
-                                    onClick={() => setActiveTab('chart')}
-                                    className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${activeTab === 'chart'
-                                        ? 'text-white'
-                                        : 'text-zinc-600 hover:text-zinc-400'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2 relative z-10">
-                                        <TrendingUp className={`w-3.5 h-3.5 ${activeTab === 'chart' ? 'text-primary' : 'opacity-40'}`} />
-                                        <span>Market Chart</span>
-                                    </div>
-                                    {activeTab === 'chart' ? (
-                                        <motion.div
-                                            layoutId="detail-header-underline"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
-                                        />
-                                    ) : (
-                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('analysis')}
-                                    className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${activeTab === 'analysis'
-                                        ? 'text-white'
-                                        : 'text-zinc-600 hover:text-zinc-400'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2 relative z-10">
-                                        <Activity className={`w-3.5 h-3.5 ${activeTab === 'analysis' ? 'text-blue-400' : 'opacity-40'}`} />
-                                        <span>Neural Logs</span>
-                                    </div>
-                                    {activeTab === 'analysis' ? (
-                                        <motion.div
-                                            layoutId="detail-header-underline"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
-                                        />
-                                    ) : (
-                                        <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
-                                    )}
-                                </button>
+                            <div className="flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-primary" />
+                                <span className="text-[11px] font-black tracking-[0.15em] uppercase text-white">{asset.name}</span>
                             </div>
                         </div>
 
@@ -265,83 +224,58 @@ export function AssetDetailClient({
                         </div>
                     </div>
 
-                    {/* CONTENT AREA - Full Tab locked */}
+                    {/* CONTENT AREA - Chart Only */}
                     <div className="flex-1 overflow-hidden relative">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'chart' ? (
-                                <motion.div
-                                    key="chart-view"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="w-full h-full flex overflow-hidden p-3 gap-3"
-                                >
-                                    {/* Left Sidebar (25%) - AssetInfoWidget + OrderBook */}
-                                    <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
-                                        <div className="flex-1 flex flex-col gap-3 overflow-hidden">
-                                            <AssetInfoWidget
-                                                name={asset.name}
-                                                imageUrl={asset.imageUrl}
-                                                type={asset.type}
-                                            />
-                                            <div className="flex-1 min-h-0">
-                                                <OrderBook assetId={asset.id} assetPrice={asset.price} />
-                                            </div>
-                                        </div>
+                        <div className="w-full h-full flex overflow-hidden p-3 gap-3">
+                            {/* Left Sidebar (25%) - AssetInfoWidget + OrderBook */}
+                            <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
+                                <div className="flex-1 flex flex-col gap-3 overflow-hidden">
+                                    <AssetInfoWidget
+                                        name={asset.name}
+                                        imageUrl={asset.imageUrl}
+                                        type={asset.type}
+                                    />
+                                    <div className="flex-1 min-h-0">
+                                        <OrderBook assetId={asset.id} assetPrice={asset.price} />
                                     </div>
+                                </div>
+                            </div>
 
-                                    {/* Right Chart (75%) */}
-                                    <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
-                                        {chartData.length > 0 ? (
-                                            <ErrorBoundary name="Market Chart">
-                                                <AssetChart
-                                                    data={chartData}
-                                                    marginalPrice={asset.price}
-                                                    marketPrice={asset.marketPrice}
-                                                    watermarkText={asset.name.toUpperCase()}
-                                                    colors={useMemo(() => ({
-                                                        lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
-                                                        areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
-                                                        areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
-                                                        textColor: '#52525b',
-                                                    }), [asset.change24h])}
-                                                    priceLines={{
-                                                        entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                        stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                        takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                                    }}
-                                                    userTrades={asset.userTrades}
-                                                    onUpdatePosition={handleChartUpdate}
-                                                    side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                                    activePositionId={activePositionId}
-                                                    onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                                />
-                                            </ErrorBoundary>
-                                        ) : (
-                                            <div className="h-full flex flex-col items-center justify-center">
-                                                <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
-                                                <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="analysis-view"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="w-full h-full overflow-hidden"
-                                >
-                                    {/* Pure Terminal Stream - Only scroll here */}
-                                    <ErrorBoundary name="Neural Logs">
-                                        <AITerminal logs={oracleLogs} />
+                            {/* Right Chart (75%) */}
+                            <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
+                                {chartData.length > 0 ? (
+                                    <ErrorBoundary name="Market Chart">
+                                        <AssetChart
+                                            data={chartData}
+                                            marginalPrice={asset.price}
+                                            marketPrice={asset.marketPrice}
+                                            watermarkText={asset.name.toUpperCase()}
+                                            colors={useMemo(() => ({
+                                                lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                                areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
+                                                areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
+                                                textColor: '#52525b',
+                                            }), [asset.change24h])}
+                                            priceLines={{
+                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                            }}
+                                            userTrades={asset.userTrades}
+                                            onUpdatePosition={handleChartUpdate}
+                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                            activePositionId={activePositionId}
+                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                        />
                                     </ErrorBoundary>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center">
+                                        <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                        <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
