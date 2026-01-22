@@ -14,7 +14,8 @@ import {
     X
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useNotification } from '@/context/NotificationContext';
+
 import { useNotification } from '@/context/NotificationContext';
 
 import { GradualExitModal } from './GradualExitModal';
@@ -206,13 +207,10 @@ export function CompactPositionItem({
     };
 
     const handleClick = () => {
-        if (!isCurrentAsset) {
-            router.push(`/assets/${position.assetId}`);
-        } else {
-            setIsExpanded(!isExpanded);
-            onSelect();
-        }
+        setIsExpanded(!isExpanded);
+        onSelect();
     };
+
 
     const exitProgress = timedExit ? (timedExit.chunksCompleted / timedExit.chunksTotal) * 100 : 0;
 
@@ -295,7 +293,8 @@ export function CompactPositionItem({
             )}
 
             <AnimatePresence>
-                {isExpanded && isCurrentAsset && (
+                {isExpanded && (
+
                     <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
