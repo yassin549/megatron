@@ -106,7 +106,11 @@ export function AssetChart({
         if (!container) return;
 
         // dispose previous instance if any to prevent leaks/duplicates
-        dispose(container);
+        try {
+            dispose(container);
+        } catch (e) {
+            console.warn('[AssetChart] Dispose cleanup warning:', e);
+        }
 
         const chart = init(container, {
             styles: {
@@ -231,7 +235,11 @@ export function AssetChart({
 
         return () => {
             window.removeEventListener('resize', handleResize);
-            if (container) dispose(container);
+            try {
+                if (container) dispose(container);
+            } catch (e) {
+                console.warn('[AssetChart] Dispose cleanup warning:', e);
+            }
             chartRef.current = null;
         };
     }, [colors, watermarkText]); // Re-init if visual config or symbol identity changes

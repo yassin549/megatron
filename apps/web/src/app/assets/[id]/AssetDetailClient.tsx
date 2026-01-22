@@ -277,44 +277,47 @@ export function AssetDetailClient({
                                     transition={{ duration: 0.2 }}
                                     className="w-full h-full flex overflow-hidden p-3 gap-3"
                                 >
-                                    {/* Sidebar Stats & Orderbook (25%) */}
-                                    <div className="w-[25%] h-full hidden md:flex flex-col gap-3 overflow-hidden">
-                                        <AssetInfoWidget
-                                            name={asset.name}
-                                            imageUrl={asset.imageUrl}
-                                            type={asset.type}
-                                        />
-                                        <div className="flex-1 overflow-hidden">
-                                            <OrderBook assetId={asset.id} assetPrice={asset.price} />
+                                    {/* Left Sidebar (25%) - AssetInfoWidget + OrderBook */}
+                                    <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
+                                        <div className="flex-1 flex flex-col gap-3 overflow-hidden">
+                                            <AssetInfoWidget
+                                                name={asset.name}
+                                                imageUrl={asset.imageUrl}
+                                                type={asset.type}
+                                            />
+                                            <div className="flex-1 min-h-0">
+                                                <OrderBook assetId={asset.id} assetPrice={asset.price} />
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Chart (75%) */}
-                                    <div className="flex-1 h-full min-h-0 overflow-hidden border border-white/5 bg-black/40 rounded-2xl shadow-2xl relative">
+                                    {/* Right Chart (75%) */}
+                                    <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
                                         {chartData.length > 0 ? (
-                                            <AssetChart
-                                                data={chartData}
-                                                marginalPrice={asset.price}
-                                                marketPrice={asset.marketPrice}
-                                                predictedPrice={executionEst}
-                                                watermarkText={asset.name.toUpperCase()}
-                                                colors={useMemo(() => ({
-                                                    lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
-                                                    areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
-                                                    areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
-                                                    textColor: '#52525b',
-                                                }), [asset.change24h])}
-                                                priceLines={{
-                                                    entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                    stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                    takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                                }}
-                                                userTrades={asset.userTrades}
-                                                onUpdatePosition={handleChartUpdate}
-                                                side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                                activePositionId={activePositionId}
-                                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                            />
+                                            <ErrorBoundary name="Market Chart">
+                                                <AssetChart
+                                                    data={chartData}
+                                                    marginalPrice={asset.price}
+                                                    marketPrice={asset.marketPrice}
+                                                    watermarkText={asset.name.toUpperCase()}
+                                                    colors={useMemo(() => ({
+                                                        lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                                        areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
+                                                        areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
+                                                        textColor: '#52525b',
+                                                    }), [asset.change24h])}
+                                                    priceLines={{
+                                                        entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                        stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                        takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                                    }}
+                                                    userTrades={asset.userTrades}
+                                                    onUpdatePosition={handleChartUpdate}
+                                                    side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                                    activePositionId={activePositionId}
+                                                    onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                                />
+                                            </ErrorBoundary>
                                         ) : (
                                             <div className="h-full flex flex-col items-center justify-center">
                                                 <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
