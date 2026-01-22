@@ -199,13 +199,7 @@ export function AssetDetailClient({
                             </Link>
                         </div>
 
-                        {/* Center: Asset Name */}
-                        <div className="absolute left-1/2 -translate-x-1/2 flex items-center h-full">
-                            <div className="flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-primary" />
-                                <span className="text-[11px] font-black tracking-[0.15em] uppercase text-white">{asset.name}</span>
-                            </div>
-                        </div>
+                        {/* Center: Empty - Clean header */}\n                        <div className=\"absolute left-1/2 -translate-x-1/2 flex items-center h-full\" />\n
 
                         {/* End: Minimalist Metrics */}
                         <div className="flex-1 flex justify-end">
