@@ -218,7 +218,7 @@ export function AssetDetailClient({
                                     </div>
                                     {activeTab === 'chart' ? (
                                         <motion.div
-                                            layoutId="header-underline"
+                                            layoutId="detail-header-underline"
                                             className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
                                         />
                                     ) : (
@@ -238,7 +238,7 @@ export function AssetDetailClient({
                                     </div>
                                     {activeTab === 'analysis' ? (
                                         <motion.div
-                                            layoutId="header-underline"
+                                            layoutId="detail-header-underline"
                                             className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
                                         />
                                     ) : (
@@ -352,6 +352,7 @@ export function AssetDetailClient({
                                 marketPrice={asset.marketPrice}
                                 totalSupply={asset.totalSupply}
                                 pricingParams={asset.pricingParams}
+                                sidebarContext="desktop"
                                 status={asset.status}
                                 stats={{
                                     marketCap: asset.marketCap,
@@ -420,6 +421,8 @@ export function AssetDetailClient({
                                                     assetId={asset.id}
                                                     assetName={asset.name}
                                                     assetPrice={asset.price}
+                                                    pricingParams={asset.pricingParams}
+                                                    sidebarContext="mobile-portal"
                                                     marketPrice={asset.marketPrice}
                                                     status={asset.status}
                                                     onTradeSuccess={() => { refreshData(); }}

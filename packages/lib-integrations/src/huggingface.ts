@@ -33,7 +33,7 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
     // FIX #7: Read env vars at call time, not module load time
     const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY;
     // New HuggingFace Inference Providers API (OpenAI-compatible)
-    const HUGGINGFACE_API_URL = process.env.HUGGINGFACE_API_URL || 'https://api-inference.huggingface.co/v1/chat/completions';
+    const HUGGINGFACE_API_URL = process.env.HUGGINGFACE_API_URL || 'https://router.huggingface.co/v1/chat/completions';
 
     if (!HUGGINGFACE_API_KEY) {
         throw new Error('HUGGINGFACE_API_KEY is not defined');

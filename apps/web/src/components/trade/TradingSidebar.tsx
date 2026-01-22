@@ -26,6 +26,7 @@ interface TradingSidebarProps {
     onSelectPosition?: (assetId: string | null) => void;
     totalSupply?: number;
     pricingParams?: { P0: number; k: number };
+    sidebarContext?: string;
 }
 
 export function TradingSidebar({
@@ -40,7 +41,8 @@ export function TradingSidebar({
     activePositionId,
     onSelectPosition,
     totalSupply,
-    pricingParams
+    pricingParams,
+    sidebarContext = 'main'
 }: TradingSidebarProps) {
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
@@ -62,7 +64,7 @@ export function TradingSidebar({
                         </div>
                         {view === 'trade' ? (
                             <motion.div
-                                layoutId="sidebar-underline"
+                                layoutId={`${sidebarContext}-sidebar-underline`}
                                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
                             />
                         ) : (
@@ -82,7 +84,7 @@ export function TradingSidebar({
                         </div>
                         {view === 'positions' ? (
                             <motion.div
-                                layoutId="sidebar-underline"
+                                layoutId={`${sidebarContext}-sidebar-underline`}
                                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]"
                             />
                         ) : (
