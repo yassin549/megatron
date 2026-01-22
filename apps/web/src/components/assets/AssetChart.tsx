@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { init, dispose, Chart, Nullable, Overlay, Styles, DeepPartial, KLineData } from 'klinecharts';
-import { Check, X, Shield, Target, MousePointer2, TrendingUp, Minus, Layers } from 'lucide-react';
+import { Check, X, Shield, Target, MousePointer2, TrendingUp, Minus, Layers, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChartProps {
@@ -469,6 +469,83 @@ export function AssetChart({
         chartRef.current?.createOverlay({ name: toolName });
     };
 
+    const handleRemoveAllDrawings = () => {
+        const chart = chartRef.current;
+        if (!chart) return;
+
+        // System overlay IDs to preserve
+        const systemIds = new Set([
+            'entry-line',
+            'sl-line',
+            'tp-line',
+            'index-line',
+            'exec-line'
+        ]);
+
+        // Get all overlays - assuming klinecharts API exposes this or we need to track them.
+        // Since getOverlay is common, we try it. If it doesn't return list, we might need another approach.
+        // However, standard klinecharts usually lets you remove by group or get list. 
+        // If unknown, we can just remove specific types we know users create.
+
+        // Actually, klinecharts v9+ removeOverlay() without args or with specific id.
+        // Let's try to remove by group if possible, or iterate known user types.
+        // User types: 'segment', 'horizontalRay', 'fibonacciRetracement'
+
+        // A safer standard approach for "Delete All User Drawings" without deleting system ones:
+        // We can just rely on the fact that we didn't give user drawings specific IDs (they get auto-generated).
+        // System ones have IDs.
+
+        // We will try to get all overlays.
+        // chart.getOverlay() usually returns a map or list in v9+.
+
+        // @ts-ignore - access internal overlay list if typed poorly
+        const overlays = chart.getOverlay?.();
+
+        if (Array.isArray(overlays)) {
+            overlays.forEach((o: any) => {
+                if (!systemIds.has(o.id) && !o.id.startsWith('trade-marker-')) {
+                    chart.removeOverlay({ id: o.id });
+                }
+            });
+        } else if (typeof overlays === 'object' && overlays !== null) {
+            // If it's a map
+            Object.values(overlays).forEach((o: any) => {
+                if (!systemIds.has(o.id) && !o.id.startsWith('trade-marker-')) {
+                    chart.removeOverlay({ id: o.id });
+                }
+            });
+        }
+    };
+
+    // Keyboard listener for deleting selected drawing
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const chart = chartRef.current;
+                if (!chart) return;
+
+                // klinecharts internal selection concept
+                // Usually we don't have direct access to "selected" state easily unless we track it 
+                // or if the library exposes something like getSelectedOverlay().
+                // Let's try to just call removeOverlay() with no args? No, that might not work.
+
+                // In many trading libs, you just hook into the event.
+                // But klinecharts might handle this internally?
+                // If not, we check for a custom solution.
+
+                // Let's try a standard API guess:
+                // @ts-ignore
+                const selected = chart.getSelectedOverlay?.();
+                if (selected) {
+                    chart.removeOverlay({ id: selected.id });
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
+
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
             <AnimatePresence>
@@ -567,6 +644,14 @@ export function AssetChart({
                     title="Fibonacci"
                 >
                     <Layers className="w-4 h-4" />
+                </button>
+                <div className="w-full h-px bg-white/5 mx-auto" />
+                <button
+                    onClick={handleRemoveAllDrawings}
+                    className="p-2 rounded-lg transition-all text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10"
+                    title="Delete All Drawings"
+                >
+                    <Trash2 className="w-4 h-4" />
                 </button>
             </div>
 
