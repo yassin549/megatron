@@ -199,7 +199,8 @@ export function AssetDetailClient({
                             </Link>
                         </div>
 
-                        {/* Center: Empty - Clean header */}\n                        <div className=\"absolute left-1/2 -translate-x-1/2 flex items-center h-full\" />\n
+                        {/* Center: Empty - Clean header */}
+
 
                         {/* End: Minimalist Metrics */}
                         <div className="flex-1 flex justify-end">
