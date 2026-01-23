@@ -513,23 +513,13 @@ export function AssetChart({
         // We will try to get all overlays.
         // chart.getOverlay() usually returns a map or list in v9+.
 
-        // @ts-ignore - access internal overlay list if typed poorly
-        const overlays = chart.getOverlay?.();
+        const overlays = chart.getOverlays();
 
-        if (Array.isArray(overlays)) {
-            overlays.forEach((o: any) => {
-                if (!systemIds.has(o.id) && !o.id.startsWith('trade-marker-')) {
-                    chart.removeOverlay({ id: o.id });
-                }
-            });
-        } else if (typeof overlays === 'object' && overlays !== null) {
-            // If it's a map
-            Object.values(overlays).forEach((o: any) => {
-                if (!systemIds.has(o.id) && !o.id.startsWith('trade-marker-')) {
-                    chart.removeOverlay({ id: o.id });
-                }
-            });
-        }
+        overlays.forEach(o => {
+            if (!systemIds.has(o.id) && !o.id.startsWith('trade-marker-')) {
+                chart.removeOverlay({ id: o.id });
+            }
+        });
     };
 
     // Keyboard listener for deleting selected drawing
@@ -549,7 +539,7 @@ export function AssetChart({
                 // If not, we check for a custom solution.
 
                 // Check if we have a tracked selected drawing
-                if (selectedDrawing && chart.getOverlay({ id: selectedDrawing })) {
+                if (selectedDrawing && chart.getOverlays({ id: selectedDrawing }).length > 0) {
                     // Double check existence to prevent errors
                     chart.removeOverlay({ id: selectedDrawing });
                     setSelectedDrawing(null);
