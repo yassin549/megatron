@@ -80,14 +80,14 @@ export function CompactPositionItem({
 
     const { showNotification, showStatusModal } = useNotification();
 
-    const handleExit = async (isGradualOverride = false) => {
+    const handleExit = async (isGradualOverride = false, forceInstant = false) => {
         if (!position.shares || Math.abs(position.shares) < 0.000001) {
             showNotification('info', "No active position to exit.");
             return;
         }
 
         // --- LIQUIDITY CHECK FOR GRADUAL EXIT ---
-        if (!isGradualOverride && !isShort) { // Only recommend for large long sells for now
+        if (!isGradualOverride && !isShort && !forceInstant) { // Only recommend for large long sells for now
             try {
                 const assetRes = await fetch(`/api/assets/${position.assetId}`);
                 if (assetRes.ok) {
@@ -353,7 +353,7 @@ export function CompactPositionItem({
                 isOpen={showGradualModal}
                 onClose={() => setShowGradualModal(false)}
                 onConfirmGradual={() => handleExit(true)}
-                onConfirmInstant={() => handleExit(false)}
+                onConfirmInstant={() => handleExit(false, true)}
                 assetName={position.assetName}
                 shareAmount={Math.abs(position.shares)}
                 estimatedValue={position.value}
