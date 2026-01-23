@@ -160,6 +160,13 @@ export async function POST(req: Request) {
                     throw new Error('Trade amount too small to generate shares');
                 }
 
+                // --- PRECISION CLAMPING FOR SHORT COVER ---
+                // If covering short (currentShares < 0) and deltaShares is very close to abs(currentShares),
+                // clamp it to exactly match to avoid lingering dust or "cannot flip" errors due to float precision.
+                if (currentShares < 0 && Math.abs(Math.abs(currentShares) - deltaShares) < 0.0001) {
+                    deltaShares = Math.abs(currentShares);
+                }
+
                 // Re-calculate Fee for records
                 const fee = usedTradeAmount * CONFIG.SWAP_FEE;
                 const lpFee = fee * CONFIG.LP_SHARE;
@@ -321,6 +328,14 @@ export async function POST(req: Request) {
                 if (shareAmount <= 0.000001) {
                     throw new Error('Trade amount too small to sell shares');
                 }
+
+                // --- PRECISION CLAMPING FOR LONG EXIT ---
+                // If exiting long (currentShares > 0) and shareAmount is very close to currentShares,
+                // clamp it to exactly match currentShares.
+                if (currentShares > 0 && Math.abs(currentShares - shareAmount) < 0.0001) {
+                    shareAmount = currentShares;
+                }
+
 
                 outputAmount = grossUsdc;
 

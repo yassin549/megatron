@@ -28,8 +28,9 @@ export async function processGradualExits() {
                     where: { id: exit.id }
                 });
 
-                // Check if asset is active - if not (e.g. 'funding', 'paused'), skip this cycle but don't error
-                if (exit.asset.status !== 'active') {
+                // Check if asset is active - if not (e.g. 'paused'), skip this cycle but don't error
+                // We allow 'active' AND 'funding' states for exits.
+                if (exit.asset.status !== 'active' && exit.asset.status !== 'funding') {
                     console.log(`Skipping exit ${exit.id} - asset ${exit.asset.name} is ${exit.asset.status}`);
                     return;
                 }
@@ -63,7 +64,7 @@ export async function processGradualExits() {
             });
 
             // If we skipped because of asset status, we continue to next exit
-            if (exit.asset.status !== 'active') continue;
+            if (exit.asset.status !== 'active' && exit.asset.status !== 'funding') continue;
 
             // Re-fetch to ensure we have latest state
             const currentExit = await db.timedExit.findUnique({ where: { id: exit.id } });
