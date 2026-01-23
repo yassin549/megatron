@@ -61,6 +61,8 @@ export function AssetChart({
         { label: 'All', value: 0 },
     ];
 
+    const [selectedDrawing, setSelectedDrawing] = useState<string | null>(null);
+
     const [localLines, setLocalLines] = useState({
         stopLoss: priceLines?.stopLoss ?? null,
         takeProfit: priceLines?.takeProfit ?? null,
@@ -221,6 +223,19 @@ export function AssetChart({
                 unsubscribeBar: () => {
                     subscribeBarRef.current = null;
                 }
+            });
+
+            // Attach listeners to drawing tools to track selection
+            ['segment', 'horizontalRay', 'fibonacciRetracement', 'straightLine', 'priceLine', 'arrow'].forEach(name => {
+                chart.overrideOverlay({
+                    name,
+                    onSelected: (e: any) => {
+                        setSelectedDrawing(e.overlay.id);
+                    },
+                    onDeselected: () => {
+                        setSelectedDrawing(null);
+                    }
+                });
             });
 
             // Set initial symbol to trigger load
@@ -533,18 +548,18 @@ export function AssetChart({
                 // But klinecharts might handle this internally?
                 // If not, we check for a custom solution.
 
-                // Let's try a standard API guess:
-                // @ts-ignore
-                const selected = chart.getSelectedOverlay?.();
-                if (selected) {
-                    chart.removeOverlay({ id: selected.id });
+                // Check if we have a tracked selected drawing
+                if (selectedDrawing && chart.getOverlay({ id: selectedDrawing })) {
+                    // Double check existence to prevent errors
+                    chart.removeOverlay({ id: selectedDrawing });
+                    setSelectedDrawing(null);
                 }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [selectedDrawing]);
 
     return (
         <div className="relative w-full h-full flex flex-col overflow-hidden bg-[#09090b]">
@@ -610,6 +625,30 @@ export function AssetChart({
                         >
                             <Target className="w-3.5 h-3.5" />
                             TP
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {selectedDrawing && (
+                    <motion.div
+                        initial={{ y: 20, opacity: 0, x: '-50%' }}
+                        animate={{ y: 0, opacity: 1, x: '-50%' }}
+                        exit={{ y: 20, opacity: 0, x: '-50%' }}
+                        className="absolute bottom-16 left-1/2 z-40 flex items-center gap-2 bg-black/60 backdrop-blur-xl p-1.5 rounded-2xl border border-white/10 shadow-2xl"
+                    >
+                        <span className="text-[10px] text-zinc-400 font-medium px-2">Drawing Selected</span>
+                        <div className="w-px h-3 bg-white/10" />
+                        <button
+                            onClick={() => {
+                                chartRef.current?.removeOverlay({ id: selectedDrawing });
+                                setSelectedDrawing(null);
+                            }}
+                            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-all text-xs font-bold"
+                        >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Delete
                         </button>
                     </motion.div>
                 )}
