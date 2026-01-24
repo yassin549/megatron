@@ -312,12 +312,33 @@ export function AssetChart({
                 optimalSpace = containerWidth / dataLength;
             }
 
-            // Apply zoom
-            chart.setBarSpace(optimalSpace);
+            // Animate zoom
+            const startSpace = chart.getBarSpace();
+            const targetSpace = optimalSpace;
+            const duration = 300; // ms
+            const startTime = performance.now();
 
-            // Scroll to the latest point ensures we see the right end if it slightly overflows
-            chart.scrollToRealTime();
+            const animate = (currentTime: number) => {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Ease out cubic
+                const ease = 1 - Math.pow(1 - progress, 3);
+
+                const currentSpace = startSpace + (targetSpace - startSpace) * ease;
+                chart.setBarSpace(currentSpace);
+
+                // Keep right edge locked
+                chart.scrollToRealTime();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                }
+            };
+
+            requestAnimationFrame(animate);
         };
+
 
         // Small timeout to allow data to process/render after period change
         setTimeout(fitContent, 50);
