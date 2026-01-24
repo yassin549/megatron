@@ -313,7 +313,8 @@ export function AssetChart({
             }
 
             // Animate zoom
-            const startSpace = chart.getBarSpace();
+            const barSpace = chart.getBarSpace();
+            const startSpace = barSpace.bar + barSpace.gapBar;
             const targetSpace = optimalSpace;
             const duration = 300; // ms
             const startTime = performance.now();
