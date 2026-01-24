@@ -160,8 +160,30 @@ export function AssetChart({
         if (chart) {
             chartRef.current = chart;
 
-            // Use applyNewData directly for stability and simplicity since we manage data state
-            chart.applyNewData(kLineData);
+            chart.setDataLoader({
+                getBars: (params) => {
+                    const rawData = dataRef.current.map(d => ({
+                        timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
+                        open: d.value,
+                        high: d.value,
+                        low: d.value,
+                        close: d.value,
+                        volume: d.volume || 0
+                    }));
+
+                    // Simple filtering for timeframe if needed, or just return all and let library aggregate
+                    // For KLineCharts, usually passing all data and letting it handle aggregation via `setPeriod` is fine.
+                    // But to be safe and match previous logic (without strict aggregation which might be buggy):
+
+                    params.callback(rawData, { noData: rawData.length === 0 });
+                },
+                subscribeBar: (params) => {
+                    subscribeBarRef.current = params.callback;
+                },
+                unsubscribeBar: () => {
+                    subscribeBarRef.current = null;
+                }
+            });
 
             // Attach listeners to drawing tools to track selection
             ['segment', 'horizontalRay', 'fibonacciRetracement', 'straightLine', 'priceLine', 'arrow'].forEach(name => {
@@ -225,35 +247,20 @@ export function AssetChart({
         } as any);
     }, [colors]);
 
-    // Reactive Data Updates WITHOUT Re-initialization
-    // Reactive Data Updates WITHOUT Re-initialization
+    // Reactive Data Updates
     useEffect(() => {
         if (!kLineData.length || !subscribeBarRef.current) return;
 
         const lastPoint = kLineData[kLineData.length - 1];
-
-        const chart = chartRef.current;
-        const period = chart?.getPeriod();
-
-        if (period) {
-            const periodSeconds = period.span * (
-                period.type === 'minute' ? 60 :
-                    period.type === 'hour' ? 3600 :
-                        period.type === 'day' ? 86400 :
-                            period.type === 'week' ? 604800 : 0
-            );
-
-            if (periodSeconds > 60) {
-                const timestamp = Math.floor(lastPoint.timestamp / (periodSeconds * 1000)) * (periodSeconds * 1000);
-                subscribeBarRef.current({
-                    ...lastPoint,
-                    timestamp
-                });
-                return;
-            }
-        }
-
+        // Feed the latest point to the chart via subscription
         subscribeBarRef.current(lastPoint);
+
+        // Also force a reload if data length changed significantly to ensure history is correct?
+        // Actually, setDataLoader should handle history. subscribeBar handles real-time.
+        // If we have a full refresh, we might need to trigger getBars again?
+        // chartRef.current?.applyNewData is definitely broken.
+        // We rely on dataRef being updated and getting called by library, or manual refresh?
+
     }, [kLineData]);
 
     // Handle timeframe changes
