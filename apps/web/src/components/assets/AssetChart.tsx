@@ -160,70 +160,8 @@ export function AssetChart({
         if (chart) {
             chartRef.current = chart;
 
-            chart.setDataLoader({
-                getBars: (params) => {
-                    const rawData = dataRef.current.map(d => ({
-                        timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
-                        open: d.value,
-                        high: d.value,
-                        low: d.value,
-                        close: d.value,
-                        volume: d.volume || 0
-                    }));
-
-                    const periodSeconds = params.period.span * (
-                        params.period.type === 'minute' ? 60 :
-                            params.period.type === 'hour' ? 3600 :
-                                params.period.type === 'day' ? 86400 :
-                                    params.period.type === 'week' ? 604800 : 0
-                    );
-
-                    let finalData = rawData;
-
-                    if (periodSeconds > 60) {
-                        // Aggregate
-                        const aggregated: typeof rawData = [];
-                        let currentBar: typeof rawData[0] | null = null;
-
-                        // Sort to ensure chronological order
-                        const sortedData = [...rawData].sort((a, b) => a.timestamp - b.timestamp);
-
-                        sortedData.forEach(point => {
-                            const timestamp = Math.floor(point.timestamp / (periodSeconds * 1000)) * (periodSeconds * 1000);
-
-                            if (!currentBar || currentBar.timestamp !== timestamp) {
-                                if (currentBar) aggregated.push(currentBar);
-                                currentBar = {
-                                    timestamp,
-                                    open: point.open,
-                                    high: point.high,
-                                    low: point.low,
-                                    close: point.close,
-                                    volume: point.volume
-                                };
-                            } else {
-                                if (currentBar) {
-                                    currentBar.high = Math.max(currentBar.high, point.high);
-                                    currentBar.low = Math.min(currentBar.low, point.low);
-                                    currentBar.close = point.close;
-                                    currentBar.volume = (currentBar.volume) + (point.volume);
-                                }
-                            }
-                        });
-                        if (currentBar) aggregated.push(currentBar);
-                        finalData = aggregated;
-                    }
-
-                    params.callback(finalData, false);
-                },
-                subscribeBar: (params) => {
-                    // Capture the callback so we can feed it data later
-                    subscribeBarRef.current = params.callback;
-                },
-                unsubscribeBar: () => {
-                    subscribeBarRef.current = null;
-                }
-            });
+            // Use applyNewData directly for stability and simplicity since we manage data state
+            chart.applyNewData(kLineData);
 
             // Attach listeners to drawing tools to track selection
             ['segment', 'horizontalRay', 'fibonacciRetracement', 'straightLine', 'priceLine', 'arrow'].forEach(name => {
@@ -323,19 +261,19 @@ export function AssetChart({
         const chart = chartRef.current;
         if (!chart) return;
 
-        const periodMap: Record<string, { span: number; type: string }> = {
-            '1m': { span: 1, type: 'minute' },
-            '15m': { span: 15, type: 'minute' },
-            '1h': { span: 1, type: 'hour' },
-            '1d': { span: 1, type: 'day' },
-            '1w': { span: 1, type: 'week' },
-            'all': { span: 1, type: 'day' }
+        // Smart Map: Timeframe -> { interval, range_duration_ms }
+        const finalConfig: Record<string, { period: { span: number; type: string }, duration?: number }> = {
+            '1m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 30 }, // 30 mins range
+            '15m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 15 }, // 15 mins range
+            '1h': { period: { span: 5, type: 'minute' }, duration: 1000 * 60 * 60 }, // 1 Hour Range
+            '1d': { period: { span: 15, type: 'minute' }, duration: 1000 * 60 * 60 * 24 }, // 1 Day Range
+            '1w': { period: { span: 1, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 7 }, // 1 Week Range
+            'all': { period: { span: 1, type: 'day' }, duration: 0 }
         };
 
-        const period = periodMap[activeTimeframe];
-        if (period) {
-            chart.setPeriod(period as any);
-        }
+        const config = finalConfig[activeTimeframe] || finalConfig['all'];
+
+        chart.setPeriod(config.period as any);
 
         // Auto-fit logic
         const fitContent = () => {
