@@ -175,7 +175,8 @@ export function AssetChart({
                     // For KLineCharts, usually passing all data and letting it handle aggregation via `setPeriod` is fine.
                     // But to be safe and match previous logic (without strict aggregation which might be buggy):
 
-                    params.callback(rawData, { noData: rawData.length === 0 });
+                    // Passing { backward: false } tells the chart there is no more historical data to fetch.
+                    params.callback(rawData, { backward: false, forward: false });
                 },
                 subscribeBar: (params) => {
                     subscribeBarRef.current = params.callback;
