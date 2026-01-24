@@ -292,9 +292,25 @@ export function AssetChart({
             const containerWidth = chartContainerRef.current?.clientWidth || 0;
             if (containerWidth === 0) return;
 
-            // Calculate optimal bar space to fill width
-            // We use a slight buffer (0.98) to ensure it fits comfortably
-            const optimalSpace = (containerWidth / dataLength);
+            let optimalSpace = 0;
+
+            if (config.duration && config.duration > 0) {
+                // Calculate how many bars fit in the duration based on current period
+                const barDurationMs = config.period.span * (
+                    config.period.type === 'minute' ? 60000 :
+                        config.period.type === 'hour' ? 3600000 :
+                            config.period.type === 'day' ? 86400000 :
+                                config.period.type === 'week' ? 604800000 : 0
+                );
+
+                if (barDurationMs > 0) {
+                    const barsToShow = config.duration / barDurationMs;
+                    optimalSpace = containerWidth / barsToShow;
+                }
+            } else {
+                // Fit All
+                optimalSpace = containerWidth / dataLength;
+            }
 
             // Apply zoom
             chart.setBarSpace(optimalSpace);
