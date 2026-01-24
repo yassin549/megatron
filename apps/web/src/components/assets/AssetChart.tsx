@@ -336,6 +336,30 @@ export function AssetChart({
         if (period) {
             chart.setPeriod(period as any);
         }
+
+        // Auto-fit logic
+        const fitContent = () => {
+            const dataList = chart.getDataList();
+            const dataLength = dataList.length;
+            if (dataLength === 0) return;
+
+            const containerWidth = chartContainerRef.current?.clientWidth || 0;
+            if (containerWidth === 0) return;
+
+            // Calculate optimal bar space to fill width
+            // We use a slight buffer (0.98) to ensure it fits comfortably
+            const optimalSpace = (containerWidth / dataLength);
+
+            // Apply zoom
+            chart.setBarSpace(optimalSpace);
+
+            // Scroll to the latest point ensures we see the right end if it slightly overflows
+            chart.scrollToRealTime();
+        };
+
+        // Small timeout to allow data to process/render after period change
+        setTimeout(fitContent, 50);
+
     }, [activeTimeframe]);
 
     useEffect(() => {
