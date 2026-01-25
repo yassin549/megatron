@@ -84,17 +84,20 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
     }, [assetPrice, rawAsks, rawBids]);
 
     const spread = useMemo(() => {
-        if (processedAsks.length === 0 || processedBids.length === 0) return { val: 0, pct: 0 };
+        // Use RAW orders for true market spread
+        if (rawAsks.length === 0 || rawBids.length === 0) return { val: 0, pct: 0 };
 
-        const hasOrders = rawAsks.length > 0 || rawBids.length > 0;
-        if (!hasOrders) return { val: 0, pct: 0 };
+        // API returns Asks sorted Ascending (Cheapest First) -> [0] is Best Ask
+        // API returns Bids sorted Descending (Highest First) -> [0] is Best Bid
+        const bestAsk = rawAsks[0].price;
+        const bestBid = rawBids[0].price;
 
-        const bestAsk = processedAsks[processedAsks.length - 1].price;
-        const bestBid = processedBids[0].price;
-        const val = bestAsk - bestBid;
+        // If crossed or equal, spread is 0 or negative (shouldn't happen with matching engine but UI should handle it)
+        const val = Math.max(0, bestAsk - bestBid);
         const pct = bestAsk > 0 ? (val / bestAsk) * 100 : 0;
+
         return { val, pct };
-    }, [processedAsks, processedBids, rawAsks.length, rawBids.length]);
+    }, [rawAsks, rawBids]);
 
     const maxTotal = useMemo(() => {
         const askMax = processedAsks.length > 0 ? Math.max(...processedAsks.map(a => a.total)) : 0;
