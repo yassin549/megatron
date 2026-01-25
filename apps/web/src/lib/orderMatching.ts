@@ -68,11 +68,32 @@ export async function matchOrder(orderId: string, tx: any) {
         await updatePosition(tx, sellerId, order.assetId, executeQty, executePrice, 'sell');
 
         // 3. Update User Balances
-        // Buyer pays USDC
-        await tx.user.update({
-            where: { id: buyerId },
-            data: { walletHotBalance: { decrement: totalAmount } }
-        });
+        // Buyer: Funds already locked at order creation. No action needed here.
+        // (Wait, if the trade happens at a BETTER price than the limit order, we need to REFUND the difference to the Buyer!)
+
+        let buyerRefund = 0;
+        if (isBuy) {
+            // Buyer locked `order.price` * quantity.
+            // Executed at `executePrice`.
+            // If executePrice < order.price, refund (order.price - executePrice) * executeQty
+            const priceDiff = order.price.toNumber() - executePrice;
+            if (priceDiff > 0.000001) {
+                buyerRefund = priceDiff * executeQty;
+            }
+        }
+        // Note: For the matching order (Maker), if it was a Buy, they locked their price.
+        // If we (Taker) are Selling to them, we sell at THEIR price (Maker Price).
+        // Usually Match Price = Maker Price.
+        // So refund is 0 for Maker.
+        // For Taker (if Buy), we execute at Maker Price (which is <= our Limit).
+        // If Taker Limit > Maker Price, we get a refund.
+
+        if (buyerRefund > 0) {
+            await tx.user.update({
+                where: { id: buyerId },
+                data: { walletHotBalance: { increment: buyerRefund } }
+            });
+        }
 
         // Seller receives net USDC
         await tx.user.update({
@@ -148,17 +169,7 @@ async function updatePosition(tx: any, userId: string, assetId: string, deltaSha
             });
         }
     } else {
-        // Sell logic: decrement shares, or handle shorting (omitted for simplicity in this version, following original AMM logic)
-        if (position) {
-            const newShares = position.shares.toNumber() - deltaShares;
-            if (newShares <= 0.000001 && newShares >= -0.000001) {
-                await tx.position.delete({ where: { userId_assetId: { userId, assetId } } });
-            } else {
-                await tx.position.update({
-                    where: { userId_assetId: { userId, assetId } },
-                    data: { shares: newShares }
-                });
-            }
-        }
+        // Sell logic: Shares were already locked/deducted at order creation. 
+        // No modification to Position needed during match.
     }
 }

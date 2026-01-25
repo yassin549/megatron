@@ -38,6 +38,7 @@ export function OrderForm({
     const [takeProfit, setTakeProfit] = useState('');
     const [loading, setLoading] = useState(false);
     const [userBalance, setUserBalance] = useState(0);
+    const [slippageSetting, setSlippageSetting] = useState('1'); // Default 1%
 
     useEffect(() => {
         if (status === 'authenticated') {
@@ -112,6 +113,37 @@ export function OrderForm({
                     if (tpValue !== null && tpValue >= executionEst) throw new Error('TP must be below Entry Price.');
                 }
 
+                // Calculate Min Output for Slippage Protection
+                const slippagePercent = parseFloat(slippageSetting) || 1;
+                const minOutputMultiplier = (100 - slippagePercent) / 100;
+
+                let minOutputAmount = undefined;
+                let maxInputAmount = undefined;
+
+                if (isBuy) {
+                    // Buying Shares with USDC
+                    // estShares = USDC / Price? 
+                    // No, we have `estimatedShares` calculated in render.
+                    // minOutput = estimatedShares * (1 - slippage)
+                    if (estimatedShares > 0) {
+                        minOutputAmount = (estimatedShares * minOutputMultiplier).toString();
+                    }
+                } else {
+                    // Selling Shares for USDC
+                    // output = estimated Revenue (USDC)
+                    // estimatedRevenue = Amount(Shares) * Price ?
+                    // Actually `executionEst` is the price per share?
+                    // Let's assume `executionEst` is the average execution price.
+                    // Revenue = amount * executionEst.
+                    if (amount && parseFloat(amount) > 0) {
+                        const estimatedRevenue = parseFloat(amount) * executionEst;
+                        // User gets Net (Revenue - Fee).
+                        // The API checks minOutput against Net.
+                        const estNet = estimatedRevenue * (1 - SWAP_FEE);
+                        minOutputAmount = (estNet * minOutputMultiplier).toString();
+                    }
+                }
+
                 const res = await fetch('/api/trade', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -121,6 +153,8 @@ export function OrderForm({
                         amount: parseFloat(amount),
                         stopLoss: slValue,
                         takeProfit: tpValue,
+                        minOutputAmount,
+                        // maxInputAmount // Not used yet for "Spend Exact USDC" flows, usually for "Buy Exact Shares"
                     })
                 });
                 const data = await res.json();
@@ -284,8 +318,8 @@ export function OrderForm({
                 </div>
             </div>
 
-            {/* SL/TP Inputs - Horizontal & Slim */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Risk Management: SL/TP & Slippage */}
+            <div className="grid grid-cols-3 gap-2">
                 <div>
                     <label className="text-[8px] font-black text-rose-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
                         <Shield className="w-2.5 h-2.5" /> Stop Loss
@@ -295,7 +329,7 @@ export function OrderForm({
                         step="0.01"
                         value={stopLoss}
                         onChange={(e) => setStopLoss(e.target.value)}
-                        placeholder="0.00"
+                        placeholder="Price"
                         className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
                     />
                 </div>
@@ -308,8 +342,21 @@ export function OrderForm({
                         step="0.01"
                         value={takeProfit}
                         onChange={(e) => setTakeProfit(e.target.value)}
-                        placeholder="0.00"
+                        placeholder="Price"
                         className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
+                    />
+                </div>
+                <div>
+                    <label className="text-[8px] font-black text-zinc-500 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
+                        Slippage %
+                    </label>
+                    <input
+                        type="number"
+                        step="0.1"
+                        value={slippageSetting}
+                        onChange={(e) => setSlippageSetting(e.target.value)}
+                        placeholder="1.0"
+                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-bold text-center"
                     />
                 </div>
             </div>

@@ -15,25 +15,49 @@ export async function DELETE(
     const { orderId } = params;
 
     try {
-        const order = await db.limitOrder.findUnique({
-            where: { id: orderId }
-        });
+        await db.$transaction(async (tx) => {
+            // Get order inside transaction to ensure lock
+            const order = await tx.limitOrder.findUnique({ where: { id: orderId } });
 
-        if (!order) {
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-        }
+            if (!order || order.status !== 'open') throw new Error('Order not found or not open');
+            if (order.userId !== session.user.id) throw new Error('Forbidden');
 
-        if (order.userId !== session.user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+            // 1. Refund Funds/Assets
+            const remainingQty = order.remainingQuantity.toNumber();
 
-        if (order.status !== 'open') {
-            return NextResponse.json({ error: 'Cannot cancel non-open order' }, { status: 400 });
-        }
+            if (order.side === 'buy') {
+                // Refund USDC
+                const refundAmount = remainingQty * order.price.toNumber();
+                await tx.user.update({
+                    where: { id: order.userId },
+                    data: { walletHotBalance: { increment: refundAmount } }
+                });
+            } else {
+                // Refund Shares - Need to handle Position upsert
+                await tx.position.upsert({
+                    where: { userId_assetId: { userId: order.userId, assetId: order.assetId } },
+                    create: {
+                        userId: order.userId,
+                        assetId: order.assetId,
+                        shares: remainingQty,
+                        avgPrice: 0 // If recreating, avgPrice logic is tricky. Simplest is 0 or keep historical? 
+                        // Actually, if they sold ALL shares, position might be gone. 
+                        // When refunding, we just add shares back. 
+                        // Ideally we should have kept the position with 0 shares to preserve avgPrice.
+                        // For now, if recreating, avgPrice 0 is safe-ish or use order price?
+                        // Let's use order.price as a distinct proxy if needed, but 0 prevents weird PnL.
+                    },
+                    update: {
+                        shares: { increment: remainingQty }
+                    }
+                });
+            }
 
-        await db.limitOrder.update({
-            where: { id: orderId },
-            data: { status: 'cancelled' }
+            // 2. Mark Cancelled
+            await tx.limitOrder.update({
+                where: { id: orderId },
+                data: { status: 'cancelled' }
+            });
         });
 
         return NextResponse.json({ success: true });

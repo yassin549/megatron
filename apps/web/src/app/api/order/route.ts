@@ -36,49 +36,63 @@ export async function POST(req: Request) {
     }
 
     try {
-        const result = await db.$transaction(async (tx) => {
-            // 1. Check if user has enough balance/shares to place order
-            if (side === 'buy') {
-                const user = await tx.user.findUnique({ where: { id: userId } });
-                const totalCost = priceNum * quantityNum;
-                if (!user || user.walletHotBalance.toNumber() < totalCost) {
-                    throw new Error('Insufficient balance to place buy order');
-                }
-                // Lock funds? (In this simple version, we check but don't explicitly 'lock' until match, 
-                // but real exchanges lock it. For MVP, we'll check it here.)
-            } else {
-                const position = await tx.position.findUnique({
-                    where: { userId_assetId: { userId, assetId } }
-                });
-                if (!position || position.shares.toNumber() < quantityNum) {
-                    throw new Error('Insufficient shares to place sell order');
-                }
+        // 1. Lock funds/assets immediately
+        if (side === 'buy') {
+            const totalCost = priceNum * quantityNum;
+
+            // Decrement wallet balance (Lock funds)
+            // Prisma will throw if balance goes negative due to db constraints, 
+            // but we check explicitly first for better error message.
+            const user = await tx.user.findUnique({ where: { id: userId } });
+            if (!user || user.walletHotBalance.toNumber() < totalCost) {
+                throw new Error('Insufficient balance to place buy order (funds are locked on order)');
             }
 
-            // 2. Create Order
-            const order = await tx.limitOrder.create({
-                data: {
-                    userId,
-                    assetId,
-                    side,
-                    price: priceNum,
-                    initialQuantity: quantityNum,
-                    remainingQuantity: quantityNum,
-                    status: 'open'
-                }
+            await tx.user.update({
+                where: { id: userId },
+                data: { walletHotBalance: { decrement: totalCost } }
             });
 
-            // 3. Trigger Matching Engine
-            await matchOrder(order.id, tx);
+        } else {
+            // Sell Side - Lock Shares
+            const position = await tx.position.findUnique({
+                where: { userId_assetId: { userId, assetId } }
+            });
 
-            return order;
+            if (!position || position.shares.toNumber() < quantityNum) {
+                throw new Error('Insufficient shares to place sell order (shares are locked on order)');
+            }
+
+            await tx.position.update({
+                where: { userId_assetId: { userId, assetId } },
+                data: { shares: { decrement: quantityNum } }
+            });
+        }
+
+        // 2. Create Order
+        const order = await tx.limitOrder.create({
+            data: {
+                userId,
+                assetId,
+                side,
+                price: priceNum,
+                initialQuantity: quantityNum,
+                remainingQuantity: quantityNum,
+                status: 'open'
+            }
         });
 
-        return NextResponse.json({ success: true, orderId: result.id });
-    } catch (error: any) {
-        console.error('Order placement failed:', error);
-        return NextResponse.json({ error: error.message || 'Order failed' }, { status: 500 });
-    }
+        // 3. Trigger Matching Engine
+        await matchOrder(order.id, tx);
+
+        return order;
+    });
+
+    return NextResponse.json({ success: true, orderId: result.id });
+} catch (error: any) {
+    console.error('Order placement failed:', error);
+    return NextResponse.json({ error: error.message || 'Order failed' }, { status: 500 });
+}
 }
 
 export async function GET(req: Request) {

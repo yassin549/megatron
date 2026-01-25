@@ -95,14 +95,30 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
     if (typeof context.deltaPercent === 'number') {
         fundamental = updateFundamental(fundamental, context.deltaPercent, DEFAULT_CONFIG.EMA_BETA);
 
-        // Calculate new P0 so marginalPrice(newP0, k, supply) matches the fundamental target
-        // linear marginalPrice = P0 + k * supply
-        // newP0 = fundamental - (k * supply)
-        let newP0 = fundamental - (k * supply);
-        if (newP0 < 0.01) newP0 = 0.01;
+        // Calculate TARGET P0 to match the new fundamental price
+        // linear marginalPrice = targetP0 + k * supply
+        // targetP0 = fundamental - (k * supply)
+        let targetP0 = fundamental - (k * supply);
+        if (targetP0 < 0.01) targetP0 = 0.01;
+
+        const currentP0 = P0;
+
+        // CIRCUIT BREAKER: Cap max change per tick to 5%
+        // This prevents massive jumps if the Oracle hallucinates or volume spikes weirdly.
+        const maxChange = currentP0 * 0.05;
+        if (Math.abs(targetP0 - currentP0) > maxChange) {
+            console.warn(`[PriceEngine] Circuit Breaker: Target P0 ${targetP0} exceeds max deviation from ${currentP0}. Capping.`);
+            if (targetP0 > currentP0) targetP0 = currentP0 + maxChange;
+            else targetP0 = currentP0 - maxChange;
+        }
+
+        // DAMPENING: Move P0 gradually towards target (Alpha 0.2)
+        // P0_new = P0_old * (1 - alpha) + Target * alpha
+        const alpha = 0.2;
+        const newP0 = currentP0 * (1 - alpha) + targetP0 * alpha;
 
         params.P0 = newP0;
-        console.log(`[PriceEngine] Shifting P0 to ${newP0.toFixed(4)} for asset ${assetId} (+${context.deltaPercent}%) to match target ${fundamental.toFixed(4)}`);
+        console.log(`[PriceEngine] Shifted P0 to ${newP0.toFixed(4)} (Target: ${targetP0.toFixed(4)}) for asset ${assetId} (+${context.deltaPercent}%)`);
     }
 
     // FIX #10: Use volume from context if available (for trade events)
