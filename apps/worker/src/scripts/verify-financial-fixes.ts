@@ -18,7 +18,7 @@ async function main() {
     const S = asset.totalSupply.toNumber();
 
     console.log(`Using User: ${user.id}`);
-    console.log(`Using Asset: ${asset.symbol} (P0: ${P0}, S: ${S})`);
+    console.log(`Using Asset: ${asset.name} (P0: ${P0}, S: ${S})`);
 
     // ====================================================
     // 1. TEST FUND LOCKING (Orderbook)
