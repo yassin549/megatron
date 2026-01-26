@@ -127,7 +127,7 @@ export async function initiateTransfer(subOrganizationId: string, walletId: stri
             timestampMs: String(Date.now()),
             parameters: {
                 type: "TRANSACTION_TYPE_ETHEREUM",
-                walletId: walletId,
+                signWith: walletId,
                 unsignedTransaction: unsignedTransaction
             }
         });
