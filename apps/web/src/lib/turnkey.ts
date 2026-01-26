@@ -48,8 +48,7 @@ export async function createSubOrganization(userId: string) {
                         }],
                         authenticators: [],
                         oauthProviders: [],
-                        authenticators: [],
-                        oauthProviders: []
+
                     }
                 ],
                 rootQuorumThreshold: 1,
