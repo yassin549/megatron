@@ -108,8 +108,8 @@ export async function createWallet(subOrganizationId: string, walletName: string
 export async function initiateTransfer(subOrganizationId: string, walletId: string, toAddress: string, amount: string) {
     try {
         // 1. Create Transaction Activity
-        const response = await turnkeyClient.createTransaction({
-            type: "ACTIVITY_TYPE_CREATE_TRANSACTION",
+        const response = await turnkeyClient.signTransaction({
+            type: "ACTIVITY_TYPE_SIGN_TRANSACTION",
             organizationId: subOrganizationId, // Act as the sub-org
             timestampMs: String(Date.now()),
             parameters: {
@@ -132,7 +132,7 @@ export async function initiateTransfer(subOrganizationId: string, walletId: stri
         // 2. Poll for Signature
         const activityId = response.activity?.id || (response as any).activityId;
         const completed = await pollActivity(activityId, subOrganizationId);
-        const result = completed.result?.createTransactionResult;
+        const result = completed.result?.signTransactionResult;
 
         // 3. Broadcast (Turnkey signs, we/they broadcast)
         // Usually Turnkey returns the signed payload, we broadcast via RPC.
