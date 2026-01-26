@@ -55,7 +55,7 @@ export async function createSubOrganization(userId: string) {
             },
         });
 
-        const activityId = response.activity?.id || response.activityId;
+        const activityId = response.activity?.id || (response as any).activityId;
         const completedActivity = await pollActivity(activityId, TURNKEY_CONFIG.organizationId);
 
         // Check result structure based on SDK version
@@ -88,7 +88,7 @@ export async function createWallet(subOrganizationId: string, walletName: string
             }
         });
 
-        const activityId = response.activity?.id || response.activityId;
+        const activityId = response.activity?.id || (response as any).activityId;
         const completed = await pollActivity(activityId, subOrganizationId);
         const result = completed.result?.createWalletResult;
 
@@ -130,7 +130,7 @@ export async function initiateTransfer(subOrganizationId: string, walletId: stri
         });
 
         // 2. Poll for Signature
-        const activityId = response.activity?.id || response.activityId;
+        const activityId = response.activity?.id || (response as any).activityId;
         const completed = await pollActivity(activityId, subOrganizationId);
         const result = completed.result?.createTransactionResult;
 
