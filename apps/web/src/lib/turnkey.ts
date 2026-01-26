@@ -109,7 +109,7 @@ export async function initiateTransfer(subOrganizationId: string, walletId: stri
     try {
         // 1. Create Transaction Activity
         const response = await turnkeyClient.signTransaction({
-            type: "ACTIVITY_TYPE_SIGN_TRANSACTION",
+            type: "ACTIVITY_TYPE_SIGN_TRANSACTION_V2",
             organizationId: subOrganizationId, // Act as the sub-org
             timestampMs: String(Date.now()),
             parameters: {
