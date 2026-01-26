@@ -96,8 +96,14 @@ const server = http.createServer((req, res) => {
     }
 });
 
-const port = process.env.PORT || 3001;
-server.listen(port, () => {
+const port = process.env.PORT || 10000;
+server.listen(port, async () => {
     console.log(`Health check server listening on port ${port}`);
-    startWorker().catch(console.error);
+    try {
+        await startWorker();
+    } catch (error) {
+        console.error('Worker startup failed, but keeping process alive:', error);
+        // Keep the health check server running even if worker fails
+        // This prevents deployment timeout and allows debugging
+    }
 });
