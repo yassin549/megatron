@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { TurnkeyClient } from "@turnkey/http";
 import { ApiKeyStamper } from "@turnkey/api-key-stamper";
+import { ethers } from "ethers";
 
 // Ensure environment variables are set
 const TURNKEY_API_PUBLIC_KEY = process.env.TURNKEY_API_PUBLIC_KEY;
@@ -107,6 +108,18 @@ export async function createWallet(subOrganizationId: string, walletName: string
 // Helper: Initiate a Transfer (Withdrawal)
 export async function initiateTransfer(subOrganizationId: string, walletId: string, toAddress: string, amount: string) {
     try {
+        // Serialize the transaction using ethers
+        const tx = new ethers.Transaction();
+        tx.to = toAddress;
+        tx.value = amount;
+        tx.chainId = 8453; // Base Mainnet (Example)
+        tx.data = "0x";
+        tx.nonce = 0; // Turnkey might handle or we need to fetch
+        tx.gasLimit = 21000;
+        tx.maxFeePerGas = 1000000000; // 1 Gwei
+        tx.maxPriorityFeePerGas = 1000000000;
+        const unsignedTransaction = tx.unsignedSerialized;
+
         // 1. Create Transaction Activity
         const response = await turnkeyClient.signTransaction({
             type: "ACTIVITY_TYPE_SIGN_TRANSACTION_V2",
@@ -115,17 +128,7 @@ export async function initiateTransfer(subOrganizationId: string, walletId: stri
             parameters: {
                 type: "TRANSACTION_TYPE_ETHEREUM",
                 walletId: walletId,
-                unsignedTransaction: {
-                    type: "TRANSACTION_TYPE_ETHEREUM",
-                    to: toAddress,
-                    value: amount, // Wei
-                    chainId: "8453", // Base Mainnet (Example) - Should be config
-                    data: "0x",
-                    nonce: "0", // Turnkey might handle or we need to fetch
-                    gasLimit: "21000",
-                    maxFeePerGas: "1000000000", // 1 Gwei
-                    maxPriorityFeePerGas: "1000000000"
-                }
+                unsignedTransaction: unsignedTransaction
             }
         });
 
