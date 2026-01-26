@@ -45,7 +45,11 @@ export async function createSubOrganization(userId: string) {
                             apiKeyName: "Megatron Admin Key",
                             publicKey: TURNKEY_API_PUBLIC_KEY!,
                             curveType: "API_KEY_CURVE_P256" // Required
-                        }]
+                        }],
+                        authenticators: [],
+                        oauthProviders: [],
+                        authenticators: [],
+                        oauthProviders: []
                     }
                 ],
                 rootQuorumThreshold: 1,

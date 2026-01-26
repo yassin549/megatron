@@ -4,6 +4,9 @@
     ".env"
   ],
   "globalPassThroughEnv": [
+    "TURNKEY_API_PUBLIC_KEY",
+    "TURNKEY_ORGANIZATION_ID",
+    "TURNKEY_API_PRIVATE_KEY",
     "NEON_DATABASE_URL",
     "UPSTASH_REST_URL",
     "UPSTASH_REST_TOKEN",
