@@ -72,11 +72,16 @@ export const authOptions: NextAuthOptions = {
                 });
 
                 if (!existingUser) {
+                    // Check if this is the first user (auto-admin)
+                    const userCount = await db.user.count();
+                    const isFirstUser = userCount === 0;
+
                     // Create new user from Google OAuth
                     const newUser = await db.user.create({
                         data: {
                             email: user.email,
                             passwordHash: '', // No password for OAuth users
+                            isAdmin: isFirstUser, // First user gets admin
                         },
                     });
                     user.id = newUser.id;
