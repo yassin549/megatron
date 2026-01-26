@@ -18,6 +18,8 @@ model User {
   walletColdBalance Decimal  @default(0) @db.Decimal(18, 6)
   depositAddress    String?  @unique
   addressIndex      Int?     @unique
+  turnkeySubOrgId   String?  // Turnkey Sub-Organization ID for this user
+  turnkeyWalletId   String?  // Turnkey Wallet ID within the Sub-Org
   isAdmin           Boolean  @default(false)
   isBlacklisted     Boolean  @default(false)
   createdAt         DateTime @default(now())

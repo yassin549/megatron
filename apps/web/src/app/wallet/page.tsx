@@ -113,13 +113,24 @@ export default function WalletPage() {
     const handleGenerateAddress = async () => {
         setIsGenerating(true);
         try {
-            const res = await fetch('/api/wallet/deposit');
+            // Updated to call the new Create Wallet endpoint
+            const res = await fetch('/api/wallet/create', { method: 'POST' });
             if (res.ok) {
                 const data = await res.json();
-                setWalletData(prev => ({ ...prev, depositAddress: data.address }));
+                setWalletData(prev => ({
+                    ...prev,
+                    depositAddress: data.address,
+                    // Optionally store walletId if we added it to state
+                }));
+                // Refund / Refresh data
+                fetchData();
+            } else {
+                const err = await res.json();
+                setMessage({ type: 'error', text: err.error || 'Failed to create wallet' });
             }
         } catch (err) {
             console.error(err);
+            setMessage({ type: 'error', text: 'Network error creating wallet' });
         } finally {
             setIsGenerating(false);
         }
@@ -274,7 +285,7 @@ export default function WalletPage() {
                                 disabled={isGenerating}
                                 className="w-full py-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
                             >
-                                {isGenerating ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Generate Deposit Address'}
+                                {isGenerating ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : 'Create Real Wallet & Address'}
                             </button>
                         ) : (
                             <>

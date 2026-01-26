@@ -1,0 +1,99 @@
+{
+  "id": "019bf40b-30f3-738a-8a15-417dd6e5eeaf",
+  "fingerprint": "sha256:a44d30378aab9b03978ead7cba92c15e21a56b2df05fb99c3580310e580a0329",
+  "appProofs": [],
+  "voteList": [
+    {
+      "id": "7a7461eb-1a5b-4f4f-86ff-4fa89384e1a8",
+      "userId": "066c3203-fe33-4ae1-bd81-7be6d39242c7",
+      "user": {
+        "userId": "066c3203-fe33-4ae1-bd81-7be6d39242c7",
+        "userName": "Root user",
+        "userEmail": "khoualdiyassin26@gmail.com",
+        "authenticators": [
+          {
+            "transports": [
+              "AUTHENTICATOR_TRANSPORT_INTERNAL"
+            ],
+            "attestationType": "packed",
+            "aaguid": "YCiwF7HUTAK0s6_Nr8lrsg",
+            "credentialId": "f7cxRd9wdRj85aTL2_cHsCG-wAbjL4au7zjHhg52NHU",
+            "model": "Windows Hello Software Authenticator",
+            "credential": {
+              "publicKey": "pAEDAzkBACBZAQDUxmSYkEQ5ojAe_OW2-mUBv1zh4rCXmvoQkF-w8WVV-J07ROXl0nUfXnobevxiHY0Ikla06-S_Hgm0SfWgiRyOF-I53zDMEpTqDekGV88lFfpTnfGfNBQQcK7UQgStRw_7mrp9p5TkraKX6LSYG4643NSSlWHaimfPPVKaAwRlQjKphEYJx8tSb9-YbZGClmJHswcg8eKTxeHFmGbvAzlo-liYvPB_QGw_7BWc68z3VEIYyQqJT7Jevd-6Gx7uArkYsc1s1VF3avyJgVNW8NRUCBLg1I4JEP3px3XgII1WD-L1L1dAdkN79BSM9xGp3yc1Q0dqI3BBJzbSxEIX5a7lIUMBAAE",
+              "type": "CREDENTIAL_TYPE_WEBAUTHN_AUTHENTICATOR"
+            },
+            "authenticatorId": "c6a2260b-6db2-43f4-aee3-505c0ea3679f",
+            "authenticatorName": "megatron",
+            "createdAt": {
+              "seconds": "1769325453",
+              "nanos": "0"
+            },
+            "updatedAt": {
+              "seconds": "1769325453",
+              "nanos": "0"
+            }
+          }
+        ],
+        "apiKeys": [],
+        "userTags": [],
+        "oauthProviders": [],
+        "createdAt": {
+          "seconds": "1769325453",
+          "nanos": "0"
+        },
+        "updatedAt": {
+          "seconds": "1769325453",
+          "nanos": "0"
+        }
+      },
+      "activityId": "019bf40b-30f3-738a-8a15-417dd6e5eeaf",
+      "selection": "VOTE_SELECTION_APPROVED",
+      "message": "authenticator_data=UaQZWk5Ei2x_le_x14Vpmw1G1lyl5F6SzJrtZ5b2ZS0FAAAAAw&client_data_json=eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiWVRRMFpETXdNemM0WVdGaU9XSXdNemszT0dWaFpEZGpZbUU1TW1NeE5XVXlNV0UxTm1JeVpHWXdOV1ppT1Rsak16VTRNRE14TUdVMU9EQmhNRE15T1EiLCJvcmlnaW4iOiJodHRwczovL2FwcC50dXJua2V5LmNvbSIsImNyb3NzT3JpZ2luIjpmYWxzZX0&post_body=eyJ0eXBlIjoiQUNUSVZJVFlfVFlQRV9DUkVBVEVfVVNFUlNfVjMiLCJ0aW1lc3RhbXBNcyI6IjE3NjkzMjU5MjI5NjMiLCJvcmdhbml6YXRpb25JZCI6IjQxYzIzYTVlLThjOGItNGY2Mi04YmM2LTZlZGQxY2Q2M2IxOSIsInBhcmFtZXRlcnMiOnsidXNlcnMiOlt7InVzZXJOYW1lIjoieWFjaW5lIiwidXNlclRhZ3MiOltdLCJhdXRoZW50aWNhdG9ycyI6W10sImFwaUtleXMiOlt7InB1YmxpY0tleSI6IjAyMTE3MmQ0ZTY0OGQ2OGJiYmI0YTQ1ZTE1ZWNkYmNmNGM2YzU2ZjcxMDQzZWEzMWMxMzI1ZGEwYWYyOGE0NzY4NyIsImFwaUtleU5hbWUiOiJtZWdhdHJvbiIsImN1cnZlVHlwZSI6IkFQSV9LRVlfQ1VSVkVfUDI1NiJ9XSwib2F1dGhQcm92aWRlcnMiOltdfV19fQ",
+      "publicKey": "pAEDAzkBACBZAQDUxmSYkEQ5ojAe_OW2-mUBv1zh4rCXmvoQkF-w8WVV-J07ROXl0nUfXnobevxiHY0Ikla06-S_Hgm0SfWgiRyOF-I53zDMEpTqDekGV88lFfpTnfGfNBQQcK7UQgStRw_7mrp9p5TkraKX6LSYG4643NSSlWHaimfPPVKaAwRlQjKphEYJx8tSb9-YbZGClmJHswcg8eKTxeHFmGbvAzlo-liYvPB_QGw_7BWc68z3VEIYyQqJT7Jevd-6Gx7uArkYsc1s1VF3avyJgVNW8NRUCBLg1I4JEP3px3XgII1WD-L1L1dAdkN79BSM9xGp3yc1Q0dqI3BBJzbSxEIX5a7lIUMBAAE",
+      "signature": "tQL_7TPhfznVLdYBl-S_WRuxufdT_npanZC-v3BF5pJ4meN7tnLofPjxIEZvILWDyM2BedNoLtO-m5W5f1kt6vt_B6CsO-Y8ut7zZq6KLRJMvXWR0u1LJ7979dP1jVY_knUVJD6Yhawe3pqtgDzMHbp4xXXbzrUzX5mOTHUGxAr8FR88yxB9SnuBuOUwqEr7cLeoWonx86efZD8Z6A5rvXMpXwYYu_r3pcnGwSDv9lIbHvQriJN1ereAoH80p5KqKQddzOKaUQ52dQZTYA_mKmld846NQtCB3_UN5eXlXcoyiUhhdny0uLkAFtxSwQu02DNJ9oSiCS2jZ80hJjk60g",
+      "scheme": "SIGNATURE_SCHEME_TK_WEBAUTHN",
+      "createdAt": {
+        "seconds": "1769325932",
+        "nanos": "0"
+      }
+    }
+  ],
+  "permission": {
+    "canApprove": false,
+    "canReject": true
+  },
+  "createdAt": {
+    "seconds": "1769325932",
+    "nanos": "0"
+  },
+  "updatedAt": {
+    "seconds": "1769325932",
+    "nanos": "0"
+  },
+  "status": "ACTIVITY_STATUS_COMPLETED",
+  "failure": null,
+  "type": "ACTIVITY_TYPE_CREATE_USERS_V3",
+  "intent": {
+    "users": [
+      {
+        "userName": "yacine",
+        "apiKeys": [
+          {
+            "apiKeyName": "megatron",
+            "publicKey": "021172d4e648d68bbbb4a45e15ecdbcf4c6c56f71043ea31c1325da0af28a47687",
+            "curveType": "API_KEY_CURVE_P256"
+          }
+        ],
+        "authenticators": [],
+        "oauthProviders": [],
+        "userTags": []
+      }
+    ]
+  },
+  "result": {
+    "userIds": [
+      "d5435993-d053-4bae-a764-00128201902d"
+    ]
+  }
+}
