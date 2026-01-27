@@ -21,6 +21,8 @@ import {
     Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRealtimeAsset } from '@/hooks/useRealtimeAsset';
+import { PressureGauge } from './PressureGauge';
 
 // Typewriter Effect Component
 
@@ -45,6 +47,7 @@ interface AssetCardProps {
     holders?: number;
     priceHistory?: number[];
     viewMode?: 'grid' | 'list';
+    pressure?: number;
 }
 
 const TYPE_ICONS: Record<string, any> = {
@@ -140,9 +143,11 @@ export function AssetCard({
     holders = 0,
     priceHistory,
     viewMode = 'grid',
-    aiConfidence
+    aiConfidence,
+    pressure: initialPressure = 50
 }: AssetCardProps) {
     const [imageError, setImageError] = useState(false);
+    const { price: livePrice, pressure: livePressure } = useRealtimeAsset(id, price, initialPressure);
     const isPositive = change24h >= 0;
     const Icon = TYPE_ICONS[type] || LayoutGrid;
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || false);
@@ -251,6 +256,11 @@ export function AssetCard({
                     )}
                 </AnimatePresence>
 
+                {/* Pressure Gauge - Top Right */}
+                <div className="absolute top-2 right-2 z-20 pointer-events-none">
+                    <PressureGauge value={livePressure} />
+                </div>
+
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
@@ -313,7 +323,7 @@ export function AssetCard({
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
                         <div className="text-lg font-bold text-white font-mono tracking-tight">
-                            ${price.toFixed(2)}
+                            ${livePrice.toFixed(2)}
                         </div>
                         <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>

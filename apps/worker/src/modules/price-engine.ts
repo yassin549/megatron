@@ -68,6 +68,25 @@ async function computeVolume5m(assetId: string, incrementalValue?: number): Prom
     return volume;
 }
 
+async function calculatePressure24h(assetId: string): Promise<number> {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const trades = await db.trade.findMany({
+        where: { assetId, timestamp: { gte: since } },
+        select: { price: true, quantity: true, side: true }
+    });
+
+    let buyVolume = 0;
+    let sellVolume = 0;
+    for (const t of trades) {
+        const vol = t.price.toNumber() * t.quantity.toNumber();
+        if (t.side === 'buy') buyVolume += vol;
+        else sellVolume += vol;
+    }
+
+    const total = buyVolume + sellVolume;
+    return total > 0 ? (buyVolume / total) * 100 : 50;
+}
+
 async function recomputePrice(assetId: string, context: PriceContext = {}): Promise<void> {
     const asset = await db.asset.findUnique({
         where: { id: assetId },
@@ -123,6 +142,7 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
 
     // FIX #10: Use volume from context if available (for trade events)
     const volume5m = await computeVolume5m(assetId, context.tradeVolume);
+    const pressure = await calculatePressure24h(assetId);
 
     const { displayPrice, marketWeight } = combinePrice(
         marketPrice,
@@ -170,6 +190,7 @@ async function recomputePrice(assetId: string, context: PriceContext = {}): Prom
             weightMarket: marketWeight,
             volume5m,
             supply,
+            pressure,
         });
     } catch (err) {
         console.error('Price Engine: failed to publish to Ably', err);

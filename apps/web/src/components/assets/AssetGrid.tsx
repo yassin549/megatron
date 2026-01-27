@@ -27,6 +27,7 @@ interface Asset {
     imageUrl?: string;
     holders?: number;
     isBookmarked?: boolean;
+    pressure?: number;
 }
 
 interface AssetGridProps {

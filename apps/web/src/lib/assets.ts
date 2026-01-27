@@ -15,13 +15,20 @@ export async function enrichAssets(assets: any[], userBookmarks: Set<string> = n
                 select: {
                     price: true,
                     quantity: true,
+                    side: true,
                 },
             });
 
-            let volume24h = 0;
+            let buyVolume = 0;
+            let sellVolume = 0;
             for (const t of trades) {
-                volume24h += Number(t.price) * Number(t.quantity);
+                const vol = Number(t.price) * Number(t.quantity);
+                if (t.side === 'buy') buyVolume += vol;
+                else sellVolume += vol;
             }
+
+            const volume24h = buyVolume + sellVolume;
+            const pressure = volume24h > 0 ? (buyVolume / volume24h) * 100 : 50;
 
             // Get Holders Count
             const holdersCount = await db.position.count({
@@ -95,6 +102,7 @@ export async function enrichAssets(assets: any[], userBookmarks: Set<string> = n
                 imageUrl: asset.imageUrl,
                 holders: holdersCount,
                 isBookmarked: userBookmarks.has(asset.id),
+                pressure: Math.round(pressure),
             };
         })
     );
