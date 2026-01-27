@@ -2,27 +2,11 @@ import { NextResponse } from 'next/server';
 import { db } from '@megatron/database';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isAdmin } from '@/lib/admin';
 
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return false;
-
-    const user = await db.user.findUnique({
-        where: { id: session.user.id },
-        select: { isAdmin: true }
-    });
-
-    return user?.isAdmin === true;
-}
-
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        // Basic check for admin - though the frontend should also be protected
-        if (!await isAdmin()) {
-            // If getServerSession fails, we might be using the simple localStorage admin session
-            // For now, let's allow it if we're in development or if a specific secret is provided
-            // But ideally, the admin should be logged in via NextAuth.
-            // Let's stick to the robust check for now.
+        if (!await isAdmin(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -41,7 +25,6 @@ export async function GET() {
             },
         });
 
-        // Format for frontend
         const formattedUsers = users.map(user => ({
             ...user,
             balance: Number(user.walletHotBalance) + Number(user.walletColdBalance),
@@ -57,7 +40,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
     try {
-        if (!await isAdmin()) {
+        if (!await isAdmin(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -73,7 +56,6 @@ export async function PUT(request: Request) {
             select: { id: true, isBlacklisted: true }
         });
 
-        // Log admin action
         const session = await getServerSession(authOptions);
         await db.adminAction.create({
             data: {

@@ -148,10 +148,14 @@ export function CreateAssetModal({ onClose, onSuccess, initialData }: CreateAsse
         try {
             const url = '/api/admin/assets';
             const method = initialData ? 'PUT' : 'POST';
+            const adminPassword = typeof window !== 'undefined' ? localStorage.getItem('megatron_admin_password') : null;
 
             const res = await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Password': adminPassword || ''
+                },
                 body: JSON.stringify(formData)
             });
 

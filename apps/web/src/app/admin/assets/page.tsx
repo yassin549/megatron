@@ -78,8 +78,12 @@ export default function AdminAssetsPage() {
             confirmText: 'Delete',
             onConfirm: async () => {
                 try {
+                    const adminPassword = localStorage.getItem('megatron_admin_password');
                     const res = await fetch(`/api/admin/assets?id=${id}`, {
                         method: 'DELETE',
+                        headers: {
+                            'X-Admin-Password': adminPassword || ''
+                        }
                     });
 
                     if (res.ok) {

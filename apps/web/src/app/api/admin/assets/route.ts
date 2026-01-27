@@ -1,23 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
-
-async function isAdmin() {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) return false;
-
-    const user = await db.user.findUnique({
-        where: { id: session.user.id },
-        select: { isAdmin: true }
-    });
-
-    return user?.isAdmin === true;
-}
+import { isAdmin } from '@/lib/admin';
 
 export async function POST(request: Request) {
     try {
-        if (!await isAdmin()) {
+        if (!await isAdmin(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -29,8 +16,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        // Create Asset + Pool + Initial Price logic could go here
-        // For simplicity, just creating Asset and Pool
         const finalQueries = Array.isArray(body.oracleQueries) && body.oracleQueries.length > 0
             ? body.oracleQueries
             : [
@@ -49,7 +34,7 @@ export async function POST(request: Request) {
                 imageUrl,
                 status: 'funding',
                 oracleQueries: finalQueries,
-                pricingParams: { P0: 18, k: 1e-10 }, // Extremely flat curve so traders have no influence
+                pricingParams: { P0: 18, k: 1e-10 },
                 lastDisplayPrice: 18,
                 lastMarketPrice: 18,
                 lastFundamental: 18,
@@ -72,7 +57,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     try {
-        if (!await isAdmin()) {
+        if (!await isAdmin(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -104,7 +89,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
     try {
-        if (!await isAdmin()) {
+        if (!await isAdmin(request)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -115,9 +100,6 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Missing id' }, { status: 400 });
         }
 
-        // We probably shouldn't fully delete if there are trades, but for now we can just mark as cancelled
-        // Or if it's very fresh, delete. Let's do a safe "mark as cancelled" logic if trades exist.
-
         const tradesCount = await db.trade.count({ where: { assetId: id } });
 
         if (tradesCount > 0) {
@@ -127,9 +109,7 @@ export async function DELETE(request: Request) {
             });
             return NextResponse.json({ success: true, message: 'Asset marked as cancelled (has trades)' });
         } else {
-            // Safe to fully delete relational data in transaction
             await db.$transaction(async (tx: any) => {
-                // Delete related records first to avoid foreign key constraints (bookmarks, etc)
                 await tx.bookmark.deleteMany({ where: { assetId: id } });
                 await tx.liquidityPool.delete({ where: { assetId: id } });
                 await tx.asset.delete({ where: { id } });
