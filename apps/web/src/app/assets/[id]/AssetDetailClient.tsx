@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRealtimeAssetData } from '@/hooks/useRealtimeAssetData';
 
 interface Asset {
     id: string;
@@ -73,6 +74,7 @@ export function AssetDetailClient({
     initialOracleLogs,
     initialPriceHistory
 }: AssetDetailClientProps) {
+    const { price: livePrice, pressure: livePressure, lastTick } = useRealtimeAssetData(initialAsset.id, initialAsset.price);
     const [asset, setAsset] = useState<Asset>(initialAsset);
     const [oracleLogs, setOracleLogs] = useState<OracleLog[]>(initialOracleLogs);
     const [priceHistory, setPriceHistory] = useState<PricePoint[]>(initialPriceHistory);
@@ -117,9 +119,28 @@ export function AssetDetailClient({
     }
 
     useEffect(() => {
-        const interval = setInterval(refreshData, 10000);
+        // Fallback polling (less frequent now)
+        const interval = setInterval(refreshData, 60000);
         return () => clearInterval(interval);
     }, [asset.id]);
+
+    // Update reactive state when lastTick arrives
+    useEffect(() => {
+        if (!lastTick) return;
+        setAsset(prev => ({
+            ...prev,
+            price: livePrice,
+            // Volume and change might need more data, but price is key
+        }));
+
+        // Append to price history for the chart
+        if (lastTick.priceDisplay) {
+            setPriceHistory(prev => [...prev, {
+                timestamp: lastTick.timestamp || new Date().toISOString(),
+                price: Number(lastTick.priceDisplay)
+            }]);
+        }
+    }, [lastTick, livePrice]);
 
     const { showNotification } = useNotification();
 
@@ -207,7 +228,7 @@ export function AssetDetailClient({
                             <div className="hidden md:flex items-center gap-8">
                                 <div className="flex flex-col items-end">
                                     <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
-                                    <span className="text-sm font-black text-white tabular-nums leading-none">${Number(asset.price || 0).toFixed(2)}</span>
+                                    <span className="text-sm font-black text-white tabular-nums leading-none">${Number(livePrice || 0).toFixed(2)}</span>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
@@ -231,7 +252,7 @@ export function AssetDetailClient({
                                         type={asset.type}
                                     />
                                     <div className="flex-1 min-h-0">
-                                        <OrderBook assetId={asset.id} assetPrice={asset.price} />
+                                        <OrderBook assetId={asset.id} assetPrice={livePrice} />
                                     </div>
                                 </div>
                             </div>
@@ -242,7 +263,7 @@ export function AssetDetailClient({
                                     <ErrorBoundary name="Market Chart">
                                         <AssetChart
                                             data={chartData}
-                                            marginalPrice={asset.price}
+                                            marginalPrice={livePrice}
                                             marketPrice={asset.marketPrice}
                                             watermarkText={asset.name.toUpperCase()}
                                             colors={useMemo(() => ({
@@ -280,7 +301,7 @@ export function AssetDetailClient({
                             <TradingSidebar
                                 assetId={asset.id}
                                 assetName={asset.name}
-                                assetPrice={asset.price}
+                                assetPrice={livePrice}
                                 marketPrice={asset.marketPrice}
                                 totalSupply={asset.totalSupply}
                                 pricingParams={asset.pricingParams}

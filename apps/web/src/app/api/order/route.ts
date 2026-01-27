@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
 import { matchOrder } from '@/lib/orderMatching';
+import { publishEvent as publishAblyEvent } from '@megatron/lib-integrations';
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
@@ -88,6 +89,12 @@ export async function POST(req: Request) {
 
             return order;
         });
+
+        // Notify orderbook update
+        publishAblyEvent(`assets:${assetId}`, 'orderbook_update', {
+            assetId,
+            timestamp: new Date().toISOString()
+        }).catch(console.error);
 
         return NextResponse.json({ success: true, orderId: result.id });
     } catch (error: any) {

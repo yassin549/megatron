@@ -21,7 +21,7 @@ import {
     Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRealtimeAsset } from '@/hooks/useRealtimeAsset';
+import { useRealtimeAssetData } from '@/hooks/useRealtimeAssetData';
 import { PressureGauge } from './PressureGauge';
 
 // Typewriter Effect Component
@@ -147,7 +147,7 @@ export function AssetCard({
     pressure: initialPressure = 50
 }: AssetCardProps) {
     const [imageError, setImageError] = useState(false);
-    const { price: livePrice, pressure: livePressure } = useRealtimeAsset(id, price, initialPressure);
+    const { price: livePrice, pressure: livePressure } = useRealtimeAssetData(id, price, initialPressure);
     const isPositive = change24h >= 0;
     const Icon = TYPE_ICONS[type] || LayoutGrid;
     const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked || false);

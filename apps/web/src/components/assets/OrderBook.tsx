@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRealtimeAssetData } from '@/hooks/useRealtimeAssetData';
 
 interface OrderBookEntry {
     price: number;
@@ -15,6 +16,7 @@ interface OrderBookProps {
 }
 
 export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
+    const { orderbookCounter } = useRealtimeAssetData(assetId, assetPrice);
     const [rawBids, setRawBids] = useState<any[]>([]);
     const [rawAsks, setRawAsks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,9 +39,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
     useEffect(() => {
         setLoading(true);
         fetchOrderBook();
-        const interval = setInterval(fetchOrderBook, 5000);
-        return () => clearInterval(interval);
-    }, [assetId]);
+    }, [assetId, orderbookCounter]);
 
     const { processedAsks, processedBids } = useMemo(() => {
         const priceNum = Number(assetPrice || 0);

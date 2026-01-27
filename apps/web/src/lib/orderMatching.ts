@@ -1,6 +1,7 @@
 import { db, Prisma } from '@megatron/database';
 import { Redis } from 'ioredis';
 import { TradeEvent, MONETARY_CONFIG } from '@megatron/lib-common';
+import { publishEvent as publishAblyEvent } from '@megatron/lib-integrations';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -124,6 +125,13 @@ export async function matchOrder(orderId: string, tx: any) {
             volume5m: 0
         };
         redis.publish('megatron:events', JSON.stringify(event)).catch(console.error);
+
+        // Also publish to Ably for the frontend
+        publishAblyEvent(`prices:${order.assetId}`, 'price_tick', {
+            assetId: order.assetId,
+            priceDisplay: executePrice,
+            timestamp: new Date().toISOString(),
+        }).catch(console.error);
     }
 
     // Final update for the original order
@@ -134,6 +142,12 @@ export async function matchOrder(orderId: string, tx: any) {
             status: remainingQty <= 0.000001 ? 'filled' : 'open'
         }
     });
+
+    // Notify orderbook update
+    publishAblyEvent(`assets:${order.assetId}`, 'orderbook_update', {
+        assetId: order.assetId,
+        timestamp: new Date().toISOString()
+    }).catch(console.error);
 }
 
 function netUsdc(amount: number) {
