@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
-import { NavMegaCard } from '@/components/layout/NavMegaCard';
+import { NavUnifiedWindow } from '@/components/layout/NavUnifiedWindow';
 import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History } from 'lucide-react';
 
 // Robust image component for search results
@@ -67,9 +67,11 @@ export function Navbar() {
 
     // UI state
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [isNotifOpen, setIsNotifOpen] = useState(false);
-    const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    // Unified Tab State
+    const [activeNavTab, setActiveNavTab] = useState<'general' | 'activity' | 'bookmarks' | null>(null);
+
     const [bookmarks, setBookmarks] = useState<any[]>([]);
     const [loadingBookmarks, setLoadingBookmarks] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -116,8 +118,7 @@ export function Navbar() {
     // Close menus on route change
     useEffect(() => {
         setIsProfileOpen(false);
-        setIsNotifOpen(false);
-        setIsBookmarksOpen(false);
+        setActiveNavTab(null);
         setIsMobileMenuOpen(false);
     }, [router]);
 
@@ -128,8 +129,7 @@ export function Navbar() {
             if (!target.closest('.nav-popover-trigger') &&
                 !target.closest('.nav-popover-content')) {
                 setIsProfileOpen(false);
-                setIsNotifOpen(false);
-                setIsBookmarksOpen(false);
+                setActiveNavTab(null);
             }
         };
         document.addEventListener('click', handleClickOutside);
@@ -215,134 +215,190 @@ export function Navbar() {
                         <>
                             <UserStats />
 
-                            {/* Bookmarks Popover */}
-                            <div className="relative">
-                                <button
-                                    className={`nav-popover-trigger p-2 rounded-lg transition-all duration-200 relative ${isBookmarksOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsBookmarksOpen(!isBookmarksOpen);
-                                        setIsNotifOpen(false);
-                                        setIsProfileOpen(false);
-                                    }}
-                                >
-                                    <Bookmark className="w-5 h-5" />
-                                </button>
 
-                                <NavMegaCard
-                                    isOpen={isBookmarksOpen}
-                                    onClose={() => setIsBookmarksOpen(false)}
-                                    title="Watchlist"
-                                    description="Saved Markets"
-                                    icon={Bookmark}
-                                    footer={
-                                        <Link
-                                            href="/bookmarks"
-                                            onClick={() => setIsBookmarksOpen(false)}
-                                            className="block w-full text-center py-2 text-xs font-bold text-primary hover:text-white transition-colors uppercase tracking-widest"
-                                        >
-                                            View all {bookmarks.length} Bookmarks
-                                        </Link>
-                                    }
+                            {/* Unified Desktop Nav Icons */}
+                            <div className="relative flex items-center gap-1">
+                                <NavUnifiedWindow
+                                    isOpen={!!activeNavTab}
+                                    activeTab={activeNavTab}
+                                    onClose={() => setActiveNavTab(null)}
                                 >
-                                    <div className="space-y-4">
-                                        {loadingBookmarks ? (
-                                            <div className="space-y-3">
-                                                {[1, 2, 3].map(i => (
-                                                    <div key={i} className="h-16 bg-white/5 rounded-2xl animate-pulse" />
-                                                ))}
-                                            </div>
-                                        ) : bookmarks.length > 0 ? (
-                                            <div className="grid gap-2">
-                                                {bookmarks.slice(0, 6).map((bm) => (
-                                                    <Link
-                                                        key={bm.id}
-                                                        href={`/assets/${bm.id}`}
-                                                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-white/5 flex items-center justify-center">
-                                                                <Star className="w-4 h-4 text-zinc-500 group-hover:text-primary transition-colors" />
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{bm.name}</p>
-                                                                <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">${bm.price.toFixed(2)}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <span className={`text-xs font-mono font-black ${bm.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
-                                                                {bm.change24h > 0 ? '+' : ''}{bm.change24h.toFixed(2)}%
-                                                            </span>
-                                                        </div>
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className="py-20 text-center flex flex-col items-center">
-                                                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                                                    <Bookmark className="w-6 h-6 text-zinc-600" />
+                                    {activeNavTab === 'general' && (
+                                        <div className="space-y-1">
+                                            <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                                <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                                                    <TrendingUp className="w-5 h-5 text-neon-purple opacity-70 group-hover:opacity-100" />
+                                                    Portfolio
                                                 </div>
-                                                <p className="text-sm text-zinc-500">No bookmarked markets</p>
-                                            </div>
-                                        )}
-                                    </div>
-                                </NavMegaCard>
-                            </div>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                            </Link>
+                                            <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                                <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                                                    <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
+                                                    Leaderboard
+                                                </div>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                            </Link>
 
-                            {/* Notifications Popover */}
-                            <div className="relative">
-                                <button
-                                    className={`nav-popover-trigger p-2 rounded-lg transition-all duration-200 relative ${isNotifOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsNotifOpen(!isNotifOpen);
-                                        setIsProfileOpen(false);
-                                        setIsBookmarksOpen(false);
-                                    }}
-                                >
-                                    <Activity className="w-5 h-5" />
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-neon-emerald rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></span>
-                                </button>
-
-                                <NavMegaCard
-                                    isOpen={isNotifOpen}
-                                    onClose={() => setIsNotifOpen(false)}
-                                    title="Activity"
-                                    description="Neural Updates"
-                                    icon={Activity}
-                                    footer={
-                                        <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-600 font-mono uppercase tracking-[0.2em]">
-                                            <span className="w-1 h-1 bg-emerald-500 rounded-full animate-pulse" />
-                                            Monitoring Live Oracle Events
-                                        </div>
-                                    }
-                                >
-                                    <div className="space-y-6">
-                                        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
-                                            <div className="flex items-start gap-4">
-                                                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                                                    <History className="w-5 h-5 text-primary" />
-                                                </div>
-                                                <div>
-                                                    <h4 className="text-sm font-bold text-white">System Status</h4>
-                                                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                                                        The Neural Engine is currently analyzing {assetCount ? assetCount.toLocaleString() : '2,400'} world variables in real-time.
-                                                    </p>
-                                                </div>
+                                            {/* System Stats in General Tab as well */}
+                                            <div className="mt-4 pt-4 border-t border-white/5">
+                                                <Link
+                                                    href="/api/auth/signout"
+                                                    className="flex items-center gap-3 w-full p-4 rounded-xl text-sm font-bold text-neon-rose hover:bg-neon-rose/10 transition-colors"
+                                                >
+                                                    <LogOut className="w-5 h-5" />
+                                                    SIGN OUT
+                                                </Link>
                                             </div>
                                         </div>
+                                    )}
 
+                                    {activeNavTab === 'bookmarks' && (
                                         <div className="space-y-4">
-                                            <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Recent events</h5>
-                                            <div className="py-12 text-center flex flex-col items-center">
-                                                <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center mb-3">
-                                                    <Activity className="w-5 h-5 text-zinc-800" />
+                                            {loadingBookmarks ? (
+                                                <div className="space-y-3">
+                                                    {[1, 2, 3].map(i => (
+                                                        <div key={i} className="h-16 bg-white/5 rounded-2xl animate-pulse" />
+                                                    ))}
                                                 </div>
-                                                <p className="text-[11px] text-zinc-600 uppercase tracking-wider">Passive mode active</p>
+                                            ) : bookmarks.length > 0 ? (
+                                                <div className="grid gap-2">
+                                                    {bookmarks.slice(0, 6).map((bm) => (
+                                                        <Link
+                                                            key={bm.id}
+                                                            href={`/assets/${bm.id}`}
+                                                            onClick={() => setActiveNavTab(null)}
+                                                            className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-white/5 flex items-center justify-center">
+                                                                    <Star className="w-4 h-4 text-zinc-500 group-hover:text-primary transition-colors" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{bm.name}</p>
+                                                                    <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">${bm.price.toFixed(2)}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right">
+                                                                <span className={`text-xs font-mono font-black ${bm.change24h >= 0 ? 'text-neon-emerald' : 'text-neon-rose'}`}>
+                                                                    {bm.change24h > 0 ? '+' : ''}{bm.change24h.toFixed(2)}%
+                                                                </span>
+                                                            </div>
+                                                        </Link>
+                                                    ))}
+                                                    <Link
+                                                        href="/bookmarks"
+                                                        onClick={() => setActiveNavTab(null)}
+                                                        className="block w-full text-center py-2 text-xs font-bold text-primary hover:text-white transition-colors uppercase tracking-widest mt-2"
+                                                    >
+                                                        View all {bookmarks.length} Bookmarks
+                                                    </Link>
+                                                </div>
+                                            ) : (
+                                                <div className="py-20 text-center flex flex-col items-center">
+                                                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                                        <Bookmark className="w-6 h-6 text-zinc-600" />
+                                                    </div>
+                                                    <p className="text-sm text-zinc-500">No bookmarked markets</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {activeNavTab === 'activity' && (
+                                        <div className="space-y-6">
+                                            <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20">
+                                                <div className="flex items-start gap-4">
+                                                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                        <History className="w-5 h-5 text-primary" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-white">System Status</h4>
+                                                        <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                                                            The Neural Engine is currently analyzing {assetCount ? assetCount.toLocaleString() : '2,400'} world variables in real-time.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-4">
+                                                <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest px-1">Recent events</h5>
+                                                <div className="py-12 text-center flex flex-col items-center">
+                                                    <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center mb-3">
+                                                        <Activity className="w-5 h-5 text-zinc-800" />
+                                                    </div>
+                                                    <p className="text-[11px] text-zinc-600 uppercase tracking-wider">Passive mode active</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </NavMegaCard>
+                                    )}
+                                </NavUnifiedWindow>
+
+                                <div className="flex items-center bg-obsidian-900/50 rounded-xl p-1 border border-white/5">
+                                    {/* General / Menu Tab */}
+                                    <button
+                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveNavTab(activeNavTab === 'general' ? null : 'general');
+                                            setIsProfileOpen(false);
+                                        }}
+                                    >
+                                        <LayoutGrid className="relative z-10 w-5 h-5" />
+                                        {activeNavTab === 'general' && (
+                                            <motion.div
+                                                layoutId="navbar-tab-indicator"
+                                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
+                                    </button>
+
+                                    <div className="w-px h-4 bg-white/5 mx-1" />
+
+                                    {/* Bookmarks Tab */}
+                                    <button
+                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'bookmarks' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveNavTab(activeNavTab === 'bookmarks' ? null : 'bookmarks');
+                                            setIsProfileOpen(false);
+                                        }}
+                                    >
+                                        <Bookmark className="relative z-10 w-5 h-5" />
+                                        {activeNavTab === 'bookmarks' && (
+                                            <motion.div
+                                                layoutId="navbar-tab-indicator"
+                                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
+                                    </button>
+
+                                    <div className="w-px h-4 bg-white/5 mx-1" />
+
+                                    {/* Activity Tab */}
+                                    <button
+                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'activity' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveNavTab(activeNavTab === 'activity' ? null : 'activity');
+                                            setIsProfileOpen(false);
+                                        }}
+                                    >
+                                        <Activity className="relative z-10 w-5 h-5" />
+                                        {/* Status Dot */}
+                                        <span className={`absolute top-2 right-2.5 w-1.5 h-1.5 bg-neon-emerald rounded-full transition-opacity duration-300 ${activeNavTab === 'activity' ? 'opacity-0' : 'opacity-100'} animate-pulse`} />
+
+                                        {activeNavTab === 'activity' && (
+                                            <motion.div
+                                                layoutId="navbar-tab-indicator"
+                                                className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Profile Popover */}
@@ -351,8 +407,7 @@ export function Navbar() {
                                     isOpen={isProfileOpen}
                                     onToggle={() => {
                                         setIsProfileOpen(!isProfileOpen);
-                                        setIsNotifOpen(false);
-                                        setIsBookmarksOpen(false);
+                                        setActiveNavTab(null);
                                     }}
                                 />
                             </div>
