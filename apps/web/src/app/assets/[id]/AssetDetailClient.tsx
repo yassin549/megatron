@@ -16,7 +16,6 @@ import {
 import { useNotification } from '@/context/NotificationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRealtimeAssetData } from '@/hooks/useRealtimeAssetData';
-import { AILiveTerminal } from '@/components/assets/AILiveTerminal';
 
 interface Asset {
     id: string;
@@ -251,6 +250,7 @@ export function AssetDetailClient({
                                         name={asset.name}
                                         imageUrl={asset.imageUrl}
                                         type={asset.type}
+                                        oracleLogs={oracleLogs}
                                     />
                                     <div className="flex-1 min-h-0">
                                         <OrderBook assetId={asset.id} assetPrice={livePrice} />
@@ -394,9 +394,6 @@ export function AssetDetailClient({
                     document.body
                 )}
             </div>
-
-            {/* AI Oracle Terminal - Fixed Bottom Right */}
-            <AILiveTerminal logs={oracleLogs} />
         </div>
     );
 }
