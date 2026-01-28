@@ -52,8 +52,8 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
 
     const userPrompt = `Analyze the following news articles and determine the impact on the asset price.\n\nContext:\n${context}\n\nReturn ONLY the JSON object, nothing else.`;
 
-    // Using Llama via HuggingFace Inference Providers (confirmed working)
-    const modelId = 'meta-llama/Llama-3.2-1B-Instruct';
+    // Using Mistral via HuggingFace Inference Providers (actively maintained)
+    const modelId = 'mistralai/Mistral-7B-Instruct-v0.3';
     console.log(`[HUGGINGFACE] Calling model: ${modelId}`);
 
     let response;
