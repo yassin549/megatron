@@ -337,9 +337,10 @@ export function Navbar() {
                                 <div className="flex items-center gap-2">
                                     {/* General / Menu Tab */}
                                     <button
-                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            e.nativeEvent.stopImmediatePropagation();
                                             setActiveNavTab(activeNavTab === 'general' ? null : 'general');
                                             setIsProfileOpen(false);
                                         }}
@@ -358,9 +359,10 @@ export function Navbar() {
 
                                     {/* Bookmarks Tab */}
                                     <button
-                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'bookmarks' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'bookmarks' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            e.nativeEvent.stopImmediatePropagation();
                                             setActiveNavTab(activeNavTab === 'bookmarks' ? null : 'bookmarks');
                                             setIsProfileOpen(false);
                                         }}
@@ -379,9 +381,10 @@ export function Navbar() {
 
                                     {/* Activity Tab */}
                                     <button
-                                        className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'activity' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                        className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'activity' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
                                         onClick={(e) => {
                                             e.stopPropagation();
+                                            e.nativeEvent.stopImmediatePropagation();
                                             setActiveNavTab(activeNavTab === 'activity' ? null : 'activity');
                                             setIsProfileOpen(false);
                                         }}
