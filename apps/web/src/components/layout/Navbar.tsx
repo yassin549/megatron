@@ -334,7 +334,7 @@ export function Navbar() {
                                     )}
                                 </NavUnifiedWindow>
 
-                                <div className="flex items-center bg-obsidian-900/50 rounded-xl p-1 border border-white/5">
+                                <div className="flex items-center gap-2">
                                     {/* General / Menu Tab */}
                                     <button
                                         className={`relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
@@ -354,7 +354,7 @@ export function Navbar() {
                                         )}
                                     </button>
 
-                                    <div className="w-px h-4 bg-white/5 mx-1" />
+
 
                                     {/* Bookmarks Tab */}
                                     <button
@@ -375,7 +375,7 @@ export function Navbar() {
                                         )}
                                     </button>
 
-                                    <div className="w-px h-4 bg-white/5 mx-1" />
+
 
                                     {/* Activity Tab */}
                                     <button
