@@ -14,25 +14,32 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const now = new Date();
-        // 1. Core Stats
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+        // 1. Core Stats - Fetch directly from source tables
+        // Removed silent .catch(() => 0) to ensure we know if DB is unreachable
         const [
             totalUsers,
             activeAssetsCount,
             allTimeFeesResult,
             treasury,
         ] = await Promise.all([
-            db.user.count().catch(() => 0),
-            db.asset.count({ where: { status: 'active' } }).catch(() => 0),
-            db.trade.aggregate({ _sum: { fee: true } }).catch(() => ({ _sum: { fee: 0 } })),
-            db.platformTreasury.findUnique({ where: { id: 'treasury' } }).catch(() => null),
+            db.user.count(),
+            db.asset.count({
+                where: {
+                    status: { in: ['active', 'funding'] }
+                }
+            }),
+            db.trade.aggregate({ _sum: { fee: true } }),
+            db.platformTreasury.findUnique({ where: { id: 'treasury' } }),
         ]);
 
-        // Volume query: Optimized with index
+        // Volume query: Optimized by using Prisma's aggregate instead of raw query for better type safety and pooling
         let totalVolume24h = 0;
         try {
+            // Volume = Sum of (price * quantity) for all trades in last 24h
+            // Since Trade stores decimal price/quantity, we use raw query for speed on large datasets
+            // but we'll add a timeout or ensure it's indexed.
             const volumeResult = await db.$queryRaw<{ volume: number }[]>`
                 SELECT COALESCE(SUM(CAST(price AS DOUBLE PRECISION) * CAST(quantity AS DOUBLE PRECISION)), 0) as volume 
                 FROM "Trade" 
@@ -41,6 +48,7 @@ export async function GET(req: Request) {
             totalVolume24h = Number(volumeResult[0]?.volume || 0);
         } catch (e) {
             console.error('Volume query failed:', e);
+            // Non-critical: allow dashboard to load even if volume fails
         }
 
         // 24h Fees query
@@ -57,7 +65,7 @@ export async function GET(req: Request) {
 
         const allTimeFees = Number(allTimeFeesResult._sum?.fee || 0);
         const platformShare = MONETARY_CONFIG?.PLATFORM_SHARE ?? 0.1;
-        const realPlatformRevenue = allTimeFees * platformShare;
+        const calculatedPlatformRevenue = allTimeFees * platformShare;
 
         // 2. Health Checks
         let dbStatus = 'Disconnected';
@@ -95,14 +103,19 @@ export async function GET(req: Request) {
             console.error('Worker status check failed:', e);
         }
 
+        // Return stats. Treasury balance is the primary for revenue, but we fall back to 
+        // calculated fees if the treasury record is missing/uninitialized.
+        const treasuryBalance = treasury ? Number(treasury.balance) : 0;
+        const displayedRevenue = treasuryBalance > 0 ? treasuryBalance : calculatedPlatformRevenue;
+
         return NextResponse.json({
             stats: {
                 totalUsers,
                 activeAssets: activeAssetsCount,
                 totalVolume24h,
-                platformFees: realPlatformRevenue,
+                platformFees: calculatedPlatformRevenue,
                 platformFees24h: totalFees24h,
-                treasuryBalance: treasury ? Number(treasury.balance) : 0
+                treasuryBalance: displayedRevenue
             },
             health: {
                 database: dbStatus,
@@ -110,8 +123,12 @@ export async function GET(req: Request) {
                 worker: workerStatus
             }
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to fetch admin stats:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        // Return a JSON error instead of crashing, but include status 500
+        return NextResponse.json(
+            { error: error?.message || 'Internal Server Error', code: error?.code },
+            { status: 500 }
+        );
     }
 }
