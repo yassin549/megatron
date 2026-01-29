@@ -5,7 +5,7 @@ import { X, TrendingUp, Users, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-type NavTab = 'general' | 'activity' | 'bookmarks';
+type NavTab = 'general' | 'activity' | 'bookmarks' | 'profile';
 
 interface NavUnifiedWindowProps {
     isOpen: boolean;
@@ -34,6 +34,7 @@ export function NavUnifiedWindow({
             case 'general': return 'Menu';
             case 'activity': return 'Activity';
             case 'bookmarks': return 'Watchlist';
+            case 'profile': return 'Identity';
             default: return '';
         }
     };
@@ -43,6 +44,7 @@ export function NavUnifiedWindow({
             case 'general': return 'Navigation';
             case 'activity': return 'Neural Updates';
             case 'bookmarks': return 'Saved Markets';
+            case 'profile': return 'Personal Settings';
             default: return '';
         }
     };
