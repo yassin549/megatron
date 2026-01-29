@@ -392,6 +392,69 @@ export function Navbar() {
                                     )}
                                 </NavUnifiedWindow>
 
+                                {/* General / Menu Tab */}
+                                <button
+                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.nativeEvent.stopImmediatePropagation();
+                                        setActiveNavTab(activeNavTab === 'general' ? null : 'general');
+                                    }}
+                                >
+                                    <Menu className="relative z-10 w-5 h-5" />
+                                    {activeNavTab === 'general' && (
+                                        <motion.div
+                                            layoutId="navbar-tab-indicator"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
+                                </button>
+
+                                {/* Bookmarks Tab */}
+                                <button
+                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'bookmarks' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.nativeEvent.stopImmediatePropagation();
+                                        setActiveNavTab(activeNavTab === 'bookmarks' ? null : 'bookmarks');
+                                    }}
+                                >
+                                    <Bookmark className="relative z-10 w-5 h-5" />
+                                    {activeNavTab === 'bookmarks' && (
+                                        <motion.div
+                                            layoutId="navbar-tab-indicator"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
+                                </button>
+
+                                {/* Activity Tab */}
+                                <button
+                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'activity' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        e.nativeEvent.stopImmediatePropagation();
+                                        setActiveNavTab(activeNavTab === 'activity' ? null : 'activity');
+                                    }}
+                                >
+                                    <Activity className="relative z-10 w-5 h-5" />
+                                    {/* Status Dot */}
+                                    <span className={`absolute top-2 right-2.5 w-1.5 h-1.5 bg-neon-emerald rounded-full transition-opacity duration-300 ${activeNavTab === 'activity' ? 'opacity-0' : 'opacity-100'} animate-pulse`} />
+
+                                    {activeNavTab === 'activity' && (
+                                        <motion.div
+                                            layoutId="navbar-tab-indicator"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                        />
+                                    )}
+                                </button>
+
+                                {/* Divider */}
+                                <div className="w-px h-6 bg-white/10 mx-1" />
+
                                 {/* Profile Tab */}
                                 <button
                                     className={`nav-popover-trigger relative p-0.5 rounded-full transition-all duration-300 group ${activeNavTab === 'profile'
@@ -418,73 +481,6 @@ export function Navbar() {
                                         <motion.div
                                             layoutId="navbar-tab-indicator"
                                             className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        />
-                                    )}
-                                </button>
-
-                                {/* Divider */}
-                                <div className="w-px h-6 bg-white/10 mx-1" />
-
-                                {/* General / Menu Tab */}
-                                <button
-                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'general' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.nativeEvent.stopImmediatePropagation();
-                                        setActiveNavTab(activeNavTab === 'general' ? null : 'general');
-                                    }}
-                                >
-                                    <Menu className="relative z-10 w-5 h-5" />
-                                    {activeNavTab === 'general' && (
-                                        <motion.div
-                                            layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        />
-                                    )}
-                                </button>
-
-
-
-                                {/* Bookmarks Tab */}
-                                <button
-                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'bookmarks' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.nativeEvent.stopImmediatePropagation();
-                                        setActiveNavTab(activeNavTab === 'bookmarks' ? null : 'bookmarks');
-                                    }}
-                                >
-                                    <Bookmark className="relative z-10 w-5 h-5" />
-                                    {activeNavTab === 'bookmarks' && (
-                                        <motion.div
-                                            layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
-                                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                        />
-                                    )}
-                                </button>
-
-
-
-                                {/* Activity Tab */}
-                                <button
-                                    className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${activeNavTab === 'activity' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        e.nativeEvent.stopImmediatePropagation();
-                                        setActiveNavTab(activeNavTab === 'activity' ? null : 'activity');
-                                    }}
-                                >
-                                    <Activity className="relative z-10 w-5 h-5" />
-                                    {/* Status Dot */}
-                                    <span className={`absolute top-2 right-2.5 w-1.5 h-1.5 bg-neon-emerald rounded-full transition-opacity duration-300 ${activeNavTab === 'activity' ? 'opacity-0' : 'opacity-100'} animate-pulse`} />
-
-                                    {activeNavTab === 'activity' && (
-                                        <motion.div
-                                            layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
