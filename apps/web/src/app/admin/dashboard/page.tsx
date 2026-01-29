@@ -26,6 +26,7 @@ export default function AdminDashboardPage() {
 
     const [stats, setStats] = useState<any>(null);
     const [health, setHealth] = useState<any>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const adminSession = localStorage.getItem('megatron_admin');
@@ -43,23 +44,31 @@ export default function AdminDashboardPage() {
 
     const fetchDashboardData = async () => {
         try {
+            setError(null);
             const password = localStorage.getItem('megatron_admin_password');
             const res = await fetch('/api/admin/stats', {
                 headers: {
                     'X-Admin-Password': password || ''
                 }
             });
+
             if (res.ok) {
                 const data = await res.json();
                 setStats(data.stats);
                 setHealth(data.health);
-            } else if (res.status === 401) {
-                localStorage.removeItem('megatron_admin');
-                localStorage.removeItem('megatron_admin_password');
-                router.push('/admin/login');
+            } else {
+                if (res.status === 401) {
+                    localStorage.removeItem('megatron_admin');
+                    localStorage.removeItem('megatron_admin_password');
+                    router.push('/admin/login');
+                } else {
+                    const data = await res.json().catch(() => ({}));
+                    setError(data.error || `Server Error (${res.status})`);
+                }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch dashboard data:', err);
+            setError(err.message || 'Connection failed');
         } finally {
             setLoading(false);
         }
@@ -84,17 +93,36 @@ export default function AdminDashboardPage() {
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 py-8">
+                {error && (
+                    <div className="mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">
+                        <div className="flex items-center gap-3 text-red-500">
+                            <Activity className="w-5 h-5" />
+                            <span className="font-medium">Failed to fetch live stats: {error}</span>
+                        </div>
+                        <button
+                            onClick={() => { setLoading(true); fetchDashboardData(); }}
+                            className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 text-red-500 text-xs font-bold rounded-lg transition-colors"
+                        >
+                            Retry
+                        </button>
+                    </div>
+                )}
+
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Total Users
                         </p>
-                        <p className="text-3xl font-bold mt-1">
-                            {stats?.totalUsers ?? '--'}
-                        </p>
+                        {loading && !stats ? (
+                            <div className="h-9 w-24 bg-white/5 animate-pulse rounded mt-1" />
+                        ) : (
+                            <p className="text-3xl font-bold mt-1">
+                                {stats?.totalUsers ?? '0'}
+                            </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            <span className={`w-1.5 h-1.5 rounded-full ${stats ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`} />
                             Live from database
                         </p>
                     </div>
@@ -102,9 +130,13 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Active Assets
                         </p>
-                        <p className="text-3xl font-bold mt-1">
-                            {stats?.activeAssets ?? '--'}
-                        </p>
+                        {loading && !stats ? (
+                            <div className="h-9 w-16 bg-white/5 animate-pulse rounded mt-1" />
+                        ) : (
+                            <p className="text-3xl font-bold mt-1">
+                                {stats?.activeAssets ?? '0'}
+                            </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                             Markets currently trading
                         </p>
@@ -113,9 +145,13 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Total Volume (24h)
                         </p>
-                        <p className="text-3xl font-bold mt-1 text-white">
-                            {stats?.totalVolume24h !== undefined ? `$${stats.totalVolume24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--'}
-                        </p>
+                        {loading && !stats ? (
+                            <div className="h-9 w-32 bg-white/5 animate-pulse rounded mt-1" />
+                        ) : (
+                            <p className="text-3xl font-bold mt-1 text-white">
+                                {stats?.totalVolume24h !== undefined ? `$${stats.totalVolume24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
+                            </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                             Global trade volume
                         </p>
@@ -124,9 +160,13 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Platform Revenue
                         </p>
-                        <p className="text-3xl font-bold mt-1 text-neon-emerald">
-                            {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '--'}
-                        </p>
+                        {loading && !stats ? (
+                            <div className="h-9 w-32 bg-white/5 animate-pulse rounded mt-1" />
+                        ) : (
+                            <p className="text-3xl font-bold mt-1 text-neon-emerald">
+                                {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
+                            </p>
+                        )}
                         <p className="text-xs text-muted-foreground mt-2">
                             Cumulative treasury balance
                         </p>

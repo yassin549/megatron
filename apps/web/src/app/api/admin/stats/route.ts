@@ -23,29 +23,46 @@ export async function GET(req: Request) {
             activeAssetsCount,
             allTimeFeesResult,
             treasury,
-            volume24hResult,
-            fees24hResult
         ] = await Promise.all([
-            db.user.count(),
-            db.asset.count({ where: { status: 'active' } }),
-            db.trade.aggregate({ _sum: { fee: true } }),
-            db.platformTreasury.findUnique({ where: { id: 'treasury' } }),
-            db.$queryRaw<{ volume: number }[]>`SELECT SUM(price * quantity) as volume FROM "Trade" WHERE timestamp >= ${oneDayAgo}`,
-            db.trade.aggregate({
-                where: { timestamp: { gte: oneDayAgo } },
-                _sum: { fee: true }
-            })
+            db.user.count().catch(() => 0),
+            db.asset.count({ where: { status: 'active' } }).catch(() => 0),
+            db.trade.aggregate({ _sum: { fee: true } }).catch(() => ({ _sum: { fee: 0 } })),
+            db.platformTreasury.findUnique({ where: { id: 'treasury' } }).catch(() => null),
         ]);
 
-        const totalVolume24h = volume24hResult[0]?.volume ? Number(volume24hResult[0].volume) : 0;
-        const totalFees24h = Number(fees24hResult._sum.fee || 0);
-        const allTimeFees = Number(allTimeFeesResult._sum.fee || 0);
-        const realPlatformRevenue = allTimeFees * MONETARY_CONFIG.PLATFORM_SHARE;
+        // Volume query can be complex, wrap it
+        let totalVolume24h = 0;
+        try {
+            const volumeResult = await db.$queryRaw<{ volume: number }[]>`
+                SELECT COALESCE(SUM(price * quantity), 0) as volume 
+                FROM "Trade" 
+                WHERE timestamp >= ${oneDayAgo}
+            `;
+            totalVolume24h = Number(volumeResult[0]?.volume || 0);
+        } catch (e) {
+            console.error('Volume query failed:', e);
+        }
+
+        // 24h Fees query
+        let totalFees24h = 0;
+        try {
+            const fees24h = await db.trade.aggregate({
+                where: { timestamp: { gte: oneDayAgo } },
+                _sum: { fee: true }
+            });
+            totalFees24h = Number(fees24h._sum.fee || 0);
+        } catch (e) {
+            console.error('Fees 24h query failed:', e);
+        }
+
+        const allTimeFees = Number((allTimeFeesResult as any)?._sum?.fee || 0);
+        const realPlatformRevenue = allTimeFees * (MONETARY_CONFIG?.PLATFORM_SHARE || 0.1);
 
         // 2. Health Checks
         let dbStatus = 'Disconnected';
         try {
-            await db.$queryRaw`SELECT 1`;
+            // Heartbeat check
+            await db.$executeRaw`SELECT 1`;
             dbStatus = 'Connected';
         } catch (e) {
             console.error('Database check failed:', e);
@@ -54,8 +71,10 @@ export async function GET(req: Request) {
         let redisStatus = 'Disconnected';
         try {
             const redis = getRedisClient();
-            const ping = await redis.ping();
-            if (ping === 'PONG') redisStatus = 'Connected';
+            if (redis) {
+                const ping = await redis.ping();
+                if (ping === 'PONG') redisStatus = 'Connected';
+            }
         } catch (e) {
             console.error('Redis check failed:', e);
         }
@@ -63,13 +82,13 @@ export async function GET(req: Request) {
         let workerStatus = 'Not running';
         try {
             const redis = getRedisClient();
-            const heartbeat = await redis.get('worker_heartbeat');
-            if (heartbeat) {
-                // Key expires in 60s, so existence means it's recent. 
-                // We double check the timestamp just in case.
-                const lastHeartbeat = parseInt(heartbeat);
-                if (Date.now() - lastHeartbeat < 90000) {
-                    workerStatus = 'Active';
+            if (redis) {
+                const heartbeat = await redis.get('worker_heartbeat');
+                if (heartbeat) {
+                    const lastHeartbeat = parseInt(heartbeat);
+                    if (Date.now() - lastHeartbeat < 90000) {
+                        workerStatus = 'Active';
+                    }
                 }
             }
         } catch (e) {
@@ -78,8 +97,8 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
             stats: {
-                totalUsers,
-                activeAssets: activeAssetsCount,
+                totalUsers: totalUsers || 0,
+                activeAssets: activeAssetsCount || 0,
                 totalVolume24h,
                 platformFees: realPlatformRevenue,
                 platformFees24h: totalFees24h,
