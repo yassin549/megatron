@@ -91,9 +91,10 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
             </div>
             <Link
                 href="/wallet"
-                className="px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 ml-2 border border-white/10"
+                className="btn-animated px-4 py-1.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20 ml-2 border border-white/10 flex items-center justify-center gap-2 group relative overflow-hidden"
             >
-                Wallet
+                <div className="btn-animated-overlay bg-white/20" />
+                <span className="relative z-10">Wallet</span>
             </Link>
         </div>
     );
