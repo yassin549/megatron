@@ -191,6 +191,7 @@ model Trade {
   buyer     User @relation(name: "BuyerTrades", fields: [buyerId], references: [id])
   
   @@index([assetId, timestamp])
+  @@index([timestamp])
   @@index([buyerId])
 }
 

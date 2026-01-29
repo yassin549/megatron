@@ -30,11 +30,11 @@ export async function GET(req: Request) {
             db.platformTreasury.findUnique({ where: { id: 'treasury' } }).catch(() => null),
         ]);
 
-        // Volume query can be complex, wrap it
+        // Volume query: Optimized with index
         let totalVolume24h = 0;
         try {
             const volumeResult = await db.$queryRaw<{ volume: number }[]>`
-                SELECT COALESCE(SUM(price * quantity), 0) as volume 
+                SELECT COALESCE(SUM(CAST(price AS DOUBLE PRECISION) * CAST(quantity AS DOUBLE PRECISION)), 0) as volume 
                 FROM "Trade" 
                 WHERE timestamp >= ${oneDayAgo}
             `;
@@ -55,14 +55,14 @@ export async function GET(req: Request) {
             console.error('Fees 24h query failed:', e);
         }
 
-        const allTimeFees = Number((allTimeFeesResult as any)?._sum?.fee || 0);
-        const realPlatformRevenue = allTimeFees * (MONETARY_CONFIG?.PLATFORM_SHARE || 0.1);
+        const allTimeFees = Number(allTimeFeesResult._sum?.fee || 0);
+        const platformShare = MONETARY_CONFIG?.PLATFORM_SHARE ?? 0.1;
+        const realPlatformRevenue = allTimeFees * platformShare;
 
         // 2. Health Checks
         let dbStatus = 'Disconnected';
         try {
-            // Heartbeat check
-            await db.$executeRaw`SELECT 1`;
+            await db.$queryRaw`SELECT 1`;
             dbStatus = 'Connected';
         } catch (e) {
             console.error('Database check failed:', e);
@@ -97,8 +97,8 @@ export async function GET(req: Request) {
 
         return NextResponse.json({
             stats: {
-                totalUsers: totalUsers || 0,
-                activeAssets: activeAssetsCount || 0,
+                totalUsers,
+                activeAssets: activeAssetsCount,
                 totalVolume24h,
                 platformFees: realPlatformRevenue,
                 platformFees24h: totalFees24h,
