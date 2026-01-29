@@ -8,19 +8,7 @@ import { ThemeCard } from '@/components/settings/ThemeCard';
 export default function SettingsPage() {
     return (
         <div className="min-h-screen pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-2 mb-12"
-            >
-                <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-2">
-                    Settings
-                </h1>
-                <p className="text-zinc-400 text-lg">
-                    Customize your Megatron experience.
-                </p>
-            </motion.div>
+
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Theme Customization - Large Card */}
