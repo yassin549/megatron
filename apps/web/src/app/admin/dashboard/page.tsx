@@ -128,17 +128,17 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                            Active Assets
+                            Assets
                         </p>
                         {loading && !stats ? (
                             <div className="h-9 w-16 bg-white/5 animate-pulse rounded mt-1" />
                         ) : (
                             <p className="text-3xl font-bold mt-1">
-                                {stats?.activeAssets ?? '0'}
+                                {stats?.activeAssets ?? '0'} <span className="text-sm font-normal text-muted-foreground">/ {stats?.totalAssets ?? '0'}</span>
                             </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
-                            Markets currently trading
+                            {stats?.activeAssets ?? '0'} active markets out of {stats?.totalAssets ?? '0'} total
                         </p>
                     </div>
                     <div className="bg-card border border-border rounded-xl p-6 hover:border-primary/50 transition-colors group">
@@ -167,9 +167,14 @@ export default function AdminDashboardPage() {
                                 {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
                             </p>
                         )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                            Cumulative treasury balance
-                        </p>
+                        <div className="flex justify-between items-center mt-2 group-hover:text-primary transition-colors">
+                            <p className="text-xs text-muted-foreground">
+                                Total Fees Generated:
+                            </p>
+                            <p className="text-xs font-bold">
+                                {stats?.allTimeFees !== undefined ? `$${stats.allTimeFees.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
+                            </p>
+                        </div>
                     </div>
                 </div>
 

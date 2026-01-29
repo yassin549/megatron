@@ -43,7 +43,12 @@ export default function AdminUsersPage() {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const res = await fetch('/api/admin/users');
+            const password = localStorage.getItem('megatron_admin_password');
+            const res = await fetch('/api/admin/users', {
+                headers: {
+                    'X-Admin-Password': password || ''
+                }
+            });
             if (!res.ok) {
                 if (res.status === 401) {
                     setError('Unauthorized. Please ensure you are logged in as an admin.');
@@ -67,9 +72,13 @@ export default function AdminUsersPage() {
         setBroadcastStatus(null);
 
         try {
+            const password = localStorage.getItem('megatron_admin_password');
             const res = await fetch('/api/admin/broadcast', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Password': password || ''
+                },
                 body: JSON.stringify({
                     subject: broadcastSubject,
                     content: broadcastContent,
@@ -110,9 +119,13 @@ export default function AdminUsersPage() {
             confirmText: action.charAt(0).toUpperCase() + action.slice(1),
             onConfirm: async () => {
                 try {
+                    const password = localStorage.getItem('megatron_admin_password');
                     const res = await fetch('/api/admin/users', {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Admin-Password': password || ''
+                        },
                         body: JSON.stringify({ userId, isBlacklisted: !currentStatus }),
                     });
 

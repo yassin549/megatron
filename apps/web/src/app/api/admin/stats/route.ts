@@ -17,10 +17,10 @@ export async function GET(req: Request) {
         const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         // 1. Core Stats - Fetch directly from source tables
-        // Removed silent .catch(() => 0) to ensure we know if DB is unreachable
         const [
             totalUsers,
             activeAssetsCount,
+            totalAssetsCount,
             allTimeFeesResult,
             treasury,
         ] = await Promise.all([
@@ -30,6 +30,7 @@ export async function GET(req: Request) {
                     status: { in: ['active', 'funding'] }
                 }
             }),
+            db.asset.count(),
             db.trade.aggregate({ _sum: { fee: true } }),
             db.platformTreasury.findUnique({ where: { id: 'treasury' } }),
         ]);
@@ -38,8 +39,6 @@ export async function GET(req: Request) {
         let totalVolume24h = 0;
         try {
             // Volume = Sum of (price * quantity) for all trades in last 24h
-            // Since Trade stores decimal price/quantity, we use raw query for speed on large datasets
-            // but we'll add a timeout or ensure it's indexed.
             const volumeResult = await db.$queryRaw<{ volume: number }[]>`
                 SELECT COALESCE(SUM(CAST(price AS DOUBLE PRECISION) * CAST(quantity AS DOUBLE PRECISION)), 0) as volume 
                 FROM "Trade" 
@@ -112,8 +111,10 @@ export async function GET(req: Request) {
             stats: {
                 totalUsers,
                 activeAssets: activeAssetsCount,
+                totalAssets: totalAssetsCount,
                 totalVolume24h,
                 platformFees: calculatedPlatformRevenue,
+                allTimeFees: allTimeFees,
                 platformFees24h: totalFees24h,
                 treasuryBalance: displayedRevenue
             },
@@ -125,7 +126,6 @@ export async function GET(req: Request) {
         });
     } catch (error: any) {
         console.error('Failed to fetch admin stats:', error);
-        // Return a JSON error instead of crashing, but include status 500
         return NextResponse.json(
             { error: error?.message || 'Internal Server Error', code: error?.code },
             { status: 500 }
