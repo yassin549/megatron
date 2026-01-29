@@ -52,9 +52,10 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
 
     const userPrompt = `Analyze the following news articles and determine the impact on the asset price.\n\nContext:\n${context}\n\nReturn ONLY the JSON object, nothing else.`;
 
-    // Using Qwen via HuggingFace Inference Providers (confirmed available)
-    // :fastest suffix enables automatic provider selection for best throughput
-    const modelId = 'Qwen/Qwen2.5-72B-Instruct:fastest';
+    // Using Qwen via HuggingFace Inference Providers
+    // Smaller model (7B) is highly likely to be available and free
+    // Can be overridden via HUGGINGFACE_MODEL env var
+    const modelId = process.env.HUGGINGFACE_MODEL || 'Qwen/Qwen2.5-7B-Instruct';
     console.log(`[HUGGINGFACE] Calling model: ${modelId}`);
 
     let response;
@@ -92,7 +93,8 @@ export async function analyzeLLM(searchResults: SearchResult[]): Promise<LLMOutp
     }
 
     if (!response.ok) {
-        if (response.status === 410 || response.status === 404 || response.status === 503) {
+        // Handle 400 (Bad Request), 402 (Payment), 429 (Rate Limit), etc.
+        if (response.status >= 400) {
             console.info(`[HUGGINGFACE] API transition detected (${response.status}), engaging Simulation Engine.`);
 
             // Richer narrative generation based on user request for professional depth
