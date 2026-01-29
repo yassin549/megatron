@@ -91,13 +91,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         applyTheme(newTheme);
     };
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
-
     return (
         <ThemeContext.Provider value={{ theme, setTheme, activeColors: THEMES[theme] }}>
-            {children}
+            {/* Prevent hydration mismatch for components using theme directly, but provide context always */}
+            {mounted ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
         </ThemeContext.Provider>
     );
 }
