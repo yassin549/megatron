@@ -12,71 +12,55 @@ interface PressureGaugeProps {
 
 export function PressureGauge({ value }: PressureGaugeProps) {
     // Map value (0-100) to rotation (-90deg to 90deg)
-    // Red side is -90deg, Green side is 90deg.
     const rotation = (value / 100) * 180 - 90;
 
     return (
-        <div className="relative w-14 h-9 flex flex-col items-center justify-end overflow-hidden group/gauge">
-            {/* Gauge Label Overlay (Shown on hover) */}
-            <div className="absolute top-0 inset-x-0 flex justify-between px-1.5 opacity-0 group-hover/gauge:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <span className="text-[5px] font-black text-rose-500 uppercase tracking-tighter">Sell</span>
-                <span className="text-[5px] font-black text-emerald-500 uppercase tracking-tighter">Buy</span>
-            </div>
-
-            {/* Gauge Background Arc */}
-            <svg viewBox="0 0 100 55" className="w-full h-full drop-shadow-[0_0_3px_rgba(0,0,0,0.5)]">
+        <div className="relative w-10 h-6 flex items-center justify-center overflow-hidden group/gauge">
+            {/* Simple Background Arc */}
+            <svg viewBox="0 0 100 60" className="w-full h-full">
                 <defs>
                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#F43F5E" /> {/* Rose/Red */}
-                        <stop offset="50%" stopColor="#EAB308" /> {/* Yellow/Neutral */}
-                        <stop offset="100%" stopColor="#10B981" /> {/* Emerald/Green */}
+                        <stop offset="0%" stopColor="#F43F5E" /> {/* Rose */}
+                        <stop offset="50%" stopColor="#EAB308" /> {/* Yellow */}
+                        <stop offset="100%" stopColor="#10B981" /> {/* Emerald */}
                     </linearGradient>
                 </defs>
 
-                {/* Background Shadow/Track */}
+                {/* Main Track */}
                 <path
-                    d="M 15,50 A 35,35 0 0 1 85,50"
-                    fill="none"
-                    stroke="#ffffff05"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                />
-
-                {/* Colored Gradient Track */}
-                <path
-                    d="M 15,50 A 35,35 0 0 1 85,50"
+                    d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
                     stroke="url(#gaugeGradient)"
-                    strokeWidth="8"
+                    strokeWidth="6"
                     strokeLinecap="round"
-                    className="opacity-40"
+                    className="opacity-25"
+                />
+
+                {/* Subtle Glow Track */}
+                <path
+                    d="M 20,50 A 30,30 0 0 1 80,50"
+                    fill="none"
+                    stroke="url(#gaugeGradient)"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    className="opacity-60 blur-[1px]"
                 />
             </svg>
 
-            {/* Needle Container */}
+            {/* Needle */}
             <div className="absolute inset-0 flex items-center justify-center">
                 <motion.div
                     className="relative w-full h-full flex justify-center"
                     animate={{ rotate: rotation }}
                     transition={{
                         type: 'spring',
-                        stiffness: 40,
-                        damping: 12,
-                        mass: 0.5
+                        stiffness: 60,
+                        damping: 15,
+                        mass: 0.8
                     }}
                 >
-                    {/* The Needle Pin */}
-                    <div className="absolute bottom-[2px] w-[1.5px] h-[22px] bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.4)] origin-bottom" />
+                    <div className="absolute bottom-[2px] w-[1px] h-[16px] bg-white rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] origin-bottom" />
                 </motion.div>
-            </div>
-
-            {/* Center Pivot Point */}
-            <div className="absolute bottom-[-1px] w-2 h-2 rounded-full bg-white shadow-xl z-10 border border-black/20" />
-
-            {/* Base indicators */}
-            <div className="absolute bottom-0 w-full flex justify-between px-2 text-[6px] font-black text-zinc-700 select-none pb-0.5">
-                <span>-</span>
-                <span>+</span>
             </div>
         </div>
     );
