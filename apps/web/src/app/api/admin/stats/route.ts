@@ -8,6 +8,14 @@ import { MONETARY_CONFIG } from '@megatron/lib-common';
 import { isAdmin } from '@/lib/admin';
 export const dynamic = 'force-dynamic';
 
+// Helper for timing out async operations
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+    const timeoutPromise = new Promise<T>((resolve) => {
+        setTimeout(() => resolve(fallback), timeoutMs);
+    });
+    return Promise.race([promise, timeoutPromise]);
+}
+
 export async function GET(req: Request) {
     try {
         if (!await isAdmin(req)) {
@@ -68,38 +76,52 @@ export async function GET(req: Request) {
         const platformShare = MONETARY_CONFIG?.PLATFORM_SHARE ?? 0.1;
         const calculatedPlatformRevenue = allTimeFees * platformShare;
 
-        // 2. Health Checks
+        // 2. Health Checks with 2s timeout each
         let dbStatus = 'Disconnected';
         try {
-            await db.$queryRaw`SELECT 1`;
-            dbStatus = 'Connected';
+            dbStatus = await withTimeout(
+                db.$queryRaw`SELECT 1`.then(() => 'Connected'),
+                2000,
+                'Timeout'
+            );
         } catch (e) {
             console.error('Database check failed:', e);
         }
 
         let redisStatus = 'Disconnected';
         try {
-            const redis = getRedisClient();
-            if (redis) {
-                const ping = await redis.ping();
-                if (ping === 'PONG') redisStatus = 'Connected';
-            }
+            redisStatus = await withTimeout(
+                (async () => {
+                    const redis = getRedisClient();
+                    if (!redis) return 'No Client';
+                    const ping = await redis.ping();
+                    return ping === 'PONG' ? 'Connected' : 'Error';
+                })(),
+                2000,
+                'Timeout'
+            );
         } catch (e) {
             console.error('Redis check failed:', e);
         }
 
         let workerStatus = 'Not running';
         try {
-            const redis = getRedisClient();
-            if (redis) {
-                const heartbeat = await redis.get('worker_heartbeat');
-                if (heartbeat) {
-                    const lastHeartbeat = parseInt(heartbeat);
-                    if (Date.now() - lastHeartbeat < 90000) {
-                        workerStatus = 'Active';
+            workerStatus = await withTimeout(
+                (async () => {
+                    const redis = getRedisClient();
+                    if (!redis) return 'No Client';
+                    const heartbeat = await redis.get('worker_heartbeat');
+                    if (heartbeat) {
+                        const lastHeartbeat = parseInt(heartbeat);
+                        if (Date.now() - lastHeartbeat < 90000) {
+                            return 'Active';
+                        }
                     }
-                }
-            }
+                    return 'Not running';
+                })(),
+                2000,
+                'Timeout'
+            );
         } catch (e) {
             console.error('Worker status check failed:', e);
         }

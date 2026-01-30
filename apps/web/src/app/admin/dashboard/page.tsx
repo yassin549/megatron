@@ -114,11 +114,11 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Total Users
                         </p>
-                        {loading && !stats ? (
+                        {loading ? (
                             <div className="h-9 w-24 bg-white/5 animate-pulse rounded mt-1" />
                         ) : (
                             <p className="text-3xl font-bold mt-1">
-                                {stats?.totalUsers ?? '0'}
+                                {stats?.totalUsers ?? '-'}
                             </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
@@ -130,11 +130,11 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-muted-foreground group-hover:text-primary transition-colors">
                             Assets
                         </p>
-                        {loading && !stats ? (
+                        {loading ? (
                             <div className="h-9 w-16 bg-white/5 animate-pulse rounded mt-1" />
                         ) : (
                             <p className="text-3xl font-bold mt-1">
-                                {stats?.activeAssets ?? '0'} <span className="text-sm font-normal text-muted-foreground">/ {stats?.totalAssets ?? '0'}</span>
+                                {stats?.activeAssets ?? '-'} <span className="text-sm font-normal text-muted-foreground">/ {stats?.totalAssets ?? '-'}</span>
                             </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
@@ -145,11 +145,11 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Total Volume (24h)
                         </p>
-                        {loading && !stats ? (
+                        {loading ? (
                             <div className="h-9 w-32 bg-white/5 animate-pulse rounded mt-1" />
                         ) : (
                             <p className="text-3xl font-bold mt-1 text-white">
-                                {stats?.totalVolume24h !== undefined ? `$${stats.totalVolume24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
+                                {stats?.totalVolume24h !== undefined ? `$${stats.totalVolume24h.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                             </p>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
@@ -160,11 +160,11 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-zinc-500 font-mono uppercase tracking-widest group-hover:text-primary transition-colors">
                             Platform Revenue
                         </p>
-                        {loading && !stats ? (
+                        {loading ? (
                             <div className="h-9 w-32 bg-white/5 animate-pulse rounded mt-1" />
                         ) : (
                             <p className="text-3xl font-bold mt-1 text-neon-emerald">
-                                {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '$0.00'}
+                                {stats?.treasuryBalance !== undefined ? `$${stats.treasuryBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                             </p>
                         )}
                         <div className="flex justify-between items-center mt-2 group-hover:text-primary transition-colors">
