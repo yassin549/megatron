@@ -226,11 +226,11 @@ export function AssetCard({
                                             src={imageUrl}
                                             alt={name}
                                             fill
-                                            className="object-cover scale-[1.5] blur-[4px] opacity-100 transition-transform duration-700 group-hover:scale-[1.6]"
+                                            className="object-cover blur-[2px] opacity-100 transition-transform duration-700 group-hover:scale-[1.1]"
                                             onError={() => setImageError(true)}
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
-                                        <div className="absolute inset-0 bg-black/30" />
+                                        <div className="absolute inset-0 bg-black/60" />
                                     </div>
                                 ) : imageUrl && imageError ? (
                                     <div className="absolute inset-0">
@@ -238,9 +238,9 @@ export function AssetCard({
                                         <img
                                             src={imageUrl}
                                             alt={name}
-                                            className="absolute inset-0 w-full h-full object-cover scale-[1.5] blur-[4px] opacity-100 transition-transform duration-700 group-hover:scale-[1.6]"
+                                            className="absolute inset-0 w-full h-full object-cover blur-[2px] opacity-100 transition-transform duration-700 group-hover:scale-[1.1]"
                                         />
-                                        <div className="absolute inset-0 bg-black/30" />
+                                        <div className="absolute inset-0 bg-black/60" />
                                     </div>
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center bg-obsidian-900/60 transition-colors duration-500 group-hover:bg-obsidian-900/40">
