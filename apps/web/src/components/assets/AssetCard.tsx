@@ -227,17 +227,16 @@ export function AssetCard({
                                         <img
                                             src={imageUrl}
                                             alt={name}
-                                            className="absolute inset-0 w-full h-full object-cover scale-[1.5] blur-[4px] opacity-90 transition-transform duration-700 group-hover:scale-[1.6]"
+                                            className="absolute inset-0 w-full h-full object-cover scale-[1.5] blur-[4px] opacity-100 transition-transform duration-700 group-hover:scale-[1.6]"
                                             onError={() => setImageError(true)}
                                         />
+                                        <div className="absolute inset-0 bg-black/30" />
                                     </>
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-30 bg-black/20">
-                                        <Icon className="w-40 h-40 text-white/50 blur-[2px]" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-obsidian-900/60 transition-colors duration-500 group-hover:bg-obsidian-900/40">
+                                        <Icon className="w-48 h-48 text-primary opacity-10 blur-[1px] transition-all duration-500 group-hover:opacity-20 group-hover:scale-110" />
                                     </div>
                                 )}
-                                {/* Integrated Darken Overlay - Simple Alpha Layer */}
-                                <div className="absolute inset-0 bg-black/40" />
                             </div>
 
                             <div className="relative z-10 w-full">
