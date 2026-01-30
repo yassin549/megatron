@@ -221,15 +221,15 @@ export function AssetCard({
                             {/* Blurred Image Background */}
                             {imageUrl && !imageError ? (
                                 <>
-                                    <div className="absolute inset-0 z-0">
+                                    <div className="absolute inset-0 z-0 pointer-events-none">
                                         <Image
                                             src={imageUrl}
                                             alt={name}
                                             fill
-                                            className="object-cover scale-110 blur-xl opacity-60"
+                                            className="object-cover scale-110 blur-md opacity-80"
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
-                                        <div className="absolute inset-0 bg-obsidian-900/60 backdrop-blur-sm" />
+                                        <div className="absolute inset-0 bg-black/50" />
                                     </div>
                                 </>
                             ) : (
