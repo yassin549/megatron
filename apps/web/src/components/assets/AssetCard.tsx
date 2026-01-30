@@ -218,7 +218,7 @@ export function AssetCard({
                             transition={{ duration: 0.3 }}
                             className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-md overflow-hidden"
                         >
-                            {/* Blurred Image Background */}
+                            {/* Blurred Image Background (Frosted Glass Look) */}
                             {imageUrl && !imageError ? (
                                 <>
                                     <div className="absolute inset-0 z-0 pointer-events-none">
@@ -226,10 +226,10 @@ export function AssetCard({
                                             src={imageUrl}
                                             alt={name}
                                             fill
-                                            className="object-cover scale-110 blur-md opacity-80"
+                                            className="object-cover scale-110 blur-[8px] opacity-90"
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
-                                        <div className="absolute inset-0 bg-black/50" />
+                                        <div className="absolute inset-0 bg-black/45" />
                                     </div>
                                 </>
                             ) : (
