@@ -218,23 +218,26 @@ export function AssetCard({
                             transition={{ duration: 0.3 }}
                             className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-md overflow-hidden"
                         >
-                            {/* Blurred Image Background (Frosted Glass Look) */}
-                            {imageUrl && !imageError ? (
-                                <>
-                                    <div className="absolute inset-0 z-0 pointer-events-none">
+                            {/* Background Layers */}
+                            <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300">
+                                {imageUrl && !imageError ? (
+                                    <>
                                         <Image
                                             src={imageUrl}
                                             alt={name}
                                             fill
-                                            className="object-cover scale-110 blur-[8px] opacity-90"
+                                            className="object-cover scale-150 blur-[4px] opacity-90 transition-transform duration-700 group-hover:scale-[1.6]"
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
-                                        <div className="absolute inset-0 bg-black/45" />
+                                    </>
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
+                                        <Icon className="w-32 h-32 text-white/50 blur-[2px]" />
                                     </div>
-                                </>
-                            ) : (
-                                <div className="absolute inset-0 bg-obsidian-900/90 backdrop-blur-md z-0" />
-                            )}
+                                )}
+                                {/* Integrated Darken Overlay */}
+                                <div className="absolute inset-0 bg-black/60 mix-blend-multiply" />
+                            </div>
 
                             <div className="relative z-10 w-full">
                                 {/* Bookmark Button - Top Right */}
@@ -266,7 +269,7 @@ export function AssetCard({
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ delay: 0.15 }}
-                                        className="text-xs text-zinc-200 font-medium leading-relaxed line-clamp-6 drop-shadow-md"
+                                        className="text-xs text-zinc-100 font-semibold leading-relaxed line-clamp-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                                     >
                                         {description}
                                     </motion.p>
