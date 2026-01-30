@@ -212,46 +212,66 @@ export function AssetCard({
                 <AnimatePresence>
                     {isHovering && viewMode === 'grid' && (
                         <motion.div
-                            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                            animate={{ opacity: 1, backdropFilter: 'blur(12px)' }}
-                            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center bg-black/80 rounded-md border border-white/10"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-md overflow-hidden"
                         >
-                            {/* Bookmark Button - Top Right */}
-                            <motion.button
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                onClick={handleToggleBookmark}
-                                className={`absolute top-3 right-3 p-2 rounded-full transition-all border ${isBookmarked
-                                    ? 'text-primary bg-primary/10 border-primary/20'
-                                    : 'text-zinc-400 hover:text-white hover:bg-white/10 border-white/10'
-                                    }`}
-                            >
-                                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                            </motion.button>
-
-                            {/* Name */}
-                            <motion.h3
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.05 }}
-                                className="text-xl font-bold text-white mb-3 leading-tight pt-4"
-                            >
-                                {name}
-                            </motion.h3>
-
-                            {/* Description */}
-                            {description && (
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.15 }}
-                                    className="text-xs text-zinc-400 font-medium leading-relaxed line-clamp-4"
-                                >
-                                    {description}
-                                </motion.p>
+                            {/* Blurred Image Background */}
+                            {imageUrl && !imageError ? (
+                                <>
+                                    <div className="absolute inset-0 z-0">
+                                        <Image
+                                            src={imageUrl}
+                                            alt={name}
+                                            fill
+                                            className="object-cover scale-110 blur-xl opacity-60"
+                                            unoptimized={imageUrl.startsWith('/uploads')}
+                                        />
+                                        <div className="absolute inset-0 bg-obsidian-900/60 backdrop-blur-sm" />
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-obsidian-900/90 backdrop-blur-md z-0" />
                             )}
+
+                            <div className="relative z-10 w-full">
+                                {/* Bookmark Button - Top Right */}
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    onClick={handleToggleBookmark}
+                                    className={`absolute -top-10 right-0 p-2 rounded-full transition-all border ${isBookmarked
+                                        ? 'text-primary bg-primary/10 border-primary/20'
+                                        : 'text-zinc-400 hover:text-white hover:bg-white/10 border-white/10'
+                                        }`}
+                                >
+                                    <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                                </motion.button>
+
+                                {/* Name */}
+                                <motion.h3
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.05 }}
+                                    className="text-xl font-bold text-white mb-3 leading-tight"
+                                >
+                                    {name}
+                                </motion.h3>
+
+                                {/* Description */}
+                                {description && (
+                                    <motion.p
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ delay: 0.15 }}
+                                        className="text-xs text-zinc-200 font-medium leading-relaxed line-clamp-6 drop-shadow-md"
+                                    >
+                                        {description}
+                                    </motion.p>
+                                )}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
