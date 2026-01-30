@@ -329,9 +329,7 @@ export function Navbar() {
                                                             className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
                                                         >
                                                             <div className="flex items-center gap-3">
-                                                                <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-white/5 flex items-center justify-center">
-                                                                    <Star className="w-4 h-4 text-zinc-500 group-hover:text-primary transition-colors" />
-                                                                </div>
+                                                                <SearchItemImage src={bm.imageUrl} alt={bm.name} />
                                                                 <div>
                                                                     <p className="text-sm font-bold text-white group-hover:text-primary transition-colors">{bm.name}</p>
                                                                     <p className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest mt-0.5">${bm.price.toFixed(2)}</p>
