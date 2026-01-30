@@ -219,24 +219,25 @@ export function AssetCard({
                             className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-md overflow-hidden"
                         >
                             {/* Background Layers */}
-                            <div className="absolute inset-0 z-0 pointer-events-none transition-opacity duration-300">
+                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-300">
                                 {imageUrl && !imageError ? (
                                     <>
-                                        <Image
+                                        {/* Standard img tag for better reliability in background effects */}
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img
                                             src={imageUrl}
                                             alt={name}
-                                            fill
-                                            className="object-cover scale-150 blur-[4px] opacity-90 transition-transform duration-700 group-hover:scale-[1.6]"
-                                            unoptimized={imageUrl.startsWith('/uploads')}
+                                            className="absolute inset-0 w-full h-full object-cover scale-[1.5] blur-[4px] opacity-90 transition-transform duration-700 group-hover:scale-[1.6]"
+                                            onError={() => setImageError(true)}
                                         />
                                     </>
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-20">
-                                        <Icon className="w-32 h-32 text-white/50 blur-[2px]" />
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-30 bg-black/20">
+                                        <Icon className="w-40 h-40 text-white/50 blur-[2px]" />
                                     </div>
                                 )}
-                                {/* Integrated Darken Overlay */}
-                                <div className="absolute inset-0 bg-black/60 mix-blend-multiply" />
+                                {/* Integrated Darken Overlay - Simple Alpha Layer */}
+                                <div className="absolute inset-0 bg-black/40" />
                             </div>
 
                             <div className="relative z-10 w-full">
