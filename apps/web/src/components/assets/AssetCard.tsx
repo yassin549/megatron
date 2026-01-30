@@ -230,7 +230,7 @@ export function AssetCard({
                                             onError={() => setImageError(true)}
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
-                                        <div className="absolute inset-0 bg-black/70" />
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.85)_0%,_rgba(0,0,0,0.6)_100%)]" />
                                     </div>
                                 ) : imageUrl && imageError ? (
                                     <div className="absolute inset-0">
@@ -240,10 +240,10 @@ export function AssetCard({
                                             alt={name}
                                             className="absolute inset-0 w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-[1.1]"
                                         />
-                                        <div className="absolute inset-0 bg-black/70" />
+                                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.85)_0%,_rgba(0,0,0,0.6)_100%)]" />
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-obsidian-900/60 transition-colors duration-500 group-hover:bg-obsidian-900/40">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(12,12,12,0.9)_0%,_rgba(12,12,12,0.7)_100%)] transition-colors duration-500">
                                         <Icon className="w-48 h-48 text-primary opacity-10 blur-[1px] transition-all duration-500 group-hover:opacity-20 group-hover:scale-110" />
                                     </div>
                                 )}
