@@ -221,17 +221,27 @@ export function AssetCard({
                             {/* Background Layers */}
                             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-300">
                                 {imageUrl && !imageError ? (
-                                    <>
-                                        {/* Standard img tag for better reliability in background effects */}
+                                    <div className="absolute inset-0">
+                                        <Image
+                                            src={imageUrl}
+                                            alt={name}
+                                            fill
+                                            className="object-cover scale-[1.5] blur-[4px] opacity-100 transition-transform duration-700 group-hover:scale-[1.6]"
+                                            onError={() => setImageError(true)}
+                                            unoptimized={imageUrl.startsWith('/uploads')}
+                                        />
+                                        <div className="absolute inset-0 bg-black/30" />
+                                    </div>
+                                ) : imageUrl && imageError ? (
+                                    <div className="absolute inset-0">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={imageUrl}
                                             alt={name}
                                             className="absolute inset-0 w-full h-full object-cover scale-[1.5] blur-[4px] opacity-100 transition-transform duration-700 group-hover:scale-[1.6]"
-                                            onError={() => setImageError(true)}
                                         />
                                         <div className="absolute inset-0 bg-black/30" />
-                                    </>
+                                    </div>
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center bg-obsidian-900/60 transition-colors duration-500 group-hover:bg-obsidian-900/40">
                                         <Icon className="w-48 h-48 text-primary opacity-10 blur-[1px] transition-all duration-500 group-hover:opacity-20 group-hover:scale-110" />
