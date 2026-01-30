@@ -6,7 +6,7 @@ import { getRedisClient } from '@megatron/lib-integrations';
 import { MONETARY_CONFIG } from '@megatron/lib-common';
 
 import { isAdmin } from '@/lib/admin';
-
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
     try {
@@ -34,6 +34,8 @@ export async function GET(req: Request) {
             db.trade.aggregate({ _sum: { fee: true } }),
             db.platformTreasury.findUnique({ where: { id: 'treasury' } }),
         ]);
+
+        console.log(`[ADMIN-STATS] raw counts: users=${totalUsers}, activeAssets=${activeAssetsCount}, totalAssets=${totalAssetsCount}`);
 
         // Volume query: Optimized by using Prisma's aggregate instead of raw query for better type safety and pooling
         let totalVolume24h = 0;

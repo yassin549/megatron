@@ -3,6 +3,7 @@ import { db } from '@megatron/database';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { isAdmin } from '@/lib/admin';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
     try {
