@@ -10,9 +10,6 @@ async function testHuggingFace() {
             title: "Bitcoin Surges Past $100k",
             link: "https://example.com/btc-news",
             snippet: "Bitcoin has reached a new all-time high driven by institutional adoption.",
-            date: "2026-01-29",
-            source: "CryptoNews",
-            imageUrl: ""
         }
     ];
 
