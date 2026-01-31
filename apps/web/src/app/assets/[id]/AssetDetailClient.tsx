@@ -85,6 +85,7 @@ export function AssetDetailClient({
     const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'oracle'>('chart');
     const [executionEst, setExecutionEst] = useState<number>(initialAsset.price);
     const [mounted, setMounted] = useState(false);
 
@@ -324,22 +325,160 @@ export function AssetDetailClient({
                     </div>
                 </div>
 
-                {/* Mobile Floating Button */}
+                {/* Mobile UI Overlay */}
+                <div className="lg:hidden fixed inset-0 z-[40] pointer-events-none flex flex-col pt-[58px] pb-[130px]">
+                    {/* Mobile Tab Switcher */}
+                    <div className="px-6 py-4 pointer-events-auto shrink-0">
+                        <div className="flex bg-white/[0.03] border border-white/5 rounded-2xl p-1.5 backdrop-blur-xl">
+                            {(['chart', 'orderbook', 'oracle'] as const).map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`relative flex-1 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-xl ${activeTab === tab ? 'text-white' : 'text-zinc-500'
+                                        }`}
+                                >
+                                    {activeTab === tab && (
+                                        <motion.div
+                                            layoutId="active-tab-bg"
+                                            className="absolute inset-0 bg-white/5 border border-white/10 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">{tab}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Mobile Tab Content */}
+                    <div className="flex-1 overflow-hidden pointer-events-auto px-4 pb-4">
+                        <AnimatePresence mode="wait">
+                            {activeTab === 'chart' && (
+                                <motion.div
+                                    key="chart"
+                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
+                                >
+                                    {chartData.length > 0 ? (
+                                        <AssetChart
+                                            data={chartData}
+                                            marginalPrice={livePrice}
+                                            marketPrice={asset.marketPrice}
+                                            watermarkText={asset.name.toUpperCase()}
+                                            colors={useMemo(() => ({
+                                                lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                                areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
+                                                areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
+                                                textColor: '#52525b',
+                                            }), [asset.change24h])}
+                                            priceLines={{
+                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                            }}
+                                            userTrades={asset.userTrades}
+                                            onUpdatePosition={handleChartUpdate}
+                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                            activePositionId={activePositionId}
+                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                        />
+                                    ) : (
+                                        <div className="h-full flex flex-col items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                            <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'orderbook' && (
+                                <motion.div
+                                    key="orderbook"
+                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col p-2"
+                                >
+                                    <div className="flex-1 min-h-0">
+                                        <OrderBook assetId={asset.id} assetPrice={livePrice} />
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {activeTab === 'oracle' && (
+                                <motion.div
+                                    key="oracle"
+                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                                    transition={{ duration: 0.3, ease: "easeOut" }}
+                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col"
+                                >
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 font-mono text-xs">
+                                        {oracleLogs.length === 0 ? (
+                                            <div className="h-full flex flex-col items-center justify-center text-zinc-600">
+                                                <Zap className="w-6 h-6 mb-4 animate-pulse" />
+                                                <span className="font-black uppercase tracking-[0.2em] text-[10px]">Awaiting_Neural_Stream...</span>
+                                            </div>
+                                        ) : (
+                                            oracleLogs.slice(0, 10).map((log) => (
+                                                <div key={log.id} className="border-l-2 border-primary/40 pl-4 py-3 bg-white/[0.02] rounded-r-xl">
+                                                    <div className="flex items-center gap-3 mb-2 opacity-60">
+                                                        <span className="text-[10px] font-bold">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                                                        <span className={`font-black ${log.deltaPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                            {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
+                                                        </span>
+                                                        <span className="text-primary font-black">{(log.confidence * 100).toFixed(0)}% CONF</span>
+                                                    </div>
+                                                    <p className="text-white font-bold leading-relaxed">{log.summary}</p>
+                                                    {log.reasoning && (
+                                                        <p className="text-[10px] text-zinc-500 mt-2 italic leading-relaxed border-l border-white/10 pl-3">
+                                                            {log.reasoning}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    <div className="p-4 border-t border-white/5 bg-black/20 flex items-center justify-between">
+                                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Neural Oracle Active</span>
+                                        <div className="flex gap-1">
+                                            <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                                            <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse delay-75" />
+                                            <div className="w-1 h-1 rounded-full bg-primary/20 animate-pulse delay-150" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Fixed Trading Button Area */}
+                    <div className="px-6 pb-2 pointer-events-auto shrink-0 w-full max-w-[500px] mx-auto">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setIsMobileTradeOpen(true)}
+                            className="w-full h-[64px] bg-primary relative overflow-hidden rounded-[24px] group flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(59,130,246,0.4)] transition-all hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <TrendingUp className="w-6 h-6 text-white" />
+                            <span className="text-sm font-black text-white uppercase tracking-[0.3em] italic">Execute Trade</span>
+                            <div className="flex items-center gap-1.5 ml-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                <span className="text-[10px] font-black text-white/60 tracking-tighter">LIVE</span>
+                            </div>
+                        </motion.button>
+                    </div>
+                </div>
+
+                {/* Mobile Floating Button - REMOVED since we added the fixed one */}
                 {mounted && createPortal(
                     <>
-                        <div className="lg:hidden fixed bottom-6 right-6 z-[60]">
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setIsMobileTradeOpen(true)}
-                                className="w-16 h-16 bg-primary text-white flex items-center justify-center rounded-[24px] border border-white/10"
-                            >
-                                <TrendingUp className="w-7 h-7" />
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-black rounded-full border-2 border-zinc-900 flex items-center justify-center">
-                                    <Plus className="w-3 h-3 text-primary" />
-                                </div>
-                            </motion.button>
-                        </div>
-
                         <AnimatePresence>
                             {isMobileTradeOpen && (
                                 <>
