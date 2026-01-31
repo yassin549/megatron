@@ -209,16 +209,6 @@ export function AssetDetailClient({
         <div className="hidden lg:grid grid-cols-12 h-full relative z-10 overflow-hidden">
             {/* LEFT COLUMN - Main Content */}
             <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
-                {/* TOP NAVIGATION & TAB TOGGLE - Reduced Height */}
-                <div className="h-[48px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
-                    <div className="flex-1 flex justify-start">
-                        <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
-                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                        </Link>
-                    </div>
-
-                    <div className="flex-1" />
-                </div>
 
                 {/* CONTENT AREA */}
                 <div className="flex-1 overflow-hidden relative">
@@ -226,25 +216,38 @@ export function AssetDetailClient({
                         {/* Left Sidebar (AssetInfoWidget + OrderBook) */}
                         <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
                             <div className="flex-1 flex flex-col gap-3 overflow-hidden">
-                                {/* Desktop Metrics - Integrated Sidebar */}
-                                <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-xl">
+                                {/* Desktop Metrics - Integrated Sidebar with Back Button */}
+                                <div className="bg-black/40 border border-white/5 rounded-[24px] p-5 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
+                                    <div className="flex items-center gap-3">
+                                        <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
+                                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                                        </Link>
+                                        <div className="flex-1 h-px bg-white/[0.05]" />
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[8px] font-black text-emerald-500/80 uppercase tracking-[0.2em]">Live_Feed</span>
+                                        </div>
+                                    </div>
+
                                     <div className="flex items-center justify-between">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 opacity-60">Index Price</span>
-                                            <span className="text-2xl font-black text-white tabular-nums leading-none tracking-tighter">${Number(livePrice || 0).toFixed(2)}</span>
+                                            <span className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-1.5 opacity-50">Index Price</span>
+                                            <span className="text-3xl font-black text-white tabular-nums leading-none tracking-tighter">${Number(livePrice || 0).toFixed(2)}</span>
                                         </div>
                                         <div className="flex flex-col items-end text-right">
-                                            <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 opacity-60">24h Change</span>
+                                            <span className="text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em] mb-1.5 opacity-50">24h Change</span>
                                             <span className={`text-xl font-black tabular-nums leading-none tracking-tighter ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
                                                 {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="h-1 w-full bg-white/[0.02] rounded-full overflow-hidden">
+
+                                    <div className="h-1.5 w-full bg-white/[0.02] rounded-full overflow-hidden">
                                         <motion.div
-                                            className={`h-full ${Number(asset.change24h || 0) >= 0 ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`}
+                                            className={`h-full ${Number(asset.change24h || 0) >= 0 ? 'bg-emerald-500/40' : 'bg-rose-500/40'}`}
                                             initial={{ width: 0 }}
                                             animate={{ width: '100%' }}
+                                            transition={{ duration: 1, ease: "easeOut" }}
                                         />
                                     </div>
                                 </div>
