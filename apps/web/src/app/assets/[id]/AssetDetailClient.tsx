@@ -85,7 +85,7 @@ export function AssetDetailClient({
     const [isUpdatingTargets, setIsUpdatingTargets] = useState(false);
     const [activePositionId, setActivePositionId] = useState<string | null>(null);
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'oracle'>('chart');
+    const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'oracle' | 'trade'>('chart');
     const [executionEst, setExecutionEst] = useState<number>(initialAsset.price);
     const [mounted, setMounted] = useState(false);
 
@@ -205,334 +205,306 @@ export function AssetDetailClient({
             index === 0 || item.time !== self[index - 1].time
         );
 
-    return (
-        <div className="h-[calc(100vh-64px)] w-full bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
+    const DesktopView = () => (
+        <div className="hidden lg:grid grid-cols-12 h-full relative z-10 overflow-hidden">
+            {/* LEFT COLUMN - Main Content */}
+            <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
+                {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
+                <div className="h-[58px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
+                    <div className="flex-1 flex justify-start">
+                        <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        </Link>
+                    </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 h-full relative z-10 overflow-hidden">
-                {/* LEFT COLUMN - Main Content */}
-                <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
-
-                    {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
-                    <div className="h-[58px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
-                        {/* Start: Back Button */}
-                        <div className="flex-1 flex justify-start">
-                            <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
-                                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                            </Link>
-                        </div>
-
-                        {/* Center: Empty - Clean header */}
-
-
-                        {/* End: Minimalist Metrics */}
-                        <div className="flex-1 flex justify-end">
-                            <div className="hidden md:flex items-center gap-8">
-                                <div className="flex flex-col items-end">
-                                    <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
-                                    <span className="text-sm font-black text-white tabular-nums leading-none">${Number(livePrice || 0).toFixed(2)}</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
-                                    <span className={`text-sm font-black tabular-nums leading-none ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
-                                    </span>
-                                </div>
+                    <div className="flex-1 flex justify-end">
+                        <div className="hidden md:flex items-center gap-8">
+                            <div className="flex flex-col items-end">
+                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
+                                <span className="text-sm font-black text-white tabular-nums leading-none">${Number(livePrice || 0).toFixed(2)}</span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
+                                <span className={`text-sm font-black tabular-nums leading-none ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {/* CONTENT AREA - Chart Only */}
-                    <div className="flex-1 overflow-hidden relative">
-                        <div className="w-full h-full flex overflow-hidden p-3 gap-3">
-                            {/* Left Sidebar (25%) - AssetInfoWidget + OrderBook */}
-                            <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
-                                <div className="flex-1 flex flex-col gap-3 overflow-hidden">
-                                    <AssetInfoWidget
-                                        name={asset.name}
-                                        imageUrl={asset.imageUrl}
-                                        type={asset.type}
-                                        oracleLogs={oracleLogs}
-                                    />
-                                    <div className="flex-1 min-h-0">
-                                        <OrderBook assetId={asset.id} assetPrice={livePrice} />
-                                    </div>
+                {/* CONTENT AREA */}
+                <div className="flex-1 overflow-hidden relative">
+                    <div className="w-full h-full flex overflow-hidden p-3 gap-3">
+                        {/* Left Sidebar (AssetInfoWidget + OrderBook) */}
+                        <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
+                            <div className="flex-1 flex flex-col gap-3 overflow-hidden">
+                                <AssetInfoWidget
+                                    name={asset.name}
+                                    imageUrl={asset.imageUrl}
+                                    type={asset.type}
+                                    oracleLogs={oracleLogs}
+                                />
+                                <div className="flex-1 min-h-0">
+                                    <OrderBook assetId={asset.id} assetPrice={livePrice} />
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Right Chart (75%) */}
-                            <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
+                        {/* Right Chart */}
+                        <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
+                            {chartData.length > 0 ? (
+                                <ErrorBoundary name="Market Chart">
+                                    <AssetChart
+                                        data={chartData}
+                                        marginalPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        watermarkText={asset.name.toUpperCase()}
+                                        colors={useMemo(() => ({
+                                            lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                            areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
+                                            areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
+                                            textColor: '#52525b',
+                                        }), [asset.change24h])}
+                                        priceLines={{
+                                            entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                            stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                            takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                        }}
+                                        userTrades={asset.userTrades}
+                                        onUpdatePosition={handleChartUpdate}
+                                        side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                        activePositionId={activePositionId}
+                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                    />
+                                </ErrorBoundary>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center">
+                                    <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
+                                    <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* RIGHT COLUMN - Trading Panel */}
+            <div className="hidden lg:block lg:col-span-4 h-full border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
+                <div className="h-full flex flex-col">
+                    <TradingSidebar
+                        assetId={asset.id}
+                        assetName={asset.name}
+                        assetPrice={livePrice}
+                        marketPrice={asset.marketPrice}
+                        totalSupply={asset.totalSupply}
+                        pricingParams={asset.pricingParams}
+                        sidebarContext="desktop"
+                        status={asset.status}
+                        stats={{
+                            marketCap: asset.marketCap,
+                            liquidity: asset.liquidity,
+                            supply: asset.totalSupply,
+                            low24h: asset.low24h,
+                            high24h: asset.high24h
+                        }}
+                        onTradeSuccess={refreshData}
+                        onExecutionPriceChange={setExecutionEst}
+                        activePositionId={activePositionId}
+                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+
+    const MobileView = () => (
+        <div className="lg:hidden fixed inset-0 flex flex-col bg-background pt-[58px] pb-20">
+            {/* Header Area */}
+            <div className="h-[58px] fixed top-0 left-0 right-0 border-b border-white/5 px-6 flex items-center bg-background/80 backdrop-blur-xl z-50">
+                <Link href="/" className="p-2 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-xl">
+                    <ArrowLeft className="w-4 h-4" />
+                </Link>
+                <div className="flex-1 px-4">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest leading-none mb-0.5">{asset.name}</span>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-black text-white leading-none tabular-nums">${Number(livePrice || 0).toFixed(2)}</span>
+                            <span className={`text-[10px] font-bold ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                {asset.change24h >= 0 ? '+' : ''}{asset.change24h.toFixed(2)}%
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+
+            {/* Content Area - Scrollable but contains fixed-height content based on tab */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Tab Bar Integration */}
+                <div className="px-6 py-4 shrink-0">
+                    <div className="flex bg-white/[0.03] border border-white/5 rounded-[20px] p-1.5 backdrop-blur-xl shadow-2xl">
+                        {(['chart', 'book', 'oracle', 'trade'] as const).map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab === 'book' ? 'orderbook' : tab as any)}
+                                className={`relative flex-1 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-[14px] ${(activeTab === 'orderbook' ? 'book' : activeTab) === tab ? 'text-white' : 'text-zinc-600'
+                                    }`}
+                            >
+                                {(activeTab === 'orderbook' ? 'book' : activeTab) === tab && (
+                                    <motion.div
+                                        layoutId="mobile-active-tab"
+                                        className="absolute inset-0 bg-white/5 border border-white/10 rounded-[14px] shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+                                        transition={{ type: 'spring', bounce: 0.1, duration: 0.4 }}
+                                    />
+                                )}
+                                <span className="relative z-10">{tab}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Main Content Pane */}
+                <div className="flex-1 overflow-hidden px-4 pb-4">
+                    <AnimatePresence mode="wait">
+                        {activeTab === 'chart' && (
+                            <motion.div
+                                key="chart"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden shadow-2xl relative"
+                            >
                                 {chartData.length > 0 ? (
-                                    <ErrorBoundary name="Market Chart">
-                                        <AssetChart
-                                            data={chartData}
-                                            marginalPrice={livePrice}
-                                            marketPrice={asset.marketPrice}
-                                            watermarkText={asset.name.toUpperCase()}
-                                            colors={useMemo(() => ({
-                                                lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
-                                                areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
-                                                areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
-                                                textColor: '#52525b',
-                                            }), [asset.change24h])}
-                                            priceLines={{
-                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                            }}
-                                            userTrades={asset.userTrades}
-                                            onUpdatePosition={handleChartUpdate}
-                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                            activePositionId={activePositionId}
-                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                        />
-                                    </ErrorBoundary>
+                                    <AssetChart
+                                        data={chartData}
+                                        marginalPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        watermarkText={asset.name.toUpperCase()}
+                                        colors={useMemo(() => ({
+                                            lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
+                                            areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
+                                            areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
+                                            textColor: '#52525b',
+                                        }), [asset.change24h])}
+                                        priceLines={{
+                                            entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
+                                            stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
+                                            takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
+                                        }}
+                                        userTrades={asset.userTrades}
+                                        onUpdatePosition={handleChartUpdate}
+                                        side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
+                                        activePositionId={activePositionId}
+                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
+                                    />
                                 ) : (
                                     <div className="h-full flex flex-col items-center justify-center">
                                         <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
-                                        <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
+                                        <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Booting_Terminal...</div>
                                     </div>
                                 )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="hidden lg:block lg:col-span-4 h-full border-l border-white/5 bg-background/10 backdrop-blur-[60px] shadow-[-20px_0_60px_rgba(0,0,0,0.4)] z-40 overflow-hidden">
-                    <div className="h-full flex flex-col">
-                        {asset && (
-                            <TradingSidebar
-                                assetId={asset.id}
-                                assetName={asset.name}
-                                assetPrice={livePrice}
-                                marketPrice={asset.marketPrice}
-                                totalSupply={asset.totalSupply}
-                                pricingParams={asset.pricingParams}
-                                sidebarContext="desktop"
-                                status={asset.status}
-                                stats={{
-                                    marketCap: asset.marketCap,
-                                    liquidity: asset.liquidity,
-                                    supply: asset.totalSupply,
-                                    low24h: asset.low24h,
-                                    high24h: asset.high24h
-                                }}
-                                onTradeSuccess={refreshData}
-                                onExecutionPriceChange={setExecutionEst}
-                                activePositionId={activePositionId}
-                                onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                            />
+                            </motion.div>
                         )}
-                    </div>
-                </div>
 
-                {/* Mobile UI Overlay */}
-                <div className="lg:hidden fixed inset-0 z-[40] pointer-events-none flex flex-col pt-[58px] pb-[130px]">
-                    {/* Mobile Tab Switcher */}
-                    <div className="px-6 py-4 pointer-events-auto shrink-0">
-                        <div className="flex bg-white/[0.03] border border-white/5 rounded-2xl p-1.5 backdrop-blur-xl">
-                            {(['chart', 'orderbook', 'oracle'] as const).map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`relative flex-1 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 rounded-xl ${activeTab === tab ? 'text-white' : 'text-zinc-500'
-                                        }`}
-                                >
-                                    {activeTab === tab && (
-                                        <motion.div
-                                            layoutId="active-tab-bg"
-                                            className="absolute inset-0 bg-white/5 border border-white/10 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.05)]"
-                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                                        />
-                                    )}
-                                    <span className="relative z-10">{tab}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                        {activeTab === 'orderbook' && (
+                            <motion.div
+                                key="orderbook"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col p-4"
+                            >
+                                <OrderBook assetId={asset.id} assetPrice={livePrice} />
+                            </motion.div>
+                        )}
 
-                    {/* Mobile Tab Content */}
-                    <div className="flex-1 overflow-hidden pointer-events-auto px-4 pb-4">
-                        <AnimatePresence mode="wait">
-                            {activeTab === 'chart' && (
-                                <motion.div
-                                    key="chart"
-                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                                    transition={{ duration: 0.3, ease: "easeOut" }}
-                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden shadow-2xl"
-                                >
-                                    {chartData.length > 0 ? (
-                                        <AssetChart
-                                            data={chartData}
-                                            marginalPrice={livePrice}
-                                            marketPrice={asset.marketPrice}
-                                            watermarkText={asset.name.toUpperCase()}
-                                            colors={useMemo(() => ({
-                                                lineColor: asset.change24h >= 0 ? '#10b981' : '#f43f5e',
-                                                areaTopColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0.4)' : 'rgba(244, 63, 94, 0.4)',
-                                                areaBottomColor: asset.change24h >= 0 ? 'rgba(16, 185, 129, 0)' : 'rgba(244, 63, 94, 0)',
-                                                textColor: '#52525b',
-                                            }), [asset.change24h])}
-                                            priceLines={{
-                                                entry: asset.userPosition && asset.userPosition.shares !== 0 ? asset.userPosition.avgPrice : undefined,
-                                                stopLoss: orderStopLoss ? parseFloat(orderStopLoss) : null,
-                                                takeProfit: orderTakeProfit ? parseFloat(orderTakeProfit) : null,
-                                            }}
-                                            userTrades={asset.userTrades}
-                                            onUpdatePosition={handleChartUpdate}
-                                            side={asset.userPosition && asset.userPosition.shares < 0 ? 'sell' : 'buy'}
-                                            activePositionId={activePositionId}
-                                            onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                        />
+                        {activeTab === 'oracle' && (
+                            <motion.div
+                                key="oracle"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col"
+                            >
+                                <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 font-mono text-xs">
+                                    {oracleLogs.length === 0 ? (
+                                        <div className="h-full flex flex-col items-center justify-center text-zinc-600">
+                                            <Zap className="w-6 h-6 mb-4 animate-pulse" />
+                                            <span className="font-black uppercase tracking-[0.2em] text-[10px]">Awaiting_Signal...</span>
+                                        </div>
                                     ) : (
-                                        <div className="h-full flex flex-col items-center justify-center">
-                                            <div className="w-8 h-8 rounded-full border-2 border-primary/20 border-t-primary animate-spin mb-4" />
-                                            <div className="text-zinc-600 font-black text-[9px] tracking-[0.3em] uppercase">Establishing_Relay...</div>
-                                        </div>
+                                        oracleLogs.map((log) => (
+                                            <div key={log.id} className="border-l-2 border-primary/40 pl-4 py-3 bg-white/[0.02] rounded-r-xl">
+                                                <div className="flex items-center gap-3 mb-1.5 opacity-60">
+                                                    <span className="text-[9px] font-bold">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
+                                                    <span className={`font-black ${log.deltaPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                        {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
+                                                    </span>
+                                                </div>
+                                                <p className="text-white font-bold leading-relaxed pr-2">{log.summary}</p>
+                                            </div>
+                                        ))
                                     )}
-                                </motion.div>
-                            )}
+                                </div>
+                                <div className="p-4 bg-black/20 border-t border-white/5 flex items-center justify-between">
+                                    <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Neural Oracle Link Status: Active</span>
+                                </div>
+                            </motion.div>
+                        )}
 
-                            {activeTab === 'orderbook' && (
-                                <motion.div
-                                    key="orderbook"
-                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                                    transition={{ duration: 0.3, ease: "easeOut" }}
-                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col p-2"
-                                >
-                                    <div className="flex-1 min-h-0">
-                                        <OrderBook assetId={asset.id} assetPrice={livePrice} />
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {activeTab === 'oracle' && (
-                                <motion.div
-                                    key="oracle"
-                                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                                    transition={{ duration: 0.3, ease: "easeOut" }}
-                                    className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col"
-                                >
-                                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 font-mono text-xs">
-                                        {oracleLogs.length === 0 ? (
-                                            <div className="h-full flex flex-col items-center justify-center text-zinc-600">
-                                                <Zap className="w-6 h-6 mb-4 animate-pulse" />
-                                                <span className="font-black uppercase tracking-[0.2em] text-[10px]">Awaiting_Neural_Stream...</span>
-                                            </div>
-                                        ) : (
-                                            oracleLogs.slice(0, 10).map((log) => (
-                                                <div key={log.id} className="border-l-2 border-primary/40 pl-4 py-3 bg-white/[0.02] rounded-r-xl">
-                                                    <div className="flex items-center gap-3 mb-2 opacity-60">
-                                                        <span className="text-[10px] font-bold">[{new Date(log.createdAt).toLocaleTimeString()}]</span>
-                                                        <span className={`font-black ${log.deltaPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                            {log.deltaPercent >= 0 ? '+' : ''}{log.deltaPercent.toFixed(2)}%
-                                                        </span>
-                                                        <span className="text-primary font-black">{(log.confidence * 100).toFixed(0)}% CONF</span>
-                                                    </div>
-                                                    <p className="text-white font-bold leading-relaxed">{log.summary}</p>
-                                                    {log.reasoning && (
-                                                        <p className="text-[10px] text-zinc-500 mt-2 italic leading-relaxed border-l border-white/10 pl-3">
-                                                            {log.reasoning}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                    <div className="p-4 border-t border-white/5 bg-black/20 flex items-center justify-between">
-                                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Neural Oracle Active</span>
-                                        <div className="flex gap-1">
-                                            <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-                                            <div className="w-1 h-1 rounded-full bg-primary/40 animate-pulse delay-75" />
-                                            <div className="w-1 h-1 rounded-full bg-primary/20 animate-pulse delay-150" />
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-
-                    {/* Fixed Trading Button Area */}
-                    <div className="px-6 pb-2 pointer-events-auto shrink-0 w-full max-w-[500px] mx-auto">
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setIsMobileTradeOpen(true)}
-                            className="w-full h-[64px] bg-primary relative overflow-hidden rounded-[24px] group flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(59,130,246,0.4)] transition-all hover:shadow-[0_15px_40px_rgba(59,130,246,0.6)]"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                            <TrendingUp className="w-6 h-6 text-white" />
-                            <span className="text-sm font-black text-white uppercase tracking-[0.3em] italic">Execute Trade</span>
-                            <div className="flex items-center gap-1.5 ml-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                                <span className="text-[10px] font-black text-white/60 tracking-tighter">LIVE</span>
-                            </div>
-                        </motion.button>
-                    </div>
-                </div>
-
-                {/* Mobile Floating Button - REMOVED since we added the fixed one */}
-                {mounted && createPortal(
-                    <>
-                        <AnimatePresence>
-                            {isMobileTradeOpen && (
-                                <>
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        onClick={() => setIsMobileTradeOpen(false)}
-                                        className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[70]"
+                        {activeTab === 'trade' && (
+                            <motion.div
+                                key="trade"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                className="w-full h-full bg-black/40 border border-white/5 rounded-[32px] overflow-hidden flex flex-col"
+                            >
+                                <div className="flex-1 overflow-y-auto px-1 custom-scrollbar">
+                                    <TradingSidebar
+                                        assetId={asset.id}
+                                        assetName={asset.name}
+                                        assetPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        status={asset.status}
+                                        sidebarContext="mobile-integrated"
+                                        totalSupply={asset.totalSupply}
+                                        pricingParams={asset.pricingParams}
+                                        onTradeSuccess={refreshData}
+                                        onExecutionPriceChange={setExecutionEst}
+                                        activePositionId={activePositionId}
+                                        onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
                                     />
-                                    <div className="fixed inset-0 z-[80] flex items-end justify-center pointer-events-none pb-4 px-4">
-                                        <motion.div
-                                            initial={{ y: "100%" }}
-                                            animate={{ y: 0 }}
-                                            exit={{ y: "100%" }}
-                                            transition={{ type: "spring", stiffness: 350, damping: 35 }}
-                                            className="bg-black/95 border border-white/10 shadow-3xl rounded-[48px] w-full max-w-[480px] flex flex-col pointer-events-auto overflow-hidden relative max-h-[92vh]"
-                                        >
-                                            <div className="p-10 pb-4 flex items-center justify-between border-b border-white/5">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
-                                                        <Zap className="w-6 h-6 text-primary" />
-                                                    </div>
-                                                    <h3 className="font-black text-white text-xl tracking-tighter uppercase italic">Terminal</h3>
-                                                </div>
-                                                <button onClick={() => setIsMobileTradeOpen(false)} className="p-3 rounded-2xl bg-white/5 text-zinc-500 transition-colors hover:text-white">
-                                                    <X className="w-6 h-6" />
-                                                </button>
-                                            </div>
-
-                                            <div className="flex-1 overflow-y-auto px-4 pb-8 custom-scrollbar">
-                                                <TradingSidebar
-                                                    assetId={asset.id}
-                                                    assetName={asset.name}
-                                                    assetPrice={asset.price}
-                                                    pricingParams={asset.pricingParams}
-                                                    sidebarContext="mobile-portal"
-                                                    marketPrice={asset.marketPrice}
-                                                    status={asset.status}
-                                                    onTradeSuccess={() => { refreshData(); }}
-                                                    onExecutionPriceChange={setExecutionEst}
-                                                    activePositionId={activePositionId}
-                                                    onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                                />
-                                            </div>
-                                        </motion.div>
-                                    </div>
-                                </>
-                            )}
-                        </AnimatePresence>
-                    </>,
-                    document.body
-                )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
+
+            {/* Reproportioned Bottom Action Button */}
+            <div className="fixed bottom-[108px] left-0 right-0 px-6 z-40 pointer-events-none">
+                <div className="max-w-[480px] mx-auto pointer-events-auto">
+                    <motion.button
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => setActiveTab('trade')}
+                        className={`w-full h-14 bg-primary relative overflow-hidden rounded-2xl group flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(59,130,246,0.3)] border border-white/10 ${activeTab === 'trade' ? 'hidden' : 'block'
+                            }`}
+                    >
+                        <TrendingUp className="w-5 h-5 text-white" />
+                        <span className="text-xs font-black text-white uppercase tracking-[0.2em] italic">Open Trade Interface</span>
+                        <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse ml-1" />
+                    </motion.button>
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className="h-[calc(100vh-64px)] w-full bg-background relative selection:bg-primary/20 selection:text-primary overflow-hidden">
+            <DesktopView />
+            <MobileView />
         </div>
     );
 }
