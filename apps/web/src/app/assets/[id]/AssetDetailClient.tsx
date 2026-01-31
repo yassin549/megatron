@@ -209,28 +209,15 @@ export function AssetDetailClient({
         <div className="hidden lg:grid grid-cols-12 h-full relative z-10 overflow-hidden">
             {/* LEFT COLUMN - Main Content */}
             <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
-                {/* TOP NAVIGATION & TAB TOGGLE - Fixed Height */}
-                <div className="h-[58px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
+                {/* TOP NAVIGATION & TAB TOGGLE - Reduced Height */}
+                <div className="h-[48px] border-b border-white/5 px-6 md:px-10 flex items-center relative z-30 shrink-0">
                     <div className="flex-1 flex justify-start">
                         <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                         </Link>
                     </div>
 
-                    <div className="flex-1 flex justify-end">
-                        <div className="hidden md:flex items-center gap-8">
-                            <div className="flex flex-col items-end">
-                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">Index Price</span>
-                                <span className="text-sm font-black text-white tabular-nums leading-none">${Number(livePrice || 0).toFixed(2)}</span>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[9px] text-zinc-500 uppercase font-black tracking-tighter mb-0.5 opacity-60">24h Change</span>
-                                <span className={`text-sm font-black tabular-nums leading-none ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                    {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                    <div className="flex-1" />
                 </div>
 
                 {/* CONTENT AREA */}
@@ -239,6 +226,28 @@ export function AssetDetailClient({
                         {/* Left Sidebar (AssetInfoWidget + OrderBook) */}
                         <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
                             <div className="flex-1 flex flex-col gap-3 overflow-hidden">
+                                {/* Desktop Metrics - Integrated Sidebar */}
+                                <div className="bg-black/40 border border-white/5 rounded-2xl p-6 flex flex-col gap-4 shadow-xl">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col">
+                                            <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 opacity-60">Index Price</span>
+                                            <span className="text-2xl font-black text-white tabular-nums leading-none tracking-tighter">${Number(livePrice || 0).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex flex-col items-end text-right">
+                                            <span className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mb-1 opacity-60">24h Change</span>
+                                            <span className={`text-xl font-black tabular-nums leading-none tracking-tighter ${Number(asset.change24h || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                {Number(asset.change24h || 0) >= 0 ? '+' : ''}{Number(asset.change24h || 0).toFixed(2)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="h-1 w-full bg-white/[0.02] rounded-full overflow-hidden">
+                                        <motion.div
+                                            className={`h-full ${Number(asset.change24h || 0) >= 0 ? 'bg-emerald-500/50' : 'bg-rose-500/50'}`}
+                                            initial={{ width: 0 }}
+                                            animate={{ width: '100%' }}
+                                        />
+                                    </div>
+                                </div>
                                 <AssetInfoWidget
                                     name={asset.name}
                                     imageUrl={asset.imageUrl}
