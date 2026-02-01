@@ -51,13 +51,13 @@ const config: Config = {
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
 
-                // Custom "Deep Obsidian" Palette
+                // Custom "Obsidian" Palette - Lighter Scale
                 obsidian: {
-                    950: "#020408", // Main background
-                    900: "#06080F", // Secondary background
-                    800: "#0F131D", // Card background
-                    700: "#1A202E", // Hover state
-                    600: "#273042", // Border
+                    950: "#090E1A", // Main background (HSL 7%)
+                    900: "#0D1426", // Secondary background (HSL 9%)
+                    800: "#141C33", // Card background (HSL 11%)
+                    700: "#1F2942", // Hover state
+                    600: "#2B3852", // Border
                 },
                 neon: {
                     blue: "#3B82F6",    // Core Brand

@@ -208,7 +208,7 @@ export function AssetDetailClient({
     const DesktopView = () => (
         <div className="hidden lg:grid grid-cols-12 h-full relative z-10 overflow-hidden">
             {/* LEFT COLUMN - Main Content */}
-            <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-black/10 overflow-hidden">
+            <div className="lg:col-span-8 flex flex-col h-full relative border-r border-white/5 bg-obsidian-900/50 overflow-hidden">
 
                 {/* CONTENT AREA */}
                 <div className="flex-1 overflow-hidden relative">
@@ -217,7 +217,7 @@ export function AssetDetailClient({
                         <div className="hidden lg:flex lg:w-[350px] max-w-[350px] flex-shrink-0 flex-col gap-3 pr-3 overflow-hidden">
                             <div className="flex-1 flex flex-col gap-3 overflow-hidden">
                                 {/* Desktop Metrics - Integrated Sidebar with Back Button */}
-                                <div className="bg-black/40 border border-white/5 rounded-[24px] p-5 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
+                                <div className="bg-obsidian-800/40 border border-white/5 rounded-[24px] p-5 flex flex-col gap-5 shadow-2xl backdrop-blur-md">
                                     <div className="flex items-center gap-3">
                                         <Link href="/" className="p-2.5 text-zinc-500 hover:text-white transition-all bg-white/[0.03] border border-white/5 rounded-2xl hover:bg-white/10 active:scale-95 group">
                                             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
@@ -264,7 +264,7 @@ export function AssetDetailClient({
                         </div>
 
                         {/* Right Chart */}
-                        <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
+                        <div className="flex-1 overflow-hidden flex flex-col bg-obsidian-800/40 border border-white/5 rounded-2xl shadow-2xl">
                             {chartData.length > 0 ? (
                                 <ErrorBoundary name="Market Chart">
                                     <AssetChart
