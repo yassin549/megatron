@@ -7,19 +7,19 @@
     /* Deep Obsidian Theme - Base Variables */
 
     /* Background: Very dark blue-grey/black */
-    --background: 222 47% 4%;
-    /* #050912 */
+    --background: 222 47% 8%;
+    /* Lightened for better visibility */
 
     /* Foreground: Off-white/Silver */
     --foreground: 210 40% 98%;
 
     /* Card: Slightly lighter dark */
-    --card: 222 47% 7%;
-    /* #090E1A */
+    --card: 222 47% 11%;
+    /* Lightened for better visibility */
     --card-foreground: 210 40% 98%;
 
     /* Popover */
-    --popover: 222 47% 6%;
+    --popover: 222 47% 10%;
     --popover-foreground: 210 40% 98%;
 
     /* Primary: Electric Blue */
@@ -27,11 +27,11 @@
     --primary-foreground: 222 47% 4%;
 
     /* Secondary: Deep Purple/Slate */
-    --secondary: 217 33% 15%;
+    --secondary: 217 33% 20%;
     --secondary-foreground: 210 40% 98%;
 
     /* Muted: Subtle background elements */
-    --muted: 217 33% 12%;
+    --muted: 217 33% 17%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent: Neon Purple */
@@ -43,9 +43,9 @@
     --destructive-foreground: 210 40% 98%;
 
     /* Borders & Inputs */
-    --border: 217 33% 15%;
-    /* #1A2230 */
-    --input: 217 33% 15%;
+    --border: 217 33% 20%;
+    /* Lightened */
+    --input: 217 33% 20%;
     --ring: 224 76% 48%;
 
     --radius: 4px;
