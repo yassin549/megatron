@@ -107,14 +107,14 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
 
     if (loading && rawBids.length === 0 && rawAsks.length === 0) {
         return (
-            <div className="h-full flex flex-col items-center justify-center bg-black/40 border border-white/5 rounded-2xl animate-pulse">
+            <div className="h-full flex flex-col items-center justify-center bg-obsidian-900/40 border border-white/5 rounded-2xl animate-pulse">
                 <span className="text-[9px] text-zinc-600 font-black tracking-widest uppercase">Syncing_Book...</span>
             </div>
         );
     }
 
     return (
-        <div className="h-full flex flex-col bg-black/40 border border-white/5 rounded-2xl font-mono text-[10px] select-none overflow-hidden shadow-2xl">
+        <div className="h-full flex flex-col bg-obsidian-900/40 border border-white/5 rounded-2xl font-mono text-[10px] select-none overflow-hidden shadow-2xl">
             {/* Header */}
             <div className="grid grid-cols-3 px-3 py-2 border-b border-white/5 text-zinc-500 font-black uppercase tracking-tighter bg-white/[0.02]">
                 <span>Price</span>
@@ -186,7 +186,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
             </div>
 
             {/* Footer / Context */}
-            <div className="px-3 py-1.5 border-t border-white/5 bg-black/40 flex items-center justify-between">
+            <div className="px-3 py-1.5 border-t border-white/5 bg-obsidian-900/40 flex items-center justify-between">
                 <span className="text-[8px] uppercase font-black tracking-widest text-zinc-500 opacity-40">Live_Liquidity</span>
                 <div className="flex gap-1">
                     <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />

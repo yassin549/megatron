@@ -216,7 +216,7 @@ export function OrderForm({
     return (
         <div className="space-y-3">
             {/* Buy/Sell Tabs - Institutional Style */}
-            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
+            <div className="flex bg-obsidian-950/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
                 <motion.div
                     className={`absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg shadow-md border border-white/5 ${isBuy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}
                     animate={{ left: isBuy ? '2px' : 'calc(50%)' }}
@@ -237,7 +237,7 @@ export function OrderForm({
             </div>
 
             {/* Market/Limit Tabs - Pill Style */}
-            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
+            <div className="flex bg-obsidian-950/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
                 <motion.div
                     className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg bg-zinc-800 shadow-md border border-white/5"
                     animate={{ left: orderType === 'market' ? '2px' : 'calc(50%)' }}
@@ -258,7 +258,7 @@ export function OrderForm({
             </div>
 
             {/* Price Info - Modular Snapshot */}
-            <div className="bg-black/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
+            <div className="bg-obsidian-900/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
                 <div className="flex justify-between items-center opacity-60">
                     <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market Index</span>
                     <span className="text-[9px] text-white font-mono font-bold">${Number(marketPrice || 0).toFixed(2)}</span>
@@ -291,7 +291,7 @@ export function OrderForm({
                                 value={price}
                                 onChange={(e) => setPrice(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
+                                className="w-full bg-obsidian-950/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
                             />
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
                         </div>
@@ -311,7 +311,7 @@ export function OrderForm({
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             placeholder="0.00"
-                            className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-primary/30 transition-all font-black shadow-inner"
+                            className="w-full bg-obsidian-950/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-primary/30 transition-all font-black shadow-inner"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
                     </div>
@@ -330,7 +330,7 @@ export function OrderForm({
                         value={stopLoss}
                         onChange={(e) => setStopLoss(e.target.value)}
                         placeholder="Price"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
+                        className="w-full bg-obsidian-950/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
                     />
                 </div>
                 <div>
@@ -343,7 +343,7 @@ export function OrderForm({
                         value={takeProfit}
                         onChange={(e) => setTakeProfit(e.target.value)}
                         placeholder="Price"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
+                        className="w-full bg-obsidian-950/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
                     />
                 </div>
                 <div>
@@ -356,7 +356,7 @@ export function OrderForm({
                         value={slippageSetting}
                         onChange={(e) => setSlippageSetting(e.target.value)}
                         placeholder="1.0"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-bold text-center"
+                        className="w-full bg-obsidian-950/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-bold text-center"
                     />
                 </div>
             </div>
