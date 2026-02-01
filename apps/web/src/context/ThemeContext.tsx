@@ -15,38 +15,38 @@ interface ThemeColors {
 export const THEMES: Record<ThemePreset, ThemeColors> = {
     default: {
         primary: '217 91% 60%',    // Electric Blue
-        secondary: '217 33% 15%',
+        secondary: '217 33% 25%',
         accent: '270 100% 60%',    // Neon Purple
-        background: '222 47% 4%',
-        card: '222 47% 7%',
+        background: '222 47% 14%',
+        card: '222 47% 17%',
     },
     ocean: {
         primary: '190 90% 50%',    // Cyan
-        secondary: '195 30% 15%',
+        secondary: '195 30% 25%',
         accent: '220 90% 60%',     // Blue
-        background: '200 50% 3%',
-        card: '200 50% 6%',
+        background: '200 50% 13%',
+        card: '200 50% 16%',
     },
     neon: {
         primary: '320 100% 55%',   // Hot Pink
-        secondary: '280 30% 15%',
+        secondary: '280 30% 25%',
         accent: '180 100% 50%',    // Cyan
-        background: '280 40% 4%',
-        card: '280 40% 7%',
+        background: '280 40% 14%',
+        card: '280 40% 17%',
     },
     crimson: {
         primary: '345 90% 55%',    // Red
-        secondary: '0 30% 12%',
+        secondary: '0 30% 22%',
         accent: '30 90% 55%',      // Orange
-        background: '0 40% 3%',
-        card: '0 40% 6%',
+        background: '0 40% 13%',
+        card: '0 40% 16%',
     },
     sunset: {
         primary: '25 95% 55%',     // Orange
-        secondary: '20 30% 15%',
+        secondary: '20 30% 25%',
         accent: '280 80% 60%',     // Purple
-        background: '20 40% 4%',
-        card: '20 40% 7%',
+        background: '20 40% 14%',
+        card: '20 40% 17%',
     }
 };
 
