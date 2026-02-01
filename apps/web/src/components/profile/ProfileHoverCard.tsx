@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { ChartBar, Trophy, LogOut, Copy, Check, PieChart, Layers, Menu, X, Shield, Wallet, Settings, ExternalLink } from 'lucide-react';
+import { ChartBar, Trophy, LogOut, Copy, Check, PieChart, Layers, Menu, X, Shield, Wallet, Settings, ExternalLink, Palette } from 'lucide-react';
 import { NavMegaCard } from '@/components/layout/NavMegaCard';
 
 interface ProfileHoverCardProps {
@@ -120,8 +120,8 @@ export function ProfileHoverCard({ isOpen: controlledIsOpen, onToggle }: Profile
                         </Link>
                         <Link href="/settings" className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
                             <div className="flex items-center gap-3">
-                                <Settings className="w-4 h-4 text-zinc-600" />
-                                My Settings
+                                <Palette className="w-4 h-4 text-zinc-600" />
+                                Themes and Colors
                             </div>
                         </Link>
                     </div>

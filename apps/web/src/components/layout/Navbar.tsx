@@ -11,7 +11,7 @@ import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
 import { NavUnifiedWindow } from '@/components/layout/NavUnifiedWindow';
-import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History, PieChart, Layers, Wallet, Trophy, Settings, ChartBar } from 'lucide-react';
+import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History, PieChart, Layers, Wallet, Trophy, Settings, ChartBar, Palette } from 'lucide-react';
 
 // Robust image component for search results
 
@@ -263,8 +263,8 @@ export function Navbar() {
                                                 </Link>
                                                 <Link href="/settings" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
                                                     <div className="flex items-center gap-3">
-                                                        <Settings className="w-4 h-4 text-zinc-600" />
-                                                        My Settings
+                                                        <Palette className="w-4 h-4 text-zinc-600" />
+                                                        Themes and Colors
                                                     </div>
                                                 </Link>
                                             </div>
