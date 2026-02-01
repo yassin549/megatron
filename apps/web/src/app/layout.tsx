@@ -32,7 +32,7 @@ export default function RootLayout({
                     {/* Global Background Effects */}
                     <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_rgba(59,130,246,0.15),transparent)] pointer-events-none z-0" />
 
-                    <div className="min-h-screen text-foreground flex flex-col relative z-10">
+                    <div className="min-h-screen text-foreground flex flex-col relative z-10 backdrop-blur-[2px]">
                         <Navbar />
                         <div className="flex-1 pb-28 md:pb-0">
                             {children}
