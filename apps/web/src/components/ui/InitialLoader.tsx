@@ -52,8 +52,7 @@ export function InitialLoader() {
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
-                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 animate-pulse"
-                            style={{ animationDuration: '1.5s' }}
+                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125"
                         />
                     </div>
                 </div>
