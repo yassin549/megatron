@@ -38,13 +38,9 @@ export function InitialLoader() {
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] bg-background flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[9999] bg-[#000] flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
         >
-            {/* Background Effects */}
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
-
             <div className="text-center space-y-8 relative z-10">
                 {/* Logo */}
                 <div className="flex justify-center mb-2 overflow-visible">
@@ -52,11 +48,7 @@ export function InitialLoader() {
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
-                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 transition-all duration-300"
-                            style={{
-                                maskImage: 'radial-gradient(circle, black 55%, transparent 75%)',
-                                WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 75%)'
-                            }}
+                            className="w-full h-full object-contain filter brightness-110 contrast-125 transition-all duration-300"
                         />
                     </div>
                 </div>
