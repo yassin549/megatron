@@ -191,6 +191,10 @@ export function Navbar() {
                             width={40}
                             height={40}
                             className="object-contain mix-blend-screen filter brightness-110 contrast-125"
+                            style={{
+                                maskImage: 'radial-gradient(circle, black 55%, transparent 75%)',
+                                WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 75%)'
+                            }}
                             priority
                         />
                     </div>
@@ -543,6 +547,10 @@ export function Navbar() {
                                                     alt="Megatron Logo"
                                                     fill
                                                     className="object-contain mix-blend-screen filter brightness-110 contrast-125"
+                                                    style={{
+                                                        maskImage: 'radial-gradient(circle, black 55%, transparent 75%)',
+                                                        WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 75%)'
+                                                    }}
                                                 />
                                             </div>
                                             <span className="font-bold text-xl text-white tracking-tighter">

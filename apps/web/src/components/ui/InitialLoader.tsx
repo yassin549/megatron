@@ -52,7 +52,11 @@ export function InitialLoader() {
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
-                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125"
+                            className="w-full h-full object-contain mix-blend-screen filter brightness-110 contrast-125 transition-all duration-300"
+                            style={{
+                                maskImage: 'radial-gradient(circle, black 55%, transparent 75%)',
+                                WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 75%)'
+                            }}
                         />
                     </div>
                 </div>
