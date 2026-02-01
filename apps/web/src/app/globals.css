@@ -62,11 +62,11 @@
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
     /* Cosmic Grid Background */
     background-image:
-      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 35%),
-      linear-gradient(rgba(255, 255, 255, 0.03) 1.5px, transparent 1.5px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1.5px, transparent 1.5px);
-    background-size: 100% 100%, 100% 100%, 60px 60px, 60px 60px;
+      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-position: center top;
   }
 
@@ -92,15 +92,15 @@
 
   /* Glassmorphism Classes */
   .glass-panel {
-    @apply bg-card border border-white/5 shadow-2xl backdrop-blur-md;
+    @apply bg-card border border-white/5 shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-card border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5 backdrop-blur-md;
+    @apply bg-card border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
   }
 
   .glass-nav {
-    @apply bg-background border-b border-white/5 shadow-lg backdrop-blur-md;
+    @apply bg-background border-b border-white/5 shadow-lg;
   }
 
   /* Text Effects */

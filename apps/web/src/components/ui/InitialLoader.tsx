@@ -43,7 +43,7 @@ export function InitialLoader() {
         >
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_rgba(59,130,246,0.15),transparent)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
 
             <div className="text-center space-y-8 relative z-10">
                 {/* Logo */}
