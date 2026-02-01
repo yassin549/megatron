@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
 import Link from 'next/link';
-import { Search, LayoutGrid, List } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Asset {
@@ -44,16 +44,18 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
     const [mobileSearchText, setMobileSearchText] = useState(searchParam);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-    // Persist view mode (client-side only)
+    // Sync view mode with SubNavbar
     useEffect(() => {
         const saved = localStorage.getItem('assetViewMode');
         if (saved === 'list' || saved === 'grid') setViewMode(saved);
-    }, []);
 
-    const toggleView = (mode: 'grid' | 'list') => {
-        setViewMode(mode);
-        localStorage.setItem('assetViewMode', mode);
-    };
+        // Listen for view mode changes from SubNavbar
+        const handleViewModeChange = (e: CustomEvent) => {
+            setViewMode(e.detail);
+        };
+        window.addEventListener('viewModeChange' as any, handleViewModeChange);
+        return () => window.removeEventListener('viewModeChange' as any, handleViewModeChange);
+    }, []);
 
     // Sync mobile search text
     useEffect(() => {
@@ -88,55 +90,19 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
 
     return (
         <>
-            {/* Markets Title & Mobile Search */}
-            <div className="flex flex-col gap-4 mb-8 text-white">
-                {/* Mobile Search Bar */}
-                <div className="md:hidden">
-                    <form onSubmit={handleMobileSearch} className="relative group">
-                        <input
-                            name="mobileSearch"
-                            type="text"
-                            value={mobileSearchText}
-                            onChange={(e) => setMobileSearchText(e.target.value)}
-                            placeholder="Search markets..."
-                            className="w-full pl-10 pr-4 py-3 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
-                        />
-                        <Search className="absolute left-3 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-                    </form>
-                </div>
-
-                <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-4">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-xl md:text-2xl font-bold tracking-tight flex items-center gap-2">
-                            {searchParam ? (
-                                <>Results for "<span className="text-primary">{searchParam}</span>"</>
-                            ) : (
-                                <>{categoryParam === 'all' ? 'Trending Markets' : `${categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1)} Markets`}</>
-                            )}
-                        </h2>
-                        <span className="hidden xs:inline-flex text-[10px] font-mono text-zinc-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">
-                            {filteredAssets.length} ASSETS
-                        </span>
-                    </div>
-
-                    {/* View Toggle */}
-                    <div className="flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm">
-                        <button
-                            onClick={() => toggleView('grid')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
-                            title="Grid View"
-                        >
-                            <LayoutGrid className="w-4 h-4" />
-                        </button>
-                        <button
-                            onClick={() => toggleView('list')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
-                            title="List View"
-                        >
-                            <List className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+            {/* Mobile Search Bar */}
+            <div className="md:hidden mb-6">
+                <form onSubmit={handleMobileSearch} className="relative group">
+                    <input
+                        name="mobileSearch"
+                        type="text"
+                        value={mobileSearchText}
+                        onChange={(e) => setMobileSearchText(e.target.value)}
+                        placeholder="Search markets..."
+                        className="w-full pl-10 pr-4 py-3 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
+                    />
+                    <Search className="absolute left-3 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                </form>
             </div>
 
             {/* Assets Grid / List */}
