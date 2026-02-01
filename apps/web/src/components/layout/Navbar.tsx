@@ -523,7 +523,7 @@ export function Navbar() {
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="absolute inset-0 bg-obsidian-950/60 backdrop-blur-md"
+                                    className="absolute inset-0 bg-black/80 backdrop-blur-sm"
                                 />
 
                                 {/* Solid Slide-out Drawer */}
@@ -532,7 +532,7 @@ export function Navbar() {
                                     animate={{ x: 0 }}
                                     exit={{ x: "100%" }}
                                     transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
-                                    className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-obsidian-900 border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.8)] flex flex-col"
+                                    className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-obsidian-950 border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
                                 >
                                     {/* Drawer Header */}
                                     <div className="h-20 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/5 bg-white/[0.02]">

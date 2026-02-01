@@ -51,7 +51,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className="glass-nav sticky top-16 z-40 transition-all duration-300">
+        <div className="glass-nav sticky top-16 z-40 transition-all duration-300 border-b border-white/5 bg-background shadow-lg">
             <div className="max-w-[1400px] mx-auto px-4">
                 <div
                     ref={scrollRef}

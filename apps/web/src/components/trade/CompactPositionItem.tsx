@@ -217,7 +217,7 @@ export function CompactPositionItem({
         <div
             className={`group relative overflow-hidden rounded-[4px] border transition-all duration-300 ${isSelected
                 ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
-                : 'border-white/5 bg-obsidian-900/40 hover:bg-obsidian-900/60 hover:border-white/10'
+                : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-white/10'
                 }`}
         >
             <button
@@ -298,7 +298,7 @@ export function CompactPositionItem({
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden border-t border-white/5 bg-obsidian-900/40"
+                        className="overflow-hidden border-t border-white/5 bg-black/40"
                     >
                         <div className="p-3 space-y-3">
                             {/* Grid Data - Technical View */}

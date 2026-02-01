@@ -6,32 +6,32 @@
   :root {
     /* Deep Obsidian Theme - Base Variables */
 
-    /* Background: Modern Slate - Significantly Brighter */
-    --background: 222 15% 22%;
-    /* #31384C */
+    /* Background: Very dark blue-grey/black */
+    --background: 222 47% 4%;
+    /* #050912 */
 
-    /* Foreground: White */
+    /* Foreground: Off-white/Silver */
     --foreground: 210 40% 98%;
 
-    /* Card: Lighter Slate */
-    --card: 222 15% 30%;
-    /* #424A61 */
+    /* Card: Slightly lighter dark */
+    --card: 222 47% 7%;
+    /* #090E1A */
     --card-foreground: 210 40% 98%;
 
-    /* Popover: Match card */
-    --popover: 222 15% 28%;
+    /* Popover */
+    --popover: 222 47% 6%;
     --popover-foreground: 210 40% 98%;
 
     /* Primary: Electric Blue */
     --primary: 217 91% 60%;
-    --primary-foreground: 222 15% 22%;
+    --primary-foreground: 222 47% 4%;
 
-    /* Secondary: Muted Slate */
-    --secondary: 222 15% 38%;
+    /* Secondary: Deep Purple/Slate */
+    --secondary: 217 33% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    /* Muted: Subtle layers */
-    --muted: 222 15% 35%;
+    /* Muted: Subtle background elements */
+    --muted: 217 33% 12%;
     --muted-foreground: 215 20% 65%;
 
     /* Accent: Neon Purple */
@@ -42,11 +42,11 @@
     --destructive: 345 80% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    /* Borders: More visible on lighter BG */
-    --border: 222 15% 42%;
-    /* #5F6B8A */
-    --input: 222 15% 42%;
-    --ring: 217 91% 60%;
+    /* Borders & Inputs */
+    --border: 217 33% 15%;
+    /* #1A2230 */
+    --input: 217 33% 15%;
+    --ring: 224 76% 48%;
 
     --radius: 4px;
     /* 12px */
@@ -60,12 +60,12 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
-    /* Cosmic Grid Background - More vibrant for lighter theme */
+    /* Cosmic Grid Background */
     background-image:
-      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.2) 0%, transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.12) 0%, transparent 25%),
-      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08) 0%, transparent 25%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-position: center top;
   }
@@ -100,7 +100,7 @@
   }
 
   .glass-nav {
-    @apply bg-background/80 backdrop-blur-2xl border-b border-white/5 shadow-2xl;
+    @apply bg-background border-b border-white/5 shadow-lg;
   }
 
   /* Text Effects */

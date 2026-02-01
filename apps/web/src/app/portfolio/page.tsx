@@ -178,7 +178,7 @@ export default function PortfolioPage() {
                 </div>
 
                 {/* Institutional Status Ribbon - High Density */}
-                <div className="bg-obsidian-900/40 border border-white/5 rounded-[4px] mb-8 overflow-hidden shadow-2xl shrink-0">
+                <div className="bg-black/40 border border-white/5 rounded-[4px] mb-8 overflow-hidden shadow-2xl shrink-0">
                     <div className="flex items-center gap-8 px-6 py-4 bg-white/[0.02] border-b border-white/5 overflow-x-auto no-scrollbar">
                         <div className="flex items-center gap-2 shrink-0">
                             <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Portfolio_Status</span>
@@ -217,7 +217,7 @@ export default function PortfolioPage() {
                         </span>
                     </div>
 
-                    <div className="bg-obsidian-900/40 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
+                    <div className="bg-black/20 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
                         {lpData?.positions && lpData.positions.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
@@ -270,7 +270,7 @@ export default function PortfolioPage() {
                                 </table>
                             </div>
                         ) : (
-                            <div className="p-16 flex flex-col items-center justify-center text-center bg-obsidian-900/40">
+                            <div className="p-16 flex flex-col items-center justify-center text-center bg-black/40">
                                 <div className="w-12 h-12 bg-white/[0.03] border border-white/5 rounded-sm flex items-center justify-center mb-4">
                                     <Droplets className="w-6 h-6 text-zinc-600 opacity-40" />
                                 </div>
@@ -293,7 +293,7 @@ export default function PortfolioPage() {
                     </span>
                 </div>
 
-                <div className="bg-obsidian-900/40 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
+                <div className="bg-black/20 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
                     {data?.positions && data.positions.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -339,7 +339,7 @@ export default function PortfolioPage() {
                             </table>
                         </div>
                     ) : (
-                        <div className="p-16 flex flex-col items-center justify-center text-center bg-obsidian-900/40">
+                        <div className="p-16 flex flex-col items-center justify-center text-center bg-black/40">
                             <div className="w-12 h-12 bg-white/[0.03] border border-white/5 rounded-sm flex items-center justify-center mb-4">
                                 <Layers className="w-6 h-6 text-zinc-600 opacity-40" />
                             </div>
@@ -358,7 +358,7 @@ export default function PortfolioPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setWithdrawModal(prev => ({ ...prev, show: false }))} />
 
-                    <div className="relative bg-obsidian-900 border border-white/5 rounded-[4px] p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                    <div className="relative bg-[#050912] border border-white/5 rounded-[4px] p-6 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)]">
                         <button
                             onClick={() => setWithdrawModal(prev => ({ ...prev, show: false }))}
                             className="absolute top-4 right-4 p-1 rounded-sm hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
@@ -395,7 +395,7 @@ export default function PortfolioPage() {
                                     value={withdrawModal.amount}
                                     onChange={(e) => setWithdrawModal(prev => ({ ...prev, amount: e.target.value }))}
                                     placeholder="0.00"
-                                    className="w-full bg-obsidian-950/40 border border-white/10 rounded-sm px-4 py-3 text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-rose-500/50 transition-all font-black"
+                                    className="w-full bg-black/40 border border-white/10 rounded-sm px-4 py-3 text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-rose-500/50 transition-all font-black"
                                 />
                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-700 font-black">USDC</span>
                             </div>
@@ -444,7 +444,7 @@ export default function PortfolioPage() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setSuccessModal({ show: false, message: '', amount: '' })} />
 
-                    <div className="relative bg-obsidian-900 border border-white/5 rounded-[4px] p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center">
+                    <div className="relative bg-[#050912] border border-white/5 rounded-[4px] p-8 max-w-md w-full shadow-[0_0_50px_rgba(0,0,0,0.5)] text-center">
                         <div className="flex justify-center mb-6">
                             <div className="w-16 h-16 rounded-sm bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                                 <CheckCircle2 className="w-8 h-8 text-emerald-500" />

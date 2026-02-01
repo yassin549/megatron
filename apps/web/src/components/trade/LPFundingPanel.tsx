@@ -137,7 +137,7 @@ export function LPFundingPanel({
 
     if (status !== 'authenticated') {
         return (
-            <div className="bg-obsidian-800 border border-white/5 rounded-xl p-8 text-center shadow-2xl">
+            <div className="bg-zinc-900 border border-white/5 rounded-xl p-8 text-center shadow-2xl">
                 <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <Droplets className="w-8 h-8 text-blue-400" />
                 </div>
@@ -155,9 +155,9 @@ export function LPFundingPanel({
     }
 
     return (
-        <div className="bg-obsidian-800 border border-white/5 rounded-xl p-3 md:p-4 md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
+        <div className="bg-zinc-900 border border-white/5 rounded-xl p-3 md:p-4 md:sticky md:top-36 z-30 shadow-2xl overflow-hidden">
             {/* Tabs */}
-            <div className="flex bg-obsidian-900/40 rounded-lg p-0.5 mb-3 relative border border-white/5">
+            <div className="flex bg-black/40 rounded-lg p-0.5 mb-3 relative border border-white/5">
                 <motion.div
                     className="absolute inset-y-1 bg-zinc-800 rounded-lg shadow-lg"
                     initial={false}
@@ -230,7 +230,7 @@ export function LPFundingPanel({
                                     <span className="text-[9px] font-medium text-zinc-500 uppercase tracking-wide">Progress to Soft Cap</span>
                                     <span className="text-sm font-mono font-medium text-white">{fundingProgress.toFixed(1)}%</span>
                                 </div>
-                                <div className="h-2 bg-obsidian-900/40 rounded-full overflow-hidden border border-white/5">
+                                <div className="h-2 bg-black/40 rounded-full overflow-hidden border border-white/5">
                                     <motion.div
                                         className="h-full bg-gradient-to-r from-blue-600 to-cyan-400"
                                         initial={{ width: 0 }}
@@ -289,7 +289,7 @@ export function LPFundingPanel({
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full bg-obsidian-900/40 border border-white/5 rounded-lg px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all"
+                                className="w-full bg-black/40 border border-white/5 rounded-lg px-4 py-3 text-lg md:text-xl font-mono text-white placeholder-zinc-800 focus:outline-none focus:border-blue-500/40 transition-all"
                             />
                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 font-medium">
                                 USDC
@@ -318,7 +318,7 @@ export function LPFundingPanel({
                     </div>
 
                     {/* Summary Card */}
-                    <div className="flex justify-between items-center bg-obsidian-900/40 border border-white/5 rounded-lg p-3 mb-4">
+                    <div className="flex justify-between items-center bg-black/40 border border-white/5 rounded-lg p-3 mb-4">
                         <span className="text-[9px] text-zinc-500 uppercase tracking-wide">
                             {isBuy ? 'Shares to Receive' : 'Execution'}
                         </span>
@@ -360,7 +360,7 @@ export function LPFundingPanel({
                             </h4>
                             <div className="space-y-3">
                                 {userPosition.pendingWithdrawals.map((w: any) => (
-                                    <div key={w.id} className="bg-obsidian-900/40 border border-white/5 rounded-xl p-4 flex items-center justify-between">
+                                    <div key={w.id} className="bg-black/40 border border-white/5 rounded-xl p-4 flex items-center justify-between">
                                         <div>
                                             <div className="text-sm font-mono font-bold text-white">${w.amount.toLocaleString()} USDC</div>
                                             <div className="text-[10px] text-zinc-500">Requested {new Date(w.requestedAt).toLocaleDateString()}</div>

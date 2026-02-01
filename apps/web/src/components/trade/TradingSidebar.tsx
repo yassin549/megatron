@@ -49,7 +49,7 @@ export function TradingSidebar({
     return (
         <div className="flex flex-col h-full w-full overflow-hidden">
             {/* Header / Tabs Module - Aligned with Chart Header (h-58) */}
-            <div className="h-[58px] border-b border-white/5 flex items-center justify-center shrink-0 bg-obsidian-900/40 backdrop-blur-md">
+            <div className="h-[58px] border-b border-white/5 flex items-center justify-center shrink-0 bg-black/20">
                 <div className="flex gap-10 h-full px-6">
                     <button
                         onClick={() => setView('trade')}
@@ -96,7 +96,7 @@ export function TradingSidebar({
 
             <div className="flex-1 flex flex-col overflow-hidden p-3 pt-1 gap-3">
                 {/* Terminal Module - Main Content */}
-                <div className="flex-1 bg-obsidian-800/40 border border-white/5 rounded-2xl p-1 shadow-2xl overflow-hidden flex flex-col relative">
+                <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl overflow-hidden flex flex-col relative">
 
                     {/* High-Density Status Ribbon - Single Line Aligned */}
                     {stats && (
