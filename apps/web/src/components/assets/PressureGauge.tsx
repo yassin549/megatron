@@ -23,9 +23,9 @@ export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
             <svg viewBox="0 -5 100 65" className="w-full h-full overflow-visible preserve-3d">
                 <defs>
                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#F43F5E" /> {/* Rose - SELL */}
-                        <stop offset="50%" stopColor="#EAB308" /> {/* Yellow - NEUTRAL */}
-                        <stop offset="100%" stopColor="#10B981" /> {/* Emerald - BUY */}
+                        <stop offset="0%" stopColor="#FB7185" /> {/* Vibrant Rose - SELL */}
+                        <stop offset="50%" stopColor="#FACC15" /> {/* Vibrant Yellow - NEUTRAL */}
+                        <stop offset="100%" stopColor="#34D399" /> {/* Vibrant Emerald - BUY */}
                     </linearGradient>
                 </defs>
 
@@ -33,10 +33,9 @@ export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
                 <path
                     d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
-                    stroke="#111827"
+                    stroke="#18181B"
                     strokeWidth="12"
                     strokeLinecap="round"
-                    className="opacity-100"
                 />
 
                 {/* Colored Progress Track */}
@@ -44,19 +43,18 @@ export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
                     d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
                     stroke="url(#gaugeGradient)"
-                    strokeWidth="10"
+                    strokeWidth="11"
                     strokeLinecap="round"
-                    className="opacity-100"
                 />
 
-                {/* Neon Glow Layer */}
+                {/* Neon Glow Layer - Optimized for color pop */}
                 <path
                     d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
                     stroke="url(#gaugeGradient)"
-                    strokeWidth="4"
+                    strokeWidth="5"
                     strokeLinecap="round"
-                    className="opacity-60 blur-[3px]"
+                    className="opacity-80 blur-[4px]"
                 />
             </svg>
 

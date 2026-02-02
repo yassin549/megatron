@@ -208,27 +208,29 @@ export function Navbar() {
     return (
         <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
-                {/* 1. Logo Section */}
-                <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
-                    <div className="relative w-8 h-8 md:w-10 md:h-10">
-                        <Image
-                            src="/images/megatron-logo.jpg"
-                            alt="Megatron Logo"
-                            width={40}
-                            height={40}
-                            className="object-contain mix-blend-screen filter brightness-110 contrast-125"
-                            priority
-                        />
-                    </div>
-                    <div className="flex items-center">
-                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200 hidden md:inline-block">
-                            MEGATRON
-                        </span>
-                        <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
-                            BETA
-                        </span>
-                    </div>
-                </Link>
+                {/* 1. Logo Section - Centered on Mobile */}
+                <div className="md:static absolute left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 z-20">
+                    <Link href="/" className="flex items-center flex-shrink-0 group gap-2 md:gap-3">
+                        <div className="relative w-7 h-7 md:w-10 md:h-10">
+                            <Image
+                                src="/images/megatron-logo.jpg"
+                                alt="Megatron Logo"
+                                width={40}
+                                height={40}
+                                className="object-contain mix-blend-screen filter brightness-110 contrast-125"
+                                priority
+                            />
+                        </div>
+                        <div className="flex items-center">
+                            <span className="font-bold text-xl md:text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200 hidden md:inline-block">
+                                MEGATRON
+                            </span>
+                            <span className="hidden lg:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                                BETA
+                            </span>
+                        </div>
+                    </Link>
+                </div>
 
                 {/* 2. Search Section (Desktop) */}
                 <div className="hidden md:flex flex-1 max-w-xl justify-center px-4">
