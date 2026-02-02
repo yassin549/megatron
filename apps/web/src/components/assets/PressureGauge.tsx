@@ -8,14 +8,17 @@ import { motion } from 'framer-motion';
  */
 interface PressureGaugeProps {
     value: number; // 0 (100% Sell Pressure) to 100 (100% Buy Pressure)
+    size?: 'sm' | 'md';
 }
 
-export function PressureGauge({ value }: PressureGaugeProps) {
+export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
     // Map value (0-100) to rotation (-90deg to 90deg)
     const rotation = (value / 100) * 180 - 90;
 
+    const dimensions = size === 'sm' ? 'w-8 h-4' : 'w-10 h-6';
+
     return (
-        <div className="relative w-10 h-6 flex items-center justify-center overflow-hidden group/gauge">
+        <div className={`relative ${dimensions} flex items-center justify-center overflow-hidden group/gauge`}>
             {/* Simple Background Arc */}
             <svg viewBox="0 0 100 60" className="w-full h-full">
                 <defs>

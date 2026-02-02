@@ -66,11 +66,12 @@ export function Navbar() {
     const [lastScrollY, setLastScrollY] = useState(0);
 
     useEffect(() => {
+        let lastScroll = 0;
         const handleScroll = () => {
             const currentScrollY = window.scrollY;
             // Only hide header on mobile
             if (window.innerWidth < 768) {
-                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                if (currentScrollY > lastScroll && currentScrollY > 80) {
                     setIsVisible(false);
                 } else {
                     setIsVisible(true);
@@ -78,12 +79,12 @@ export function Navbar() {
             } else {
                 setIsVisible(true);
             }
-            setLastScrollY(currentScrollY);
+            lastScroll = currentScrollY;
         };
 
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [lastScrollY]);
+    }, []);
 
     // Mobile search state
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
@@ -527,7 +528,7 @@ export function Navbar() {
                 <div className="md:hidden flex items-center gap-3">
                     {status === 'authenticated' && (
                         <div className="flex items-center gap-3">
-                            <UserStats />
+                            <UserStats isMobile={true} />
                             <button
                                 onClick={() => setIsMobileMenuOpen(true)}
                                 className="transition-all active:scale-95"

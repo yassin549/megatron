@@ -289,8 +289,8 @@ export function AssetCard({
                     )}
                 </AnimatePresence>
 
-                {/* Pressure Gauge - Top Right */}
-                <div className="absolute top-2 right-2 z-20 pointer-events-none">
+                {/* Pressure Gauge - Top Right (Desktop Only) */}
+                <div className="absolute top-2 right-2 z-20 pointer-events-none hidden md:block">
                     <PressureGauge value={livePressure} />
                 </div>
 
@@ -401,6 +401,11 @@ export function AssetCard({
                                 <Users className="w-3 h-3" />
                                 {holders}
                             </div>
+                        </div>
+
+                        {/* Mobile Pressure Gauge */}
+                        <div className="md:hidden">
+                            <PressureGauge value={livePressure} size="sm" />
                         </div>
 
                         <button

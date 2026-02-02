@@ -15,6 +15,30 @@ export function SubNavbar() {
     ]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+    // Scroll behavior
+    const [isVisible, setIsVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        let lastScroll = 0;
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            if (window.innerWidth < 768) {
+                if (currentScrollY > lastScroll && currentScrollY > 80) {
+                    setIsVisible(false);
+                } else {
+                    setIsVisible(true);
+                }
+            } else {
+                setIsVisible(true);
+            }
+            lastScroll = currentScrollY;
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     // Persist view mode
     useEffect(() => {
         const saved = localStorage.getItem('assetViewMode');
@@ -72,7 +96,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className="glass-nav sticky top-16 z-40 transition-all duration-300 border-b border-white/5 bg-background shadow-lg">
+        <div className={`glass-nav sticky top-16 z-40 transition-all duration-300 border-b border-white/5 bg-background shadow-lg ${!isVisible ? '-translate-y-[8rem] md:translate-y-0' : 'translate-y-0'}`}>
             <div className="max-w-[1400px] mx-auto px-4">
                 <div className="flex items-center justify-between h-12 md:h-14">
                     {/* Categories - scrollable on mobile */}

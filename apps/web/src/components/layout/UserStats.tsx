@@ -60,13 +60,23 @@ export function UserStats({ isMobile = false }: UserStatsProps) {
 
     if (isMobile) {
         return (
-            <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-white/5">
-                <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                    Cash
-                </span>
-                <span className="text-sm font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
-                    ${parseFloat(stats.walletHotBalance).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                </span>
+            <div className="flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+                        Portfolio
+                    </span>
+                    <span className="text-xs font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                        ${parseFloat(stats.portfolioValue).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                </div>
+                <div className="flex flex-col items-end">
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-semibold">
+                        Cash
+                    </span>
+                    <span className="text-xs font-bold text-neon-emerald drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]">
+                        ${parseFloat(stats.walletHotBalance).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                    </span>
+                </div>
             </div>
         );
     }
