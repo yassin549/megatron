@@ -255,53 +255,53 @@ export function Navbar() {
                                             {/* Navigation Grid */}
                                             <div className="grid grid-cols-2 gap-3 mb-6">
                                                 <Link href="/dashboard" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-blue-500/10 active:scale-[0.98]">
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-blue-500/5 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
                                                     <div className="relative z-10 flex flex-col gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-300">
+                                                        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.1)]">
                                                             <ChartBar className="w-5 h-5" />
                                                         </div>
                                                         <div>
                                                             <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">Dashboard</span>
-                                                            <p className="text-[10px] text-zinc-500 font-medium">Overview & Stats</p>
+                                                            <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors font-medium">Overview & Stats</p>
                                                         </div>
                                                     </div>
                                                 </Link>
 
                                                 <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.98]">
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-emerald-500/5 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
                                                     <div className="relative z-10 flex flex-col gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+                                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
                                                             <PieChart className="w-5 h-5" />
                                                         </div>
                                                         <div>
                                                             <span className="text-sm font-bold text-white group-hover:text-emerald-200 transition-colors">Portfolio</span>
-                                                            <p className="text-[10px] text-zinc-500 font-medium">Your Assets</p>
+                                                            <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors font-medium">Your Assets</p>
                                                         </div>
                                                     </div>
                                                 </Link>
 
                                                 <Link href="/lp" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-500/10 active:scale-[0.98]">
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-500/5 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
                                                     <div className="relative z-10 flex flex-col gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-300">
+                                                        <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(168,85,247,0.1)]">
                                                             <Layers className="w-5 h-5" />
                                                         </div>
                                                         <div>
                                                             <span className="text-sm font-bold text-white group-hover:text-purple-200 transition-colors">Pools</span>
-                                                            <p className="text-[10px] text-zinc-500 font-medium">Liquidity</p>
+                                                            <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors font-medium">Liquidity</p>
                                                         </div>
                                                     </div>
                                                 </Link>
 
                                                 <Link href="/wallet" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]">
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-amber-500/5 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-100" />
                                                     <div className="relative z-10 flex flex-col gap-3">
-                                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+                                                        <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/30 transition-all duration-300 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
                                                             <Wallet className="w-5 h-5" />
                                                         </div>
                                                         <div>
                                                             <span className="text-sm font-bold text-white group-hover:text-amber-200 transition-colors">Wallet</span>
-                                                            <p className="text-[10px] text-zinc-500 font-medium">Deposit/Withdraw</p>
+                                                            <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 transition-colors font-medium">Deposit/Withdraw</p>
                                                         </div>
                                                     </div>
                                                 </Link>

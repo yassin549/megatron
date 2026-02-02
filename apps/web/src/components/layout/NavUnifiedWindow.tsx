@@ -110,7 +110,7 @@ export function NavUnifiedWindow({
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -10 }}
                                     transition={{ duration: 0.15 }}
-                                    className="absolute inset-0 p-6"
+                                    className="absolute inset-0 p-6 pb-10"
                                 >
                                     {children}
                                 </motion.div>
