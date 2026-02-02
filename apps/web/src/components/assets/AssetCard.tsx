@@ -194,6 +194,8 @@ export function AssetCard({
             className={`relative group ${viewMode === 'grid' ? 'h-full' : 'w-full'}`}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
+            onTouchStart={() => setIsHovering(true)}
+            onTouchEnd={() => setIsHovering(false)}
         >
             <Link
                 href={`/assets/${id}`}
