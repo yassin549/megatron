@@ -11,7 +11,7 @@ import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
 import { ProfileHoverCard } from '@/components/profile/ProfileHoverCard';
 import { NavUnifiedWindow } from '@/components/layout/NavUnifiedWindow';
-import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History, PieChart, Layers, Wallet, Trophy, Settings, ChartBar, Palette } from 'lucide-react';
+import { Search, Activity, Menu, TrendingUp, Users, Bookmark, FileText, X, LogOut, LayoutGrid, Star, History, PieChart, Layers, Wallet, Trophy, Settings, ChartBar, Palette, ArrowUpRight } from 'lucide-react';
 
 // Robust image component for search results
 
