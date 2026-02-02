@@ -250,57 +250,93 @@ export function Navbar() {
                                     onClose={() => setActiveNavTab(null)}
                                 >
                                     {activeNavTab === 'profile' && session?.user && (
-                                        <div className="space-y-8">
+                                        <div className="flex flex-col h-full">
                                             {/* Navigation Grid */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <Link href="/dashboard" onClick={() => setActiveNavTab(null)} className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
-                                                    <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
-                                                        <ChartBar className="w-4 h-4" />
+                                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                                <Link href="/dashboard" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-blue-500/10 active:scale-[0.98]">
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="relative z-10 flex flex-col gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-300">
+                                                            <ChartBar className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">Dashboard</span>
+                                                            <p className="text-[10px] text-zinc-500 font-medium">Overview & Stats</p>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-bold text-white">Dashboard</span>
                                                 </Link>
-                                                <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
-                                                    <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
-                                                        <PieChart className="w-4 h-4" />
+
+                                                <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-emerald-500/10 active:scale-[0.98]">
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="relative z-10 flex flex-col gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
+                                                            <PieChart className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white group-hover:text-emerald-200 transition-colors">Portfolio</span>
+                                                            <p className="text-[10px] text-zinc-500 font-medium">Your Assets</p>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-bold text-white">Portfolio</span>
                                                 </Link>
-                                                <Link href="/lp" onClick={() => setActiveNavTab(null)} className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
-                                                    <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                                                        <Layers className="w-4 h-4" />
+
+                                                <Link href="/lp" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-purple-500/10 active:scale-[0.98]">
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="relative z-10 flex flex-col gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-300">
+                                                            <Layers className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white group-hover:text-purple-200 transition-colors">Pools</span>
+                                                            <p className="text-[10px] text-zinc-500 font-medium">Liquidity</p>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-bold text-white">Pools</span>
                                                 </Link>
-                                                <Link href="/wallet" onClick={() => setActiveNavTab(null)} className="flex flex-col gap-3 p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group">
-                                                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
-                                                        <Wallet className="w-4 h-4" />
+
+                                                <Link href="/wallet" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-white/5 p-4 transition-all hover:border-white/10 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98]">
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                                    <div className="relative z-10 flex flex-col gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
+                                                            <Wallet className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-sm font-bold text-white group-hover:text-amber-200 transition-colors">Wallet</span>
+                                                            <p className="text-[10px] text-zinc-500 font-medium">Deposit/Withdraw</p>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-xs font-bold text-white">Wallet</span>
+                                                </Link>
+                                            </div>
+
+                                            {/* List Links */}
+                                            <div className="space-y-2 mb-auto">
+                                                <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all active:scale-[0.99]">
+                                                    <div className="flex items-center gap-3.5">
+                                                        <div className="w-8 h-8 rounded-lg bg-zinc-800/50 flex items-center justify-center text-amber-500/80 group-hover:text-amber-400 group-hover:bg-amber-500/10 transition-colors">
+                                                            <Trophy className="w-4 h-4" />
+                                                        </div>
+                                                        <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Leaderboard</span>
+                                                    </div>
+                                                    <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transform duration-200" />
+                                                </Link>
+
+                                                <Link href="/settings" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all active:scale-[0.99]">
+                                                    <div className="flex items-center gap-3.5">
+                                                        <div className="w-8 h-8 rounded-lg bg-zinc-800/50 flex items-center justify-center text-zinc-400 group-hover:text-white group-hover:bg-white/10 transition-colors">
+                                                            <Palette className="w-4 h-4" />
+                                                        </div>
+                                                        <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">Themes & Colors</span>
+                                                    </div>
+                                                    <ArrowUpRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transform duration-200" />
                                                 </Link>
                                             </div>
 
                                             {/* Footer Actions */}
-                                            <div className="space-y-1">
-                                                <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
-                                                    <div className="flex items-center gap-3">
-                                                        <Trophy className="w-4 h-4 text-amber-500/50" />
-                                                        Leaderboard
-                                                    </div>
-                                                </Link>
-                                                <Link href="/settings" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-xs font-medium">
-                                                    <div className="flex items-center gap-3">
-                                                        <Palette className="w-4 h-4 text-zinc-600" />
-                                                        Themes and Colors
-                                                    </div>
-                                                </Link>
-                                            </div>
-
-                                            <div className="pt-4 border-t border-white/5">
+                                            <div className="mt-8 pt-6 border-t border-white/5">
                                                 <Link
                                                     href="/api/auth/signout"
-                                                    className="w-full flex items-center justify-center gap-3 py-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white transition-all font-bold text-xs uppercase tracking-widest group"
+                                                    className="group relative flex items-center justify-center gap-2.5 w-full py-3.5 rounded-xl bg-rose-500/10 text-rose-400 font-bold text-xs uppercase tracking-widest hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-500/20 active:scale-[0.98] transition-all duration-300 overflow-hidden"
                                                 >
-                                                    <LogOut className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                                                    <LogOut className="w-4 h-4" />
                                                     Log Out Session
                                                 </Link>
                                             </div>
