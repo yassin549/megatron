@@ -60,6 +60,31 @@ function SearchItemImage({ src, alt }: { src?: string; alt: string }) {
 export function Navbar() {
     const { data: session, status } = useSession();
     const router = useRouter();
+
+    // Scroll behavior
+    const [isVisible, setIsVisible] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            // Only hide header on mobile
+            if (window.innerWidth < 768) {
+                if (currentScrollY > lastScrollY && currentScrollY > 80) {
+                    setIsVisible(false);
+                } else {
+                    setIsVisible(true);
+                }
+            } else {
+                setIsVisible(true);
+            }
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [lastScrollY]);
+
     // Mobile search state
     const [mobileSearchQuery, setMobileSearchQuery] = useState('');
     const [mobileSearchResults, setMobileSearchResults] = useState<any[]>([]);
@@ -180,7 +205,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className="glass-nav sticky top-0 z-50 h-16 transition-all duration-200">
+        <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full' : 'translate-y-0'}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
@@ -195,7 +220,7 @@ export function Navbar() {
                         />
                     </div>
                     <div className="flex items-center">
-                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200">
+                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200 hidden md:inline-block">
                             MEGATRON
                         </span>
                         <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
@@ -498,15 +523,36 @@ export function Navbar() {
                     )}
                 </div>
 
-                {/* 4. Mobile Toggle */}
+                {/* 4. Mobile Layout (Integrated Stats + Profile) */}
                 <div className="md:hidden flex items-center gap-3">
+                    {status === 'authenticated' && (
+                        <div className="flex items-center gap-3">
+                            <UserStats />
+                            <button
+                                onClick={() => setIsMobileMenuOpen(true)}
+                                className="transition-all active:scale-95"
+                            >
+                                <div className="w-8 h-8 rounded-full border border-white/10 overflow-hidden relative">
+                                    {session.user?.image ? (
+                                        <img src={session.user.image} alt="User" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-blue-800 text-white text-[10px] font-bold">
+                                            {session.user?.email?.[0]?.toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
+                            </button>
+                        </div>
+                    )}
 
-                    <button
-                        onClick={() => setIsMobileMenuOpen(true)}
-                        className="p-2 text-muted-foreground hover:text-white"
-                    >
-                        <Menu className="w-6 h-6" />
-                    </button>
+                    {status !== 'authenticated' && (
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="p-2 text-muted-foreground hover:text-white"
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                    )}
                 </div>
             </div>
 
