@@ -18,51 +18,66 @@ export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
     const dimensions = size === 'sm' ? 'w-8 h-5' : 'w-10 h-7';
 
     return (
-        <div className={`relative ${dimensions} flex items-center justify-center group/gauge`}>
+        <div className={`relative ${dimensions} flex items-center justify-center group/gauge rounded-md overflow-visible`}>
             {/* Simple Background Arc */}
-            <svg viewBox="0 -5 100 65" className="w-full h-full overflow-visible">
+            <svg viewBox="0 -5 100 65" className="w-full h-full overflow-visible preserve-3d">
                 <defs>
                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#F43F5E" /> {/* Rose */}
-                        <stop offset="50%" stopColor="#EAB308" /> {/* Yellow */}
-                        <stop offset="100%" stopColor="#10B981" /> {/* Emerald */}
+                        <stop offset="0%" stopColor="#F43F5E" /> {/* Rose - SELL */}
+                        <stop offset="50%" stopColor="#EAB308" /> {/* Yellow - NEUTRAL */}
+                        <stop offset="100%" stopColor="#10B981" /> {/* Emerald - BUY */}
                     </linearGradient>
                 </defs>
 
-                {/* Main Track */}
+                {/* Background Track - Solid dark base for contrast */}
                 <path
                     d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
-                    stroke="url(#gaugeGradient)"
-                    strokeWidth="6"
+                    stroke="#111827"
+                    strokeWidth="12"
                     strokeLinecap="round"
-                    className="opacity-25"
+                    className="opacity-100"
                 />
 
-                {/* Subtle Glow Track */}
+                {/* Colored Progress Track */}
                 <path
                     d="M 20,50 A 30,30 0 0 1 80,50"
                     fill="none"
                     stroke="url(#gaugeGradient)"
-                    strokeWidth="2"
+                    strokeWidth="10"
                     strokeLinecap="round"
-                    className="opacity-60 blur-[1px]"
+                    className="opacity-100"
+                />
+
+                {/* Neon Glow Layer */}
+                <path
+                    d="M 20,50 A 30,30 0 0 1 80,50"
+                    fill="none"
+                    stroke="url(#gaugeGradient)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    className="opacity-60 blur-[3px]"
                 />
             </svg>
 
-            {/* Needle */}
-            <div className="absolute inset-0 flex items-center justify-center">
+            {/* Needle - High Contrast */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none translate-y-[2px]">
                 <motion.div
                     className="relative w-full h-full flex justify-center"
+                    initial={{ rotate: rotation }}
                     animate={{ rotate: rotation }}
                     transition={{
                         type: 'spring',
-                        stiffness: 60,
+                        stiffness: 150,
                         damping: 15,
-                        mass: 0.8
+                        mass: 0.5
                     }}
                 >
-                    <div className="absolute bottom-[2px] w-[1px] h-[16px] bg-white rounded-full shadow-[0_0_5px_rgba(255,255,255,0.8)] origin-bottom" />
+                    {/* The Line (Needle) */}
+                    <div className="absolute bottom-[2px] w-[2.5px] h-[18px] bg-white rounded-full shadow-[0_0_12px_rgba(255,255,255,1)] origin-bottom z-10" />
+
+                    {/* Pivot point dot */}
+                    <div className="absolute bottom-[-2px] w-2 h-2 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)] z-20 border border-zinc-900" />
                 </motion.div>
             </div>
         </div>

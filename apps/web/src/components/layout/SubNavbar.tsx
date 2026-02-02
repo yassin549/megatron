@@ -141,8 +141,8 @@ export function SubNavbar() {
                         })}
                     </div>
 
-                    {/* View Toggle */}
-                    <div className="flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm ml-4 shrink-0">
+                    {/* View Toggle - Hidden on Mobile */}
+                    <div className="hidden md:flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm ml-4 shrink-0">
                         <button
                             onClick={() => toggleView('grid')}
                             className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}

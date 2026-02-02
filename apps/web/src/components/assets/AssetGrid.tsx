@@ -64,18 +64,32 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
 
     const handleMobileSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (mobileSearchText.trim()) {
-            router.push(`/?q=${encodeURIComponent(mobileSearchText)}&category=${categoryParam}`);
-        } else {
-            router.push(`/?category=${categoryParam}`);
+        // Blur input to hide keyboard
+        if (typeof document !== 'undefined') {
+            (document.activeElement as HTMLElement)?.blur();
         }
     };
 
-    // Filter assets (can be moved to server eventually, but client-side is fine for <1000 items)
+    // Live search effect
+    const [inputValue, setInputValue] = useState(searchParam);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (inputValue !== searchParam) {
+                if (inputValue.trim()) {
+                    router.push(`/?q=${encodeURIComponent(inputValue)}&category=${categoryParam}`, { scroll: false });
+                } else {
+                    router.push(`/?category=${categoryParam}`, { scroll: false });
+                }
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [inputValue, searchParam, categoryParam, router]);
+
+    // Filter assets
     const filteredAssets = initialAssets.filter((asset) => {
         // 1. Text Search
-        if (searchParam) {
-            const query = searchParam.toLowerCase();
+        const query = (searchParam || inputValue).toLowerCase();
+        if (query) {
             const matchesName = asset.name.toLowerCase().includes(query);
             const matchesDesc = asset.description?.toLowerCase().includes(query);
             if (!matchesName && !matchesDesc) return false;
@@ -88,6 +102,10 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
         return asset.type.toLowerCase() === categoryParam.toLowerCase();
     });
 
+    const suggestions = inputValue.trim()
+        ? initialAssets.filter(a => a.name.toLowerCase().includes(inputValue.toLowerCase())).slice(0, 5)
+        : [];
+
     return (
         <>
             {/* Search Bar (Mobile only) - Simplified and high-contrast */}
@@ -96,13 +114,38 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                     <input
                         name="mobileSearch"
                         type="text"
-                        value={mobileSearchText}
-                        onChange={(e) => setMobileSearchText(e.target.value)}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
                         placeholder="Search markets..."
                         className="w-full pl-10 pr-4 py-3 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
                     />
                     <Search className="absolute left-3 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
                 </form>
+
+                {/* Suggestions Dropdown */}
+                {inputValue.trim().length > 0 && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-obsidian-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                        {suggestions.map((asset) => (
+                            <Link
+                                key={asset.id}
+                                href={`/assets/${asset.id}`}
+                                className="flex items-center gap-3 p-3 hover:bg-white/5 border-b border-white/5 last:border-0"
+                            >
+                                <div className="w-8 h-8 rounded bg-white/5 flex items-center justify-center shrink-0">
+                                    {asset.imageUrl ? (
+                                        <img src={asset.imageUrl} alt="" className="w-full h-full object-cover rounded" />
+                                    ) : (
+                                        <Search className="w-4 h-4 text-zinc-600" />
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-white truncate">{asset.name}</p>
+                                    <p className="text-[10px] text-zinc-500 uppercase">{asset.type}</p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Assets Grid / List */}

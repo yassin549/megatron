@@ -342,84 +342,80 @@ export function AssetCard({
                             <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold bg-white/5 px-1.5 py-0.5 rounded">
                                 {type}
                             </span>
-                            {aiConfidence && (
-                                <span className="flex items-center gap-1 text-[10px] text-blue-400 font-mono">
-                                    <Zap className="w-3 h-3" /> {(aiConfidence * 100).toFixed(0)}%
-                                </span>
-                            )}
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Metrics Section */}
-                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
-                    {/* Price Block */}
-                    <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-lg font-bold text-white font-mono tracking-tight">
-                            ${livePrice.toFixed(2)}
-                        </div>
-                        <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
-                            } ${viewMode === 'list' ? 'justify-end' : ''}`}>
-                            {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                            {Math.abs(change24h).toFixed(2)}%
-                        </div>
+            {/* Metrics Section */}
+            <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
+                {/* Price Block */}
+                <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
+                    <div className="text-lg font-bold text-white font-mono tracking-tight">
+                        ${livePrice.toFixed(2)}
                     </div>
-
-                    {/* Chart (Hidden on small mobile list) */}
-                    <div className={`${viewMode === 'list' ? 'hidden sm:block' : ''}`}>
-                        <AssetMiniChart
-                            data={priceHistory || []}
-                            positive={isPositive}
-                            viewMode={viewMode}
-                        />
+                    <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                        } ${viewMode === 'list' ? 'justify-end' : ''}`}>
+                        {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                        {Math.abs(change24h).toFixed(2)}%
                     </div>
-
-                    {/* Meta Stats (List View Only) */}
-                    {viewMode === 'list' && (
-                        <div className="hidden md:flex items-center gap-6 text-xs text-zinc-400 font-mono">
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] uppercase text-zinc-600 font-bold">Vol</span>
-                                {formatVolume(volume24h)}
-                            </div>
-                            <div className="flex flex-col items-end">
-                                <span className="text-[10px] uppercase text-zinc-600 font-bold">Holders</span>
-                                {holders}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
-                {/* Footer Stats (Grid View Only) */}
-                {viewMode === 'grid' && (
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
-                                <Activity className="w-3 h-3" />
-                                {formatVolume(volume24h)}
-                            </div>
-                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
-                                <Users className="w-3 h-3" />
-                                {holders}
-                            </div>
-                        </div>
+                {/* Chart (Hidden on small mobile list) */}
+                <div className={`${viewMode === 'list' ? 'hidden sm:block' : ''}`}>
+                    <AssetMiniChart
+                        data={priceHistory || []}
+                        positive={isPositive}
+                        viewMode={viewMode}
+                    />
+                </div>
 
-                        {/* Mobile Pressure Gauge */}
-                        <div className="md:hidden">
-                            <PressureGauge value={livePressure} size="sm" />
+                {/* Meta Stats (List View Only) */}
+                {viewMode === 'list' && (
+                    <div className="hidden md:flex items-center gap-6 text-xs text-zinc-400 font-mono">
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] uppercase text-zinc-600 font-bold">Vol</span>
+                            {formatVolume(volume24h)}
                         </div>
-
-                        <button
-                            onClick={handleToggleBookmark}
-                            className={`p-1.5 rounded-lg transition-all ${isBookmarked
-                                ? 'text-neon-blue bg-blue-500/10'
-                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
-                                }`}
-                        >
-                            <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                        </button>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] uppercase text-zinc-600 font-bold">Holders</span>
+                            {holders}
+                        </div>
                     </div>
                 )}
-            </Link>
+            </div>
+
+            {/* Footer Stats (Grid View Only) */}
+            {viewMode === 'grid' && (
+                <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                            <Activity className="w-3 h-3" />
+                            {formatVolume(volume24h)}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                            <Users className="w-3 h-3" />
+                            {holders}
+                        </div>
+                    </div>
+
+                    {/* Mobile Pressure Gauge */}
+                    <div className="md:hidden">
+                        <PressureGauge value={livePressure} size="sm" />
+                    </div>
+
+                    <button
+                        onClick={handleToggleBookmark}
+                        className={`p-1.5 rounded-lg transition-all ${isBookmarked
+                            ? 'text-neon-blue bg-blue-500/10'
+                            : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                            }`}
+                    >
+                        <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                    </button>
+                </div>
+            )}
+        </Link>
         </motion.div >
     );
 }
