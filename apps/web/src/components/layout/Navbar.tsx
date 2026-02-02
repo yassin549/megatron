@@ -248,6 +248,7 @@ export function Navbar() {
                                     isOpen={!!activeNavTab}
                                     activeTab={activeNavTab}
                                     onClose={() => setActiveNavTab(null)}
+                                    userName={session?.user?.name}
                                 >
                                     {activeNavTab === 'profile' && session?.user && (
                                         <div className="flex flex-col h-full">

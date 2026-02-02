@@ -12,13 +12,15 @@ interface NavUnifiedWindowProps {
     activeTab: NavTab | null;
     onClose: () => void;
     children: React.ReactNode;
+    userName?: string | null;
 }
 
 export function NavUnifiedWindow({
     isOpen,
     activeTab,
     onClose,
-    children
+    children,
+    userName
 }: NavUnifiedWindowProps) {
     // Close on Escape
     useEffect(() => {
@@ -34,7 +36,7 @@ export function NavUnifiedWindow({
             case 'general': return 'Menu';
             case 'activity': return 'Activity';
             case 'bookmarks': return 'Watchlist';
-            case 'profile': return 'Identity';
+            case 'profile': return userName ? `Welcome back, ${userName.split(' ')[0]}` : 'Identity';
             default: return '';
         }
     };
@@ -44,7 +46,7 @@ export function NavUnifiedWindow({
             case 'general': return 'Navigation';
             case 'activity': return 'Neural Updates';
             case 'bookmarks': return 'Saved Markets';
-            case 'profile': return 'Personal Settings';
+            case 'profile': return '';
             default: return '';
         }
     };
@@ -70,7 +72,7 @@ export function NavUnifiedWindow({
                         className="w-[380px] h-[600px] bg-obsidian-900 border border-white/10 rounded-lg shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col nav-popover-content"
                     >
                         {/* Header */}
-                        <div className="p-6 border-b border-white/5 bg-white/[0.02] flex-shrink-0">
+                        <div className="p-4 border-b border-white/5 bg-white/[0.02] flex-shrink-0">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <motion.h3
