@@ -90,8 +90,8 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
 
     return (
         <>
-            {/* Mobile Search Bar */}
-            <div className="md:hidden mb-6">
+            {/* Search Bar (Mobile only) - Simplified and high-contrast */}
+            <div className="md:hidden mb-6 max-w-xl relative z-20">
                 <form onSubmit={handleMobileSearch} className="relative group">
                     <input
                         name="mobileSearch"

@@ -15,12 +15,12 @@ export function PressureGauge({ value, size = 'md' }: PressureGaugeProps) {
     // Map value (0-100) to rotation (-90deg to 90deg)
     const rotation = (value / 100) * 180 - 90;
 
-    const dimensions = size === 'sm' ? 'w-8 h-4' : 'w-10 h-6';
+    const dimensions = size === 'sm' ? 'w-8 h-5' : 'w-10 h-7';
 
     return (
-        <div className={`relative ${dimensions} flex items-center justify-center overflow-hidden group/gauge`}>
+        <div className={`relative ${dimensions} flex items-center justify-center group/gauge`}>
             {/* Simple Background Arc */}
-            <svg viewBox="0 0 100 60" className="w-full h-full">
+            <svg viewBox="0 -5 100 65" className="w-full h-full overflow-visible">
                 <defs>
                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="0%" stopColor="#F43F5E" /> {/* Rose */}

@@ -206,7 +206,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full' : 'translate-y-0'}`}>
+        <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
@@ -695,6 +695,13 @@ export function Navbar() {
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
                                                     Leaderboard
+                                                </div>
+                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                            </Link>
+                                            <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                                <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
+                                                    <Palette className="w-5 h-5 text-zinc-500 opacity-70 group-hover:opacity-100" />
+                                                    Themes and Colors
                                                 </div>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
                                             </Link>
