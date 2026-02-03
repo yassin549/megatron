@@ -149,172 +149,281 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-background">
-            <main className="max-w-7xl mx-auto px-4 py-8">
-                {/* Welcome Header */}
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="mb-10"
-                >
-                    <h1 className="text-4xl font-bold text-foreground tracking-tight">
-                        Welcome back, <span className="text-primary">{userData?.email.split('@')[0]}</span>
-                    </h1>
-                    <p className="text-muted-foreground mt-2 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                        System Online | Terminal connected via {userData?.email}
-                    </p>
-                </motion.div>
+            {/* =========================================
+                DESKTOP VIEW (Hidden on Mobile)
+               ========================================= */}
+            <div className="hidden md:block">
+                <main className="max-w-7xl mx-auto px-4 py-8">
+                    {/* Welcome Header */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="mb-10"
+                    >
+                        <h1 className="text-4xl font-bold text-foreground tracking-tight">
+                            Welcome back, <span className="text-primary">{userData?.email.split('@')[0]}</span>
+                        </h1>
+                        <p className="text-muted-foreground mt-2 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                            System Online | Terminal connected via {userData?.email}
+                        </p>
+                    </motion.div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                    {/* Left Column: Stats & Chart */}
-                    <div className="lg:col-span-8 space-y-6">
-                        {/* Highlights Grid */}
-                        <PortfolioStatsGrid stats={portfolioStats} loading={loading} />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                        {/* Left Column: Stats & Chart */}
+                        <div className="lg:col-span-8 space-y-6">
+                            {/* Highlights Grid */}
+                            <PortfolioStatsGrid stats={portfolioStats} loading={loading} />
 
-                        {/* Main Performance Chart */}
-                        <EquityCurveChart data={history} loading={historyLoading} />
-                    </div>
-
-                    {/* Right Column: Actions & Deposit */}
-                    <div className="lg:col-span-4 space-y-6">
-                        {/* Quick Actions Card */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: 0.2 }}
-                            className="glass-card rounded-2xl p-6 border-white/5"
-                        >
-                            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
-                                <div className="p-1.5 bg-primary/10 rounded-md">
-                                    <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M12 11V16M12 11V6M12 11H7M12 11H17" strokeLinecap="round" strokeLinejoin="round" />
-                                    </svg>
-                                </div>
-                                Terminal Actions
-                            </h2>
-                            <div className="grid grid-cols-1 gap-3">
-                                <Link
-                                    href="/assets"
-                                    className="flex items-center justify-between p-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 group"
-                                >
-                                    <span>Marketplace</span>
-                                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </Link>
-                                <Link
-                                    href="/lp"
-                                    className="flex items-center justify-between p-4 bg-white/5 text-foreground font-medium rounded-xl border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 group"
-                                >
-                                    <span>Liquidity Pools</span>
-                                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </Link>
-                                <Link
-                                    href="/wallet"
-                                    className="flex items-center justify-between p-4 bg-white/5 text-foreground font-medium rounded-xl border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 group"
-                                >
-                                    <span>Treasury Sync</span>
-                                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                    </svg>
-                                </Link>
-                            </div>
-                        </motion.div>
-
-                        {/* Expandable Deposit Card */}
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                            <DepositCard depositAddress={userData?.depositAddress} />
-                        </motion.div>
-                    </div>
-                </div>
-
-                {/* Portfolio Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-12"
-                >
-                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-4 mb-6">
-                        <div className="flex items-center gap-3">
-                            <h2 className="text-xl md:text-2xl font-bold text-foreground">
-                                Active Positions
-                            </h2>
-                            <span className="text-[10px] md:text-xs font-mono bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
-                                {portfolioStats?.positions.length || 0} TOTAL
-                            </span>
+                            {/* Main Performance Chart */}
+                            <EquityCurveChart data={history} loading={historyLoading} />
                         </div>
-                        <Link
-                            href="/portfolio"
-                            className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1 group w-fit"
-                        >
-                            <span>Terminal View</span>
-                            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </Link>
-                    </div>
 
-                    {portfolioStats && portfolioStats.positions.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {portfolioStats.positions.map((pos: Position, i: number) => (
-                                <motion.div
-                                    key={pos.assetId}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 0.5 + i * 0.05 }}
-                                    className="glass-card p-6 rounded-2xl hover:border-primary/30 transition-all group"
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{pos.assetName}</h3>
-                                            <p className="text-sm text-muted-foreground">{pos.shares.toFixed(4)} shares</p>
-                                        </div>
-                                        <div className={`px-2 py-1 rounded-lg text-xs font-bold ${pos.returnAbs >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                            {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <div>
-                                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Market Value</p>
-                                            <p className="text-xl font-bold font-mono">${pos.value.toFixed(2)}</p>
-                                        </div>
-                                        <Link
-                                            href={`/assets/${pos.assetId}`}
-                                            className="p-2 bg-white/5 rounded-lg hover:bg-primary hover:text-primary-foreground transition-all"
-                                        >
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
-                                        </Link>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-16 text-center backdrop-blur-sm">
-                            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <ActivityIcon className="w-10 h-10 text-primary opacity-50" />
-                            </div>
-                            <h3 className="text-xl font-bold text-foreground mb-2">Portfolio Empty</h3>
-                            <p className="text-muted-foreground mb-8 max-w-xs mx-auto">
-                                No active positions found in your terminal. Deploy capital to start tracking performance.
-                            </p>
-                            <Link
-                                href="/assets"
-                                className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-105"
+                        {/* Right Column: Actions & Deposit */}
+                        <div className="lg:col-span-4 space-y-6">
+                            {/* Quick Actions Card */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                                className="glass-card rounded-2xl p-6 border-white/5"
                             >
-                                Open Markets
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
+                                    <div className="p-1.5 bg-primary/10 rounded-md">
+                                        <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M12 11V16M12 11V6M12 11H7M12 11H17" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </div>
+                                    Terminal Actions
+                                </h2>
+                                <div className="grid grid-cols-1 gap-3">
+                                    <Link
+                                        href="/assets"
+                                        className="flex items-center justify-between p-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 group"
+                                    >
+                                        <span>Marketplace</span>
+                                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </Link>
+                                    <Link
+                                        href="/lp"
+                                        className="flex items-center justify-between p-4 bg-white/5 text-foreground font-medium rounded-xl border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 group"
+                                    >
+                                        <span>Liquidity Pools</span>
+                                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </Link>
+                                    <Link
+                                        href="/wallet"
+                                        className="flex items-center justify-between p-4 bg-white/5 text-foreground font-medium rounded-xl border border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-95 group"
+                                    >
+                                        <span>Treasury Sync</span>
+                                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </motion.div>
+
+                            {/* Expandable Deposit Card */}
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                                <DepositCard depositAddress={userData?.depositAddress} />
+                            </motion.div>
+                        </div>
+                    </div>
+
+                    {/* Portfolio Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mt-12"
+                    >
+                        <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-4 mb-6">
+                            <div className="flex items-center gap-3">
+                                <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                                    Active Positions
+                                </h2>
+                                <span className="text-[10px] md:text-xs font-mono bg-primary/10 text-primary px-2 py-1 rounded-full border border-primary/20">
+                                    {portfolioStats?.positions.length || 0} TOTAL
+                                </span>
+                            </div>
+                            <Link
+                                href="/portfolio"
+                                className="text-sm font-semibold text-primary hover:text-primary/80 flex items-center gap-1 group w-fit"
+                            >
+                                <span>Terminal View</span>
+                                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </Link>
                         </div>
-                    )}
-                </motion.div>
-            </main>
+
+                        {portfolioStats && portfolioStats.positions.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {portfolioStats.positions.map((pos: Position, i: number) => (
+                                    <motion.div
+                                        key={pos.assetId}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.5 + i * 0.05 }}
+                                        className="glass-card p-6 rounded-2xl hover:border-primary/30 transition-all group"
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="font-bold text-lg group-hover:text-primary transition-colors">{pos.assetName}</h3>
+                                                <p className="text-sm text-muted-foreground">{pos.shares.toFixed(4)} shares</p>
+                                            </div>
+                                            <div className={`px-2 py-1 rounded-lg text-xs font-bold ${pos.returnAbs >= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                                {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Market Value</p>
+                                                <p className="text-xl font-bold font-mono">${pos.value.toFixed(2)}</p>
+                                            </div>
+                                            <Link
+                                                href={`/assets/${pos.assetId}`}
+                                                className="p-2 bg-white/5 rounded-lg hover:bg-primary hover:text-primary-foreground transition-all"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                </svg>
+                                            </Link>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-16 text-center backdrop-blur-sm">
+                                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <ActivityIcon className="w-10 h-10 text-primary opacity-50" />
+                                </div>
+                                <h3 className="text-xl font-bold text-foreground mb-2">Portfolio Empty</h3>
+                                <p className="text-muted-foreground mb-8 max-w-xs mx-auto">
+                                    No active positions found in your terminal. Deploy capital to start tracking performance.
+                                </p>
+                                <Link
+                                    href="/assets"
+                                    className="inline-flex items-center gap-2 px-8 py-3 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 hover:scale-105"
+                                >
+                                    Open Markets
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </Link>
+                            </div>
+                        )}
+                    </motion.div>
+                </main>
+            </div>
+
+            {/* =========================================
+                MOBILE VIEW (Visible on Mobile)
+               ========================================= */}
+            <div className="md:hidden pb-24">
+                {/* Mobile Header */}
+                <div className="px-6 pt-6 pb-2 bg-background/80 backdrop-blur-sm sticky top-0 z-30">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-muted-foreground font-medium">Good Morning,</p>
+                            <h1 className="text-2xl font-bold text-foreground">{userData?.email.split('@')[0]}</h1>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-600 shadow-lg shadow-primary/20" />
+                    </div>
+                </div>
+
+                <div className="px-6 space-y-8 mt-4">
+                    {/* Hero Stats */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 rounded-3xl bg-gradient-to-br from-obsidian-900 to-obsidian-950 border border-white/10 shadow-2xl relative overflow-hidden"
+                    >
+                        <div className="absolute top-0 right-0 p-4 opacity-10">
+                            <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" /></svg>
+                        </div>
+                        <p className="text-sm text-muted-foreground font-medium mb-1">Total Equity</p>
+                        <h2 className="text-4xl font-mono font-bold text-white mb-4">
+                            ${portfolioStats?.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+                        </h2>
+                        <div className="flex items-center gap-3">
+                            <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${portfolioStats?.totalReturnPercent && portfolioStats.totalReturnPercent >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                {portfolioStats?.totalReturnPercent && portfolioStats.totalReturnPercent >= 0 ? '▲' : '▼'}
+                                {Math.abs(portfolioStats?.totalReturnPercent || 0).toFixed(2)}%
+                            </div>
+                            <span className="text-xs text-muted-foreground">last 24h</span>
+                        </div>
+                    </motion.div>
+
+                    {/* Quick Actions Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <Link href="/assets" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-card border border-white/5 active:scale-95 transition-transform">
+                            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center mb-2 text-blue-500">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">Trade</span>
+                        </Link>
+                        <Link href="/wallet" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-card border border-white/5 active:scale-95 transition-transform">
+                            <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center mb-2 text-emerald-500">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">Deposit</span>
+                        </Link>
+                        <Link href="/lp" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-card border border-white/5 active:scale-95 transition-transform">
+                            <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center mb-2 text-purple-500">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">Pools</span>
+                        </Link>
+                        <Link href="/leaderboard" className="flex flex-col items-center justify-center p-4 rounded-2xl bg-card border border-white/5 active:scale-95 transition-transform">
+                            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center mb-2 text-amber-500">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">Rank</span>
+                        </Link>
+                    </div>
+
+                    {/* Top Movers/Watchlist */}
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-foreground">Your Portfolio</h3>
+                            <Link href="/portfolio" className="text-xs text-primary font-medium">View All</Link>
+                        </div>
+                        <div className="space-y-3">
+                            {portfolioStats?.positions.slice(0, 5).map((pos) => (
+                                <Link href={`/assets/${pos.assetId}`} key={pos.assetId}>
+                                    <div className="flex items-center justify-between p-4 bg-card/50 border border-white/5 rounded-2xl active:bg-card/80 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center font-bold text-xs text-muted-foreground">
+                                                {pos.assetName[0]}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-foreground">{pos.assetName}</h4>
+                                                <p className="text-xs text-muted-foreground">{pos.shares.toFixed(2)} Shares</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-mono font-bold text-foreground">${pos.value.toFixed(2)}</p>
+                                            <p className={`text-xs font-medium ${pos.returnPercent >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            ))}
+                            {(!portfolioStats?.positions || portfolioStats.positions.length === 0) && (
+                                <div className="text-center py-8 text-muted-foreground text-sm">
+                                    No active positions.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
