@@ -674,7 +674,7 @@ export function Navbar() {
                                                         value={mobileSearchQuery}
                                                         onChange={(e) => setMobileSearchQuery(e.target.value)}
                                                         placeholder="Search markets..."
-                                                        className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/[0.05] transition-all"
+                                                        className="w-full pl-11 pr-4 py-3.5 bg-secondary/30 border border-border/50 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-secondary/50 transition-all"
                                                     />
                                                 </form>
 

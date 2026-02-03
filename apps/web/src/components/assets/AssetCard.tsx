@@ -199,7 +199,7 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-obsidian-800/80 backdrop-blur-md border border-white/5 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-white/10'
+                className={`block h-full bg-card/80 backdrop-blur-md border border-border/40 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-border/80'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'
@@ -270,7 +270,7 @@ export function AssetCard({
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.05 }}
-                                    className="text-xl font-bold text-white mb-3 leading-tight"
+                                    className="text-xl font-bold text-foreground mb-3 leading-tight"
                                 >
                                     {name}
                                 </motion.h3>
@@ -299,7 +299,7 @@ export function AssetCard({
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded bg-obsidian-900 border border-white/10 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
+                        <div className={`relative overflow-hidden rounded bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
@@ -336,12 +336,12 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                        <h3 className={`font-bold text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
+                        <h3 className={`font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
                             }`}>
                             {name}
                         </h3>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-bold bg-white/5 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold bg-secondary/30 px-1.5 py-0.5 rounded">
                                 {type}
                             </span>
                         </div>
@@ -352,7 +352,7 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-lg font-bold text-white font-mono tracking-tight">
+                        <div className="text-lg font-bold text-foreground font-mono tracking-tight">
                             ${livePrice.toFixed(2)}
                         </div>
                         <div className={`flex items-center gap-1 text-xs font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
@@ -388,13 +388,13 @@ export function AssetCard({
 
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
+                    <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono">
                                 <Activity className="w-3 h-3" />
                                 {formatVolume(volume24h)}
                             </div>
-                            <div className="flex items-center gap-1.5 text-zinc-500 text-[10px] font-mono">
+                            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono">
                                 <Users className="w-3 h-3" />
                                 {holders}
                             </div>
