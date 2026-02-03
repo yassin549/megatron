@@ -9,7 +9,6 @@ import { MobileListRow } from '@/components/mobile/MobileListRow';
 
 export default function SettingsPage() {
     return (
-    return (
         <div className="min-h-screen bg-black">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
@@ -193,6 +192,5 @@ export default function SettingsPage() {
                 </div>
             </div>
         </div>
-    );
     );
 }
