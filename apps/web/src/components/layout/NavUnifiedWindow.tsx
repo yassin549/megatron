@@ -69,7 +69,7 @@ export function NavUnifiedWindow({
                             stiffness: 400,
                             mass: 0.5
                         }}
-                        className="w-[380px] max-h-[85vh] h-auto bg-obsidian-900 border border-white/10 rounded-lg shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col nav-popover-content"
+                        className="w-[380px] h-[520px] bg-obsidian-900 border border-white/10 rounded-lg shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col nav-popover-content"
                     >
                         {/* Header */}
                         <div className="p-4 border-b border-white/5 bg-white/[0.02] flex-shrink-0">
