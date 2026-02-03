@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { PieChart, DollarSign, Wallet, TrendingUp, ArrowRight, ArrowUpRight, ArrowDownRight, Layers, Droplets, X, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { MobilePageHeader } from '@/components/mobile/MobilePageHeader';
+import { MobileListRow } from '@/components/mobile/MobileListRow';
 
 interface Position {
     assetId: string;
@@ -171,98 +173,170 @@ export default function PortfolioPage() {
 
     return (
         <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-500">
+            {/* =========================================
+                DESKTOP VIEW (Hidden on Mobile)
+               ========================================= */}
+            <div className="hidden md:block">
+                <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
+                    <div className="flex items-center justify-between mb-6 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Portfolio</h1>
+                    </div>
 
-            <main className="max-w-[1400px] mx-auto px-4 py-8 pb-32 md:pb-8">
-                <div className="flex items-center justify-between mb-6 md:mb-8">
-                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Portfolio</h1>
-                </div>
+                    {/* Institutional Status Ribbon - High Density */}
+                    <div className="bg-black/40 border border-white/5 rounded-[4px] mb-8 overflow-hidden shadow-2xl shrink-0">
+                        <div className="flex items-center gap-8 px-6 py-4 bg-white/[0.02] border-b border-white/5 overflow-x-auto no-scrollbar">
+                            <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Portfolio_Status</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            </div>
 
-                {/* Institutional Status Ribbon - High Density */}
-                <div className="bg-black/40 border border-white/5 rounded-[4px] mb-8 overflow-hidden shadow-2xl shrink-0">
-                    <div className="flex items-center gap-8 px-6 py-4 bg-white/[0.02] border-b border-white/5 overflow-x-auto no-scrollbar">
-                        <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Portfolio_Status</span>
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        </div>
-
-                        <div className="flex items-center gap-10 text-xs font-mono whitespace-nowrap">
-                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
-                                <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Net_Equity</span>
-                                <span className="text-white font-black text-sm">${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                            </div>
-                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
-                                <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Liquidity_Pools</span>
-                                <span className="text-cyan-400 font-black text-sm">${lpValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                            </div>
-                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
-                                <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Total_PnL</span>
-                                <span className={`font-black text-sm ${(lpData?.summary?.totalEarnings || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                    {(lpData?.summary?.totalEarnings || 0) >= 0 ? '+' : ''}${(lpData?.summary?.totalEarnings || 0).toFixed(2)}
-                                </span>
-                            </div>
-                            <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
-                                <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Cash_Balance</span>
-                                <span className="text-white font-black text-sm">${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                            <div className="flex items-center gap-10 text-xs font-mono whitespace-nowrap">
+                                <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
+                                    <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Net_Equity</span>
+                                    <span className="text-white font-black text-sm">${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
+                                    <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Liquidity_Pools</span>
+                                    <span className="text-cyan-400 font-black text-sm">${lpValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
+                                    <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Total_PnL</span>
+                                    <span className={`font-black text-sm ${(lpData?.summary?.totalEarnings || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                        {(lpData?.summary?.totalEarnings || 0) >= 0 ? '+' : ''}${(lpData?.summary?.totalEarnings || 0).toFixed(2)}
+                                    </span>
+                                </div>
+                                <div className="flex flex-col gap-0.5 border-l border-white/10 pl-6">
+                                    <span className="text-zinc-600 font-black uppercase text-[8px] tracking-widest">Cash_Balance</span>
+                                    <span className="text-white font-black text-sm">${cashBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="mb-8 md:mb-12">
+                    <div className="mb-8 md:mb-12">
+                        <div className="mb-4 flex items-center gap-2">
+                            <Droplets className="w-4 h-4 text-cyan-500" />
+                            <h2 className="text-lg font-black uppercase tracking-widest">Liquidity_Pools</h2>
+                            <span className="ml-2 px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-black rounded-sm border border-cyan-500/20">
+                                {lpData?.positions?.length || 0}_ACTIVE
+                            </span>
+                        </div>
+
+                        <div className="bg-black/20 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
+                            {lpData?.positions && lpData.positions.length > 0 ? (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead className="bg-white/[0.02] border-b border-white/5 text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em]">
+                                            <tr>
+                                                <th className="px-6 py-3 font-black">Instrument</th>
+                                                <th className="px-6 py-3 text-right font-black">Capital_Exposure</th>
+                                                <th className="px-6 py-3 text-right font-black">Asset_Value</th>
+                                                <th className="px-6 py-3 text-right font-black">Net_Yield</th>
+                                                <th className="px-6 py-3 text-right font-black">APY</th>
+                                                <th className="px-6 py-3 text-right font-black">Maturity</th>
+                                                <th className="px-6 py-3 text-right font-black">Control</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/[0.03] text-xs">
+                                            {lpData.positions.map((lp) => (
+                                                <tr key={lp.id} className="group hover:bg-white/[0.01] transition-colors">
+                                                    <td className="px-6 py-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="w-6 h-6 rounded-sm bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                                                                <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                                                            </div>
+                                                            <span className="font-black text-white uppercase tracking-tight">{lp.assetName}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">${lp.contributed.toLocaleString()}</td>
+                                                    <td className="px-6 py-3 text-right font-mono text-white font-black tracking-tighter">${lp.currentValue.toLocaleString()}</td>
+                                                    <td className="px-6 py-3 text-right">
+                                                        <span className={`font-mono font-black tracking-tighter ${lp.earnings >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                            {lp.earnings >= 0 ? '+' : ''}${lp.earnings.toFixed(2)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-right">
+                                                        <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-black border border-emerald-500/20 rounded-sm">
+                                                            {lp.apy}%
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-3 text-right text-[10px] text-zinc-500 font-mono uppercase font-bold">{lp.vestingEnd}</td>
+                                                    <td className="px-6 py-3 text-right">
+                                                        <button
+                                                            onClick={() => setWithdrawModal({ show: true, position: lp, amount: '', loading: false, error: '' })}
+                                                            className="inline-flex items-center gap-1.5 text-[9px] font-black text-rose-400 hover:text-white transition-all bg-rose-500/10 px-3 py-1.5 rounded-sm border border-rose-500/20 hover:bg-rose-500/40 uppercase tracking-widest"
+                                                        >
+                                                            Redeem_Shares
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="p-16 flex flex-col items-center justify-center text-center bg-black/40">
+                                    <div className="w-12 h-12 bg-white/[0.03] border border-white/5 rounded-sm flex items-center justify-center mb-4">
+                                        <Droplets className="w-6 h-6 text-zinc-600 opacity-40" />
+                                    </div>
+                                    <h3 className="text-xs font-black text-zinc-500 mb-1 uppercase tracking-widest">No_Pool_Exposure</h3>
+                                    <p className="text-[10px] text-zinc-600 uppercase tracking-tight mb-6">No active liquidity positions detected.</p>
+                                    <Link href="/" className="px-6 py-2 bg-primary/10 border border-primary/20 text-primary rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all">
+                                        Explore_Vaults
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Trading Positions Table - High Density Instrument View */}
                     <div className="mb-4 flex items-center gap-2">
-                        <Droplets className="w-4 h-4 text-cyan-500" />
-                        <h2 className="text-lg font-black uppercase tracking-widest">Liquidity_Pools</h2>
-                        <span className="ml-2 px-2 py-0.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-black rounded-sm border border-cyan-500/20">
-                            {lpData?.positions?.length || 0}_ACTIVE
+                        <Layers className="w-4 h-4 text-primary" />
+                        <h2 className="text-lg font-black uppercase tracking-widest">Market_Exposure</h2>
+                        <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-sm border border-primary/20">
+                            {data?.positions?.length || 0}_INSTRUMENTS
                         </span>
                     </div>
 
                     <div className="bg-black/20 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
-                        {lpData?.positions && lpData.positions.length > 0 ? (
+                        {data?.positions && data.positions.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead className="bg-white/[0.02] border-b border-white/5 text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em]">
                                         <tr>
-                                            <th className="px-6 py-3 font-black">Instrument</th>
-                                            <th className="px-6 py-3 text-right font-black">Capital_Exposure</th>
-                                            <th className="px-6 py-3 text-right font-black">Asset_Value</th>
-                                            <th className="px-6 py-3 text-right font-black">Net_Yield</th>
-                                            <th className="px-6 py-3 text-right font-black">APY</th>
-                                            <th className="px-6 py-3 text-right font-black">Maturity</th>
+                                            <th className="px-6 py-3 font-black">Asset_Node</th>
+                                            <th className="px-6 py-3 text-right font-black">Alloc_Shares</th>
+                                            <th className="px-6 py-3 text-right font-black">Entry_Price</th>
+                                            <th className="px-6 py-3 text-right font-black">Mark_Price</th>
+                                            <th className="px-6 py-3 text-right font-black">Hold_Value</th>
+                                            <th className="px-6 py-3 text-right font-black">PnL_Percent</th>
                                             <th className="px-6 py-3 text-right font-black">Control</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/[0.03] text-xs">
-                                        {lpData.positions.map((lp) => (
-                                            <tr key={lp.id} className="group hover:bg-white/[0.01] transition-colors">
+                                        {data.positions.map((pos) => (
+                                            <tr key={pos.assetId} className="group hover:bg-white/[0.01] transition-colors">
                                                 <td className="px-6 py-3">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="w-6 h-6 rounded-sm bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                                                            <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+                                                        <div className="w-6 h-6 rounded-sm bg-white/[0.03] flex items-center justify-center border border-white/10 text-[10px] font-black text-zinc-500">
+                                                            {pos.assetName[0]}
                                                         </div>
-                                                        <span className="font-black text-white uppercase tracking-tight">{lp.assetName}</span>
+                                                        <span className="font-black text-white hover:text-primary transition-colors cursor-pointer uppercase tracking-tight">{pos.assetName}</span>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">${lp.contributed.toLocaleString()}</td>
-                                                <td className="px-6 py-3 text-right font-mono text-white font-black tracking-tighter">${lp.currentValue.toLocaleString()}</td>
+                                                <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">{pos.shares.toFixed(4)}</td>
+                                                <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">${pos.avgPrice.toFixed(2)}</td>
+                                                <td className="px-6 py-3 text-right font-mono text-white font-bold tracking-tighter">${pos.currentPrice.toFixed(2)}</td>
+                                                <td className="px-6 py-3 text-right font-mono text-white font-black tracking-tighter">${pos.value.toLocaleString()}</td>
                                                 <td className="px-6 py-3 text-right">
-                                                    <span className={`font-mono font-black tracking-tighter ${lp.earnings >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                        {lp.earnings >= 0 ? '+' : ''}${lp.earnings.toFixed(2)}
-                                                    </span>
+                                                    <div className={`inline-flex items-center gap-1 font-mono font-black border-l border-white/10 pl-3 ${pos.returnPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                                        {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-3 text-right">
-                                                    <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-black border border-emerald-500/20 rounded-sm">
-                                                        {lp.apy}%
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-3 text-right text-[10px] text-zinc-500 font-mono uppercase font-bold">{lp.vestingEnd}</td>
-                                                <td className="px-6 py-3 text-right">
-                                                    <button
-                                                        onClick={() => setWithdrawModal({ show: true, position: lp, amount: '', loading: false, error: '' })}
-                                                        className="inline-flex items-center gap-1.5 text-[9px] font-black text-rose-400 hover:text-white transition-all bg-rose-500/10 px-3 py-1.5 rounded-sm border border-rose-500/20 hover:bg-rose-500/40 uppercase tracking-widest"
-                                                    >
-                                                        Redeem_Shares
-                                                    </button>
+                                                    <Link href={`/assets/${pos.assetId}`} className="inline-flex items-center gap-1.5 text-[9px] font-black text-primary hover:text-white transition-all bg-primary/10 px-3 py-1.5 rounded-sm border border-primary/20 hover:bg-primary/40 uppercase tracking-widest">
+                                                        Manage_Node <ArrowRight className="w-3 h-3" />
+                                                    </Link>
                                                 </td>
                                             </tr>
                                         ))}
@@ -272,86 +346,129 @@ export default function PortfolioPage() {
                         ) : (
                             <div className="p-16 flex flex-col items-center justify-center text-center bg-black/40">
                                 <div className="w-12 h-12 bg-white/[0.03] border border-white/5 rounded-sm flex items-center justify-center mb-4">
-                                    <Droplets className="w-6 h-6 text-zinc-600 opacity-40" />
+                                    <Layers className="w-6 h-6 text-zinc-600 opacity-40" />
                                 </div>
-                                <h3 className="text-xs font-black text-zinc-500 mb-1 uppercase tracking-widest">No_Pool_Exposure</h3>
-                                <p className="text-[10px] text-zinc-600 uppercase tracking-tight mb-6">No active liquidity positions detected.</p>
+                                <h3 className="text-xs font-black text-zinc-500 mb-1 uppercase tracking-widest">No_Market_Sync</h3>
+                                <p className="text-[10px] text-zinc-600 uppercase tracking-tight mb-6">Market exposure currently zero-indexed.</p>
                                 <Link href="/" className="px-6 py-2 bg-primary/10 border border-primary/20 text-primary rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all">
-                                    Explore_Vaults
+                                    Initialize_Trade
                                 </Link>
                             </div>
                         )}
                     </div>
-                </div>
+                </main>
+            </div>
 
-                {/* Trading Positions Table - High Density Instrument View */}
-                <div className="mb-4 flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-primary" />
-                    <h2 className="text-lg font-black uppercase tracking-widest">Market_Exposure</h2>
-                    <span className="ml-2 px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black rounded-sm border border-primary/20">
-                        {data?.positions?.length || 0}_INSTRUMENTS
-                    </span>
-                </div>
+            {/* =========================================
+                MOBILE VIEW (Visible on Mobile)
+               ========================================= */}
+            <div className="md:hidden pb-24">
+                <MobilePageHeader
+                    title="Portfolio"
+                    description="Assets & Performance"
+                />
 
-                <div className="bg-black/20 border border-white/5 rounded-[4px] overflow-hidden shadow-2xl">
-                    {data?.positions && data.positions.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead className="bg-white/[0.02] border-b border-white/5 text-[9px] text-zinc-500 uppercase font-black tracking-[0.2em]">
-                                    <tr>
-                                        <th className="px-6 py-3 font-black">Asset_Node</th>
-                                        <th className="px-6 py-3 text-right font-black">Alloc_Shares</th>
-                                        <th className="px-6 py-3 text-right font-black">Entry_Price</th>
-                                        <th className="px-6 py-3 text-right font-black">Mark_Price</th>
-                                        <th className="px-6 py-3 text-right font-black">Hold_Value</th>
-                                        <th className="px-6 py-3 text-right font-black">PnL_Percent</th>
-                                        <th className="px-6 py-3 text-right font-black">Control</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/[0.03] text-xs">
-                                    {data.positions.map((pos) => (
-                                        <tr key={pos.assetId} className="group hover:bg-white/[0.01] transition-colors">
-                                            <td className="px-6 py-3">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-6 h-6 rounded-sm bg-white/[0.03] flex items-center justify-center border border-white/10 text-[10px] font-black text-zinc-500">
-                                                        {pos.assetName[0]}
-                                                    </div>
-                                                    <span className="font-black text-white hover:text-primary transition-colors cursor-pointer uppercase tracking-tight">{pos.assetName}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">{pos.shares.toFixed(4)}</td>
-                                            <td className="px-6 py-3 text-right font-mono text-zinc-400 font-bold tracking-tighter">${pos.avgPrice.toFixed(2)}</td>
-                                            <td className="px-6 py-3 text-right font-mono text-white font-bold tracking-tighter">${pos.currentPrice.toFixed(2)}</td>
-                                            <td className="px-6 py-3 text-right font-mono text-white font-black tracking-tighter">${pos.value.toLocaleString()}</td>
-                                            <td className="px-6 py-3 text-right">
-                                                <div className={`inline-flex items-center gap-1 font-mono font-black border-l border-white/10 pl-3 ${pos.returnPercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                                    {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-3 text-right">
-                                                <Link href={`/assets/${pos.assetId}`} className="inline-flex items-center gap-1.5 text-[9px] font-black text-primary hover:text-white transition-all bg-primary/10 px-3 py-1.5 rounded-sm border border-primary/20 hover:bg-primary/40 uppercase tracking-widest">
-                                                    Manage_Node <ArrowRight className="w-3 h-3" />
-                                                </Link>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <div className="p-16 flex flex-col items-center justify-center text-center bg-black/40">
-                            <div className="w-12 h-12 bg-white/[0.03] border border-white/5 rounded-sm flex items-center justify-center mb-4">
-                                <Layers className="w-6 h-6 text-zinc-600 opacity-40" />
+                <div className="px-4 py-6 space-y-8">
+                    {/* 1. Total Equity Card - Premium Look */}
+                    <div className="p-6 rounded-3xl bg-gradient-to-br from-[#1a1f35] to-[#0f1219] border border-white/5 shadow-xl relative overflow-hidden">
+                        {/* Background Decoration */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[50px] rounded-full -translate-y-1/2 translate-x-1/2" />
+
+                        <div className="relative z-10">
+                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-widest">Total Net Worth</span>
+                            <div className="flex items-end gap-3 mt-2 mb-6">
+                                <h2 className="text-4xl font-mono font-bold text-white tracking-tight">
+                                    ${totalEquity.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </h2>
                             </div>
-                            <h3 className="text-xs font-black text-zinc-500 mb-1 uppercase tracking-widest">No_Market_Sync</h3>
-                            <p className="text-[10px] text-zinc-600 uppercase tracking-tight mb-6">Market exposure currently zero-indexed.</p>
-                            <Link href="/" className="px-6 py-2 bg-primary/10 border border-primary/20 text-primary rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-primary/20 transition-all">
-                                Initialize_Trade
-                            </Link>
+
+                            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-white/5">
+                                <div>
+                                    <p className="text-[10px] text-muted-foreground uppercase mb-1">24h Profit/Loss</p>
+                                    <p className={`text-sm font-bold flex items-center gap-1 ${(lpData?.summary?.totalEarnings || 0) >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                        {(lpData?.summary?.totalEarnings || 0) >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
+                                        {(lpData?.summary?.totalEarnings || 0) >= 0 ? '+' : ''}${(lpData?.summary?.totalEarnings || 0).toFixed(2)}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-muted-foreground uppercase mb-1">Cash Balance</p>
+                                    <p className="text-sm font-bold text-white">${cashBalance.toLocaleString()}</p>
+                                </div>
+                            </div>
                         </div>
-                    )}
+                    </div>
+
+                    {/* 2. Liquidity Pools Section */}
+                    <div>
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <div className="flex items-center gap-2">
+                                <Droplets className="w-4 h-4 text-cyan-500" />
+                                <h3 className="text-sm font-bold text-foreground">Liquidity Pools</h3>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{lpData?.positions?.length || 0} Active</span>
+                        </div>
+
+                        <div className="space-y-3">
+                            {lpData?.positions && lpData.positions.length > 0 ? (
+                                lpData.positions.map((lp) => (
+                                    <MobileListRow
+                                        key={lp.id}
+                                        label={lp.assetName}
+                                        subLabel={`Yield: ${lp.apy}% APY`}
+                                        value={`$${lp.currentValue.toLocaleString()}`}
+                                        subValue={
+                                            <span className={lp.earnings >= 0 ? 'text-emerald-500' : 'text-rose-500'}>
+                                                {lp.earnings >= 0 ? '+' : ''}${lp.earnings.toFixed(2)}
+                                            </span>
+                                        }
+                                        icon={<Droplets className="w-5 h-5 text-cyan-500" />}
+                                        onClick={() => setWithdrawModal({ show: true, position: lp, amount: '', loading: false, error: '' })}
+                                    />
+                                ))
+                            ) : (
+                                <div className="p-8 text-center bg-card/30 rounded-2xl border border-white/5 border-dashed">
+                                    <p className="text-xs text-muted-foreground">No active liquidity positions.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* 3. Market Positions Section */}
+                    <div>
+                        <div className="flex items-center justify-between mb-4 px-1">
+                            <div className="flex items-center gap-2">
+                                <Layers className="w-4 h-4 text-primary" />
+                                <h3 className="text-sm font-bold text-foreground">Market Positions</h3>
+                            </div>
+                            <span className="text-xs text-muted-foreground">{data?.positions?.length || 0} Open</span>
+                        </div>
+
+                        <div className="space-y-3">
+                            {data?.positions && data.positions.length > 0 ? (
+                                data.positions.map((pos) => (
+                                    <Link href={`/assets/${pos.assetId}`} key={pos.assetId} className="block">
+                                        <MobileListRow
+                                            label={pos.assetName}
+                                            subLabel={`${pos.shares.toFixed(4)} Shares`}
+                                            value={`$${pos.value.toLocaleString()}`}
+                                            subValue={
+                                                <span className={pos.returnPercent >= 0 ? 'text-emerald-500' : 'text-rose-500'}>
+                                                    {pos.returnPercent >= 0 ? '+' : ''}{pos.returnPercent.toFixed(2)}%
+                                                </span>
+                                            }
+                                            icon={<div className="font-bold text-xs">{pos.assetName[0]}</div>}
+                                        />
+                                    </Link>
+                                ))
+                            ) : (
+                                <div className="p-8 text-center bg-card/30 rounded-2xl border border-white/5 border-dashed">
+                                    <p className="text-xs text-muted-foreground">No open market positions.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
-            </main>
+            </div>
 
             {/* Withdraw Modal - Institutional Refinement */}
             {withdrawModal.show && withdrawModal.position && (

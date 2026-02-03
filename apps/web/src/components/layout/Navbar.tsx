@@ -221,7 +221,7 @@ export function Navbar() {
                         />
                     </div>
                     <div className="flex items-center">
-                        <span className="font-bold text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200 hidden md:inline-block">
+                        <span className="font-bold text-xl md:text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200">
                             MEGATRON
                         </span>
                         <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
