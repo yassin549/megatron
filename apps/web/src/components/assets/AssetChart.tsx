@@ -48,7 +48,7 @@ export function AssetChart({
     onSelectPosition,
     watermarkText,
     userTrades = [],
-    userTrades = [],
+
     hideTools = false,
     toolsPosition = 'center'
 }: ChartProps) {
@@ -671,8 +671,8 @@ export function AssetChart({
             {!hideTools && (
                 <div
                     className={`absolute z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl transition-all ${toolsPosition === 'bottom-left'
-                            ? 'left-2 bottom-4'
-                            : 'left-3 top-1/2 -translate-y-1/2'
+                        ? 'left-2 bottom-4'
+                        : 'left-3 top-1/2 -translate-y-1/2'
                         }`}
                 >
                     <button
