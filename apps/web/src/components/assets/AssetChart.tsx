@@ -33,6 +33,7 @@ interface ChartProps {
     }>;
     hideTools?: boolean;
     toolsPosition?: 'center' | 'bottom-left';
+    toolsClassName?: string;
 }
 
 export function AssetChart({
@@ -50,7 +51,8 @@ export function AssetChart({
     userTrades = [],
 
     hideTools = false,
-    toolsPosition = 'center'
+    toolsPosition = 'center',
+    toolsClassName
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<Nullable<Chart>>(null);
@@ -670,7 +672,7 @@ export function AssetChart({
             {/* Toolbar conditionally rendered */}
             {!hideTools && (
                 <div
-                    className={`absolute z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl transition-all ${toolsPosition === 'bottom-left'
+                    className={toolsClassName || `absolute z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl transition-all ${toolsPosition === 'bottom-left'
                         ? 'left-2 bottom-4'
                         : 'left-3 top-1/2 -translate-y-1/2'
                         }`}

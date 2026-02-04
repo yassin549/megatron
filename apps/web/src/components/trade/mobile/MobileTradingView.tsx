@@ -150,20 +150,20 @@ export function MobileTradingView({
 
     return (
         <div className="lg:hidden flex flex-col h-full min-h-0 relative bg-[#09090b]">
-            {/* Header */}
+            {/* Header - Fixed Top */}
             <MobileHeader
                 assetName={asset.name}
                 price={livePrice}
                 change24h={asset.change24h}
             />
 
-            {/* Buy/Sell Buttons - Only on Chart Page, Top Position */}
+            {/* Floating Buy/Sell Buttons - Top Below Header - NO CONTAINER */}
             {activeTab === 'chart' && (
-                <div className="flex gap-3 px-4 py-2 bg-black/40 border-b border-white/5">
+                <div className="absolute top-[60px] left-4 right-4 z-50 flex gap-3 pointer-events-none">
                     <motion.button
                         onClick={() => handleOpenTrade('buy')}
                         whileTap={{ scale: 0.98 }}
-                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-900/20"
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-900/20 pointer-events-auto backdrop-blur-md"
                     >
                         <TrendingUp className="w-3.5 h-3.5" />
                         Buy
@@ -171,7 +171,7 @@ export function MobileTradingView({
                     <motion.button
                         onClick={() => handleOpenTrade('sell')}
                         whileTap={{ scale: 0.98 }}
-                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-1.5 bg-rose-600/90 hover:bg-rose-500 text-white transition-all shadow-lg shadow-rose-900/20"
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-[10px] flex items-center justify-center gap-1.5 bg-rose-600/90 hover:bg-rose-500 text-white transition-all shadow-lg shadow-rose-900/20 pointer-events-auto backdrop-blur-md"
                     >
                         <TrendingDown className="w-3.5 h-3.5" />
                         Sell
@@ -179,84 +179,80 @@ export function MobileTradingView({
                 </div>
             )}
 
-            {/* Main Content Area with Left Sidebar */}
-            <div className="flex-1 flex min-h-0 relative">
-                {/* Left Navigation Sidebar - Vertical */}
-                <div className="w-14 flex flex-col justify-end items-center pb-6 border-r border-white/5 bg-black/20 z-30">
-                    <div className="flex flex-col gap-2">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
-                            const colors = tabColors[tab.id];
-                            const activeColor = tabActiveColors[tab.id];
-                            return (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`relative p-3 rounded-xl transition-all duration-300 ${isActive
-                                        ? activeColor
-                                        : 'text-zinc-600 hover:text-zinc-400'
-                                        }`}
-                                    title={tab.label}
-                                >
-                                    <Icon className="w-5 h-5" />
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="tab-indicator-mobile"
-                                            className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-xl -z-10 shadow-lg ${colors.glow}`}
-                                            transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
-                                        />
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Tab Content */}
-                <div className="flex-1 min-w-0 relative h-full">
-                    {activeTab === 'chart' && (
-                        <div className="absolute inset-0">
-                            {chartData.length > 0 ? (
-                                <ErrorBoundary name="Mobile Chart">
-                                    <AssetChart
-                                        data={chartData}
-                                        marginalPrice={livePrice}
-                                        marketPrice={asset.marketPrice}
-                                        watermarkText=""
-                                        colors={chartColors}
-                                        priceLines={priceLines}
-                                        userTrades={asset.userTrades}
-                                        hideTools={false}
-                                        toolsPosition="bottom-left"
-                                    />
-                                </ErrorBoundary>
-                            ) : (
-                                <div className="h-full flex items-center justify-center">
-                                    <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
-                                </div>
+            {/* Floating Nav Bar - Vertical Left Bottom */}
+            <div className="absolute left-4 bottom-6 z-50 flex flex-col gap-2">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    const colors = tabColors[tab.id];
+                    const activeColor = tabActiveColors[tab.id];
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`relative p-3 rounded-xl transition-all duration-300 bg-black/60 backdrop-blur-xl border border-white/5 shadow-xl ${isActive
+                                ? activeColor
+                                : 'text-zinc-500 hover:text-zinc-300'
+                                }`}
+                            title={tab.label}
+                        >
+                            <Icon className="w-5 h-5" />
+                            {isActive && (
+                                <motion.div
+                                    layoutId="tab-indicator-mobile"
+                                    className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-xl -z-10 shadow-lg ${colors.glow}`}
+                                    transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                                />
                             )}
-                        </div>
-                    )}
+                        </button>
+                    );
+                })}
+            </div>
 
-                    {activeTab === 'book' && (
-                        <div className="absolute inset-0">
-                            <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
-                        </div>
-                    )}
+            {/* Tab Content Areas */}
+            <div className="flex-1 min-w-0 relative h-full">
+                {activeTab === 'chart' && (
+                    <div className="absolute inset-0 mb-[68px]"> {/* Space for nav not blocking content? Tools are above */}
+                        {chartData.length > 0 ? (
+                            <ErrorBoundary name="Mobile Chart">
+                                <AssetChart
+                                    data={chartData}
+                                    marginalPrice={livePrice}
+                                    marketPrice={asset.marketPrice}
+                                    watermarkText=""
+                                    colors={chartColors}
+                                    priceLines={priceLines}
+                                    userTrades={asset.userTrades}
+                                    hideTools={false}
+                                    toolsPosition="bottom-left"
+                                    toolsClassName="absolute left-4 bottom-[230px] z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl"
+                                />
+                            </ErrorBoundary>
+                        ) : (
+                            <div className="h-full flex items-center justify-center">
+                                <Loader2 className="w-6 h-6 animate-spin text-zinc-500" />
+                            </div>
+                        )}
+                    </div>
+                )}
 
-                    {activeTab === 'oracle' && (
-                        <div className="absolute inset-0">
-                            <MobileOracleTerminal oracleLogs={oracleLogs} />
-                        </div>
-                    )}
+                {activeTab === 'book' && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black p-4 pt-16">
+                        <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
+                    </div>
+                )}
 
-                    {activeTab === 'stats' && (
-                        <div className="absolute inset-0">
-                            <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
-                        </div>
-                    )}
-                </div>
+                {activeTab === 'oracle' && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black p-4 pt-16">
+                        <MobileOracleTerminal oracleLogs={oracleLogs} />
+                    </div>
+                )}
+
+                {activeTab === 'stats' && (
+                    <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black p-4 pt-16">
+                        <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
+                    </div>
+                )}
             </div>
 
             {/* Trade Sheet Modal */}
