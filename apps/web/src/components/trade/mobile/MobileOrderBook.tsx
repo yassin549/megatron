@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRealtimeAssetData } from '@/hooks/useRealtimeAssetData';
+import { BookOpen, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 interface MobileOrderBookProps {
     assetId: string;
@@ -49,7 +50,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
         const gridAsks: OrderBookEntry[] = [];
         const gridBids: OrderBookEntry[] = [];
 
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 8; i++) {
             const price = Number((priceNum + i * step).toFixed(2));
             const amount = rawAsks
                 .filter((o) => Math.abs(Number(o.price || 0) - price) <= step / 2)
@@ -57,7 +58,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
             gridAsks.push({ price, amount, total: 0 });
         }
 
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 8; i++) {
             const price = Number((priceNum - i * step).toFixed(2));
             const amount = rawBids
                 .filter((o) => Math.abs(Number(o.price || 0) - price) <= step / 2)
@@ -100,44 +101,52 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
 
     if (loading && rawBids.length === 0 && rawAsks.length === 0) {
         return (
-            <div className="h-full flex items-center justify-center">
-                <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest animate-pulse">
-                    Loading...
+            <div className="h-full flex flex-col items-center justify-center gap-3">
+                <BookOpen className="w-8 h-8 text-zinc-700 animate-pulse" />
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                    Loading Order Book...
                 </span>
             </div>
         );
     }
 
     return (
-        <div className="h-full flex flex-col font-mono text-[10px] select-none">
+        <div className="h-full flex flex-col font-mono text-[11px] select-none pb-28 bg-gradient-to-b from-transparent to-black/20">
             {/* Header */}
-            <div className="grid grid-cols-3 px-3 py-2 text-zinc-500 font-bold uppercase tracking-tight border-b border-white/5">
-                <span>Price</span>
+            <div className="grid grid-cols-3 px-4 py-3 text-zinc-500 font-bold uppercase tracking-tight border-b border-white/5 bg-black/40">
+                <span className="flex items-center gap-1.5">
+                    <div className="w-1 h-3 rounded-full bg-gradient-to-b from-rose-500 to-emerald-500" />
+                    Price
+                </span>
                 <span className="text-right">Size</span>
                 <span className="text-right">Total</span>
             </div>
 
-            {/* Asks */}
+            {/* Asks (Sell Orders) */}
             <div className="flex-1 flex flex-col-reverse justify-end overflow-hidden">
                 <AnimatePresence initial={false}>
-                    {processedAsks.map((order) => (
+                    {processedAsks.map((order, idx) => (
                         <motion.div
                             key={`ask-${order.price}`}
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="relative h-7 flex items-center"
+                            transition={{ delay: idx * 0.02 }}
+                            className="relative h-9 flex items-center group"
                         >
                             <div
-                                className="absolute right-0 inset-y-0 bg-rose-500/10"
+                                className="absolute right-0 inset-y-0 bg-gradient-to-l from-rose-500/15 to-transparent transition-all"
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
-                            <div className="grid grid-cols-3 w-full px-3 relative z-10">
-                                <span className="text-rose-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">
-                                    {order.amount === 0 ? '--' : order.amount.toFixed(1)}
+                            <div className="grid grid-cols-3 w-full px-4 relative z-10">
+                                <span className="text-rose-400 font-bold flex items-center gap-1">
+                                    <ArrowUpRight className="w-3 h-3 opacity-40" />
+                                    ${order.price.toFixed(2)}
                                 </span>
-                                <span className="text-right text-zinc-500">
-                                    {order.amount === 0 ? '--' : order.total.toFixed(0)}
+                                <span className={`text-right transition-colors ${order.amount > 0 ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                                    {order.amount === 0 ? '—' : order.amount.toFixed(2)}
+                                </span>
+                                <span className={`text-right transition-colors ${order.amount > 0 ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                                    {order.amount === 0 ? '—' : order.total.toFixed(0)}
                                 </span>
                             </div>
                         </motion.div>
@@ -145,40 +154,46 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
                 </AnimatePresence>
             </div>
 
-            {/* Spread */}
-            <div className="px-3 py-2 border-y border-white/10 bg-white/[0.02] flex items-center justify-between">
-                <div>
-                    <span className="text-sm font-black text-white">${assetPrice.toFixed(2)}</span>
-                    <span className="text-[8px] text-zinc-500 uppercase ml-1.5">Mark</span>
+            {/* Central Price / Spread */}
+            <div className="px-4 py-3 border-y border-white/10 bg-gradient-to-r from-white/[0.03] to-transparent flex items-center justify-between">
+                <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-black text-white tabular-nums">
+                        ${assetPrice.toFixed(2)}
+                    </span>
+                    <span className="text-[9px] text-zinc-500 uppercase font-bold tracking-widest">Mark</span>
                 </div>
-                <div className="text-right">
-                    <span className="text-[8px] text-zinc-500 uppercase mr-1.5">Spread</span>
-                    <span className="text-white font-bold">${spread.val.toFixed(2)}</span>
-                    <span className="text-zinc-600 ml-1">({spread.pct.toFixed(2)}%)</span>
+                <div className="flex items-center gap-2 text-right">
+                    <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-widest">Spread</span>
+                    <span className="text-sm text-white font-bold tabular-nums">${spread.val.toFixed(2)}</span>
+                    <span className="text-xs text-zinc-500 tabular-nums">({spread.pct.toFixed(2)}%)</span>
                 </div>
             </div>
 
-            {/* Bids */}
+            {/* Bids (Buy Orders) */}
             <div className="flex-1 overflow-hidden">
                 <AnimatePresence initial={false}>
-                    {processedBids.map((order) => (
+                    {processedBids.map((order, idx) => (
                         <motion.div
                             key={`bid-${order.price}`}
                             initial={{ opacity: 0, x: -5 }}
                             animate={{ opacity: 1, x: 0 }}
-                            className="relative h-7 flex items-center"
+                            transition={{ delay: idx * 0.02 }}
+                            className="relative h-9 flex items-center group"
                         >
                             <div
-                                className="absolute right-0 inset-y-0 bg-emerald-500/10"
+                                className="absolute right-0 inset-y-0 bg-gradient-to-l from-emerald-500/15 to-transparent transition-all"
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
-                            <div className="grid grid-cols-3 w-full px-3 relative z-10">
-                                <span className="text-emerald-400 font-bold">${order.price.toFixed(2)}</span>
-                                <span className="text-right text-zinc-400">
-                                    {order.amount === 0 ? '--' : order.amount.toFixed(1)}
+                            <div className="grid grid-cols-3 w-full px-4 relative z-10">
+                                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                    <ArrowDownRight className="w-3 h-3 opacity-40" />
+                                    ${order.price.toFixed(2)}
                                 </span>
-                                <span className="text-right text-zinc-500">
-                                    {order.amount === 0 ? '--' : order.total.toFixed(0)}
+                                <span className={`text-right transition-colors ${order.amount > 0 ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                                    {order.amount === 0 ? '—' : order.amount.toFixed(2)}
+                                </span>
+                                <span className={`text-right transition-colors ${order.amount > 0 ? 'text-zinc-400' : 'text-zinc-700'}`}>
+                                    {order.amount === 0 ? '—' : order.total.toFixed(0)}
                                 </span>
                             </div>
                         </motion.div>

@@ -65,9 +65,24 @@ interface MobileTradingViewProps {
 const tabs: { id: MobileTab; icon: React.ElementType; label: string }[] = [
     { id: 'chart', icon: LineChart, label: 'Chart' },
     { id: 'book', icon: BookOpen, label: 'Book' },
-    { id: 'oracle', icon: Sparkles, label: 'Oracle' },
+    { id: 'oracle', icon: Sparkles, label: 'AI' },
     { id: 'stats', icon: BarChart3, label: 'Stats' },
 ];
+
+// Tab indicator colors based on active tab
+const tabColors: Record<MobileTab, { bg: string; border: string; glow: string }> = {
+    chart: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', glow: 'shadow-emerald-500/20' },
+    book: { bg: 'bg-blue-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
+    oracle: { bg: 'bg-violet-500/20', border: 'border-violet-500/40', glow: 'shadow-violet-500/20' },
+    stats: { bg: 'bg-amber-500/20', border: 'border-amber-500/40', glow: 'shadow-amber-500/20' },
+};
+
+const tabActiveColors: Record<MobileTab, string> = {
+    chart: 'text-emerald-400',
+    book: 'text-blue-400',
+    oracle: 'text-violet-400',
+    stats: 'text-amber-400',
+};
 
 export function MobileTradingView({
     asset,
@@ -235,7 +250,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 bg-black/20"
+                            className="absolute inset-0"
                         >
                             <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
                         </motion.div>
@@ -250,7 +265,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 bg-black/20 overflow-y-auto"
+                            className="absolute inset-0 overflow-y-auto"
                         >
                             <MobileOracleTerminal oracleLogs={oracleLogs} />
                         </motion.div>
@@ -265,60 +280,64 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 bg-black/20 overflow-y-auto"
+                            className="absolute inset-0 overflow-y-auto"
                         >
-                            <MobileStatsPanel stats={stats} />
+                            <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Vertical Icon Nav - Bottom Right */}
-                <div className="absolute right-3 bottom-3 z-30 flex flex-col gap-1 p-1.5 bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
-                    {tabs.map((tab) => {
-                        const Icon = tab.icon;
-                        const isActive = activeTab === tab.id;
-                        return (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`relative p-2.5 rounded-xl transition-all duration-200 ${isActive
-                                    ? 'text-white bg-white/10'
-                                    : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'
-                                    }`}
-                                title={tab.label}
-                            >
-                                <Icon className="w-4 h-4" />
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="tab-indicator"
-                                        className="absolute inset-0 bg-primary/20 border border-primary/30 rounded-xl -z-10"
-                                        transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                                    />
-                                )}
-                            </button>
-                        );
-                    })}
+                {/* Vertical Icon Nav - Bottom Right - Larger, matching bottom nav style */}
+                <div className="absolute right-3 bottom-20 z-30">
+                    <div className="flex flex-col gap-1.5 p-2 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl">
+                        {tabs.map((tab) => {
+                            const Icon = tab.icon;
+                            const isActive = activeTab === tab.id;
+                            const colors = tabColors[tab.id];
+                            const activeColor = tabActiveColors[tab.id];
+                            return (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`relative p-3.5 rounded-xl transition-all duration-300 ${isActive
+                                            ? activeColor
+                                            : 'text-zinc-600 hover:text-zinc-400'
+                                        }`}
+                                    title={tab.label}
+                                >
+                                    <Icon className="w-5 h-5" />
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="tab-indicator-mobile"
+                                            className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-xl -z-10 shadow-lg ${colors.glow}`}
+                                            transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                                        />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
 
-            {/* Floating Buy/Sell Buttons - Above bottom nav */}
-            <div className="px-4 py-3 bg-black/80 backdrop-blur-xl border-t border-white/5">
-                <div className="flex gap-3">
-                    <button
-                        onClick={() => handleOpenTrade('buy')}
-                        className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white transition-all shadow-lg shadow-emerald-900/30"
-                    >
-                        <TrendingUp className="w-4 h-4" />
-                        Buy
-                    </button>
-                    <button
-                        onClick={() => handleOpenTrade('sell')}
-                        className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 active:scale-[0.98] text-white transition-all shadow-lg shadow-rose-900/30"
-                    >
-                        <TrendingDown className="w-4 h-4" />
-                        Sell
-                    </button>
-                </div>
+            {/* Floating Buy/Sell Buttons - No container, just floating buttons */}
+            <div className="absolute bottom-[76px] left-4 right-4 z-20 flex gap-3">
+                <motion.button
+                    onClick={() => handleOpenTrade('buy')}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-xl shadow-emerald-900/40"
+                >
+                    <TrendingUp className="w-4 h-4" />
+                    Buy
+                </motion.button>
+                <motion.button
+                    onClick={() => handleOpenTrade('sell')}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-xl shadow-rose-900/40"
+                >
+                    <TrendingDown className="w-4 h-4" />
+                    Sell
+                </motion.button>
             </div>
 
             {/* Trade Sheet Modal */}
@@ -479,8 +498,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('buy')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${isBuy
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'text-zinc-500'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'text-zinc-500'
                         }`}
                 >
                     Buy
@@ -488,8 +507,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('sell')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${!isBuy
-                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                        : 'text-zinc-500'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            : 'text-zinc-500'
                         }`}
                 >
                     Sell
@@ -554,8 +573,8 @@ function TradeSheet({
                 onClick={handleSubmit}
                 disabled={isSubmitting || !amount}
                 className={`w-full h-14 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${isBuy
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
-                    : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                        : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
                     }`}
             >
                 {isSubmitting ? (
