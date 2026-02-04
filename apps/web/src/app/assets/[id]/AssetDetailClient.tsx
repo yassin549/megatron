@@ -336,5 +336,7 @@ export function AssetDetailClient({
                 livePrice={livePrice}
                 onRefresh={refreshData}
             />
-            );
+        </div>
+    );
 }
+
