@@ -31,6 +31,7 @@ interface ChartProps {
         quantity: number;
         side: 'buy' | 'sell';
     }>;
+    hideTools?: boolean;
 }
 
 export function AssetChart({
@@ -45,7 +46,8 @@ export function AssetChart({
     activePositionId,
     onSelectPosition,
     watermarkText,
-    userTrades = []
+    userTrades = [],
+    hideTools = false
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<Nullable<Chart>>(null);
@@ -652,7 +654,7 @@ export function AssetChart({
                 )}
             </AnimatePresence>
 
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl">
+            {!hideTools && <div className="absolute left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl">
                 <button
                     onClick={() => setActiveTool(null)}
                     className={`p-2 rounded-lg transition-all ${!activeTool ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
@@ -690,9 +692,9 @@ export function AssetChart({
                 >
                     <Trash2 className="w-4 h-4" />
                 </button>
-            </div>
+            </div>}
 
-            <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
+            {!hideTools && <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
                 {timeframes.map((tf) => (
                     <button
                         key={tf.label}
@@ -705,14 +707,14 @@ export function AssetChart({
                         {tf.label}
                     </button>
                 ))}
-            </div>
+            </div>}
 
-            <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
+            {!hideTools && <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                     Live
                 </span>
-            </div>
+            </div>}
 
             <div className="flex-1 relative">
                 <div ref={chartContainerRef} className="w-full h-full" />
