@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, TrendingDown, LineChart, BookOpen, Sparkles, BarChart3, X, Loader2 } from 'lucide-react';
+import {
+    ArrowLeft, TrendingUp, TrendingDown, LineChart, BookOpen, Sparkles, BarChart3,
+    X, Loader2, Crosshair, TrendingUp as TrendUp, Minus, MousePointer2
+} from 'lucide-react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useNotification } from '@/context/NotificationContext';
@@ -69,7 +72,7 @@ const tabs: { id: MobileTab; icon: React.ElementType; label: string }[] = [
     { id: 'stats', icon: BarChart3, label: 'Stats' },
 ];
 
-// Tab indicator colors based on active tab
+// Tab indicator colors
 const tabColors: Record<MobileTab, { bg: string; border: string; glow: string }> = {
     chart: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', glow: 'shadow-emerald-500/20' },
     book: { bg: 'bg-blue-500/20', border: 'border-blue-500/40', glow: 'shadow-blue-500/20' },
@@ -84,6 +87,14 @@ const tabActiveColors: Record<MobileTab, string> = {
     stats: 'text-amber-400',
 };
 
+// Chart tools
+const chartTools = [
+    { id: 'crosshair', icon: Crosshair, label: 'Crosshair' },
+    { id: 'trendline', icon: TrendUp, label: 'Trendline' },
+    { id: 'hline', icon: Minus, label: 'H-Line' },
+    { id: 'cursor', icon: MousePointer2, label: 'Cursor' },
+];
+
 export function MobileTradingView({
     asset,
     oracleLogs,
@@ -94,6 +105,7 @@ export function MobileTradingView({
     const [activeTab, setActiveTab] = useState<MobileTab>('chart');
     const [showTradeSheet, setShowTradeSheet] = useState(false);
     const [tradeSide, setTradeSide] = useState<'buy' | 'sell'>('buy');
+    const [activeTool, setActiveTool] = useState<string | null>(null);
 
     const chartData = useMemo(() => {
         return (priceHistory || [])
@@ -152,8 +164,8 @@ export function MobileTradingView({
 
     // Page transition direction
     const getDirection = (newTab: MobileTab) => {
-        const currentIndex = tabs.findIndex(t => t.id === activeTab);
-        const newIndex = tabs.findIndex(t => t.id === newTab);
+        const currentIndex = tabs.findIndex((t) => t.id === activeTab);
+        const newIndex = tabs.findIndex((t) => t.id === newTab);
         return newIndex > currentIndex ? 1 : -1;
     };
 
@@ -174,7 +186,7 @@ export function MobileTradingView({
 
     return (
         <div className="lg:hidden flex flex-col h-full min-h-0 relative">
-            {/* Compact Header */}
+            {/* Compact Header with Asset Info */}
             <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5 bg-black/60 backdrop-blur-xl z-20">
                 <Link
                     href="/"
@@ -194,7 +206,8 @@ export function MobileTradingView({
                             className={`text-[10px] font-bold tabular-nums ${isPositive ? 'text-emerald-400' : 'text-rose-400'
                                 }`}
                         >
-                            {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
+                            {isPositive ? '+' : ''}
+                            {asset.change24h.toFixed(2)}%
                         </span>
                     </div>
                 </div>
@@ -206,90 +219,57 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Full-Page Content Area */}
-            <div className="flex-1 min-h-0 relative overflow-hidden">
-                <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
+            {/* Buy/Sell Buttons - Only on Chart Page, Below Header */}
+            {activeTab === 'chart' && (
+                <div className="flex gap-3 px-4 py-2.5 bg-black/40 border-b border-white/5">
+                    <motion.button
+                        onClick={() => handleOpenTrade('buy')}
+                        whileTap={{ scale: 0.97 }}
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-900/30"
+                    >
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        Buy
+                    </motion.button>
+                    <motion.button
+                        onClick={() => handleOpenTrade('sell')}
+                        whileTap={{ scale: 0.97 }}
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-lg shadow-rose-900/30"
+                    >
+                        <TrendingDown className="w-3.5 h-3.5" />
+                        Sell
+                    </motion.button>
+                </div>
+            )}
+
+            {/* Main Content Area with Left Navigation */}
+            <div className="flex-1 min-h-0 flex relative">
+                {/* Left Sidebar: Chart Tools (on chart page) + Navigation */}
+                <div className="w-12 flex-shrink-0 flex flex-col bg-[#0a0d14] border-r border-white/5 z-20">
+                    {/* Chart Tools - Only visible on Chart page */}
                     {activeTab === 'chart' && (
-                        <motion.div
-                            key="chart"
-                            custom={getDirection('chart')}
-                            variants={pageVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0"
-                        >
-                            {chartData.length > 0 ? (
-                                <ErrorBoundary name="Mobile Chart">
-                                    <AssetChart
-                                        data={chartData}
-                                        marginalPrice={livePrice}
-                                        marketPrice={asset.marketPrice}
-                                        watermarkText=""
-                                        colors={chartColors}
-                                        priceLines={priceLines}
-                                        userTrades={asset.userTrades}
-                                        hideTools
-                                    />
-                                </ErrorBoundary>
-                            ) : (
-                                <div className="h-full flex items-center justify-center bg-black/20">
-                                    <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                                </div>
-                            )}
-                        </motion.div>
+                        <div className="flex flex-col gap-1 p-1.5 border-b border-white/5">
+                            {chartTools.map((tool) => {
+                                const Icon = tool.icon;
+                                const isActive = activeTool === tool.id;
+                                return (
+                                    <button
+                                        key={tool.id}
+                                        onClick={() => setActiveTool(isActive ? null : tool.id)}
+                                        className={`p-2 rounded-lg transition-all ${isActive
+                                                ? 'bg-primary/20 text-primary border border-primary/30'
+                                                : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'
+                                            }`}
+                                        title={tool.label}
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                    </button>
+                                );
+                            })}
+                        </div>
                     )}
 
-                    {activeTab === 'book' && (
-                        <motion.div
-                            key="book"
-                            custom={getDirection('book')}
-                            variants={pageVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0"
-                        >
-                            <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'oracle' && (
-                        <motion.div
-                            key="oracle"
-                            custom={getDirection('oracle')}
-                            variants={pageVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 overflow-y-auto"
-                        >
-                            <MobileOracleTerminal oracleLogs={oracleLogs} />
-                        </motion.div>
-                    )}
-
-                    {activeTab === 'stats' && (
-                        <motion.div
-                            key="stats"
-                            custom={getDirection('stats')}
-                            variants={pageVariants}
-                            initial="enter"
-                            animate="center"
-                            exit="exit"
-                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 overflow-y-auto"
-                        >
-                            <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Vertical Icon Nav - Bottom Right - Above the buy/sell buttons */}
-                <div className="absolute right-3 bottom-36 z-30">
-                    <div className="flex flex-col gap-1.5 p-2 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl">
+                    {/* Page Navigation */}
+                    <div className="flex-1 flex flex-col justify-end p-1.5 gap-1">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -299,9 +279,7 @@ export function MobileTradingView({
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`relative p-3.5 rounded-xl transition-all duration-300 ${isActive
-                                        ? activeColor
-                                        : 'text-zinc-600 hover:text-zinc-400'
+                                    className={`relative p-2.5 rounded-xl transition-all duration-300 ${isActive ? activeColor : 'text-zinc-600 hover:text-zinc-400'
                                         }`}
                                     title={tab.label}
                                 >
@@ -318,26 +296,93 @@ export function MobileTradingView({
                         })}
                     </div>
                 </div>
-            </div>
 
-            {/* Floating Buy/Sell Buttons - Fixed to viewport, above bottom nav */}
-            <div className="fixed bottom-[72px] left-4 right-4 z-40 flex gap-3 pointer-events-auto lg:hidden">
-                <motion.button
-                    onClick={() => handleOpenTrade('buy')}
-                    whileTap={{ scale: 0.97 }}
-                    className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-xl shadow-emerald-900/40"
-                >
-                    <TrendingUp className="w-4 h-4" />
-                    Buy
-                </motion.button>
-                <motion.button
-                    onClick={() => handleOpenTrade('sell')}
-                    whileTap={{ scale: 0.97 }}
-                    className="flex-1 h-12 rounded-2xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-xl shadow-rose-900/40"
-                >
-                    <TrendingDown className="w-4 h-4" />
-                    Sell
-                </motion.button>
+                {/* Page Content */}
+                <div className="flex-1 min-w-0 relative overflow-hidden">
+                    <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
+                        {activeTab === 'chart' && (
+                            <motion.div
+                                key="chart"
+                                custom={getDirection('chart')}
+                                variants={pageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                className="absolute inset-0"
+                            >
+                                {chartData.length > 0 ? (
+                                    <ErrorBoundary name="Mobile Chart">
+                                        <AssetChart
+                                            data={chartData}
+                                            marginalPrice={livePrice}
+                                            marketPrice={asset.marketPrice}
+                                            watermarkText=""
+                                            colors={chartColors}
+                                            priceLines={priceLines}
+                                            userTrades={asset.userTrades}
+                                            hideTools
+                                        />
+                                    </ErrorBoundary>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center bg-black/20">
+                                        <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'book' && (
+                            <motion.div
+                                key="book"
+                                custom={getDirection('book')}
+                                variants={pageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                className="absolute inset-0"
+                            >
+                                <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'oracle' && (
+                            <motion.div
+                                key="oracle"
+                                custom={getDirection('oracle')}
+                                variants={pageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 overflow-y-auto"
+                            >
+                                <MobileOracleTerminal oracleLogs={oracleLogs} />
+                            </motion.div>
+                        )}
+
+                        {activeTab === 'stats' && (
+                            <motion.div
+                                key="stats"
+                                custom={getDirection('stats')}
+                                variants={pageVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                className="absolute inset-0 overflow-y-auto"
+                            >
+                                <MobileStatsPanel
+                                    stats={stats}
+                                    assetName={asset.name}
+                                    price={livePrice}
+                                    change={asset.change24h}
+                                />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {/* Trade Sheet Modal */}
@@ -488,7 +533,10 @@ function TradeSheet({
                 <h3 className="text-lg font-bold text-white">
                     {isBuy ? 'Buy' : 'Sell'} {assetName}
                 </h3>
-                <button onClick={onClose} className="p-2 text-zinc-500 hover:text-white rounded-lg transition-colors">
+                <button
+                    onClick={onClose}
+                    className="p-2 text-zinc-500 hover:text-white rounded-lg transition-colors"
+                >
                     <X className="w-5 h-5" />
                 </button>
             </div>
@@ -498,8 +546,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('buy')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${isBuy
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        : 'text-zinc-500'
+                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                            : 'text-zinc-500'
                         }`}
                 >
                     Buy
@@ -507,8 +555,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('sell')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${!isBuy
-                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                        : 'text-zinc-500'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                            : 'text-zinc-500'
                         }`}
                 >
                     Sell
@@ -564,25 +612,21 @@ function TradeSheet({
             )}
 
             {/* Error */}
-            {error && (
-                <div className="text-sm text-rose-400 font-medium px-1 mb-4">{error}</div>
-            )}
+            {error && <div className="text-sm text-rose-400 font-medium px-1 mb-4">{error}</div>}
 
             {/* Submit */}
             <button
                 onClick={handleSubmit}
                 disabled={isSubmitting || !amount}
                 className={`w-full h-14 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${isBuy
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
-                    : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                        : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
                     }`}
             >
                 {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                    <>
-                        {isBuy ? 'Confirm Buy' : 'Confirm Sell'}
-                    </>
+                    <>{isBuy ? 'Confirm Buy' : 'Confirm Sell'}</>
                 )}
             </button>
         </div>

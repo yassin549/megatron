@@ -111,7 +111,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
     }
 
     return (
-        <div className="h-full flex flex-col font-mono text-[11px] select-none pb-28 bg-gradient-to-b from-transparent to-black/20">
+        <div className="h-full flex flex-col font-mono text-[11px] select-none bg-gradient-to-b from-transparent to-black/20">
             {/* Header */}
             <div className="grid grid-cols-3 px-4 py-3 text-zinc-500 font-bold uppercase tracking-tight border-b border-white/5 bg-black/40">
                 <span className="flex items-center gap-1.5">

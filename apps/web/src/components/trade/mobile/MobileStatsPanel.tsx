@@ -58,7 +58,7 @@ export function MobileStatsPanel({ stats, assetName, price, change }: MobileStat
     ];
 
     return (
-        <div className="h-full flex flex-col p-4 pb-32">
+        <div className="h-full flex flex-col p-4">
             {/* Hero Section */}
             {assetName && price !== undefined && (
                 <motion.div
