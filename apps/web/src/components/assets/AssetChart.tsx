@@ -125,6 +125,10 @@ export function AssetChart({
                 },
                 candle: {
                     type: 'area' as any,
+                    tooltip: {
+                        showRule: hideTools ? 'none' : 'always',
+                        showType: 'standard'
+                    },
                     area: {
                         lineColor: colors?.lineColor || '#34d399',
                         lineSize: 2,
@@ -139,6 +143,12 @@ export function AssetChart({
                             rippleColor: colors?.areaTopColor || 'rgba(52, 211, 153, 0.2)',
                             rippleRadius: 8
                         }
+                    }
+                },
+                indicator: {
+                    tooltip: {
+                        showRule: hideTools ? 'none' : 'always',
+                        showType: 'standard'
                     }
                 },
                 xAxis: {
@@ -220,7 +230,7 @@ export function AssetChart({
             }
             chartRef.current = null;
         };
-    }, [colors, watermarkText]); // Re-init if visual config or symbol identity changes
+    }, [colors, watermarkText, hideTools]); // Re-init if visual config or symbol identity changes
 
     // Update styles reactively when colors change
     useEffect(() => {

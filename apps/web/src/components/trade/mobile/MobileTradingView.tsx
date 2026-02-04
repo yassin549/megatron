@@ -287,8 +287,8 @@ export function MobileTradingView({
                     )}
                 </AnimatePresence>
 
-                {/* Vertical Icon Nav - Bottom Right - Larger, matching bottom nav style */}
-                <div className="absolute right-3 bottom-20 z-30">
+                {/* Vertical Icon Nav - Bottom Right - Above the buy/sell buttons */}
+                <div className="absolute right-3 bottom-36 z-30">
                     <div className="flex flex-col gap-1.5 p-2 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl">
                         {tabs.map((tab) => {
                             const Icon = tab.icon;
@@ -300,8 +300,8 @@ export function MobileTradingView({
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`relative p-3.5 rounded-xl transition-all duration-300 ${isActive
-                                            ? activeColor
-                                            : 'text-zinc-600 hover:text-zinc-400'
+                                        ? activeColor
+                                        : 'text-zinc-600 hover:text-zinc-400'
                                         }`}
                                     title={tab.label}
                                 >
@@ -320,8 +320,8 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Floating Buy/Sell Buttons - No container, just floating buttons */}
-            <div className="absolute bottom-[76px] left-4 right-4 z-20 flex gap-3">
+            {/* Floating Buy/Sell Buttons - Fixed to viewport, above bottom nav */}
+            <div className="fixed bottom-[72px] left-4 right-4 z-40 flex gap-3 pointer-events-auto lg:hidden">
                 <motion.button
                     onClick={() => handleOpenTrade('buy')}
                     whileTap={{ scale: 0.97 }}
@@ -498,8 +498,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('buy')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${isBuy
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'text-zinc-500'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : 'text-zinc-500'
                         }`}
                 >
                     Buy
@@ -507,8 +507,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('sell')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${!isBuy
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'text-zinc-500'
+                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                        : 'text-zinc-500'
                         }`}
                 >
                     Sell
@@ -573,8 +573,8 @@ function TradeSheet({
                 onClick={handleSubmit}
                 disabled={isSubmitting || !amount}
                 className={`w-full h-14 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${isBuy
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
-                        : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                    : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
                     }`}
             >
                 {isSubmitting ? (
