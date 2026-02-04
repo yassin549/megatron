@@ -190,7 +190,7 @@ export function OrderForm({
         );
     }
 
-    const springConfig = { type: 'spring', stiffness: 400, damping: 30 };
+    const springConfig = { type: 'spring' as const, stiffness: 400, damping: 30 };
 
     return (
         <LayoutGroup>
