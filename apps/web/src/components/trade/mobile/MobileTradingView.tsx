@@ -2,14 +2,17 @@
 
 import { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, LineChart, BookOpen, Sparkles, BarChart3, X, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { MobileTabBar, MobileTab } from './MobileTabBar';
+import { useSession } from 'next-auth/react';
+import { useNotification } from '@/context/NotificationContext';
 import { MobileOrderBook } from './MobileOrderBook';
 import { MobileOracleTerminal } from './MobileOracleTerminal';
 import { MobileStatsPanel } from './MobileStatsPanel';
 import { AssetChart } from '@/components/assets/AssetChart';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
+
+type MobileTab = 'chart' | 'book' | 'oracle' | 'stats';
 
 interface Asset {
     id: string;
@@ -58,6 +61,13 @@ interface MobileTradingViewProps {
     livePrice: number;
     onRefresh: () => void;
 }
+
+const tabs: { id: MobileTab; icon: React.ElementType; label: string }[] = [
+    { id: 'chart', icon: LineChart, label: 'Chart' },
+    { id: 'book', icon: BookOpen, label: 'Book' },
+    { id: 'oracle', icon: Sparkles, label: 'Oracle' },
+    { id: 'stats', icon: BarChart3, label: 'Stats' },
+];
 
 export function MobileTradingView({
     asset,
@@ -125,13 +135,35 @@ export function MobileTradingView({
         setShowTradeSheet(true);
     };
 
+    // Page transition direction
+    const getDirection = (newTab: MobileTab) => {
+        const currentIndex = tabs.findIndex(t => t.id === activeTab);
+        const newIndex = tabs.findIndex(t => t.id === newTab);
+        return newIndex > currentIndex ? 1 : -1;
+    };
+
+    const pageVariants = {
+        enter: (direction: number) => ({
+            x: direction > 0 ? '100%' : '-100%',
+            opacity: 0,
+        }),
+        center: {
+            x: 0,
+            opacity: 1,
+        },
+        exit: (direction: number) => ({
+            x: direction > 0 ? '-100%' : '100%',
+            opacity: 0,
+        }),
+    };
+
     return (
-        <div className="lg:hidden flex flex-col h-full min-h-0">
-            {/* Compact Asset Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/5 bg-black/40">
+        <div className="lg:hidden flex flex-col h-full min-h-0 relative">
+            {/* Compact Header */}
+            <div className="flex items-center gap-3 px-4 py-2.5 border-b border-white/5 bg-black/60 backdrop-blur-xl z-20">
                 <Link
                     href="/"
-                    className="p-2 -ml-2 text-zinc-500 hover:text-white transition-colors rounded-lg"
+                    className="p-1.5 -ml-1.5 text-zinc-500 hover:text-white transition-colors rounded-lg"
                 >
                     <ArrowLeft className="w-4 h-4" />
                 </Link>
@@ -140,11 +172,11 @@ export function MobileTradingView({
                         {asset.name}
                     </p>
                     <div className="flex items-center gap-2">
-                        <span className="text-base font-black text-white tabular-nums">
+                        <span className="text-sm font-black text-white tabular-nums">
                             ${livePrice.toFixed(2)}
                         </span>
                         <span
-                            className={`text-xs font-bold tabular-nums ${isPositive ? 'text-emerald-400' : 'text-rose-400'
+                            className={`text-[10px] font-bold tabular-nums ${isPositive ? 'text-emerald-400' : 'text-rose-400'
                                 }`}
                         >
                             {isPositive ? '+' : ''}{asset.change24h.toFixed(2)}%
@@ -159,69 +191,66 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Chart - Clean, no sidebar tools */}
-            <div className="h-[220px] shrink-0 bg-black/20">
-                {chartData.length > 0 ? (
-                    <ErrorBoundary name="Mobile Chart">
-                        <AssetChart
-                            data={chartData}
-                            marginalPrice={livePrice}
-                            marketPrice={asset.marketPrice}
-                            watermarkText=""
-                            colors={chartColors}
-                            priceLines={priceLines}
-                            userTrades={asset.userTrades}
-                            hideTools
-                        />
-                    </ErrorBoundary>
-                ) : (
-                    <div className="h-full flex items-center justify-center">
-                        <div className="w-5 h-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                    </div>
-                )}
-            </div>
-
-            {/* Tab Bar */}
-            <div className="py-2 px-4 shrink-0">
-                <MobileTabBar activeTab={activeTab} onTabChange={setActiveTab} />
-            </div>
-
-            {/* Tab Content - Scrollable */}
-            <div className="flex-1 min-h-0 overflow-y-auto">
-                <AnimatePresence mode="wait">
+            {/* Full-Page Content Area */}
+            <div className="flex-1 min-h-0 relative overflow-hidden">
+                <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
                     {activeTab === 'chart' && (
                         <motion.div
-                            key="chart-empty"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="h-full"
-                        />
+                            key="chart"
+                            custom={getDirection('chart')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0"
+                        >
+                            {chartData.length > 0 ? (
+                                <ErrorBoundary name="Mobile Chart">
+                                    <AssetChart
+                                        data={chartData}
+                                        marginalPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        watermarkText=""
+                                        colors={chartColors}
+                                        priceLines={priceLines}
+                                        userTrades={asset.userTrades}
+                                        hideTools
+                                    />
+                                </ErrorBoundary>
+                            ) : (
+                                <div className="h-full flex items-center justify-center bg-black/20">
+                                    <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                </div>
+                            )}
+                        </motion.div>
                     )}
 
                     {activeTab === 'book' && (
                         <motion.div
                             key="book"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="h-full px-4"
+                            custom={getDirection('book')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 bg-black/20"
                         >
-                            <div className="bg-black/30 border border-white/5 rounded-2xl overflow-hidden h-full">
-                                <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
-                            </div>
+                            <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
                         </motion.div>
                     )}
 
                     {activeTab === 'oracle' && (
                         <motion.div
                             key="oracle"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="h-full"
+                            custom={getDirection('oracle')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 bg-black/20 overflow-y-auto"
                         >
                             <MobileOracleTerminal oracleLogs={oracleLogs} />
                         </motion.div>
@@ -230,31 +259,61 @@ export function MobileTradingView({
                     {activeTab === 'stats' && (
                         <motion.div
                             key="stats"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="h-full"
+                            custom={getDirection('stats')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 bg-black/20 overflow-y-auto"
                         >
                             <MobileStatsPanel stats={stats} />
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                {/* Vertical Icon Nav - Bottom Right */}
+                <div className="absolute right-3 bottom-3 z-30 flex flex-col gap-1 p-1.5 bg-black/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`relative p-2.5 rounded-xl transition-all duration-200 ${isActive
+                                    ? 'text-white bg-white/10'
+                                    : 'text-zinc-600 hover:text-zinc-300 hover:bg-white/5'
+                                    }`}
+                                title={tab.label}
+                            >
+                                <Icon className="w-4 h-4" />
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="tab-indicator"
+                                        className="absolute inset-0 bg-primary/20 border border-primary/30 rounded-xl -z-10"
+                                        transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
-            {/* Buy/Sell Action Buttons - Fixed above bottom nav */}
-            <div className="px-4 py-3 border-t border-white/5 bg-black/80 backdrop-blur-xl">
+            {/* Floating Buy/Sell Buttons - Above bottom nav */}
+            <div className="px-4 py-3 bg-black/80 backdrop-blur-xl border-t border-white/5">
                 <div className="flex gap-3">
                     <button
                         onClick={() => handleOpenTrade('buy')}
-                        className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-lg shadow-emerald-900/30"
+                        className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 active:scale-[0.98] text-white transition-all shadow-lg shadow-emerald-900/30"
                     >
                         <TrendingUp className="w-4 h-4" />
                         Buy
                     </button>
                     <button
                         onClick={() => handleOpenTrade('sell')}
-                        className="flex-1 h-12 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-colors shadow-lg shadow-rose-900/30"
+                        className="flex-1 h-11 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 active:scale-[0.98] text-white transition-all shadow-lg shadow-rose-900/30"
                     >
                         <TrendingDown className="w-4 h-4" />
                         Sell
@@ -262,25 +321,23 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Trade Sheet - Slide up modal */}
+            {/* Trade Sheet Modal */}
             <AnimatePresence>
                 {showTradeSheet && (
                     <>
-                        {/* Backdrop */}
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/60 z-50"
+                            className="fixed inset-0 bg-black/70 z-50"
                             onClick={() => setShowTradeSheet(false)}
                         />
-                        {/* Sheet */}
                         <motion.div
                             initial={{ y: '100%' }}
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 rounded-t-3xl border-t border-white/10 max-h-[80vh] overflow-y-auto"
+                            className="fixed bottom-0 left-0 right-0 z-50 bg-zinc-900 rounded-t-3xl border-t border-white/10 max-h-[75vh] overflow-y-auto"
                         >
                             <TradeSheet
                                 assetId={asset.id}
@@ -302,12 +359,7 @@ export function MobileTradingView({
     );
 }
 
-// Trade Sheet Component (inline for simplicity)
-import { useState as useLocalState, useEffect as useLocalEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { useNotification } from '@/context/NotificationContext';
-import { Loader2, X } from 'lucide-react';
-
+// Inline Trade Sheet Component
 interface TradeSheetProps {
     assetId: string;
     assetName: string;
@@ -327,22 +379,22 @@ function TradeSheet({
     onClose,
     onSuccess,
 }: TradeSheetProps) {
-    const { data: session, status } = useSession();
+    const { status } = useSession();
     const { showNotification } = useNotification();
 
-    const [amount, setAmount] = useLocalState('');
-    const [balance, setBalance] = useLocalState<number | null>(null);
-    const [isSubmitting, setIsSubmitting] = useLocalState(false);
-    const [error, setError] = useLocalState<string | null>(null);
+    const [amount, setAmount] = useState('');
+    const [balance, setBalance] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    useLocalEffect(() => {
+    useState(() => {
         if (status === 'authenticated') {
             fetch('/api/user/me')
                 .then((res) => res.json())
                 .then((data) => setBalance(parseFloat(data.walletHotBalance || '0')))
                 .catch(() => { });
         }
-    }, [status]);
+    });
 
     const estimation = useMemo(() => {
         const numAmount = parseFloat(amount);
@@ -406,7 +458,7 @@ function TradeSheet({
     const isBuy = side === 'buy';
 
     return (
-        <div className="p-5">
+        <div className="p-5 pb-8">
             {/* Handle */}
             <div className="flex justify-center mb-4">
                 <div className="w-10 h-1 rounded-full bg-white/20" />
@@ -417,7 +469,7 @@ function TradeSheet({
                 <h3 className="text-lg font-bold text-white">
                     {isBuy ? 'Buy' : 'Sell'} {assetName}
                 </h3>
-                <button onClick={onClose} className="p-2 text-zinc-500 hover:text-white">
+                <button onClick={onClose} className="p-2 text-zinc-500 hover:text-white rounded-lg transition-colors">
                     <X className="w-5 h-5" />
                 </button>
             </div>
@@ -427,8 +479,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('buy')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${isBuy
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'text-zinc-500'
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : 'text-zinc-500'
                         }`}
                 >
                     Buy
@@ -436,8 +488,8 @@ function TradeSheet({
                 <button
                     onClick={() => onSideChange('sell')}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${!isBuy
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                            : 'text-zinc-500'
+                        ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                        : 'text-zinc-500'
                         }`}
                 >
                     Sell
@@ -487,7 +539,7 @@ function TradeSheet({
             {/* Estimation */}
             {estimation && (
                 <div className="flex items-center justify-between text-sm px-1 mb-4 text-zinc-400">
-                    <span>≈ {estimation.quantity.toFixed(4)} {assetName}</span>
+                    <span>≈ {estimation.quantity.toFixed(4)} shares</span>
                     <span className="text-zinc-600">Fee: ${estimation.fee.toFixed(2)}</span>
                 </div>
             )}
@@ -502,8 +554,8 @@ function TradeSheet({
                 onClick={handleSubmit}
                 disabled={isSubmitting || !amount}
                 className={`w-full h-14 rounded-xl font-bold uppercase tracking-wider text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 ${isBuy
-                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
-                        : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40'
+                    : 'bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/40'
                     }`}
             >
                 {isSubmitting ? (
