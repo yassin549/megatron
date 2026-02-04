@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Shield, Target } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Shield, Target, Wallet, Info } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 
 interface OrderFormProps {
@@ -17,6 +16,10 @@ interface OrderFormProps {
     onExecutionPriceChange?: (price: number) => void;
     totalSupply?: number;
     pricingParams?: { P0: number; k: number };
+    userPosition?: {
+        shares: number;
+        avgPrice: number;
+    } | null;
 }
 
 export function OrderForm({
@@ -27,7 +30,8 @@ export function OrderForm({
     onTradeSuccess,
     onExecutionPriceChange,
     totalSupply = 0,
-    pricingParams = { P0: 10, k: 0.01 }
+    pricingParams = { P0: 10, k: 0.01 },
+    userPosition
 }: OrderFormProps) {
     const { status } = useSession();
     const [type, setType] = useState<'buy' | 'sell'>('buy');
@@ -38,7 +42,8 @@ export function OrderForm({
     const [takeProfit, setTakeProfit] = useState('');
     const [loading, setLoading] = useState(false);
     const [userBalance, setUserBalance] = useState(0);
-    const [slippageSetting, setSlippageSetting] = useState('1'); // Default 1%
+    const [slippageSetting, setSlippageSetting] = useState('1');
+    const [showRiskSettings, setShowRiskSettings] = useState(false);
 
     useEffect(() => {
         if (status === 'authenticated') {
@@ -49,7 +54,7 @@ export function OrderForm({
     }, [status]);
 
     const isBuy = type === 'buy';
-    const SWAP_FEE = 0.005; // Match MONETARY_CONFIG.SWAP_FEE from lib-common (0.5%)
+    const SWAP_FEE = 0.005;
 
     // Bonding Curve Stats
     const P0 = pricingParams?.P0 ?? 10;
@@ -63,7 +68,6 @@ export function OrderForm({
 
         const usdc = parseFloat(amount);
         if (isBuy) {
-            // ΔS = (-b + √(b² - 4ac)) / 2a
             const netUsdc = usdc * (1 - SWAP_FEE);
             const a = k / 2;
             const b = P0 + k * S;
@@ -73,15 +77,11 @@ export function OrderForm({
             const deltaS = (-b + Math.sqrt(discriminant)) / (2 * a);
             return netUsdc / deltaS;
         } else {
-            // ΔS = (b - √(b² - 4ac)) / (2a)
-            // where a = -k/2, b = (P0 + k*S), c = -A
-            // Gross USDC is the amount entered by the user
             const a = k / 2;
             const b = -(P0 + k * S);
             const c = usdc;
             const discriminant = b * b - 4 * a * c;
             if (discriminant < 0) return assetPrice;
-            // Solve for shares to sell that yield user's USDC amount
             const deltaS = (-b - Math.sqrt(discriminant)) / (2 * a);
             return usdc / deltaS;
         }
@@ -96,6 +96,23 @@ export function OrderForm({
     const estimatedShares = amount ? parseFloat(amount) / executionEst : 0;
 
     const { showStatusModal } = useNotification();
+
+    const handlePercentageClick = (percent: number) => {
+        if (isBuy) {
+            const val = userBalance * percent;
+            setAmount(val > 0 ? val.toFixed(2) : '');
+        } else {
+            // Sell logic: percent of held shares -> converted to approx USDC value
+            if (userPosition && userPosition.shares > 0) {
+                // Determine how many shares to sell
+                const sharesToSell = userPosition.shares * percent;
+                // Roughly estimate USDC value: shares * current price
+                // Ideally we'd reverse calculate exact USDC but approx is fine for UI fill
+                const distinctUsdc = sharesToSell * assetPrice;
+                setAmount(distinctUsdc > 0 ? distinctUsdc.toFixed(2) : '');
+            }
+        }
+    };
 
     const handleTrade = async () => {
         if (!amount) return;
@@ -113,32 +130,18 @@ export function OrderForm({
                     if (tpValue !== null && tpValue >= executionEst) throw new Error('TP must be below Entry Price.');
                 }
 
-                // Calculate Min Output for Slippage Protection
                 const slippagePercent = parseFloat(slippageSetting) || 1;
                 const minOutputMultiplier = (100 - slippagePercent) / 100;
 
                 let minOutputAmount = undefined;
-                let maxInputAmount = undefined;
 
                 if (isBuy) {
-                    // Buying Shares with USDC
-                    // estShares = USDC / Price? 
-                    // No, we have `estimatedShares` calculated in render.
-                    // minOutput = estimatedShares * (1 - slippage)
                     if (estimatedShares > 0) {
                         minOutputAmount = (estimatedShares * minOutputMultiplier).toString();
                     }
                 } else {
-                    // Selling Shares for USDC
-                    // output = estimated Revenue (USDC)
-                    // estimatedRevenue = Amount(Shares) * Price ?
-                    // Actually `executionEst` is the price per share?
-                    // Let's assume `executionEst` is the average execution price.
-                    // Revenue = amount * executionEst.
                     if (amount && parseFloat(amount) > 0) {
                         const estimatedRevenue = parseFloat(amount) * executionEst;
-                        // User gets Net (Revenue - Fee).
-                        // The API checks minOutput against Net.
                         const estNet = estimatedRevenue * (1 - SWAP_FEE);
                         minOutputAmount = (estNet * minOutputMultiplier).toString();
                     }
@@ -154,13 +157,11 @@ export function OrderForm({
                         stopLoss: slValue,
                         takeProfit: tpValue,
                         minOutputAmount,
-                        // maxInputAmount // Not used yet for "Spend Exact USDC" flows, usually for "Buy Exact Shares"
                     })
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error);
             } else {
-                // Limit Order
                 const priceValue = parseFloat(price);
                 if (isNaN(priceValue) || priceValue <= 0) throw new Error('Invalid limit price');
 
@@ -171,7 +172,7 @@ export function OrderForm({
                         assetId,
                         side: type,
                         price: priceValue,
-                        quantity: parseFloat(amount) / priceValue, // For limit orders, amount is usually USDC, but the API expects quantity. 
+                        quantity: parseFloat(amount) / priceValue,
                     })
                 });
                 const data = await res.json();
@@ -200,13 +201,15 @@ export function OrderForm({
 
     if (status !== 'authenticated') {
         return (
-            <div className="bg-zinc-900 border border-white/5 rounded-xl p-6 text-center shadow-2xl">
-                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
+                    <TrendingUp className="w-8 h-8 text-emerald-400" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Trade Assets</h3>
-                <p className="text-zinc-400 text-xs mb-4">Sign in to start trading.</p>
-                <Link href="/login" className="flex items-center justify-center w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all text-xs">
+                <div>
+                    <h3 className="text-lg font-black text-white uppercase tracking-widest">Trade Access</h3>
+                    <p className="text-zinc-500 text-xs font-medium mt-1">Connect your wallet to start trading</p>
+                </div>
+                <Link href="/login" className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:scale-105 transition-transform">
                     Connect Wallet
                 </Link>
             </div>
@@ -214,172 +217,203 @@ export function OrderForm({
     }
 
     return (
-        <div className="space-y-3">
-            {/* Buy/Sell Tabs - Institutional Style */}
-            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
-                <motion.div
-                    className={`absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg shadow-md border border-white/5 ${isBuy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}
-                    animate={{ left: isBuy ? '2px' : 'calc(50%)' }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-                <button
-                    onClick={() => setType('buy')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${isBuy ? 'text-emerald-400' : 'text-zinc-600'}`}
-                >
-                    BUY
-                </button>
-                <button
-                    onClick={() => setType('sell')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-600'}`}
-                >
-                    SELL
-                </button>
-            </div>
-
-            {/* Market/Limit Tabs - Pill Style */}
-            <div className="flex bg-black/60 rounded-xl p-0.5 relative border border-white/5 shadow-inner">
-                <motion.div
-                    className="absolute inset-y-0.5 w-[calc(50%-2px)] rounded-lg bg-zinc-800 shadow-md border border-white/5"
-                    animate={{ left: orderType === 'market' ? '2px' : 'calc(50%)' }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                />
-                <button
-                    onClick={() => setOrderType('market')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${orderType === 'market' ? 'text-white' : 'text-zinc-600'}`}
-                >
-                    MARKET
-                </button>
-                <button
-                    onClick={() => setOrderType('limit')}
-                    className={`flex-1 py-1.5 text-[9px] font-black tracking-[0.2em] relative z-10 transition-colors uppercase ${orderType === 'limit' ? 'text-white' : 'text-zinc-600'}`}
-                >
-                    LIMIT
-                </button>
-            </div>
-
-            {/* Price Info - Modular Snapshot */}
-            <div className="bg-black/40 rounded-xl px-3 py-2 border border-white/5 space-y-1.5">
-                <div className="flex justify-between items-center opacity-60">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter">Market Index</span>
-                    <span className="text-[9px] text-white font-mono font-bold">${Number(marketPrice || 0).toFixed(2)}</span>
+        <div className="flex flex-col h-full gap-4">
+            {/* Top Config Row: Order Type & Slippage Toggle */}
+            <div className="flex items-center justify-between px-1">
+                <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/5">
+                    {(['market', 'limit'] as const).map((t) => (
+                        <button
+                            key={t}
+                            onClick={() => setOrderType(t)}
+                            className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${orderType === t ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                        >
+                            {t}
+                        </button>
+                    ))}
                 </div>
-                <div className="flex justify-between items-center border-t border-white/[0.03] pt-1.5">
-                    <span className="text-[8px] text-zinc-500 font-black uppercase tracking-tighter text-emerald-500/50">Execution Est</span>
-                    <div className="flex flex-col items-end">
-                        <span className={`text-[10px] font-mono font-black ${isHighSlippage ? 'text-amber-400' : 'text-emerald-400'}`}>
-                            ${Number(executionEst || 0).toFixed(2)}
-                        </span>
-                        {amount && parseFloat(amount) > 0 && (
-                            <span className={`text-[7px] font-bold ${isHighSlippage ? 'text-amber-500/50' : 'text-zinc-600'}`}>
-                                ({Number(slippage || 0) >= 0 ? '+' : ''}{Number(slippage || 0).toFixed(2)}% Slippage)
-                            </span>
-                        )}
-                    </div>
-                </div>
+                <button
+                    onClick={() => setShowRiskSettings(!showRiskSettings)}
+                    className={`p-1.5 rounded-lg border transition-all ${showRiskSettings ? 'bg-primary/20 border-primary/50 text-white' : 'bg-transparent border-transparent text-zinc-600 hover:text-zinc-400 hover:bg-white/5'}`}
+                >
+                    <Shield className="w-3.5 h-3.5" />
+                </button>
             </div>
 
-            {/* Amount & Limit Logic */}
-            <div className="space-y-2">
-                {orderType === 'limit' && (
-                    <div>
-                        <div className="flex justify-between items-center mb-1 px-1">
-                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Limit Price</span>
-                        </div>
-                        <div className="relative">
-                            <input
-                                type="number"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                                placeholder="0.00"
-                                className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-black shadow-inner"
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
+            {/* Main Action Area */}
+            <div className="flex-1 flex flex-col gap-4">
+                {/* Buy/Sell Switcher */}
+                <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
+                    <button
+                        onClick={() => setType('buy')}
+                        className={`py-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${isBuy
+                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
+                            : 'border-transparent text-zinc-600 hover:bg-white/5'
+                            }`}
+                    >
+                        Buy
+                    </button>
+                    <button
+                        onClick={() => setType('sell')}
+                        className={`py-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${!isBuy
+                            ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
+                            : 'border-transparent text-zinc-600 hover:bg-white/5'
+                            }`}
+                    >
+                        Sell
+                    </button>
+                </div>
+
+                {/* Amount Input */}
+                <div className="space-y-2">
+                    <div className="relative group">
+                        <div className={`absolute -inset-0.5 rounded-2xl opacity-75 blur-sm transition duration-500 group-hover:duration-200 ${isBuy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}></div>
+                        <div className="relative flex flex-col bg-zinc-900/80 border border-white/10 rounded-xl overflow-hidden">
+                            <div className="flex items-baseline px-4 pt-4 pb-1">
+                                <span className="text-3xl font-black text-white font-mono tracking-tighter">$</span>
+                                <input
+                                    type="number"
+                                    value={amount}
+                                    onChange={(e) => setAmount(e.target.value)}
+                                    placeholder="0.00"
+                                    className="w-full bg-transparent border-none focus:ring-0 text-3xl font-black text-white font-mono tracking-tighter placeholder-zinc-700 p-0 ml-1"
+                                />
+                            </div>
+                            <div className="px-4 pb-3 flex justify-between items-center bg-black/20 pt-2 border-t border-white/5">
+                                <span className="text-[10px] text-zinc-500 font-bold tracking-wider">
+                                    ≈ {estimatedShares.toFixed(2)} {assetSymbol}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <Wallet className="w-3 h-3 text-zinc-600" />
+                                    <span className="text-[10px] font-mono text-zinc-400">
+                                        {isBuy
+                                            ? `$${userBalance.toFixed(2)}`
+                                            : `${userPosition?.shares?.toFixed(2) || '0.00'} Shares`
+                                        }
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                )}
 
-                <div>
-                    <div className="flex justify-between items-center mb-1 px-1">
-                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-tighter">Amount (USDC)</span>
-                        <span className="text-[8px] text-zinc-600 font-bold tracking-tighter">
-                            AVL: <span className="text-zinc-400 font-mono">${userBalance.toFixed(1)}</span>
-                        </span>
-                    </div>
-                    <div className="relative">
-                        <input
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            placeholder="0.00"
-                            className="w-full bg-black/60 border border-white/5 rounded-xl pl-3 pr-10 py-2.5 text-base font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-primary/30 transition-all font-black shadow-inner"
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] text-zinc-700 font-black">USDC</span>
+                    {/* Quick Percentages */}
+                    <div className="grid grid-cols-4 gap-1.5">
+                        {[0.25, 0.5, 0.75, 1].map((pct) => (
+                            <button
+                                key={pct}
+                                onClick={() => handlePercentageClick(pct)}
+                                className="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
+                            >
+                                {pct === 1 ? 'MAX' : `${pct * 100}%`}
+                            </button>
+                        ))}
                     </div>
                 </div>
+
+                {/* Limit Price Input */}
+                <AnimatePresence>
+                    {orderType === 'limit' && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-black/30 rounded-xl p-3 border border-white/5"
+                        >
+                            <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2 block">
+                                Limit Price
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
+                                <input
+                                    type="number"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-6 pr-3 text-sm font-mono text-white focus:border-white/20 transition-all font-bold"
+                                    placeholder={assetPrice.toFixed(2)}
+                                />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Advanced / Risk Management */}
+                <AnimatePresence>
+                    {showRiskSettings && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden space-y-3 pt-1"
+                        >
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="bg-rose-500/5 rounded-xl p-3 border border-rose-500/10">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                        <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Stop Loss</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        value={stopLoss}
+                                        onChange={(e) => setStopLoss(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/5 rounded-lg px-2 py-1.5 text-xs font-mono text-white placeholder-zinc-700 focus:border-rose-500/30 transition-all"
+                                        placeholder="Price"
+                                    />
+                                </div>
+                                <div className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/10">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Take Profit</span>
+                                    </div>
+                                    <input
+                                        type="number"
+                                        value={takeProfit}
+                                        onChange={(e) => setTakeProfit(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/5 rounded-lg px-2 py-1.5 text-xs font-mono text-white placeholder-zinc-700 focus:border-emerald-500/30 transition-all"
+                                        placeholder="Price"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex items-center justify-between">
+                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Max Slippage</span>
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="number"
+                                        value={slippageSetting}
+                                        onChange={(e) => setSlippageSetting(e.target.value)}
+                                        className="w-12 bg-black/50 border border-white/10 rounded-md py-1 text-center text-xs font-mono text-white"
+                                    />
+                                    <span className="text-xs text-zinc-500 font-bold">%</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
-            {/* Risk Management: SL/TP & Slippage */}
-            <div className="grid grid-cols-3 gap-2">
-                <div>
-                    <label className="text-[8px] font-black text-rose-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Shield className="w-2.5 h-2.5" /> Stop Loss
-                    </label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        value={stopLoss}
-                        onChange={(e) => setStopLoss(e.target.value)}
-                        placeholder="Price"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-rose-500/30 transition-all font-bold"
-                    />
-                </div>
-                <div>
-                    <label className="text-[8px] font-black text-emerald-500/30 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        <Target className="w-2.5 h-2.5" /> Take Profit
-                    </label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        value={takeProfit}
-                        onChange={(e) => setTakeProfit(e.target.value)}
-                        placeholder="Price"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-emerald-500/30 transition-all font-bold"
-                    />
-                </div>
-                <div>
-                    <label className="text-[8px] font-black text-zinc-500 uppercase flex items-center gap-1 mb-1 px-1 tracking-tighter">
-                        Slippage %
-                    </label>
-                    <input
-                        type="number"
-                        step="0.1"
-                        value={slippageSetting}
-                        onChange={(e) => setSlippageSetting(e.target.value)}
-                        placeholder="1.0"
-                        className="w-full bg-black/60 border border-white/5 rounded-lg px-2 py-1.5 text-[10px] font-mono text-white placeholder-zinc-900 focus:outline-none focus:border-blue-500/30 transition-all font-bold text-center"
-                    />
-                </div>
-            </div>
-
-            {/* Execution Button */}
+            {/* Submit Button */}
             <button
                 onClick={handleTrade}
                 disabled={!amount || loading}
-                className={`btn-animated w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all active:scale-[0.97] disabled:opacity-20 flex items-center justify-center gap-2 shadow-2xl
-                    ${isBuy
-                        ? 'bg-emerald-500 text-black hover:bg-emerald-400'
-                        : 'bg-rose-500 text-black hover:bg-rose-400'
-                    }`}
+                className={`group relative w-full h-[60px] rounded-xl overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isBuy ? 'shadow-[0_0_40px_rgba(16,185,129,0.2)]' : 'shadow-[0_0_40px_rgba(244,63,94,0.2)]'}`}
             >
-                <div className={`btn-animated-overlay ${isBuy ? 'bg-white/20' : 'bg-white/20'}`} />
-                {loading ? (
-                    <div className="w-3.5 h-3.5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                ) : (
-                    <>
-                        {isBuy ? <ArrowUpRight className="w-3.5 h-3.5 relative z-10" /> : <ArrowDownRight className="w-3.5 h-3.5 relative z-10" />}
-                        <span className="relative z-10">{isBuy ? 'Place Buy' : 'Place Sell'}</span>
-                    </>
-                )}
+                <div className={`absolute inset-0 transition-all duration-300 ${isBuy ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10 gap-0.5">
+                    {loading ? (
+                        <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    ) : (
+                        <>
+                            <div className="flex items-center gap-2">
+                                {isBuy ? <ArrowUpRight className="w-5 h-5 text-black" /> : <ArrowDownRight className="w-5 h-5 text-black" />}
+                                <span className="text-sm font-black text-black uppercase tracking-[0.2em] italic">
+                                    {isBuy ? 'Place Buy Order' : 'Place Sell Order'}
+                                </span>
+                            </div>
+                            <span className="text-[9px] font-bold text-black/60 uppercase tracking-widest">
+                                @ ${executionEst.toFixed(2)}
+                            </span>
+                        </>
+                    )}
+                </div>
             </button>
         </div>
     );

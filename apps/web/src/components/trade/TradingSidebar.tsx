@@ -27,6 +27,10 @@ interface TradingSidebarProps {
     totalSupply?: number;
     pricingParams?: { P0: number; k: number };
     sidebarContext?: string;
+    userPosition?: {
+        shares: number;
+        avgPrice: number;
+    } | null;
 }
 
 export function TradingSidebar({
@@ -42,7 +46,8 @@ export function TradingSidebar({
     onSelectPosition,
     totalSupply,
     pricingParams,
-    sidebarContext = 'main'
+    sidebarContext = 'main',
+    userPosition
 }: TradingSidebarProps) {
     const [view, setView] = useState<'trade' | 'positions'>('trade');
 
@@ -150,6 +155,7 @@ export function TradingSidebar({
                                             onExecutionPriceChange={onExecutionPriceChange}
                                             totalSupply={totalSupply}
                                             pricingParams={pricingParams}
+                                            userPosition={userPosition}
                                         />
                                     </div>
 
