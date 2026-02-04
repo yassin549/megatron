@@ -324,7 +324,6 @@ export function AssetDetailClient({
                         onExecutionPriceChange={setExecutionEst}
                         activePositionId={activePositionId}
                         onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                        userPosition={asset.userPosition as any}
                     />
                 </div>
             </div>
@@ -488,7 +487,6 @@ export function AssetDetailClient({
                                         onExecutionPriceChange={setExecutionEst}
                                         activePositionId={activePositionId}
                                         onSelectPosition={(id) => setActivePositionId(id === 'current' ? asset?.id || null : id)}
-                                        userPosition={asset.userPosition as any}
                                     />
                                 </div>
                             </motion.div>
