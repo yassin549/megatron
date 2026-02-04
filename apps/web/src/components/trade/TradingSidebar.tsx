@@ -99,9 +99,9 @@ export function TradingSidebar({
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col overflow-hidden p-3 pt-1 gap-3">
+            <div className="flex-1 flex flex-col overflow-hidden p-6 pt-2 gap-6">
                 {/* Terminal Module - Main Content */}
-                <div className="flex-1 bg-black/40 border border-white/5 rounded-2xl p-1 shadow-2xl overflow-hidden flex flex-col relative">
+                <div className="flex-1 overflow-hidden flex flex-col relative">
 
                     {/* High-Density Status Ribbon - Single Line Aligned */}
                     {stats && (
@@ -134,7 +134,7 @@ export function TradingSidebar({
                         </div>
                     )}
 
-                    <div className="flex-1 overflow-hidden p-2">
+                    <div className="flex-1 overflow-hidden">
                         <AnimatePresence mode="wait">
                             {view === 'trade' ? (
                                 <motion.div

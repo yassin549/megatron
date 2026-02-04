@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, ArrowUpRight, ArrowDownRight, Shield, Target, Wallet, Info } from 'lucide-react';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { TrendingUp, ArrowUpRight, ArrowDownRight, Shield, Wallet, Settings2, ChevronDown } from 'lucide-react';
 import { useNotification } from '@/context/NotificationContext';
 
 interface OrderFormProps {
@@ -56,13 +56,11 @@ export function OrderForm({
     const isBuy = type === 'buy';
     const SWAP_FEE = 0.005;
 
-    // Bonding Curve Stats
     const P0 = pricingParams?.P0 ?? 10;
     const k = pricingParams?.k ?? 0.01;
     const S = totalSupply;
 
-    // Calculate Estimated Fill Price
-    const executionEst = (() => {
+    const executionEst = useMemo(() => {
         if (orderType === 'limit') return parseFloat(price) || assetPrice;
         if (!amount || parseFloat(amount) <= 0) return assetPrice;
 
@@ -85,14 +83,13 @@ export function OrderForm({
             const deltaS = (-b - Math.sqrt(discriminant)) / (2 * a);
             return usdc / deltaS;
         }
-    })();
+    }, [amount, assetPrice, orderType, price, isBuy, k, P0, S]);
 
     useEffect(() => {
         onExecutionPriceChange?.(executionEst);
     }, [executionEst, onExecutionPriceChange]);
 
     const slippage = ((executionEst - assetPrice) / assetPrice) * 100;
-    const isHighSlippage = Math.abs(slippage) > 2;
     const estimatedShares = amount ? parseFloat(amount) / executionEst : 0;
 
     const { showStatusModal } = useNotification();
@@ -102,12 +99,8 @@ export function OrderForm({
             const val = userBalance * percent;
             setAmount(val > 0 ? val.toFixed(2) : '');
         } else {
-            // Sell logic: percent of held shares -> converted to approx USDC value
             if (userPosition && userPosition.shares > 0) {
-                // Determine how many shares to sell
                 const sharesToSell = userPosition.shares * percent;
-                // Roughly estimate USDC value: shares * current price
-                // Ideally we'd reverse calculate exact USDC but approx is fine for UI fill
                 const distinctUsdc = sharesToSell * assetPrice;
                 setAmount(distinctUsdc > 0 ? distinctUsdc.toFixed(2) : '');
             }
@@ -122,23 +115,12 @@ export function OrderForm({
             const tpValue = takeProfit ? parseFloat(takeProfit) : null;
 
             if (orderType === 'market') {
-                if (isBuy) {
-                    if (slValue !== null && slValue >= executionEst) throw new Error('SL must be below Entry Price.');
-                    if (tpValue !== null && tpValue <= executionEst) throw new Error('TP must be above Entry Price.');
-                } else {
-                    if (slValue !== null && slValue <= executionEst) throw new Error('SL must be above Entry Price.');
-                    if (tpValue !== null && tpValue >= executionEst) throw new Error('TP must be below Entry Price.');
-                }
-
                 const slippagePercent = parseFloat(slippageSetting) || 1;
                 const minOutputMultiplier = (100 - slippagePercent) / 100;
-
                 let minOutputAmount = undefined;
 
                 if (isBuy) {
-                    if (estimatedShares > 0) {
-                        minOutputAmount = (estimatedShares * minOutputMultiplier).toString();
-                    }
+                    if (estimatedShares > 0) minOutputAmount = (estimatedShares * minOutputMultiplier).toString();
                 } else {
                     if (amount && parseFloat(amount) > 0) {
                         const estimatedRevenue = parseFloat(amount) * executionEst;
@@ -183,17 +165,9 @@ export function OrderForm({
             setStopLoss('');
             setTakeProfit('');
             await onTradeSuccess?.();
-            showStatusModal({
-                type: 'success',
-                title: 'DONE',
-                message: `${estimatedShares.toFixed(4)} ${assetSymbol} units added`
-            });
+            showStatusModal({ type: 'success', title: 'DONE', message: 'Order executed successfully' });
         } catch (err: any) {
-            showStatusModal({
-                type: 'error',
-                title: 'ORDER FAILED',
-                message: err.message || 'Unknown error'
-            });
+            showStatusModal({ type: 'error', title: 'FAILED', message: err.message });
         } finally {
             setLoading(false);
         }
@@ -201,220 +175,259 @@ export function OrderForm({
 
     if (status !== 'authenticated') {
         return (
-            <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center border border-white/5">
-                    <TrendingUp className="w-8 h-8 text-emerald-400" />
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center gap-6">
+                <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center animate-pulse">
+                    <Wallet className="w-8 h-8 text-zinc-600" />
                 </div>
-                <div>
-                    <h3 className="text-lg font-black text-white uppercase tracking-widest">Trade Access</h3>
-                    <p className="text-zinc-500 text-xs font-medium mt-1">Connect your wallet to start trading</p>
+                <div className="space-y-2">
+                    <h3 className="text-xl font-black text-white uppercase tracking-[0.2em]">Connect Wallet</h3>
+                    <p className="text-zinc-500 text-xs font-medium max-w-[200px] leading-relaxed">Please connect your wallet to access the trading terminal.</p>
                 </div>
-                <Link href="/login" className="px-8 py-3 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:scale-105 transition-transform">
-                    Connect Wallet
+                <Link href="/login" className="px-10 py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-transform shadow-xl">
+                    Connect
                 </Link>
             </div>
         );
     }
 
+    const springConfig = { type: 'spring', stiffness: 400, damping: 30 };
+
     return (
-        <div className="flex flex-col h-full gap-4">
-            {/* Top Config Row: Order Type & Slippage Toggle */}
-            <div className="flex items-center justify-between px-1">
-                <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/5">
-                    {(['market', 'limit'] as const).map((t) => (
+        <LayoutGroup>
+            <div className="flex flex-col h-full gap-10">
+                {/* Toggles Row */}
+                <div className="flex items-center justify-between">
+                    {/* Buy/Sell Word Switcher */}
+                    <div className="relative flex items-center gap-10">
                         <button
-                            key={t}
-                            onClick={() => setOrderType(t)}
-                            className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-md transition-all ${orderType === t ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            onClick={() => setType('buy')}
+                            className={`relative text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-300 ${isBuy ? 'text-emerald-400' : 'text-zinc-700'}`}
                         >
-                            {t}
+                            Buy
+                            {isBuy && (
+                                <motion.div
+                                    layoutId="type-indicator"
+                                    className="absolute -bottom-2 left-0 right-0 h-[2px] bg-emerald-400 shadow-[0_4px_10px_rgba(52,211,153,0.5)]"
+                                    transition={springConfig}
+                                />
+                            )}
                         </button>
-                    ))}
-                </div>
-                <button
-                    onClick={() => setShowRiskSettings(!showRiskSettings)}
-                    className={`p-1.5 rounded-lg border transition-all ${showRiskSettings ? 'bg-primary/20 border-primary/50 text-white' : 'bg-transparent border-transparent text-zinc-600 hover:text-zinc-400 hover:bg-white/5'}`}
-                >
-                    <Shield className="w-3.5 h-3.5" />
-                </button>
-            </div>
+                        <button
+                            onClick={() => setType('sell')}
+                            className={`relative text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-300 ${!isBuy ? 'text-rose-400' : 'text-zinc-700'}`}
+                        >
+                            Sell
+                            {!isBuy && (
+                                <motion.div
+                                    layoutId="type-indicator"
+                                    className="absolute -bottom-2 left-0 right-0 h-[2px] bg-rose-400 shadow-[0_4px_10px_rgba(251,113,133,0.5)]"
+                                    transition={springConfig}
+                                />
+                            )}
+                        </button>
+                    </div>
 
-            {/* Main Action Area */}
-            <div className="flex-1 flex flex-col gap-4">
-                {/* Buy/Sell Switcher */}
-                <div className="grid grid-cols-2 gap-2 bg-black/40 p-1 rounded-xl border border-white/5">
-                    <button
-                        onClick={() => setType('buy')}
-                        className={`py-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${isBuy
-                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]'
-                            : 'border-transparent text-zinc-600 hover:bg-white/5'
-                            }`}
-                    >
-                        Buy
-                    </button>
-                    <button
-                        onClick={() => setType('sell')}
-                        className={`py-3 rounded-lg border text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${!isBuy
-                            ? 'bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.1)]'
-                            : 'border-transparent text-zinc-600 hover:bg-white/5'
-                            }`}
-                    >
-                        Sell
-                    </button>
+                    {/* Market/Limit Word Switcher */}
+                    <div className="relative flex items-center gap-10">
+                        <button
+                            onClick={() => setOrderType('market')}
+                            className={`relative text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-300 ${orderType === 'market' ? 'text-white' : 'text-zinc-700'}`}
+                        >
+                            Mkt
+                            {orderType === 'market' && (
+                                <motion.div
+                                    layoutId="order-indicator"
+                                    className="absolute -bottom-2 left-0 right-0 h-[2px] bg-white shadow-[0_4px_10px_rgba(255,255,255,0.3)]"
+                                    transition={springConfig}
+                                />
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setOrderType('limit')}
+                            className={`relative text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-300 ${orderType === 'limit' ? 'text-white' : 'text-zinc-700'}`}
+                        >
+                            Lmt
+                            {orderType === 'limit' && (
+                                <motion.div
+                                    layoutId="order-indicator"
+                                    className="absolute -bottom-2 left-0 right-0 h-[2px] bg-white shadow-[0_4px_10px_rgba(255,255,255,0.3)]"
+                                    transition={springConfig}
+                                />
+                            )}
+                        </button>
+                    </div>
                 </div>
 
-                {/* Amount Input */}
-                <div className="space-y-2">
-                    <div className="relative group">
-                        <div className={`absolute -inset-0.5 rounded-2xl opacity-75 blur-sm transition duration-500 group-hover:duration-200 ${isBuy ? 'bg-emerald-500/10' : 'bg-rose-500/10'}`}></div>
-                        <div className="relative flex flex-col bg-zinc-900/80 border border-white/10 rounded-xl overflow-hidden">
-                            <div className="flex items-baseline px-4 pt-4 pb-1">
-                                <span className="text-3xl font-black text-white font-mono tracking-tighter">$</span>
+                {/* Amount Section */}
+                <div className="space-y-6">
+                    <div className="space-y-1">
+                        <div className="flex items-center justify-between px-1 mb-2">
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Amount</span>
+                            <div className="flex items-center gap-1.5 grayscale opacity-50">
+                                <Wallet className="w-2.5 h-2.5" />
+                                <span className="text-[9px] font-mono font-bold text-zinc-400">
+                                    {isBuy ? `$${userBalance.toFixed(2)}` : `${userPosition?.shares?.toFixed(2) || '0.00'} Unit`}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="flex items-center relative gap-2">
+                                <span className={`text-4xl font-black font-mono transition-colors ${isBuy ? 'text-emerald-500/50' : 'text-rose-500/50'}`}>$</span>
                                 <input
                                     type="number"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
                                     placeholder="0.00"
-                                    className="w-full bg-transparent border-none focus:ring-0 text-3xl font-black text-white font-mono tracking-tighter placeholder-zinc-700 p-0 ml-1"
+                                    className="w-full bg-transparent border-none focus:ring-0 text-5xl font-black text-white font-mono tracking-tighter placeholder-zinc-800 p-0"
                                 />
                             </div>
-                            <div className="px-4 pb-3 flex justify-between items-center bg-black/20 pt-2 border-t border-white/5">
-                                <span className="text-[10px] text-zinc-500 font-bold tracking-wider">
-                                    ≈ {estimatedShares.toFixed(2)} {assetSymbol}
-                                </span>
-                                <div className="flex items-center gap-1.5">
-                                    <Wallet className="w-3 h-3 text-zinc-600" />
-                                    <span className="text-[10px] font-mono text-zinc-400">
-                                        {isBuy
-                                            ? `$${userBalance.toFixed(2)}`
-                                            : `${userPosition?.shares?.toFixed(2) || '0.00'} Shares`
-                                        }
-                                    </span>
-                                </div>
-                            </div>
+                            <motion.div
+                                initial={false}
+                                animate={{ opacity: amount ? 1 : 0, y: amount ? 0 : 5 }}
+                                className="flex items-center gap-2 mt-2 px-1 text-[10px] font-black text-zinc-600 uppercase tracking-widest italic"
+                            >
+                                <ChevronDown className="w-3 h-3" />
+                                {estimatedShares.toFixed(4)} {assetSymbol}
+                            </motion.div>
                         </div>
                     </div>
 
-                    {/* Quick Percentages */}
-                    <div className="grid grid-cols-4 gap-1.5">
+                    {/* Percentages Row */}
+                    <div className="flex items-center justify-between px-1">
                         {[0.25, 0.5, 0.75, 1].map((pct) => (
                             <button
                                 key={pct}
                                 onClick={() => handlePercentageClick(pct)}
-                                className="py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-[9px] font-black text-zinc-500 hover:text-white transition-colors uppercase tracking-widest"
+                                className="text-[10px] font-black text-zinc-700 hover:text-white transition-colors uppercase tracking-[0.2em]"
                             >
-                                {pct === 1 ? 'MAX' : `${pct * 100}%`}
+                                {pct === 1 ? 'Full' : `${pct * 100}%`}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                {/* Limit Price Input */}
-                <AnimatePresence>
-                    {orderType === 'limit' && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="bg-black/30 rounded-xl p-3 border border-white/5"
+                {/* Advanced Logic Area */}
+                <div className="flex-1 flex flex-col gap-6">
+                    <AnimatePresence mode="popLayout">
+                        {orderType === 'limit' && (
+                            <motion.div
+                                key="limit-price"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={springConfig}
+                                className="space-y-4"
+                            >
+                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Limit Price</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-xl font-black text-zinc-500 font-mono">$</span>
+                                    <input
+                                        type="number"
+                                        value={price}
+                                        onChange={(e) => setPrice(e.target.value)}
+                                        className="w-full bg-transparent border-none focus:ring-0 text-3xl font-black text-white font-mono tracking-tight p-0"
+                                        placeholder={assetPrice.toFixed(2)}
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Settings Toggles */}
+                    <div className="mt-auto space-y-6">
+                        <button
+                            onClick={() => setShowRiskSettings(!showRiskSettings)}
+                            className="flex items-center gap-3 group"
                         >
-                            <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2 block">
-                                Limit Price
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">$</span>
-                                <input
-                                    type="number"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    className="w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-6 pr-3 text-sm font-mono text-white focus:border-white/20 transition-all font-bold"
-                                    placeholder={assetPrice.toFixed(2)}
-                                />
+                            <div className={`p-2 rounded-full transition-all duration-300 ${showRiskSettings ? 'bg-white text-black' : 'bg-white/5 text-zinc-600 group-hover:bg-white/10'}`}>
+                                <Settings2 className="w-3 h-3" />
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Advanced / Risk Management */}
-                <AnimatePresence>
-                    {showRiskSettings && (
-                        <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden space-y-3 pt-1"
-                        >
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="bg-rose-500/5 rounded-xl p-3 border border-rose-500/10">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                                        <span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Stop Loss</span>
-                                    </div>
-                                    <input
-                                        type="number"
-                                        value={stopLoss}
-                                        onChange={(e) => setStopLoss(e.target.value)}
-                                        className="w-full bg-black/50 border border-white/5 rounded-lg px-2 py-1.5 text-xs font-mono text-white placeholder-zinc-700 focus:border-rose-500/30 transition-all"
-                                        placeholder="Price"
-                                    />
-                                </div>
-                                <div className="bg-emerald-500/5 rounded-xl p-3 border border-emerald-500/10">
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Take Profit</span>
-                                    </div>
-                                    <input
-                                        type="number"
-                                        value={takeProfit}
-                                        onChange={(e) => setTakeProfit(e.target.value)}
-                                        className="w-full bg-black/50 border border-white/5 rounded-lg px-2 py-1.5 text-xs font-mono text-white placeholder-zinc-700 focus:border-emerald-500/30 transition-all"
-                                        placeholder="Price"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="bg-white/5 rounded-xl p-3 border border-white/5 flex items-center justify-between">
-                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Max Slippage</span>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="number"
-                                        value={slippageSetting}
-                                        onChange={(e) => setSlippageSetting(e.target.value)}
-                                        className="w-12 bg-black/50 border border-white/10 rounded-md py-1 text-center text-xs font-mono text-white"
-                                    />
-                                    <span className="text-xs text-zinc-500 font-bold">%</span>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-
-            {/* Submit Button */}
-            <button
-                onClick={handleTrade}
-                disabled={!amount || loading}
-                className={`group relative w-full h-[60px] rounded-xl overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed ${isBuy ? 'shadow-[0_0_40px_rgba(16,185,129,0.2)]' : 'shadow-[0_0_40px_rgba(244,63,94,0.2)]'}`}
-            >
-                <div className={`absolute inset-0 transition-all duration-300 ${isBuy ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-rose-500 hover:bg-rose-400'}`} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center relative z-10 gap-0.5">
-                    {loading ? (
-                        <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                    ) : (
-                        <>
-                            <div className="flex items-center gap-2">
-                                {isBuy ? <ArrowUpRight className="w-5 h-5 text-black" /> : <ArrowDownRight className="w-5 h-5 text-black" />}
-                                <span className="text-sm font-black text-black uppercase tracking-[0.2em] italic">
-                                    {isBuy ? 'Place Buy Order' : 'Place Sell Order'}
-                                </span>
-                            </div>
-                            <span className="text-[9px] font-bold text-black/60 uppercase tracking-widest">
-                                @ ${executionEst.toFixed(2)}
+                            <span className={`text-[9px] font-black uppercase tracking-[0.2em] transition-colors ${showRiskSettings ? 'text-white' : 'text-zinc-600 group-hover:text-zinc-400'}`}>
+                                Risk Management
                             </span>
-                        </>
-                    )}
+                        </button>
+
+                        <AnimatePresence>
+                            {showRiskSettings && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="pt-2 space-y-8"
+                                >
+                                    <div className="grid grid-cols-2 gap-10">
+                                        <div className="space-y-2">
+                                            <span className="text-[8px] font-black text-rose-500/50 uppercase tracking-widest ml-1">Stop Loss</span>
+                                            <input
+                                                type="number"
+                                                value={stopLoss}
+                                                onChange={(e) => setStopLoss(e.target.value)}
+                                                className="w-full bg-transparent border-none focus:ring-0 text-lg font-black text-white font-mono p-1"
+                                                placeholder="0.00"
+                                            />
+                                        </div>
+                                        <div className="space-y-2 text-right">
+                                            <span className="text-[8px] font-black text-emerald-500/50 uppercase tracking-widest mr-1">Take Profit</span>
+                                            <input
+                                                type="number"
+                                                value={takeProfit}
+                                                onChange={(e) => setTakeProfit(e.target.value)}
+                                                className="w-full bg-transparent border-none focus:ring-0 text-lg font-black text-white font-mono p-1 text-right"
+                                                placeholder="0.00"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between px-1">
+                                        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Slippage Tolerance</span>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                value={slippageSetting}
+                                                onChange={(e) => setSlippageSetting(e.target.value)}
+                                                className="w-10 bg-transparent border-none focus:ring-0 text-[10px] font-black text-white font-mono p-0 text-right"
+                                            />
+                                            <span className="text-[10px] text-zinc-600 font-bold">%</span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
-            </button>
-        </div>
+
+                {/* Final Action Area */}
+                <div className="relative mt-auto">
+                    <button
+                        onClick={handleTrade}
+                        disabled={!amount || loading}
+                        className={`group relative w-full h-16 rounded-full overflow-hidden transition-all duration-500 disabled:opacity-20 active:scale-95 ${isBuy ? 'bg-emerald-500' : 'bg-rose-500'}`}
+                    >
+                        <div className="absolute inset-0 flex items-center justify-center gap-3">
+                            {loading ? (
+                                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                            ) : (
+                                <>
+                                    <span className="text-xs font-black text-black uppercase tracking-[0.3em] font-italic">
+                                        {isBuy ? 'Confirm Buy' : 'Confirm Sell'}
+                                    </span>
+                                    {isBuy ? <ArrowUpRight className="w-4 h-4 text-black" /> : <ArrowDownRight className="w-4 h-4 text-black" />}
+                                </>
+                            )}
+                        </div>
+                    </button>
+
+                    <motion.div
+                        initial={false}
+                        animate={{ opacity: slippage > 2 ? 1 : 0 }}
+                        className="absolute -top-6 left-0 right-0 text-center"
+                    >
+                        <span className="text-[8px] font-black text-amber-500 uppercase tracking-[0.2em] italic">
+                            High Slippage Impact Detect: {slippage.toFixed(2)}%
+                        </span>
+                    </motion.div>
+                </div>
+            </div>
+        </LayoutGroup>
     );
 }
