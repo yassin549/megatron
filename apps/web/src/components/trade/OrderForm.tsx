@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, TrendingUp, TrendingDown, Wallet, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Loader2, TrendingUp, TrendingDown, Wallet, AlertCircle, RefreshCw, Settings2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { useNotification } from '@/context/NotificationContext';
 
@@ -30,10 +30,17 @@ export function OrderForm({
     const { data: session, status } = useSession();
     const { showNotification } = useNotification();
 
-    // Local state for balance (similar to UserStats)
+    // State
     const [balance, setBalance] = useState<number | null>(null);
     const [side, setSide] = useState<'buy' | 'sell'>('buy');
+    const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
     const [amount, setAmount] = useState('');
+
+    // Limit Order State
+    const [limitPrice, setLimitPrice] = useState('');
+    const [takeProfit, setTakeProfit] = useState('');
+    const [stopLoss, setStopLoss] = useState('');
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -53,62 +60,64 @@ export function OrderForm({
             };
             fetchBalance();
         }
-    }, [status, isSubmitting]); // Re-fetch after submission
+    }, [status, isSubmitting]);
+
+    // Pre-fill limit price with current price when switching to limit
+    useEffect(() => {
+        if (orderType === 'limit' && !limitPrice) {
+            setLimitPrice(assetPrice.toFixed(2));
+        }
+    }, [orderType, assetPrice]);
 
     // Color themes based on side
     const activeColor = side === 'buy' ? 'text-emerald-400' : 'text-rose-400';
     const activeBg = side === 'buy' ? 'bg-emerald-500' : 'bg-rose-500';
-    const activeBorder = side === 'buy' ? 'border-emerald-500/50' : 'border-rose-500/50';
-    const activeRing = side === 'buy' ? 'focus-within:ring-emerald-500/20' : 'focus-within:ring-rose-500/20';
+    const btnGradient = side === 'buy'
+        ? 'from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400'
+        : 'from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400';
 
     // Calculate estimated execution details
     const estimation = useMemo(() => {
         const numAmount = parseFloat(amount);
         if (isNaN(numAmount) || numAmount <= 0) return null;
 
+        const effectivePrice = orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : assetPrice;
         const feeRate = 0.01; // 1% fee mocked
-        let estimatedPrice = assetPrice;
         let estimatedQuantity = 0;
         let fee = 0;
         let total = 0;
 
         if (side === 'buy') {
-            estimatedPrice = assetPrice;
+            // For Buy: Amount is in USD (Input) -> Convert to Shares
             fee = numAmount * feeRate;
             const netAmount = numAmount - fee;
-            estimatedQuantity = netAmount / estimatedPrice;
+            estimatedQuantity = netAmount / effectivePrice;
             total = numAmount;
         } else {
-            estimatedPrice = assetPrice;
-            estimatedQuantity = numAmount;
-            const grossReturn = estimatedQuantity * estimatedPrice;
+            // For Sell: Input is Shares (usually) or USD value?
+            // Assuming Input is Shares for Sell in this simple view, OR we keep "Amount" as USD value for simplicity
+            // Let's stick to USD Value for input to keep UI unified as "Amount (USD)"
+            // Logic: User wants to sell $X worth of assets
+
+            // Standardizing: Input is ALWAYS USD Value for this UI Design
+            estimatedQuantity = numAmount / effectivePrice; // Shares to sell
+            const grossReturn = numAmount;
             fee = grossReturn * feeRate;
             total = grossReturn - fee;
         }
 
         return {
-            price: estimatedPrice,
+            price: effectivePrice,
             quantity: estimatedQuantity,
             fee: fee,
             total: total
         };
-    }, [amount, side, assetPrice]);
-
-    useEffect(() => {
-        if (onExecutionPriceChange && estimation) {
-            onExecutionPriceChange(estimation.price);
-        }
-    }, [estimation, onExecutionPriceChange]);
-
+    }, [amount, side, assetPrice, orderType, limitPrice]);
 
     const handlePercentageClick = (percent: number) => {
         if (side === 'buy' && balance !== null) {
             setAmount((balance * percent).toFixed(2));
             setError(null);
-        } else if (side === 'sell') {
-            // For sell side, ideally we'd need user's asset position. 
-            // Since we don't have it easily here without more props, disabling or doing nothing for now.
-            // Or we could pass 'userPosition' prop to OrderForm.
         }
     };
 
@@ -117,6 +126,11 @@ export function OrderForm({
             setError('Enter a valid amount');
             return;
         }
+        if (orderType === 'limit' && (!limitPrice || parseFloat(limitPrice) <= 0)) {
+            setError('Enter a valid limit price');
+            return;
+        }
+
         if (status !== 'authenticated') {
             showNotification('error', 'Please login to trade');
             return;
@@ -131,14 +145,23 @@ export function OrderForm({
         setError(null);
 
         try {
+            const payload: any = {
+                assetId,
+                side,
+                type: orderType,
+                amount: parseFloat(amount)
+            };
+
+            if (orderType === 'limit') {
+                payload.limitPrice = parseFloat(limitPrice);
+                if (takeProfit) payload.takeProfit = parseFloat(takeProfit);
+                if (stopLoss) payload.stopLoss = parseFloat(stopLoss);
+            }
+
             const res = await fetch('/api/trade', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    assetId,
-                    side,
-                    amount: parseFloat(amount)
-                })
+                body: JSON.stringify(payload)
             });
 
             const data = await res.json();
@@ -147,10 +170,9 @@ export function OrderForm({
                 throw new Error(data.error || 'Trade failed');
             }
 
-            showNotification('success', 'Trade executed successfully');
+            showNotification('success', 'Order placed successfully');
             setAmount('');
             if (onTradeSuccess) onTradeSuccess();
-            // Refetch balance happens via effect dependency on isSubmitting
         } catch (err: any) {
             setError(err.message);
             showNotification('error', err.message);
@@ -160,62 +182,78 @@ export function OrderForm({
     };
 
     return (
-        <div className="flex flex-col h-full w-full relative">
-
-            {/* 1. Header & Tab Switcher */}
-            <div className="flex-none p-4 pb-2">
-                <div className="bg-black/40 border border-white/5 p-1 rounded-xl flex relative isolate overflow-hidden backdrop-blur-md">
+        <div className="flex flex-col h-full w-full relative group/container">
+            {/* 1. Integrated Header & Controls */}
+            <div className="flex-none p-4 pb-0 space-y-4">
+                {/* Buy/Sell Tabs - Floating Pill Design */}
+                <div className="bg-black/40 border border-white/5 p-1 rounded-xl flex relative isolate overflow-hidden">
                     <button
                         onClick={() => setSide('buy')}
-                        className={`flex-1 py-3 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-xs flex items-center justify-center gap-2 ${side === 'buy' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'buy' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
                             }`}
                     >
                         Buy
                         {side === 'buy' && (
                             <motion.div
                                 layoutId="active-tab-bg"
-                                className="absolute inset-0 bg-emerald-500/20 border border-emerald-500/30 rounded-lg -z-10 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
-                                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                className="absolute inset-0 bg-emerald-500/10 border border-emerald-500/20 rounded-lg -z-10"
+                                transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
                             />
                         )}
                     </button>
                     <button
                         onClick={() => setSide('sell')}
-                        className={`flex-1 py-3 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-xs flex items-center justify-center gap-2 ${side === 'sell' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'sell' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
                             }`}
                     >
                         Sell
                         {side === 'sell' && (
                             <motion.div
                                 layoutId="active-tab-bg"
-                                className="absolute inset-0 bg-rose-500/20 border border-rose-500/30 rounded-lg -z-10 shadow-[0_0_15px_rgba(244,63,94,0.1)]"
-                                transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                className="absolute inset-0 bg-rose-500/10 border border-rose-500/20 rounded-lg -z-10"
+                                transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
                             />
                         )}
                     </button>
                 </div>
+
+                {/* Order Type Toggle */}
+                <div className="flex justify-between items-center px-1">
+                    <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Order Type</span>
+                    <div className="flex items-center bg-white/5 rounded-lg p-0.5 border border-white/5">
+                        <button
+                            onClick={() => setOrderType('market')}
+                            className={`px-3 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md transition-all ${orderType === 'market' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+                                }`}
+                        >
+                            Market
+                        </button>
+                        <button
+                            onClick={() => setOrderType('limit')}
+                            className={`px-3 py-1 text-[9px] font-bold uppercase tracking-wider rounded-md transition-all ${orderType === 'limit' ? 'bg-white/10 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'
+                                }`}
+                        >
+                            Limit
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            {/* 2. Main Input Area */}
-            <div className="flex-1 px-4 flex flex-col gap-4">
-                <div className="relative group">
-                    <div className={`absolute -inset-0.5 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 blur-md ${side === 'buy' ? 'bg-emerald-500/30' : 'bg-rose-500/30'}`} />
-                    <div className={`relative bg-black/60 border ${activeBorder} rounded-2xl p-4 transition-all duration-300 ${activeRing} group-focus-within:ring-1`}>
-                        <div className="flex justify-between items-center mb-2">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                                Amount ({side === 'buy' ? 'USD' : assetSymbol})
-                            </label>
-                            <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
-                                <Wallet className="w-3 h-3" />
-                                {status === 'authenticated' ? (
-                                    <span>{side === 'buy' ? `$${(balance || 0).toFixed(2)}` : 'Avail: --'}</span>
-                                ) : (
-                                    <span>--</span>
-                                )}
-                            </span>
-                        </div>
+            {/* 2. Scrollable Form Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
 
-                        <div className="flex items-baseline gap-2">
+                {/* Main Inputs - Clean Design (No Glows) */}
+                <div className="space-y-4">
+                    {/* Amount Input */}
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center text-[10px] uppercase font-bold text-zinc-500 px-1">
+                            <span>Amount (USD)</span>
+                            <div className="flex items-center gap-1.5 font-mono">
+                                <Wallet className="w-3 h-3" />
+                                <span>{balance ? `$${balance.toFixed(2)}` : '--'}</span>
+                            </div>
+                        </div>
+                        <div className={`relative bg-white/[0.02] border border-white/5 rounded-xl transition-colors focus-within:border-white/20 hover:border-white/10`}>
                             <input
                                 type="number"
                                 value={amount}
@@ -224,18 +262,27 @@ export function OrderForm({
                                     setError(null);
                                 }}
                                 placeholder="0.00"
-                                className="w-full bg-transparent text-3xl font-black text-white placeholder-zinc-700 outline-none tabular-nums caret-zinc-400"
+                                className="w-full bg-transparent px-4 py-3 text-xl font-bold text-white placeholder-zinc-800 outline-none tabular-nums"
                             />
+                            {side === 'buy' && (
+                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                                    <button
+                                        onClick={() => handlePercentageClick(1.0)}
+                                        className="px-2 py-1 text-[9px] font-bold bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white rounded uppercase transition-colors"
+                                    >
+                                        Max
+                                    </button>
+                                </div>
+                            )}
                         </div>
-
-                        {/* Percentages - Only valid known balance for BUY currently */}
+                        {/* Percentages Bar */}
                         {side === 'buy' && (
-                            <div className="flex gap-2 mt-3">
-                                {[0.25, 0.5, 0.75, 1].map((pct) => (
+                            <div className="flex gap-2">
+                                {[0.25, 0.5, 0.75].map((pct) => (
                                     <button
                                         key={pct}
                                         onClick={() => handlePercentageClick(pct)}
-                                        className="flex-1 py-1 text-[9px] font-bold text-zinc-500 bg-white/5 hover:bg-white/10 hover:text-white rounded-lg transition-colors border border-white/5 uppercase tracking-wider"
+                                        className="flex-1 py-1 text-[9px] font-bold text-zinc-600 bg-white/[0.02] hover:bg-white/[0.05] hover:text-zinc-300 rounded-lg transition-colors border border-transparent hover:border-white/5"
                                     >
                                         {pct * 100}%
                                     </button>
@@ -243,10 +290,72 @@ export function OrderForm({
                             </div>
                         )}
                     </div>
+
+                    {/* Limit Price Input */}
+                    <AnimatePresence>
+                        {orderType === 'limit' && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="space-y-4 overflow-hidden"
+                            >
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center text-[10px] uppercase font-bold text-zinc-500 px-1">
+                                        <span>Limit Price ($)</span>
+                                        <button
+                                            onClick={() => setLimitPrice(assetPrice.toFixed(2))}
+                                            className="text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+                                        >
+                                            <RefreshCw className="w-3 h-3" />
+                                            Last
+                                        </button>
+                                    </div>
+                                    <div className="bg-white/[0.02] border border-white/5 rounded-xl flex items-center px-4 py-3 focus-within:border-white/20 transition-colors">
+                                        <input
+                                            type="number"
+                                            value={limitPrice}
+                                            onChange={(e) => setLimitPrice(e.target.value)}
+                                            className="w-full bg-transparent text-lg font-bold text-white placeholder-zinc-800 outline-none tabular-nums"
+                                            placeholder={assetPrice.toFixed(2)}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Advanced TP/SL Section */}
+                                <div className="grid grid-cols-2 gap-3 pt-2">
+                                    <div className="space-y-2">
+                                        <span className="text-[10px] uppercase font-bold text-zinc-500 px-1">Take Profit</span>
+                                        <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl px-3 py-2.5 focus-within:border-emerald-500/30 transition-colors">
+                                            <input
+                                                type="number"
+                                                value={takeProfit}
+                                                onChange={(e) => setTakeProfit(e.target.value)}
+                                                className="w-full bg-transparent text-sm font-bold text-emerald-400 placeholder-emerald-500/20 outline-none tabular-nums"
+                                                placeholder="Optional"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <span className="text-[10px] uppercase font-bold text-zinc-500 px-1">Stop Loss</span>
+                                        <div className="bg-rose-500/5 border border-rose-500/10 rounded-xl px-3 py-2.5 focus-within:border-rose-500/30 transition-colors">
+                                            <input
+                                                type="number"
+                                                value={stopLoss}
+                                                onChange={(e) => setStopLoss(e.target.value)}
+                                                className="w-full bg-transparent text-sm font-bold text-rose-400 placeholder-rose-500/20 outline-none tabular-nums"
+                                                placeholder="Optional"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
-                {/* 3. Transaction Details & Error */}
-                <div className="flex-1 min-h-[100px]">
+                {/* Summary Section */}
+                <div className="pt-2">
                     <AnimatePresence mode="wait">
                         {error ? (
                             <motion.div
@@ -257,7 +366,7 @@ export function OrderForm({
                                 className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 flex items-start gap-3"
                             >
                                 <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-                                <p className="text-xs text-rose-200 font-medium leading-relaxed">{error}</p>
+                                <p className="text-xs text-rose-200 font-bold leading-relaxed">{error}</p>
                             </motion.div>
                         ) : (
                             <motion.div
@@ -265,26 +374,26 @@ export function OrderForm({
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                className="space-y-3 p-2"
+                                className="space-y-2.5 p-2"
                             >
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className="text-zinc-500 font-medium">Price Impact</span>
-                                    <span className="text-white font-mono">~0.1%</span>
-                                </div>
-                                <div className="flex justify-between items-center text-xs">
+                                <div className="flex justify-between items-center text-[11px]">
                                     <span className="text-zinc-500 font-medium">Est. Price</span>
-                                    <span className="text-white font-mono">${assetPrice.toFixed(2)}</span>
+                                    <span className="text-white font-mono font-bold">${(orderType === 'limit' && limitPrice ? parseFloat(limitPrice) : assetPrice).toFixed(2)}</span>
                                 </div>
-                                <div className="h-px bg-white/5 my-2" />
+                                <div className="flex justify-between items-center text-[11px]">
+                                    <span className="text-zinc-500 font-medium">Fee (1%)</span>
+                                    <span className="text-zinc-400 font-mono">${estimation ? estimation.fee.toFixed(2) : '0.00'}</span>
+                                </div>
+                                <div className="h-px bg-white/5 my-1" />
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">Total</span>
+                                    <span className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">Total Est.</span>
                                     <div className="text-right">
-                                        <div className={`text-lg font-black tabular-nums ${activeColor}`}>
+                                        <div className={`text-base font-black tabular-nums ${activeColor}`}>
                                             {side === 'buy'
                                                 ? estimation ? estimation.quantity.toFixed(4) : '0.0000'
                                                 : estimation ? `$${estimation.total.toFixed(2)}` : '$0.00'
                                             }
-                                            <span className="text-[10px] text-zinc-500 ml-1">
+                                            <span className="text-[9px] text-zinc-500 ml-1 font-bold">
                                                 {side === 'buy' ? assetSymbol : 'USD'}
                                             </span>
                                         </div>
@@ -296,28 +405,27 @@ export function OrderForm({
                 </div>
             </div>
 
-            {/* 4. Action Button - Fixed at Bottom */}
-            <div className="p-4 mt-auto">
+            {/* 3. Action Button */}
+            <div className="p-4 mt-auto border-t border-white/5 bg-black/20">
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitting || (side === 'buy' && !amount)}
-                    className="w-full relative group h-14 rounded-2xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    className={`w-full relative group h-12 rounded-xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg active:scale-[0.98] transition-all bg-gradient-to-r ${btnGradient}`}
                 >
-                    <div className={`absolute inset-0 ${activeBg} opacity-80 group-hover:opacity-100 transition-opacity duration-300`} />
-                    <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000`} />
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
 
                     <div className="relative h-full flex items-center justify-center gap-2">
                         {isSubmitting ? (
                             <Loader2 className="w-5 h-5 text-white animate-spin" />
                         ) : (
                             <>
-                                <span className="text-white font-black uppercase tracking-[0.2em] text-sm">
-                                    {side === 'buy' ? 'Buy Now' : 'Sell Now'}
+                                <span className="text-white font-black uppercase tracking-[0.2em] text-xs">
+                                    {orderType === 'limit' ? `Place Limit ${side}` : `${side} Now`}
                                 </span>
                                 {side === 'buy' ? (
-                                    <TrendingUp className="w-4 h-4 text-white/80" />
+                                    <TrendingUp className="w-4 h-4 text-white/90" />
                                 ) : (
-                                    <TrendingDown className="w-4 h-4 text-white/80" />
+                                    <TrendingDown className="w-4 h-4 text-white/90" />
                                 )}
                             </>
                         )}
@@ -327,3 +435,5 @@ export function OrderForm({
         </div>
     );
 }
+
+export default OrderForm;
