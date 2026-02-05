@@ -713,21 +713,6 @@ export function AssetChart({
                 </button>
             </div>}
 
-            {!hideTools && <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
-                {timeframes.map((tf) => (
-                    <button
-                        key={tf.label}
-                        onClick={() => props.activeTimeframe ? null : setInternalTimeframe(tf.label.toLowerCase() as any)}
-                        className={`px-2 py-1 text-[9px] font-black tracking-tighter uppercase rounded transition-all duration-200 ${activeTimeframe === tf.label.toLowerCase()
-                            ? 'bg-primary/20 text-primary shadow-[0_0_10px_rgba(59,130,246,0.2)]'
-                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
-                            }`}
-                    >
-                        {tf.label}
-                    </button>
-                ))}
-            </div>}
-
             {!hideTools && <div className="flex items-center justify-end p-3 md:p-4 border-b border-white/5 bg-black/40 backdrop-blur-md z-30">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
