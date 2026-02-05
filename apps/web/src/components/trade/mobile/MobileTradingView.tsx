@@ -217,7 +217,7 @@ export function MobileTradingView({
 
             {/* Floating Buy/Sell Buttons - Only on chart page, no container */}
             {activeTab === 'chart' && (
-                <div className="fixed top-[100px] left-4 right-4 z-40 flex gap-3 lg:hidden">
+                <div className="fixed top-[140px] left-4 right-4 z-40 flex gap-3 lg:hidden">
                     <motion.button
                         onClick={() => handleOpenTrade('buy')}
                         whileTap={{ scale: 0.97 }}
@@ -272,7 +272,7 @@ export function MobileTradingView({
             )}
 
             {/* FIXED Floating Tab Navigation - Vertically centered on left side */}
-            <div className="fixed left-3 top-1/2 -translate-y-1/2 z-40 lg:hidden">
+            <div className="fixed left-3 bottom-[140px] z-40 lg:hidden">
                 <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
@@ -315,7 +315,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 pt-10"
+                            className="absolute inset-0"
                             style={{ paddingBottom: '0px' }}
                         >
                             {chartData.length > 0 ? (
