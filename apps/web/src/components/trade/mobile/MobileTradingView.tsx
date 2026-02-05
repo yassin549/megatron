@@ -103,7 +103,7 @@ export function MobileTradingView({
     const [showTradeSheet, setShowTradeSheet] = useState(false);
     const [tradeSide, setTradeSide] = useState<'buy' | 'sell'>('buy');
     const [activeTool, setActiveTool] = useState<string | null>(null);
-    const [timeframe, setTimeframe] = useState('15m');
+    const [timeframe, setTimeframe] = useState('4h');
 
     // Lock body scroll when on chart tab to prevent scrolling
     useEffect(() => {

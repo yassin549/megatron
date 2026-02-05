@@ -129,10 +129,10 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                             type="text"
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
-                            placeholder="Search..."
-                            className="w-full h-full pl-10 pr-4 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
+                            placeholder="Search markets..."
+                            className="w-full h-full pl-11 pr-4 py-4 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
                         />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500 group-focus-within:text-primary transition-colors" />
                     </form>
                 </div>
 
@@ -141,7 +141,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                     className={`w-[20%] flex items-center justify-center bg-obsidian-900 border border-white/10 rounded-xl text-zinc-400 hover:text-white hover:border-white/20 transition-all ${showFilters ? 'text-primary border-primary/30 bg-primary/10' : ''
                         }`}
                 >
-                    <SlidersHorizontal className="w-5 h-5" />
+                    <SlidersHorizontal className="w-6 h-6" />
                 </button>
 
                 {/* Suggestions Dropdown */}
@@ -186,7 +186,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-white/10 rounded-t-3xl z-50 p-6 md:hidden max-h-[80vh] overflow-y-auto"
+                            className="fixed bottom-[80px] left-0 right-0 bg-zinc-900 border-t border-white/10 rounded-t-3xl z-50 p-6 md:hidden max-h-[70vh] overflow-y-auto shadow-2xl"
                         >
                             <div className="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mb-6" />
 
@@ -202,8 +202,8 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                                                     router.push(`/?category=${val}`, { scroll: false });
                                                 }}
                                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${(activeCategory === cat.toLowerCase() || (cat === 'All' && activeCategory === 'all'))
-                                                        ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                                        : 'bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200'
+                                                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                                    : 'bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200'
                                                     }`}
                                             >
                                                 {cat}
