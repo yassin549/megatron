@@ -215,13 +215,13 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Buy/Sell Buttons - Below header, only on chart page */}
+            {/* Floating Buy/Sell Buttons - Only on chart page, no container */}
             {activeTab === 'chart' && (
-                <div className="flex gap-3 px-4 py-2 bg-black/40 border-b border-white/5">
+                <div className="fixed top-[100px] left-4 right-4 z-40 flex gap-3 lg:hidden">
                     <motion.button
                         onClick={() => handleOpenTrade('buy')}
                         whileTap={{ scale: 0.97 }}
-                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-lg shadow-emerald-900/30"
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-xl shadow-emerald-900/40"
                     >
                         <TrendingUp className="w-4 h-4" />
                         Buy
@@ -229,7 +229,7 @@ export function MobileTradingView({
                     <motion.button
                         onClick={() => handleOpenTrade('sell')}
                         whileTap={{ scale: 0.97 }}
-                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-lg shadow-rose-900/30"
+                        className="flex-1 h-10 rounded-xl font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-xl shadow-rose-900/40"
                     >
                         <TrendingDown className="w-4 h-4" />
                         Sell
@@ -237,154 +237,153 @@ export function MobileTradingView({
                 </div>
             )}
 
-            {/* Main Content Area with Left Sidebar */}
-            <div className="flex-1 min-h-0 relative flex overflow-hidden">
-                {/* Left Sidebar - Tools (chart only) + Tab Nav */}
-                <div className="flex flex-col gap-2 p-2 bg-[#0a0e14]/90 border-r border-white/5 z-30">
-                    {/* Chart Tools - Only visible on chart tab */}
-                    {activeTab === 'chart' && (
-                        <div className="flex flex-col gap-1 p-1.5 bg-white/[0.02] border border-white/5 rounded-xl mb-2">
-                            {chartTools.map((tool) => {
-                                const Icon = tool.icon;
-                                const isActive = activeTool === tool.id;
-                                return (
-                                    <button
-                                        key={tool.id}
-                                        onClick={() => setActiveTool(isActive ? null : tool.id)}
-                                        className={`p-2.5 rounded-lg transition-all ${isActive
-                                                ? 'bg-primary/20 text-primary border border-primary/30'
-                                                : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'
-                                            }`}
-                                        title={tool.label}
-                                    >
-                                        <Icon className="w-4 h-4" />
-                                    </button>
-                                );
-                            })}
-                            {activeTool && (
-                                <button
-                                    onClick={() => setActiveTool(null)}
-                                    className="p-2.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all"
-                                    title="Clear Tool"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Tab Navigation - Always visible */}
-                    <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl">
-                        {tabs.map((tab) => {
-                            const Icon = tab.icon;
-                            const isActive = activeTab === tab.id;
-                            const colors = tabColors[tab.id];
-                            const activeColor = tabActiveColors[tab.id];
+            {/* FIXED Floating Chart Tools - Only on chart page */}
+            {activeTab === 'chart' && (
+                <div className="fixed left-3 top-[160px] z-40 lg:hidden">
+                    <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
+                        {chartTools.map((tool) => {
+                            const Icon = tool.icon;
+                            const isActive = activeTool === tool.id;
                             return (
                                 <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
-                                            ? activeColor
-                                            : 'text-zinc-600 hover:text-zinc-400'
+                                    key={tool.id}
+                                    onClick={() => setActiveTool(isActive ? null : tool.id)}
+                                    className={`p-2.5 rounded-lg transition-all ${isActive
+                                            ? 'bg-primary/20 text-primary border border-primary/30'
+                                            : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'
                                         }`}
-                                    title={tab.label}
+                                    title={tool.label}
                                 >
-                                    <Icon className="w-5 h-5" />
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="tab-indicator-mobile"
-                                            className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-lg -z-10 shadow-lg ${colors.glow}`}
-                                            transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
-                                        />
-                                    )}
+                                    <Icon className="w-4 h-4" />
                                 </button>
                             );
                         })}
+                        {activeTool && (
+                            <button
+                                onClick={() => setActiveTool(null)}
+                                className="p-2.5 rounded-lg text-rose-500 hover:bg-rose-500/10 transition-all"
+                                title="Clear Tool"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        )}
                     </div>
                 </div>
+            )}
 
-                {/* Page Content */}
-                <div className="flex-1 min-h-0 relative overflow-hidden">
-                    <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
-                        {activeTab === 'chart' && (
-                            <motion.div
-                                key="chart"
-                                custom={getDirection('chart')}
-                                variants={pageVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                className="absolute inset-0"
+            {/* FIXED Floating Tab Navigation - Always at same position */}
+            <div className="fixed left-3 bottom-[76px] z-40 lg:hidden">
+                <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        const colors = tabColors[tab.id];
+                        const activeColor = tabActiveColors[tab.id];
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
+                                        ? activeColor
+                                        : 'text-zinc-600 hover:text-zinc-400'
+                                    }`}
+                                title={tab.label}
                             >
-                                {chartData.length > 0 ? (
-                                    <ErrorBoundary name="Mobile Chart">
-                                        <AssetChart
-                                            data={chartData}
-                                            marginalPrice={livePrice}
-                                            marketPrice={asset.marketPrice}
-                                            watermarkText=""
-                                            colors={chartColors}
-                                            priceLines={priceLines}
-                                            userTrades={asset.userTrades}
-                                            hideTools
-                                        />
-                                    </ErrorBoundary>
-                                ) : (
-                                    <div className="h-full flex items-center justify-center bg-black/20">
-                                        <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
-                                    </div>
+                                <Icon className="w-5 h-5" />
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="tab-indicator-mobile"
+                                        className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-lg -z-10 shadow-lg ${colors.glow}`}
+                                        transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                                    />
                                 )}
-                            </motion.div>
-                        )}
-
-                        {activeTab === 'book' && (
-                            <motion.div
-                                key="book"
-                                custom={getDirection('book')}
-                                variants={pageVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                className="absolute inset-0"
-                            >
-                                <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
-                            </motion.div>
-                        )}
-
-                        {activeTab === 'oracle' && (
-                            <motion.div
-                                key="oracle"
-                                custom={getDirection('oracle')}
-                                variants={pageVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                className="absolute inset-0 overflow-y-auto"
-                            >
-                                <MobileOracleTerminal oracleLogs={oracleLogs} />
-                            </motion.div>
-                        )}
-
-                        {activeTab === 'stats' && (
-                            <motion.div
-                                key="stats"
-                                custom={getDirection('stats')}
-                                variants={pageVariants}
-                                initial="enter"
-                                animate="center"
-                                exit="exit"
-                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                className="absolute inset-0 overflow-y-auto"
-                            >
-                                <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                            </button>
+                        );
+                    })}
                 </div>
+            </div>
+
+            {/* Content Area - Full width, proper height for chart time axis */}
+            <div className="flex-1 min-h-0 relative overflow-hidden">
+                <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
+                    {activeTab === 'chart' && (
+                        <motion.div
+                            key="chart"
+                            custom={getDirection('chart')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 pt-12 pb-0"
+                            style={{ paddingBottom: '0px' }}
+                        >
+                            {chartData.length > 0 ? (
+                                <ErrorBoundary name="Mobile Chart">
+                                    <AssetChart
+                                        data={chartData}
+                                        marginalPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        watermarkText=""
+                                        colors={chartColors}
+                                        priceLines={priceLines}
+                                        userTrades={asset.userTrades}
+                                        hideTools
+                                    />
+                                </ErrorBoundary>
+                            ) : (
+                                <div className="h-full flex items-center justify-center bg-black/20">
+                                    <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'book' && (
+                        <motion.div
+                            key="book"
+                            custom={getDirection('book')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 pl-14"
+                        >
+                            <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'oracle' && (
+                        <motion.div
+                            key="oracle"
+                            custom={getDirection('oracle')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 pl-14 overflow-y-auto"
+                        >
+                            <MobileOracleTerminal oracleLogs={oracleLogs} />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'stats' && (
+                        <motion.div
+                            key="stats"
+                            custom={getDirection('stats')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 pl-14 overflow-y-auto"
+                        >
+                            <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Trade Sheet Modal */}
