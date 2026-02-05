@@ -254,33 +254,7 @@ export function MobileTradingView({
                 </div>
             )}
 
-            {/* Timeframe Toggle - Only on chart page */}
-            {activeTab === 'chart' && (
-                <div className="fixed top-[196px] left-4 right-4 z-40 flex justify-center lg:hidden">
-                    <div className="flex items-center gap-1 p-1 bg-[#0d1421]/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg relative">
-                        {['1m', '5m', '15m', '1h', '4h', '1d'].map((tf) => {
-                            const isActive = timeframe === tf;
-                            return (
-                                <button
-                                    key={tf}
-                                    onClick={() => setTimeframe(tf)}
-                                    className={`relative z-10 px-2.5 py-1 text-[10px] font-bold rounded-md transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-                                        }`}
-                                >
-                                    {isActive && (
-                                        <motion.div
-                                            layoutId="activeTimeframe"
-                                            className="absolute inset-0 bg-blue-500 rounded-md -z-10 shadow-sm"
-                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                        />
-                                    )}
-                                    {tf.toUpperCase()}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+
 
             {/* FIXED Floating Chart Tools - Only on chart page */}
             {activeTab === 'chart' && (
@@ -302,178 +276,176 @@ export function MobileTradingView({
                                     <Icon className="w-4 h-4" />
                                 </button>
                             );
-                            <Icon className="w-4 h-4" />
-                                </button>
-                    );
+
                         })}
-                    {/* Timeframe Buttons in Tools Bar */}
-                    <div className="w-px h-4 bg-white/10 mx-1" />
-                    {['1m', '15m', '4h', '1d', 'all'].map((tf) => (
-                        <button
-                            key={tf}
-                            onClick={() => setTimeframe(tf)}
-                            className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${timeframe === tf
-                                ? 'bg-blue-500 text-white shadow-sm'
-                                : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-                                }`}
-                        >
-                            {tf === 'all' ? 'ALL' : tf.toUpperCase()}
-                        </button>
-                    ))}
-                </div>
-                </div>
-    )
-}
-
-{/* FIXED Floating Tab Navigation - Vertically centered on left side */ }
-<div className="fixed left-3 bottom-[140px] z-40 lg:hidden">
-    <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
-        {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            const colors = tabColors[tab.id];
-            const activeColor = tabActiveColors[tab.id];
-            return (
-                <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
-                        ? activeColor
-                        : 'text-zinc-600 hover:text-zinc-400'
-                        }`}
-                    title={tab.label}
-                >
-                    <Icon className="w-5 h-5" />
-                    {isActive && (
-                        <motion.div
-                            layoutId="tab-indicator-mobile"
-                            className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-lg -z-10 shadow-lg ${colors.glow}`}
-                            transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
-                        />
-                    )}
-                </button>
-            );
-        })}
-    </div>
-</div>
-
-{/* Content Area - Full width, ends above bottom nav */ }
-<div className="flex-1 min-h-0 relative overflow-hidden pb-[72px]">
-    <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
-        {activeTab === 'chart' && (
-            <motion.div
-                key="chart"
-                custom={getDirection('chart')}
-                variants={pageVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute top-0 left-0 right-0 bottom-[72px]"
-            >
-                {chartData.length > 0 ? (
-                    <ErrorBoundary name="Mobile Chart">
-                        <AssetChart
-                            data={chartData}
-                            activeTimeframe={timeframe as any}
-                            marginalPrice={livePrice}
-                            marketPrice={asset.marketPrice}
-                            watermarkText=""
-                            colors={chartColors}
-                            priceLines={priceLines}
-                            userTrades={asset.userTrades}
-                            hideTools
-                        />
-                    </ErrorBoundary>
-                ) : (
-                    <div className="h-full flex items-center justify-center bg-black/20">
-                        <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                        {/* Timeframe Buttons in Tools Bar */}
+                        <div className="w-px h-4 bg-white/10 mx-1" />
+                        {['1m', '15m', '4h', '1d', 'all'].map((tf) => (
+                            <button
+                                key={tf}
+                                onClick={() => setTimeframe(tf)}
+                                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${timeframe === tf
+                                    ? 'bg-blue-500 text-white shadow-sm'
+                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
+                                    }`}
+                            >
+                                {tf === 'all' ? 'ALL' : tf.toUpperCase()}
+                            </button>
+                        ))}
                     </div>
+                </div>
+            )
+            }
+
+            {/* FIXED Floating Tab Navigation - Vertically centered on left side */}
+            <div className="fixed left-3 bottom-[140px] z-40 lg:hidden">
+                <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
+                    {tabs.map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        const colors = tabColors[tab.id];
+                        const activeColor = tabActiveColors[tab.id];
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
+                                    ? activeColor
+                                    : 'text-zinc-600 hover:text-zinc-400'
+                                    }`}
+                                title={tab.label}
+                            >
+                                <Icon className="w-5 h-5" />
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="tab-indicator-mobile"
+                                        className={`absolute inset-0 ${colors.bg} border ${colors.border} rounded-lg -z-10 shadow-lg ${colors.glow}`}
+                                        transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Content Area - Full width, ends above bottom nav */}
+            <div className="flex-1 min-h-0 relative overflow-hidden pb-[72px]">
+                <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
+                    {activeTab === 'chart' && (
+                        <motion.div
+                            key="chart"
+                            custom={getDirection('chart')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute top-0 left-0 right-0 bottom-[72px]"
+                        >
+                            {chartData.length > 0 ? (
+                                <ErrorBoundary name="Mobile Chart">
+                                    <AssetChart
+                                        data={chartData}
+                                        activeTimeframe={timeframe as any}
+                                        marginalPrice={livePrice}
+                                        marketPrice={asset.marketPrice}
+                                        watermarkText=""
+                                        colors={chartColors}
+                                        priceLines={priceLines}
+                                        userTrades={asset.userTrades}
+                                        hideTools
+                                    />
+                                </ErrorBoundary>
+                            ) : (
+                                <div className="h-full flex items-center justify-center bg-black/20">
+                                    <div className="w-6 h-6 rounded-full border-2 border-primary/20 border-t-primary animate-spin" />
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'book' && (
+                        <motion.div
+                            key="book"
+                            custom={getDirection('book')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0"
+                        >
+                            <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'oracle' && (
+                        <motion.div
+                            key="oracle"
+                            custom={getDirection('oracle')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 overflow-y-auto"
+                        >
+                            <MobileOracleTerminal oracleLogs={oracleLogs} />
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'stats' && (
+                        <motion.div
+                            key="stats"
+                            custom={getDirection('stats')}
+                            variants={pageVariants}
+                            initial="enter"
+                            animate="center"
+                            exit="exit"
+                            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                            className="absolute inset-0 overflow-y-auto"
+                        >
+                            <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Trade Sheet Modal */}
+            <AnimatePresence>
+                {showTradeSheet && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/70 z-50"
+                            onClick={() => setShowTradeSheet(false)}
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="fixed bottom-[72px] left-0 right-0 z-50 bg-zinc-900 rounded-t-3xl border-t border-white/10 max-h-[60vh] overflow-y-auto"
+                        >
+                            <TradeSheet
+                                assetId={asset.id}
+                                assetName={asset.name}
+                                assetPrice={livePrice}
+                                side={tradeSide}
+                                onSideChange={setTradeSide}
+                                onClose={() => setShowTradeSheet(false)}
+                                onSuccess={() => {
+                                    setShowTradeSheet(false);
+                                    onRefresh();
+                                }}
+                            />
+                        </motion.div>
+                    </>
                 )}
-            </motion.div>
-        )}
-
-        {activeTab === 'book' && (
-            <motion.div
-                key="book"
-                custom={getDirection('book')}
-                variants={pageVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute inset-0"
-            >
-                <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
-            </motion.div>
-        )}
-
-        {activeTab === 'oracle' && (
-            <motion.div
-                key="oracle"
-                custom={getDirection('oracle')}
-                variants={pageVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute inset-0 overflow-y-auto"
-            >
-                <MobileOracleTerminal oracleLogs={oracleLogs} />
-            </motion.div>
-        )}
-
-        {activeTab === 'stats' && (
-            <motion.div
-                key="stats"
-                custom={getDirection('stats')}
-                variants={pageVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute inset-0 overflow-y-auto"
-            >
-                <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
-            </motion.div>
-        )}
-    </AnimatePresence>
-</div>
-
-{/* Trade Sheet Modal */ }
-<AnimatePresence>
-    {showTradeSheet && (
-        <>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/70 z-50"
-                onClick={() => setShowTradeSheet(false)}
-            />
-            <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="fixed bottom-[72px] left-0 right-0 z-50 bg-zinc-900 rounded-t-3xl border-t border-white/10 max-h-[60vh] overflow-y-auto"
-            >
-                <TradeSheet
-                    assetId={asset.id}
-                    assetName={asset.name}
-                    assetPrice={livePrice}
-                    side={tradeSide}
-                    onSideChange={setTradeSide}
-                    onClose={() => setShowTradeSheet(false)}
-                    onSuccess={() => {
-                        setShowTradeSheet(false);
-                        onRefresh();
-                    }}
-                />
-            </motion.div>
-        </>
-    )}
-</AnimatePresence>
+            </AnimatePresence>
         </div >
     );
 }
