@@ -254,6 +254,34 @@ export function MobileTradingView({
                 </div>
             )}
 
+            {/* Timeframe Toggle - Horizontal below Buy/Sell */}
+            {activeTab === 'chart' && (
+                <div className="fixed top-[190px] left-4 right-4 z-30 flex justify-center lg:hidden pointer-events-auto">
+                    <div className="flex items-center gap-1 p-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg shadow-lg">
+                        {['1m', '15m', '4h', '1d', 'all'].map((tf) => {
+                            const isActive = timeframe === tf;
+                            return (
+                                <button
+                                    key={tf}
+                                    onClick={() => setTimeframe(tf)}
+                                    className={`relative px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all duration-200 ${isActive ? 'text-white bg-zinc-800 shadow-sm ring-1 ring-white/10' : 'text-zinc-500 hover:text-zinc-300'
+                                        }`}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeTimeframe"
+                                            className="absolute inset-0 bg-zinc-800 rounded-md -z-10"
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    {tf === 'all' ? 'ALL' : tf}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
 
 
             {/* FIXED Floating Chart Tools - Only on chart page */}
@@ -278,20 +306,7 @@ export function MobileTradingView({
                             );
 
                         })}
-                        {/* Timeframe Buttons in Tools Bar */}
-                        <div className="w-px h-4 bg-white/10 mx-1" />
-                        {['1m', '15m', '4h', '1d', 'all'].map((tf) => (
-                            <button
-                                key={tf}
-                                onClick={() => setTimeframe(tf)}
-                                className={`px-2 py-1 text-[10px] font-bold rounded-md transition-all ${timeframe === tf
-                                    ? 'bg-blue-500 text-white shadow-sm'
-                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-                                    }`}
-                            >
-                                {tf === 'all' ? 'ALL' : tf.toUpperCase()}
-                            </button>
-                        ))}
+
                     </div>
                 </div>
             )
