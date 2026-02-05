@@ -114,7 +114,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
         <div className="h-full flex flex-col font-mono text-[11px] select-none pb-28 bg-gradient-to-b from-transparent to-black/20">
             {/* Header */}
             <div className="grid grid-cols-3 px-4 py-3 text-zinc-500 font-bold uppercase tracking-tight border-b border-white/5 bg-black/40">
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 pl-14">
                     <div className="w-1 h-3 rounded-full bg-gradient-to-b from-rose-500 to-emerald-500" />
                     Price
                 </span>
@@ -138,7 +138,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-4 relative z-10">
-                                <span className="text-rose-400 font-bold flex items-center gap-1">
+                                <span className="text-rose-400 font-bold flex items-center gap-1 pl-14">
                                     <ArrowUpRight className="w-3 h-3 opacity-40" />
                                     ${order.price.toFixed(2)}
                                 </span>
@@ -185,7 +185,7 @@ export function MobileOrderBook({ assetId, assetPrice }: MobileOrderBookProps) {
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-4 relative z-10">
-                                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                <span className="text-emerald-400 font-bold flex items-center gap-1 pl-14">
                                     <ArrowDownRight className="w-3 h-3 opacity-40" />
                                     ${order.price.toFixed(2)}
                                 </span>
