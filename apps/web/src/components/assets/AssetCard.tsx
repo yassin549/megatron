@@ -291,10 +291,7 @@ export function AssetCard({
                     )}
                 </AnimatePresence>
 
-                {/* Pressure Gauge - Top Right (Visible on all screens) */}
-                <div className="absolute top-2 right-2 z-20 pointer-events-none">
-                    <PressureGauge value={livePressure} />
-                </div>
+                {/* Pressure Gauge - Moved to bottom footer */}
 
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
@@ -389,7 +386,9 @@ export function AssetCard({
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
                     <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
-                        <div className="flex-1" />
+                        <div className="flex-1 mr-4">
+                            <PressureGauge value={livePressure} size="sm" />
+                        </div>
 
                         <button
                             onClick={handleToggleBookmark}

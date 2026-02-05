@@ -257,19 +257,27 @@ export function MobileTradingView({
             {/* Timeframe Toggle - Only on chart page */}
             {activeTab === 'chart' && (
                 <div className="fixed top-[196px] left-4 right-4 z-40 flex justify-center lg:hidden">
-                    <div className="flex items-center gap-1 p-1 bg-[#0d1421]/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg">
-                        {['1m', '5m', '15m', '1h', '4h', '1d'].map((tf) => (
-                            <button
-                                key={tf}
-                                onClick={() => setTimeframe(tf)}
-                                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${timeframe === tf
-                                    ? 'bg-blue-500 text-white shadow-sm'
-                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
-                                    }`}
-                            >
-                                {tf.toUpperCase()}
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-1 p-1 bg-[#0d1421]/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg relative">
+                        {['1m', '5m', '15m', '1h', '4h', '1d'].map((tf) => {
+                            const isActive = timeframe === tf;
+                            return (
+                                <button
+                                    key={tf}
+                                    onClick={() => setTimeframe(tf)}
+                                    className={`relative z-10 px-2.5 py-1 text-[10px] font-bold rounded-md transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                                        }`}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeTimeframe"
+                                            className="absolute inset-0 bg-blue-500 rounded-md -z-10 shadow-sm"
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                        />
+                                    )}
+                                    {tf.toUpperCase()}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
             )}
