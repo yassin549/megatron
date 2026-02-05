@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, TrendingUp, TrendingDown, LineChart, BookOpen, Sparkles, BarChart3, X, Loader2, Crosshair, RulerIcon, TrendingUpIcon, Minus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
@@ -103,6 +103,23 @@ export function MobileTradingView({
     const [showTradeSheet, setShowTradeSheet] = useState(false);
     const [tradeSide, setTradeSide] = useState<'buy' | 'sell'>('buy');
     const [activeTool, setActiveTool] = useState<string | null>(null);
+    const [timeframe, setTimeframe] = useState('15m');
+
+    // Lock body scroll when on chart tab to prevent scrolling
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            if (activeTab === 'chart') {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                document.body.style.overflow = '';
+            }
+        };
+    }, [activeTab]);
 
     const chartData = useMemo(() => {
         return (priceHistory || [])
@@ -237,9 +254,29 @@ export function MobileTradingView({
                 </div>
             )}
 
+            {/* Timeframe Toggle - Only on chart page */}
+            {activeTab === 'chart' && (
+                <div className="fixed top-[196px] left-4 right-4 z-40 flex justify-center lg:hidden">
+                    <div className="flex items-center gap-1 p-1 bg-[#0d1421]/90 backdrop-blur-md border border-white/10 rounded-lg shadow-lg">
+                        {['1m', '5m', '15m', '1h', '4h', '1d'].map((tf) => (
+                            <button
+                                key={tf}
+                                onClick={() => setTimeframe(tf)}
+                                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${timeframe === tf
+                                    ? 'bg-blue-500 text-white shadow-sm'
+                                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5'
+                                    }`}
+                            >
+                                {tf.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* FIXED Floating Chart Tools - Only on chart page */}
             {activeTab === 'chart' && (
-                <div className="fixed left-3 top-[200px] z-40 lg:hidden">
+                <div className="fixed left-3 top-[250px] z-40 lg:hidden">
                     <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
                         {chartTools.map((tool) => {
                             const Icon = tool.icon;

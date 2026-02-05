@@ -291,8 +291,8 @@ export function AssetCard({
                     )}
                 </AnimatePresence>
 
-                {/* Pressure Gauge - Top Right (Desktop Only) */}
-                <div className="absolute top-2 right-2 z-20 pointer-events-none hidden md:block">
+                {/* Pressure Gauge - Top Right (Visible on all screens) */}
+                <div className="absolute top-2 right-2 z-20 pointer-events-none">
                     <PressureGauge value={livePressure} />
                 </div>
 
@@ -389,21 +389,7 @@ export function AssetCard({
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
                     <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono">
-                                <Activity className="w-3 h-3" />
-                                {formatVolume(volume24h)}
-                            </div>
-                            <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-mono">
-                                <Users className="w-3 h-3" />
-                                {holders}
-                            </div>
-                        </div>
-
-                        {/* Mobile Pressure Gauge */}
-                        <div className="md:hidden">
-                            <PressureGauge value={livePressure} size="sm" />
-                        </div>
+                        <div className="flex-1" />
 
                         <button
                             onClick={handleToggleBookmark}
