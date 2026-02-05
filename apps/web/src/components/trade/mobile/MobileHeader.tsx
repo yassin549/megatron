@@ -14,7 +14,7 @@ export function MobileHeader({ assetName, price, change24h }: MobileHeaderProps)
     const isPositive = change24h >= 0;
 
     return (
-        <header className="h-14 flex-none sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
+        <header className="h-14 fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-xl border-b border-white/5">
             <div className="h-full px-4 flex items-center gap-3">
                 {/* Back Button */}
                 <Link
