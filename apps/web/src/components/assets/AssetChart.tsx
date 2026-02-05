@@ -306,6 +306,7 @@ export function AssetChart({
         chart.setPeriod(config.period as any);
 
         // Auto-fit logic
+        // Auto-fit logic
         const fitContent = () => {
             const dataList = chart.getDataList();
             const dataLength = dataList.length;
@@ -314,57 +315,50 @@ export function AssetChart({
             const containerWidth = chartContainerRef.current?.clientWidth || 0;
             if (containerWidth === 0) return;
 
-            let optimalSpace = 0;
+            // Explicitly unlock gestures
+            chart.setScrollEnabled(true);
+            chart.setZoomEnabled(true);
 
-            if (config.duration && config.duration > 0) {
-                // Calculate how many bars fit in the duration based on current period
-                const barDurationMs = config.period.span * (
-                    config.period.type === 'minute' ? 60000 :
-                        config.period.type === 'hour' ? 3600000 :
-                            config.period.type === 'day' ? 86400000 :
-                                config.period.type === 'week' ? 604800000 : 0
-                );
+            if (activeTimeframe === 'all') {
+                // "All" Mode: STRICT FIT
+                // We want all data visible.
+                // Space per bar = Width / Count
+                chart.setOffsetRightDistance(0); // No empty space for "All"
 
-                if (barDurationMs > 0) {
-                    const barsToShow = config.duration / barDurationMs;
-                    optimalSpace = containerWidth / barsToShow;
-                }
+                const space = containerWidth / dataLength;
+                // Apply slightly smaller space to ensure no horizontal scroll needed
+                chart.setBarSpace(space * 0.95);
+                chart.scrollToRealTime(); // Or scrollToDataIndex(0)? KLineCharts typically scrolls to end. 
+                // Actually for "All", we might want to center or just rely on barSpace fitting.
+
             } else {
-                // Fit All
-                optimalSpace = containerWidth / dataLength;
-            }
+                // Standard Timeframes
+                chart.setOffsetRightDistance(50); // Restore breathing room
 
-            // prevent massive bars on low data (cap max width)
-            optimalSpace = Math.min(optimalSpace, 50);
-            // prevent tiny bars (cap min width)
-            optimalSpace = Math.max(optimalSpace, 2);
+                let optimalSpace = 0;
+                if (config.duration && config.duration > 0) {
+                    const barDurationMs = config.period.span * (
+                        config.period.type === 'minute' ? 60000 :
+                            config.period.type === 'hour' ? 3600000 :
+                                config.period.type === 'day' ? 86400000 :
+                                    config.period.type === 'week' ? 604800000 : 0
+                    );
 
-            // Animate zoom
-            const barSpace = chart.getBarSpace();
-            const startSpace = barSpace.bar + barSpace.gapBar;
-            const targetSpace = optimalSpace;
-            const duration = 300; // ms
-            const startTime = performance.now();
-
-            const animate = (currentTime: number) => {
-                const elapsed = currentTime - startTime;
-                const progress = Math.min(elapsed / duration, 1);
-
-                // Ease out cubic
-                const ease = 1 - Math.pow(1 - progress, 3);
-
-                const currentSpace = startSpace + (targetSpace - startSpace) * ease;
-                chart.setBarSpace(currentSpace);
-
-                // Keep right edge locked
-                chart.scrollToRealTime();
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
+                    if (barDurationMs > 0) {
+                        const barsToShow = config.duration / barDurationMs;
+                        optimalSpace = containerWidth / barsToShow;
+                    }
+                } else {
+                    optimalSpace = 10; // Fallback
                 }
-            };
 
-            requestAnimationFrame(animate);
+                // Cap standard views to reasonable sizes
+                optimalSpace = Math.min(optimalSpace, 50);
+                optimalSpace = Math.max(optimalSpace, 2);
+
+                chart.setBarSpace(optimalSpace);
+                chart.scrollToRealTime();
+            }
         };
 
 
