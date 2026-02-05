@@ -249,8 +249,8 @@ export function MobileTradingView({
                                     key={tool.id}
                                     onClick={() => setActiveTool(isActive ? null : tool.id)}
                                     className={`p-2.5 rounded-lg transition-all ${isActive
-                                            ? 'bg-primary/20 text-primary border border-primary/30'
-                                            : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'
+                                        ? 'bg-primary/20 text-primary border border-primary/30'
+                                        : 'text-zinc-600 hover:text-zinc-400 hover:bg-white/5'
                                         }`}
                                     title={tool.label}
                                 >
@@ -271,8 +271,8 @@ export function MobileTradingView({
                 </div>
             )}
 
-            {/* FIXED Floating Tab Navigation - Always at same position */}
-            <div className="fixed left-3 bottom-[76px] z-40 lg:hidden">
+            {/* FIXED Floating Tab Navigation - Vertically centered on left side */}
+            <div className="fixed left-3 top-1/2 -translate-y-1/2 z-40 lg:hidden">
                 <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
@@ -284,8 +284,8 @@ export function MobileTradingView({
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
-                                        ? activeColor
-                                        : 'text-zinc-600 hover:text-zinc-400'
+                                    ? activeColor
+                                    : 'text-zinc-600 hover:text-zinc-400'
                                     }`}
                                 title={tab.label}
                             >
@@ -315,7 +315,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 pt-12 pb-0"
+                            className="absolute inset-0 pt-10"
                             style={{ paddingBottom: '0px' }}
                         >
                             {chartData.length > 0 ? (
@@ -348,7 +348,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 pl-14"
+                            className="absolute inset-0"
                         >
                             <MobileOrderBook assetId={asset.id} assetPrice={livePrice} />
                         </motion.div>
@@ -363,7 +363,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 pl-14 overflow-y-auto"
+                            className="absolute inset-0 overflow-y-auto"
                         >
                             <MobileOracleTerminal oracleLogs={oracleLogs} />
                         </motion.div>
@@ -378,7 +378,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0 pl-14 overflow-y-auto"
+                            className="absolute inset-0 overflow-y-auto"
                         >
                             <MobileStatsPanel stats={stats} assetName={asset.name} price={livePrice} change={asset.change24h} />
                         </motion.div>
