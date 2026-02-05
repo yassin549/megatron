@@ -32,6 +32,7 @@ interface ChartProps {
         side: 'buy' | 'sell';
     }>;
     hideTools?: boolean;
+    activeTimeframe?: '1m' | '15m' | '1h' | '1d' | '1w' | 'all';
 }
 
 export function AssetChart({
@@ -47,11 +48,15 @@ export function AssetChart({
     onSelectPosition,
     watermarkText,
     userTrades = [],
-    hideTools = false
+    hideTools = false,
+    ...props
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<Nullable<Chart>>(null);
-    const [activeTimeframe, setActiveTimeframe] = useState<'1m' | '15m' | '1h' | '1d' | '1w' | 'all'>('all');
+    const [internalTimeframe, setInternalTimeframe] = useState<'1m' | '15m' | '1h' | '1d' | '1w' | 'all'>('all');
+
+    // Use prop if provided (controlled), else internal state (uncontrolled)
+    const activeTimeframe = props.activeTimeframe || internalTimeframe;
     const [activeTool, setActiveTool] = useState<string | null>(null);
 
     const timeframes = [
@@ -708,7 +713,7 @@ export function AssetChart({
                 {timeframes.map((tf) => (
                     <button
                         key={tf.label}
-                        onClick={() => setActiveTimeframe(tf.label.toLowerCase() as any)}
+                        onClick={() => props.activeTimeframe ? null : setInternalTimeframe(tf.label.toLowerCase() as any)}
                         className={`px-2 py-1 text-[9px] font-black tracking-tighter uppercase rounded transition-all duration-200 ${activeTimeframe === tf.label.toLowerCase()
                             ? 'bg-primary/20 text-primary shadow-[0_0_10px_rgba(59,130,246,0.2)]'
                             : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'

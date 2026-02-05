@@ -366,6 +366,7 @@ export function MobileTradingView({
                                 <ErrorBoundary name="Mobile Chart">
                                     <AssetChart
                                         data={chartData}
+                                        activeTimeframe={timeframe as any}
                                         marginalPrice={livePrice}
                                         marketPrice={asset.marketPrice}
                                         watermarkText=""

@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
 import Link from 'next/link';
-import { Search } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Asset {
     id: string;
@@ -43,6 +43,12 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
 
     const [mobileSearchText, setMobileSearchText] = useState(searchParam);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [showFilters, setShowFilters] = useState(false);
+    const [filters, setFilters] = useState({
+        minHolders: 0,
+        minLiquidity: 0,
+        maxPressure: 100
+    });
 
     // Sync view mode with SubNavbar
     useEffect(() => {
@@ -96,11 +102,17 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
         }
 
         // 2. Category Filter
-        if (categoryParam === 'all') return true;
-        if (categoryParam === 'new') return true;
-        if (categoryParam === 'trending') return true;
-        return asset.type.toLowerCase() === categoryParam.toLowerCase();
+        if (categoryParam !== 'all' && categoryParam !== 'new' && categoryParam !== 'trending') {
+            if (asset.type.toLowerCase() !== categoryParam.toLowerCase()) return false;
+        }
+
+        // 3. Advanced Filters
+        if (filters.minHolders > 0 && (asset.holders || 0) < filters.minHolders) return false;
+
+        return true;
     });
+
+    const activeCategory = categoryParam.toLowerCase();
 
     const suggestions = inputValue.trim()
         ? initialAssets.filter(a => a.name.toLowerCase().includes(inputValue.toLowerCase())).slice(0, 5)
@@ -108,23 +120,33 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
 
     return (
         <>
-            {/* Search Bar (Mobile only) - Simplified and high-contrast */}
-            <div className="md:hidden mb-6 max-w-xl relative z-20">
-                <form onSubmit={handleMobileSearch} className="relative group">
-                    <input
-                        name="mobileSearch"
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Search markets..."
-                        className="w-full pl-10 pr-4 py-3 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
-                    />
-                    <Search className="absolute left-3 top-3.5 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
-                </form>
+            {/* Search Bar & Filter (Mobile only) */}
+            <div className="md:hidden mb-6 max-w-xl relative z-20 flex gap-2">
+                <div className="relative flex-1 group">
+                    <form onSubmit={handleMobileSearch} className="h-full">
+                        <input
+                            name="mobileSearch"
+                            type="text"
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            placeholder="Search..."
+                            className="w-full h-full pl-10 pr-4 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                    </form>
+                </div>
+
+                <button
+                    onClick={() => setShowFilters(true)}
+                    className={`w-[20%] flex items-center justify-center bg-obsidian-900 border border-white/10 rounded-xl text-zinc-400 hover:text-white hover:border-white/20 transition-all ${showFilters ? 'text-primary border-primary/30 bg-primary/10' : ''
+                        }`}
+                >
+                    <SlidersHorizontal className="w-5 h-5" />
+                </button>
 
                 {/* Suggestions Dropdown */}
                 {inputValue.trim().length > 0 && suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-obsidian-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                    <div className="absolute top-full left-0 right-[20%] mt-2 bg-obsidian-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
                         {suggestions.map((asset) => (
                             <Link
                                 key={asset.id}
@@ -147,6 +169,78 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                     </div>
                 )}
             </div>
+
+            {/* Filter Sheet Modal */}
+            <AnimatePresence>
+                {showFilters && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowFilters(false)}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 md:hidden"
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed bottom-0 left-0 right-0 bg-zinc-900 border-t border-white/10 rounded-t-3xl z-50 p-6 md:hidden max-h-[80vh] overflow-y-auto"
+                        >
+                            <div className="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mb-6" />
+
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Categories</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['All', 'New', 'Trending', 'Crypto', 'Stocks', 'AI', 'Meme'].map((cat) => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => {
+                                                    const val = cat.toLowerCase();
+                                                    router.push(`/?category=${val}`, { scroll: false });
+                                                }}
+                                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${(activeCategory === cat.toLowerCase() || (cat === 'All' && activeCategory === 'all'))
+                                                        ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                                        : 'bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200'
+                                                    }`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-wider mb-3">Minimum Holders</h3>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="10000"
+                                        step="100"
+                                        value={filters.minHolders}
+                                        onChange={(e) => setFilters(prev => ({ ...prev, minHolders: parseInt(e.target.value) }))}
+                                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-primary"
+                                    />
+                                    <div className="flex justify-between text-xs text-zinc-500 mt-2 font-mono">
+                                        <span>0</span>
+                                        <span className="text-primary font-bold">{filters.minHolders}+</span>
+                                        <span>10k+</span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => setShowFilters(false)}
+                                    className="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-all"
+                                >
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
             {/* Assets Grid / List */}
             {filteredAssets.length > 0 ? (
