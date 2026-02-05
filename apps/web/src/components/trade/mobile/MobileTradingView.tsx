@@ -315,8 +315,7 @@ export function MobileTradingView({
                             animate="center"
                             exit="exit"
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                            className="absolute inset-0"
-                            style={{ paddingBottom: '0px' }}
+                            className="absolute top-0 left-0 right-0 bottom-[72px]"
                         >
                             {chartData.length > 0 ? (
                                 <ErrorBoundary name="Mobile Chart">
