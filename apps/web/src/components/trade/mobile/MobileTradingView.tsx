@@ -239,7 +239,7 @@ export function MobileTradingView({
 
             {/* FIXED Floating Chart Tools - Only on chart page */}
             {activeTab === 'chart' && (
-                <div className="fixed left-3 top-[160px] z-40 lg:hidden">
+                <div className="fixed left-3 top-[200px] z-40 lg:hidden">
                     <div className="flex flex-col gap-1 p-1.5 bg-[#0d1421]/95 backdrop-blur-xl border border-white/[0.08] rounded-xl shadow-2xl">
                         {chartTools.map((tool) => {
                             const Icon = tool.icon;
@@ -303,8 +303,8 @@ export function MobileTradingView({
                 </div>
             </div>
 
-            {/* Content Area - Full width, proper height for chart time axis */}
-            <div className="flex-1 min-h-0 relative overflow-hidden">
+            {/* Content Area - Full width, ends above bottom nav */}
+            <div className="flex-1 min-h-0 relative overflow-hidden pb-[72px]">
                 <AnimatePresence mode="wait" custom={getDirection(activeTab)}>
                     {activeTab === 'chart' && (
                         <motion.div
