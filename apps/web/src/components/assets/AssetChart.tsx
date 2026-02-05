@@ -171,11 +171,16 @@ export function AssetChart({
                     horizontal: { line: { color: 'rgba(255, 255, 255, 0.2)' }, text: { backgroundColor: '#1F2937' } },
                     vertical: { line: { color: 'rgba(255, 255, 255, 0.2)' }, text: { backgroundColor: '#1F2937' } }
                 }
-            } as any
-        });
+            }
+        } as any);
 
         if (chart) {
             chartRef.current = chart;
+
+            // CRITICAL: Explicitly enable mobile gestures
+            chart.setScrollEnabled(true);
+            chart.setZoomEnabled(true);
+            chart.setOffsetRightDistance(50); // Give some space at the right
 
             chart.setDataLoader({
                 getBars: (params) => {
@@ -328,6 +333,11 @@ export function AssetChart({
                 // Fit All
                 optimalSpace = containerWidth / dataLength;
             }
+
+            // prevent massive bars on low data (cap max width)
+            optimalSpace = Math.min(optimalSpace, 50);
+            // prevent tiny bars (cap min width)
+            optimalSpace = Math.max(optimalSpace, 2);
 
             // Animate zoom
             const barSpace = chart.getBarSpace();
@@ -732,7 +742,7 @@ export function AssetChart({
             </div>}
 
             <div className="flex-1 relative">
-                <div ref={chartContainerRef} className="w-full h-full" />
+                <div ref={chartContainerRef} className="w-full h-full touch-none" />
             </div>
         </div>
     );
