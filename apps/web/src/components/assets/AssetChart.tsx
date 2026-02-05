@@ -32,8 +32,6 @@ interface ChartProps {
         side: 'buy' | 'sell';
     }>;
     hideTools?: boolean;
-    toolsPosition?: 'center' | 'bottom-left';
-    toolsClassName?: string;
 }
 
 export function AssetChart({
@@ -49,10 +47,7 @@ export function AssetChart({
     onSelectPosition,
     watermarkText,
     userTrades = [],
-
-    hideTools = false,
-    toolsPosition = 'center',
-    toolsClassName
+    hideTools = false
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<Nullable<Chart>>(null);
@@ -669,54 +664,47 @@ export function AssetChart({
                 )}
             </AnimatePresence>
 
-            {/* Toolbar conditionally rendered */}
-            {!hideTools && (
-                <div
-                    className={toolsClassName || `absolute z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl transition-all ${toolsPosition === 'bottom-left'
-                        ? 'left-2 bottom-4'
-                        : 'left-3 top-1/2 -translate-y-1/2'
-                        }`}
+            {!hideTools && <div className="absolute left-3 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2 p-1.5 bg-black/80 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl">
+                <button
+                    onClick={() => setActiveTool(null)}
+                    className={`p-2 rounded-lg transition-all ${!activeTool ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                    title="Cursor"
                 >
-                    <button
-                        onClick={() => setActiveTool(activeTool === 'crosshair' ? null : 'crosshair')}
-                        className={`p-2 rounded-lg transition-colors ${activeTool === 'crosshair' ? 'bg-primary/20 text-primary' : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                            }`}
-                        title="Crosshair"
-                    >
-                        <MousePointer2 className="w-4 h-4" />
-                    </button>
-                    {['segment', 'horizontalRay', 'fibonacciRetracement'].map((tool) => (
-                        <button
-                            key={tool}
-                            onClick={() => {
-                                const chart = chartRef.current;
-                                if (!chart) return;
-                                chart.createOverlay(tool);
-                                setActiveTool(tool);
-                            }}
-                            className={`p-2 rounded-lg transition-colors ${activeTool === tool ? 'bg-primary/20 text-primary' : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                                }`}
-                            title={tool}
-                        >
-                            {tool === 'segment' && <TrendingUp className="w-4 h-4" />}
-                            {tool === 'horizontalRay' && <Minus className="w-4 h-4" />}
-                            {tool === 'fibonacciRetracement' && <Layers className="w-4 h-4" />}
-                        </button>
-                    ))}
-                    <button
-                        onClick={() => {
-                            const chart = chartRef.current;
-                            if (!chart) return;
-                            chart.removeOverlay();
-                            setActiveTool(null);
-                        }}
-                        className="p-2 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors"
-                        title="Clear All"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
-                </div>
-            )}  {!hideTools && <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
+                    <MousePointer2 className="w-4 h-4" />
+                </button>
+                <div className="w-full h-px bg-white/5 mx-auto" />
+                <button
+                    onClick={() => toggleTool('segment')}
+                    className={`p-2 rounded-lg transition-all ${activeTool === 'segment' ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                    title="Trendline"
+                >
+                    <TrendingUp className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => toggleTool('horizontalRay')}
+                    className={`p-2 rounded-lg transition-all ${activeTool === 'horizontalRay' ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                    title="Horizontal Ray"
+                >
+                    <Minus className="w-4 h-4" />
+                </button>
+                <button
+                    onClick={() => toggleTool('fibonacciRetracement')}
+                    className={`p-2 rounded-lg transition-all ${activeTool === 'fibonacciRetracement' ? 'bg-primary/20 text-primary' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                    title="Fibonacci"
+                >
+                    <Layers className="w-4 h-4" />
+                </button>
+                <div className="w-full h-px bg-white/5 mx-auto" />
+                <button
+                    onClick={handleRemoveAllDrawings}
+                    className="p-2 rounded-lg transition-all text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10"
+                    title="Delete All Drawings"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>}
+
+            {!hideTools && <div className="absolute top-3 left-14 z-50 flex gap-1.5 p-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg shadow-2xl">
                 {timeframes.map((tf) => (
                     <button
                         key={tf.label}

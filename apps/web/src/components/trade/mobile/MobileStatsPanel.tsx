@@ -59,7 +59,37 @@ export function MobileStatsPanel({ stats, assetName, price, change }: MobileStat
 
     return (
         <div className="h-full flex flex-col p-4 pb-32">
-            {/* Stats Grid - No hero section, header already shows asset info */}
+            {/* Hero Section */}
+            {assetName && price !== undefined && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 p-5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/[0.06] rounded-2xl"
+                >
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">
+                        {assetName}
+                    </p>
+                    <div className="flex items-baseline gap-3">
+                        <span className="text-3xl font-black text-white tabular-nums">
+                            ${price.toFixed(2)}
+                        </span>
+                        <span
+                            className={`flex items-center gap-1 text-sm font-bold ${isPositive ? 'text-emerald-400' : 'text-rose-400'
+                                }`}
+                        >
+                            {isPositive ? (
+                                <TrendingUp className="w-4 h-4" />
+                            ) : (
+                                <TrendingDown className="w-4 h-4" />
+                            )}
+                            {isPositive ? '+' : ''}
+                            {change?.toFixed(2)}%
+                        </span>
+                    </div>
+                </motion.div>
+            )}
+
+            {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-3">
                 {statItems.map((item, index) => {
                     const Icon = item.icon;
