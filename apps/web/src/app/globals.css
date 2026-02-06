@@ -7,13 +7,13 @@
     /* Deep Obsidian Theme - Base Variables */
 
     /* Background: Lightened for better visibility (+10% from original) */
-    --background: 222 47% 14%;
+    --background: 222 47% 24%;
 
     /* Foreground: Off-white/Silver */
     --foreground: 210 40% 98%;
 
     /* Card: Lightened for better visibility (+10% from original) */
-    --card: 222 47% 48%;
+    --card: 222 47% 58%;
     --card-foreground: 210 40% 98%;
 
     /* Popover */
