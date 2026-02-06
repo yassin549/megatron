@@ -208,7 +208,7 @@ export function AssetChart({
                     vertical: { color: 'rgba(255, 255, 255, 0.02)' }
                 },
                 candle: {
-                    type: (activeTimeframe === 'all' ? 'area' : 'candle_solid') as any,
+                    type: 'area' as any,
                     tooltip: {
                         showRule: hideTools ? 'none' : 'always',
                         showType: 'standard'
@@ -305,7 +305,7 @@ export function AssetChart({
 
         chart.setStyles({
             candle: {
-                type: (activeTimeframe === 'all' ? 'area' : 'candle_solid') as any,
+                type: 'area' as any,
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
                     backgroundColor: [
