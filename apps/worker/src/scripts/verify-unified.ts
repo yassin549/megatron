@@ -7,17 +7,19 @@ async function main() {
 
     // Setup
     const user = await db.user.findFirst();
-    const asset = await db.asset.findFirst({ where: { status: 'active' } });
+    const asset = await db.asset.findFirst();
 
     if (!user || !asset) {
-        console.error('No user or active asset found');
+        console.error('No user or asset found (Database empty?)');
+        // Try creating one? No, too risky to mutate DB state blindly if empty.
+        // We assume Dev DB has seed.
         return;
     }
 
     const userId = user.id;
     const assetId = asset.id;
 
-    console.log(`Using User: ${user.username} (${userId})`);
+    console.log(`Using User: ${user.email} (${userId})`);
     console.log(`Using Asset: ${asset.name} (${assetId})`);
 
     try {
