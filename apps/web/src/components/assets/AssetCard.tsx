@@ -47,6 +47,7 @@ interface AssetCardProps {
     holders?: number;
     priceHistory?: number[];
     viewMode?: 'grid' | 'list';
+    activeTimeframe?: string;
     pressure?: number;
     marketCap?: number;
 }
