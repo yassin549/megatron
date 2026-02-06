@@ -4,7 +4,7 @@ import { Check, X, Shield, Target, MousePointer2, TrendingUp, Minus, Layers, Tra
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChartProps {
-    data: { time: string; value: number; volume?: number }[];
+    data: { time: string | number; value: number; volume?: number }[];
     colors?: {
         backgroundColor?: string;
         lineColor?: string;
@@ -98,8 +98,8 @@ export function AssetChart({
 
         // 1. Sort raw data
         const sortedData = [...data].sort((a, b) => {
-            const ta = typeof a.time === 'string' ? new Date(a.time).getTime() : a.time * 1000;
-            const tb = typeof b.time === 'string' ? new Date(b.time).getTime() : b.time * 1000;
+            const ta = typeof a.time === 'string' ? new Date(a.time).getTime() : (a.time as any) * 1000;
+            const tb = typeof b.time === 'string' ? new Date(b.time).getTime() : (b.time as any) * 1000;
             return ta - tb;
         });
 
@@ -114,8 +114,8 @@ export function AssetChart({
             case '1w': intervalMs = 7 * 24 * 60 * 60 * 1000; break;
             case 'all':
                 // Dynamic: Target ~150 bars max for "All" view
-                const start = typeof sortedData[0].time === 'string' ? new Date(sortedData[0].time).getTime() : sortedData[0].time * 1000;
-                const end = typeof sortedData[sortedData.length - 1].time === 'string' ? new Date(sortedData[sortedData.length - 1].time).getTime() : sortedData[sortedData.length - 1].time * 1000;
+                const start = typeof sortedData[0].time === 'string' ? new Date(sortedData[0].time).getTime() : (sortedData[0].time as any) * 1000;
+                const end = typeof sortedData[sortedData.length - 1].time === 'string' ? new Date(sortedData[sortedData.length - 1].time).getTime() : (sortedData[sortedData.length - 1].time as any) * 1000;
                 intervalMs = (end - start) / 100;
                 if (intervalMs < 60 * 1000) intervalMs = 60 * 1000; // Min 1m
                 break;
@@ -133,7 +133,7 @@ export function AssetChart({
         let bucketHasData = false;
 
         sortedData.forEach((d) => {
-            const timestamp = typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000;
+            const timestamp = typeof d.time === 'string' ? new Date(d.time).getTime() : (d.time as any) * 1000;
             const bucketTime = Math.floor(timestamp / intervalMs) * intervalMs;
             const value = d.value;
 
