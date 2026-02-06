@@ -119,7 +119,7 @@ export function NavbarSearch() {
                     onFocus={() => setIsSearchFocused(true)}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Type / to search markets..."
-                    className="block w-full pl-10 pr-3 py-2 bg-secondary/30 border border-border/50 text-foreground placeholder-muted-foreground rounded-lg focus:outline-none focus:bg-secondary/50 focus:ring-1 focus:ring-primary focus:border-primary/50 text-sm transition-all duration-200"
+                    className="block w-full pl-10 pr-3 py-2 bg-secondary/60 border border-border/50 text-foreground placeholder-muted-foreground rounded-lg focus:outline-none focus:bg-secondary/50 focus:ring-1 focus:ring-primary focus:border-primary/50 text-sm transition-all duration-200"
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                     <kbd className="hidden sm:inline-block px-1.5 py-0.5 border border-white/10 rounded text-[10px] font-mono text-muted-foreground">
