@@ -207,7 +207,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} ${pathname === '/' ? 'border-b-0' : ''}`}>
+        <nav className={`glass-nav sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} ${pathname === '/' ? 'border-b-0 shadow-none' : ''}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* 1. Logo Section */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
