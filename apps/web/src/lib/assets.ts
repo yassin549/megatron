@@ -103,6 +103,7 @@ export async function enrichAssets(assets: any[], userBookmarks: Set<string> = n
                 holders: holdersCount,
                 isBookmarked: userBookmarks.has(asset.id),
                 pressure: Math.round(pressure),
+                marketCap: Math.round(currentPrice * Number(asset.totalSupply) * 100) / 100,
             };
         })
     );

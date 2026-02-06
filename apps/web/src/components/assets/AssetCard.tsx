@@ -48,6 +48,7 @@ interface AssetCardProps {
     priceHistory?: number[];
     viewMode?: 'grid' | 'list';
     pressure?: number;
+    marketCap?: number;
 }
 
 const TYPE_ICONS: Record<string, any> = {
@@ -143,6 +144,8 @@ export function AssetCard({
     holders = 0,
     priceHistory,
     viewMode = 'grid',
+    activeTimeframe,
+    marketCap = 0,
     aiConfidence,
     pressure: initialPressure = 50
 }: AssetCardProps) {
@@ -386,8 +389,24 @@ export function AssetCard({
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
                     <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
-                        <div className="flex-1 mr-4">
+                        <div className="flex-1 mr-4 flex items-center gap-4">
                             <PressureGauge value={livePressure} size="sm" />
+
+                            {/* Desktop Metadata Block */}
+                            <div className="hidden md:flex items-center gap-4 text-[10px] font-mono whitespace-nowrap border-l border-border/40 pl-4">
+                                <div className="flex flex-col">
+                                    <span className="text-zinc-500 uppercase text-[8px] font-bold">Vol 24h</span>
+                                    <span className="text-white font-bold">{formatVolume(volume24h)}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-zinc-500 uppercase text-[8px] font-bold">Holders</span>
+                                    <span className="text-white font-bold">{holders.toLocaleString()}</span>
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-zinc-500 uppercase text-[8px] font-bold">Mkt Cap</span>
+                                    <span className="text-white font-bold">{formatVolume(marketCap)}</span>
+                                </div>
+                            </div>
                         </div>
 
                         <button

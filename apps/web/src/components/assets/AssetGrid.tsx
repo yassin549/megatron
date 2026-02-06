@@ -28,6 +28,7 @@ interface Asset {
     holders?: number;
     isBookmarked?: boolean;
     pressure?: number;
+    marketCap?: number;
 }
 
 interface AssetGridProps {
