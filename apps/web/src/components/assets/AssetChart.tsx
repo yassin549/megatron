@@ -135,7 +135,7 @@ export function AssetChart({
         sortedData.forEach((d) => {
             const timestamp = typeof d.time === 'string' ? new Date(d.time).getTime() : (d.time as any) * 1000;
             const bucketTime = Math.floor(timestamp / intervalMs) * intervalMs;
-            const value = d.value;
+            const value = Number(d.value || 0);
 
             if (bucketTime !== currentBucketStart) {
                 // Close previous bucket
@@ -208,7 +208,7 @@ export function AssetChart({
                     vertical: { color: 'rgba(255, 255, 255, 0.02)' }
                 },
                 candle: {
-                    type: (activeTimeframe === 'all' ? 'area' : 'candle') as any,
+                    type: (activeTimeframe === 'all' ? 'area' : 'candle_solid') as any,
                     tooltip: {
                         showRule: hideTools ? 'none' : 'always',
                         showType: 'standard'
@@ -278,7 +278,7 @@ export function AssetChart({
             });
 
             // Set initial symbol to trigger load
-            chart.setSymbol({ ticker: watermarkText || 'ASSET' });
+            chart.setSymbol({ name: watermarkText || 'ASSET' });
         }
 
         const handleResize = () => {
@@ -305,7 +305,7 @@ export function AssetChart({
 
         chart.setStyles({
             candle: {
-                type: (activeTimeframe === 'all' ? 'area' : 'candle') as any,
+                type: (activeTimeframe === 'all' ? 'area' : 'candle_solid') as any,
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
                     backgroundColor: [
@@ -325,18 +325,19 @@ export function AssetChart({
                 tickText: { color: colors?.textColor || '#9CA3AF' }
             }
         } as any);
-    }, [colors]);
+    }, [colors, activeTimeframe]);
 
     // Reactive Data Updates
     useEffect(() => {
         const chart = chartRef.current;
         if (!chart || !kLineData.length) return;
 
-        // Efficiently update data
-        // If it's just a new point (realtime), updateData is better, but since we are re-aggregating,
-        // we need to be careful.
-        // For simplicity with < 500 points, applyNewData is robust and ensures consistency (e.g. replacing last candle).
-        (chart as any).applyNewData(kLineData);
+        // In klinecharts v10, applyNewData is removed. Use setDataLoader.
+        chart.setDataLoader({
+            getBars: (params) => {
+                params.callback(kLineData, { backward: false, forward: false });
+            }
+        });
 
     }, [kLineData]);
 
@@ -346,16 +347,15 @@ export function AssetChart({
         if (!chart) return;
 
         // Smart Map: Timeframe -> { interval, range_duration_ms }
-        // Smart Map: Timeframe -> { interval, range_duration_ms }
         // Now that we aggregate data, 'period' mostly affects axis formatting.
-        const finalConfig: Record<string, { period: { span: number; type: string }, duration?: number }> = {
-            '1m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 60 * 2 }, // 2h view
-            '15m': { period: { span: 15, type: 'minute' }, duration: 1000 * 60 * 60 * 24 }, // 1 day view
-            '1h': { period: { span: 1, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 7 }, // 1 week view
-            '4h': { period: { span: 4, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 30 }, // 1 month view
-            '1d': { period: { span: 1, type: 'day' }, duration: 1000 * 60 * 60 * 24 * 90 }, // 3 month view
-            '1w': { period: { span: 1, type: 'week' }, duration: 1000 * 60 * 60 * 24 * 365 }, // 1 year view
-            'all': { period: { span: 1, type: 'day' }, duration: 0 } // Fit all
+        const finalConfig: Record<string, { period: { multiplier: number; timespan: string }, duration?: number }> = {
+            '1m': { period: { multiplier: 1, timespan: 'minute' }, duration: 1000 * 60 * 60 * 2 }, // 2h view
+            '15m': { period: { multiplier: 15, timespan: 'minute' }, duration: 1000 * 60 * 60 * 24 }, // 1 day view
+            '1h': { period: { multiplier: 1, timespan: 'hour' }, duration: 1000 * 60 * 60 * 24 * 7 }, // 1 week view
+            '4h': { period: { multiplier: 4, timespan: 'hour' }, duration: 1000 * 60 * 60 * 24 * 30 }, // 1 month view
+            '1d': { period: { multiplier: 1, timespan: 'day' }, duration: 1000 * 60 * 60 * 24 * 90 }, // 3 month view
+            '1w': { period: { multiplier: 1, timespan: 'week' }, duration: 1000 * 60 * 60 * 24 * 365 }, // 1 year view
+            'all': { period: { multiplier: 1, timespan: 'day' }, duration: 0 } // Fit all
         };
 
         const config = finalConfig[activeTimeframe] || finalConfig['all'];
@@ -394,11 +394,11 @@ export function AssetChart({
 
                 let optimalSpace = 0;
                 if (config.duration && config.duration > 0) {
-                    const barDurationMs = config.period.span * (
-                        config.period.type === 'minute' ? 60000 :
-                            config.period.type === 'hour' ? 3600000 :
-                                config.period.type === 'day' ? 86400000 :
-                                    config.period.type === 'week' ? 604800000 : 0
+                    const barDurationMs = config.period.multiplier * (
+                        config.period.timespan === 'minute' ? 60000 :
+                            config.period.timespan === 'hour' ? 3600000 :
+                                config.period.timespan === 'day' ? 86400000 :
+                                    config.period.timespan === 'week' ? 604800000 : 0
                     );
 
                     if (barDurationMs > 0) {
@@ -428,11 +428,11 @@ export function AssetChart({
         const chart = chartRef.current;
         if (!chart) return;
 
-        chart.removeOverlay({ name: 'entry-line' });
-        chart.removeOverlay({ name: 'sl-line' });
-        chart.removeOverlay({ name: 'tp-line' });
-        chart.removeOverlay({ name: 'index-line' });
-        chart.removeOverlay({ name: 'exec-line' });
+        chart.removeOverlay({ id: 'entry-line' });
+        chart.removeOverlay({ id: 'sl-line' });
+        chart.removeOverlay({ id: 'tp-line' });
+        chart.removeOverlay({ id: 'index-line' });
+        chart.removeOverlay({ id: 'exec-line' });
 
         const isSelected = activePositionId !== null;
 
