@@ -353,10 +353,10 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-xl md:text-5xl font-black text-foreground font-mono tracking-tighter">
+                        <div className="text-xl md:text-4xl font-black text-foreground font-mono tracking-tighter">
                             ${livePrice.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-sm md:text-xl font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                        <div className={`flex items-center gap-1 text-sm md:text-lg font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
@@ -394,18 +394,18 @@ export function AssetCard({
                             <PressureGauge value={livePressure} size="sm" />
 
                             {/* Desktop Metadata Block */}
-                            <div className="hidden md:flex items-center gap-8 text-base font-mono whitespace-nowrap border-l border-border/40 pl-6">
+                            <div className="hidden md:flex items-center gap-8 text-sm font-mono whitespace-nowrap border-l border-border/40 pl-6">
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[11px] font-bold">Vol 24h</span>
-                                    <span className="text-white font-black text-xl">{formatVolume(volume24h)}</span>
+                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Vol 24h</span>
+                                    <span className="text-white font-black text-lg">{formatVolume(volume24h)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[11px] font-bold">Holders</span>
-                                    <span className="text-white font-black text-xl">{holders.toLocaleString()}</span>
+                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Holders</span>
+                                    <span className="text-white font-black text-lg">{holders.toLocaleString()}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[11px] font-bold">Mkt Cap</span>
-                                    <span className="text-white font-black text-xl">{formatVolume(marketCap)}</span>
+                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Mkt Cap</span>
+                                    <span className="text-white font-black text-lg">{formatVolume(marketCap)}</span>
                                 </div>
                             </div>
                         </div>
