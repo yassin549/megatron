@@ -258,7 +258,7 @@ export function MobileTradingView({
             {activeTab === 'chart' && (
                 <div className="fixed top-[190px] left-4 right-4 z-30 flex justify-center lg:hidden pointer-events-auto">
                     <div className="flex items-center gap-1 p-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-lg shadow-lg">
-                        {['1m', '15m', '4h', '1d', 'all'].map((tf) => {
+                        {['1m', '15m', '1h', '4h', '1d', 'all'].map((tf) => {
                             const isActive = timeframe === tf;
                             return (
                                 <button

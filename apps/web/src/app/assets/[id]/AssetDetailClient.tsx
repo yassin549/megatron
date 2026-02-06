@@ -83,6 +83,7 @@ export function AssetDetailClient({
     const [isMobileTradeOpen, setIsMobileTradeOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'chart' | 'orderbook' | 'oracle' | 'trade'>('chart');
     const [executionEst, setExecutionEst] = useState<number>(initialAsset.price);
+    const [desktopTimeframe, setDesktopTimeframe] = useState<'1m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'all'>('15m');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -260,11 +261,28 @@ export function AssetDetailClient({
                         </div>
 
                         {/* Right Chart */}
-                        <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl">
+                        <div className="flex-1 overflow-hidden flex flex-col bg-black/40 border border-white/5 rounded-2xl shadow-2xl relative">
+                            {/* Desktop Timeframe Switch */}
+                            <div className="absolute top-4 right-4 z-50 flex items-center gap-1 p-1 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl">
+                                {['1m', '15m', '1h', '4h', '1d', 'all'].map((tf) => (
+                                    <button
+                                        key={tf}
+                                        onClick={() => setDesktopTimeframe(tf as any)}
+                                        className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-lg transition-all ${desktopTimeframe === tf
+                                            ? 'bg-white/10 text-white shadow-xl'
+                                            : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                                            }`}
+                                    >
+                                        {tf}
+                                    </button>
+                                ))}
+                            </div>
+
                             {chartData.length > 0 ? (
                                 <ErrorBoundary name="Market Chart">
                                     <AssetChart
                                         data={chartData}
+                                        activeTimeframe={desktopTimeframe}
                                         marginalPrice={livePrice}
                                         marketPrice={asset.marketPrice}
                                         watermarkText={asset.name.toUpperCase()}

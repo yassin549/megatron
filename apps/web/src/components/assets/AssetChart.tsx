@@ -32,7 +32,7 @@ interface ChartProps {
         side: 'buy' | 'sell';
     }>;
     hideTools?: boolean;
-    activeTimeframe?: '1m' | '15m' | '1h' | '1d' | '1w' | 'all';
+    activeTimeframe?: '1m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'all';
 }
 
 export function AssetChart({
@@ -53,7 +53,7 @@ export function AssetChart({
 }: ChartProps) {
     const chartContainerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<Nullable<Chart>>(null);
-    const [internalTimeframe, setInternalTimeframe] = useState<'1m' | '15m' | '1h' | '1d' | '1w' | 'all'>('all');
+    const [internalTimeframe, setInternalTimeframe] = useState<'1m' | '15m' | '1h' | '4h' | '1d' | '1w' | 'all'>('all');
 
     // Use prop if provided (controlled), else internal state (uncontrolled)
     const activeTimeframe = props.activeTimeframe || internalTimeframe;
@@ -63,6 +63,7 @@ export function AssetChart({
         { label: '1m', value: 60 },
         { label: '15m', value: 15 * 60 },
         { label: '1h', value: 60 * 60 },
+        { label: '4h', value: 4 * 60 * 60 },
         { label: '1d', value: 24 * 60 * 60 },
         { label: '1w', value: 7 * 24 * 60 * 60 },
         { label: 'All', value: 0 },
@@ -91,16 +92,94 @@ export function AssetChart({
         }
     }, [priceLines, hasPending]);
 
+    // Aggregation Logic
     const kLineData = useMemo(() => {
-        return data.map(d => ({
-            timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
-            open: d.value,
-            high: d.value,
-            low: d.value,
-            close: d.value,
-            volume: d.volume || 0
-        }));
-    }, [data]);
+        if (!data || data.length === 0) return [];
+
+        // 1. Sort raw data
+        const sortedData = [...data].sort((a, b) => {
+            const ta = typeof a.time === 'string' ? new Date(a.time).getTime() : a.time * 1000;
+            const tb = typeof b.time === 'string' ? new Date(b.time).getTime() : b.time * 1000;
+            return ta - tb;
+        });
+
+        // 2. Determine Interval based on timeframe
+        let intervalMs: number;
+        switch (activeTimeframe) {
+            case '1m': intervalMs = 60 * 1000; break;
+            case '15m': intervalMs = 15 * 60 * 1000; break;
+            case '1h': intervalMs = 60 * 60 * 1000; break;
+            case '4h': intervalMs = 4 * 60 * 60 * 1000; break;
+            case '1d': intervalMs = 24 * 60 * 60 * 1000; break;
+            case '1w': intervalMs = 7 * 24 * 60 * 60 * 1000; break;
+            case 'all':
+                // Dynamic: Target ~150 bars max for "All" view
+                const start = typeof sortedData[0].time === 'string' ? new Date(sortedData[0].time).getTime() : sortedData[0].time * 1000;
+                const end = typeof sortedData[sortedData.length - 1].time === 'string' ? new Date(sortedData[sortedData.length - 1].time).getTime() : sortedData[sortedData.length - 1].time * 1000;
+                intervalMs = (end - start) / 100;
+                if (intervalMs < 60 * 1000) intervalMs = 60 * 1000; // Min 1m
+                break;
+            default: intervalMs = 60 * 1000;
+        }
+
+        // 3. Aggregate
+        const candles: KLineData[] = [];
+        let currentBucketStart = 0;
+        let bucketOpen = 0;
+        let bucketHigh = -Infinity;
+        let bucketLow = Infinity;
+        let bucketClose = 0;
+        let bucketVolume = 0;
+        let bucketHasData = false;
+
+        sortedData.forEach((d) => {
+            const timestamp = typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000;
+            const bucketTime = Math.floor(timestamp / intervalMs) * intervalMs;
+            const value = d.value;
+
+            if (bucketTime !== currentBucketStart) {
+                // Close previous bucket
+                if (bucketHasData) {
+                    candles.push({
+                        timestamp: currentBucketStart,
+                        open: bucketOpen,
+                        high: bucketHigh,
+                        low: bucketLow,
+                        close: bucketClose,
+                        volume: bucketVolume
+                    });
+                }
+                // Start new bucket
+                currentBucketStart = bucketTime;
+                bucketOpen = value;
+                bucketHigh = value;
+                bucketLow = value;
+                bucketClose = value;
+                bucketVolume = d.volume || 0;
+                bucketHasData = true;
+            } else {
+                // Update current bucket
+                bucketHigh = Math.max(bucketHigh, value);
+                bucketLow = Math.min(bucketLow, value);
+                bucketClose = value; // Close is always the last seen value
+                bucketVolume += (d.volume || 0);
+            }
+        });
+
+        // Push last bucket
+        if (bucketHasData) {
+            candles.push({
+                timestamp: currentBucketStart,
+                open: bucketOpen,
+                high: bucketHigh,
+                low: bucketLow,
+                close: bucketClose,
+                volume: bucketVolume
+            });
+        }
+
+        return candles;
+    }, [data, activeTimeframe]);
 
     const subscribeBarRef = useRef<((data: KLineData) => void) | null>(null);
     const dataRef = useRef(data);
@@ -129,7 +208,7 @@ export function AssetChart({
                     vertical: { color: 'rgba(255, 255, 255, 0.02)' }
                 },
                 candle: {
-                    type: 'area' as any,
+                    type: (activeTimeframe === 'all' ? 'area' : 'candle') as any,
                     tooltip: {
                         showRule: hideTools ? 'none' : 'always',
                         showType: 'standard'
@@ -182,31 +261,8 @@ export function AssetChart({
             chart.setZoomEnabled(true);
             chart.setOffsetRightDistance(50); // Give some space at the right
 
-            chart.setDataLoader({
-                getBars: (params) => {
-                    const rawData = dataRef.current.map(d => ({
-                        timestamp: typeof d.time === 'string' ? new Date(d.time).getTime() : d.time * 1000,
-                        open: d.value,
-                        high: d.value,
-                        low: d.value,
-                        close: d.value,
-                        volume: d.volume || 0
-                    }));
-
-                    // Simple filtering for timeframe if needed, or just return all and let library aggregate
-                    // For KLineCharts, usually passing all data and letting it handle aggregation via `setPeriod` is fine.
-                    // But to be safe and match previous logic (without strict aggregation which might be buggy):
-
-                    // Passing { backward: false } tells the chart there is no more historical data to fetch.
-                    params.callback(rawData, { backward: false, forward: false });
-                },
-                subscribeBar: (params) => {
-                    subscribeBarRef.current = params.callback;
-                },
-                unsubscribeBar: () => {
-                    subscribeBarRef.current = null;
-                }
-            });
+            // We manage data via applyNewData reactively, so we don't need getBars for history fetching here.
+            // chart.setDataLoader(...) 
 
             // Attach listeners to drawing tools to track selection
             ['segment', 'horizontalRay', 'fibonacciRetracement', 'straightLine', 'priceLine', 'arrow'].forEach(name => {
@@ -249,6 +305,7 @@ export function AssetChart({
 
         chart.setStyles({
             candle: {
+                type: (activeTimeframe === 'all' ? 'area' : 'candle') as any,
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
                     backgroundColor: [
@@ -272,17 +329,14 @@ export function AssetChart({
 
     // Reactive Data Updates
     useEffect(() => {
-        if (!kLineData.length || !subscribeBarRef.current) return;
+        const chart = chartRef.current;
+        if (!chart || !kLineData.length) return;
 
-        const lastPoint = kLineData[kLineData.length - 1];
-        // Feed the latest point to the chart via subscription
-        subscribeBarRef.current(lastPoint);
-
-        // Also force a reload if data length changed significantly to ensure history is correct?
-        // Actually, setDataLoader should handle history. subscribeBar handles real-time.
-        // If we have a full refresh, we might need to trigger getBars again?
-        // chartRef.current?.applyNewData is definitely broken.
-        // We rely on dataRef being updated and getting called by library, or manual refresh?
+        // Efficiently update data
+        // If it's just a new point (realtime), updateData is better, but since we are re-aggregating,
+        // we need to be careful.
+        // For simplicity with < 500 points, applyNewData is robust and ensures consistency (e.g. replacing last candle).
+        (chart as any).applyNewData(kLineData);
 
     }, [kLineData]);
 
@@ -292,13 +346,16 @@ export function AssetChart({
         if (!chart) return;
 
         // Smart Map: Timeframe -> { interval, range_duration_ms }
+        // Smart Map: Timeframe -> { interval, range_duration_ms }
+        // Now that we aggregate data, 'period' mostly affects axis formatting.
         const finalConfig: Record<string, { period: { span: number; type: string }, duration?: number }> = {
-            '1m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 30 }, // 30 mins range
-            '15m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 15 }, // 15 mins range
-            '1h': { period: { span: 5, type: 'minute' }, duration: 1000 * 60 * 60 }, // 1 Hour Range
-            '1d': { period: { span: 15, type: 'minute' }, duration: 1000 * 60 * 60 * 24 }, // 1 Day Range
-            '1w': { period: { span: 1, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 7 }, // 1 Week Range
-            'all': { period: { span: 1, type: 'day' }, duration: 0 }
+            '1m': { period: { span: 1, type: 'minute' }, duration: 1000 * 60 * 60 * 2 }, // 2h view
+            '15m': { period: { span: 15, type: 'minute' }, duration: 1000 * 60 * 60 * 24 }, // 1 day view
+            '1h': { period: { span: 1, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 7 }, // 1 week view
+            '4h': { period: { span: 4, type: 'hour' }, duration: 1000 * 60 * 60 * 24 * 30 }, // 1 month view
+            '1d': { period: { span: 1, type: 'day' }, duration: 1000 * 60 * 60 * 24 * 90 }, // 3 month view
+            '1w': { period: { span: 1, type: 'week' }, duration: 1000 * 60 * 60 * 24 * 365 }, // 1 year view
+            'all': { period: { span: 1, type: 'day' }, duration: 0 } // Fit all
         };
 
         const config = finalConfig[activeTimeframe] || finalConfig['all'];
