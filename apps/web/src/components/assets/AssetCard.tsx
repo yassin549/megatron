@@ -76,11 +76,10 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
     const min = Math.min(...data);
     const max = Math.max(...data);
     const range = (max - min) || 1;
-
     // Dimensions
     const isList = viewMode === 'list';
-    const height = isList ? 40 : 32;
-    const width = isList ? 120 : 80;
+    const height = isList ? 60 : 70; // Grid height 32 -> 70
+    const width = isList ? 200 : 160; // Grid width 80 -> 160
 
     const points = data.map((val, i) => {
         const x = (i / (data.length - 1)) * width;
@@ -298,9 +297,9 @@ export function AssetCard({
                 {/* Pressure Gauge - Moved to bottom footer */}
 
                 {/* Header Section */}
-                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
+                <div className={`flex items-center gap-6 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-6'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12'
+                        <div className={`relative overflow-hidden rounded-lg bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-20 md:h-20'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
@@ -336,13 +335,13 @@ export function AssetCard({
                         )}
                     </div>
 
-                    <div className="flex-1 min-w-0">
-                        <h3 className={`font-bold text-foreground line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm'
+                    <div className="flex-1 min-w-0 pr-4">
+                        <h3 className={`font-black text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-2xl tracking-tight leading-tight'
                             }`}>
                             {name}
                         </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold bg-secondary/30 px-1.5 py-0.5 rounded">
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground font-black bg-secondary/40 px-2 py-0.5 rounded">
                                 {type}
                             </span>
                         </div>
