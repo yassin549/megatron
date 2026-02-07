@@ -85,7 +85,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-bg-elevated rounded-md hover:bg-brand-primary/50 transition-colors;
+    @apply bg-elevated rounded-md hover:bg-brand-primary/50 transition-colors;
   }
 }
 
