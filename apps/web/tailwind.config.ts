@@ -13,6 +13,7 @@ const config: Config = {
             },
             colors: {
                 // Semantic Tokens
+                base: "hsl(var(--bg-base))",
                 background: "hsl(var(--bg-base))",
                 surface: "hsl(var(--bg-surface))",
                 elevated: "hsl(var(--bg-elevated))",

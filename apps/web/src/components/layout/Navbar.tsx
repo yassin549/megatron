@@ -255,7 +255,7 @@ export function Navbar() {
                                         <div className="flex flex-col h-full">
                                             {/* Navigation Grid */}
                                             <div className="grid grid-cols-2 gap-2 mb-3">
-                                                <Link href="/dashboard" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-md border border-border/40 p-3 transition-all hover:border-blue-500/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] active:scale-[0.98]">
+                                                <Link href="/dashboard" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card border border-border/40 p-3 transition-all hover:border-blue-500/30 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)] active:scale-[0.98]">
                                                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                     <div className="relative z-10 flex flex-col gap-2">
                                                         <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 group-hover:bg-blue-500/20 transition-all duration-300">
@@ -268,7 +268,7 @@ export function Navbar() {
                                                     </div>
                                                 </Link>
 
-                                                <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-md border border-border/40 p-3 transition-all hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] active:scale-[0.98]">
+                                                <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card border border-border/40 p-3 transition-all hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)] active:scale-[0.98]">
                                                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                     <div className="relative z-10 flex flex-col gap-2">
                                                         <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300">
@@ -281,7 +281,7 @@ export function Navbar() {
                                                     </div>
                                                 </Link>
 
-                                                <Link href="/lp" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-md border border-border/40 p-3 transition-all hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] active:scale-[0.98]">
+                                                <Link href="/lp" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card border border-border/40 p-3 transition-all hover:border-purple-500/30 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] active:scale-[0.98]">
                                                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                     <div className="relative z-10 flex flex-col gap-2">
                                                         <div className="w-9 h-9 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-300">
@@ -294,7 +294,7 @@ export function Navbar() {
                                                     </div>
                                                 </Link>
 
-                                                <Link href="/wallet" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card/80 backdrop-blur-md border border-border/40 p-3 transition-all hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] active:scale-[0.98]">
+                                                <Link href="/wallet" onClick={() => setActiveNavTab(null)} className="group relative overflow-hidden rounded-2xl bg-card border border-border/40 p-3 transition-all hover:border-amber-500/30 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] active:scale-[0.98]">
                                                     <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                                     <div className="relative z-10 flex flex-col gap-2">
                                                         <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300">
@@ -310,7 +310,7 @@ export function Navbar() {
 
                                             {/* List Links */}
                                             <div className="space-y-1 mb-auto">
-                                                <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition-all active:scale-[0.99]">
+                                                <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-active transition-all active:scale-[0.99]">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-7 h-7 rounded-lg bg-secondary/30 flex items-center justify-center text-amber-500/80 group-hover:text-amber-400 group-hover:bg-amber-500/10 transition-colors">
                                                             <Trophy className="w-3.5 h-3.5" />
@@ -320,7 +320,7 @@ export function Navbar() {
                                                     <ArrowUpRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transform duration-200" />
                                                 </Link>
 
-                                                <Link href="/settings" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-white/5 transition-all active:scale-[0.99]">
+                                                <Link href="/settings" onClick={() => setActiveNavTab(null)} className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-active transition-all active:scale-[0.99]">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-7 h-7 rounded-lg bg-secondary/30 flex items-center justify-center text-muted-foreground group-hover:text-foreground group-hover:bg-white/10 transition-colors">
                                                             <Palette className="w-3.5 h-3.5" />
@@ -347,14 +347,14 @@ export function Navbar() {
 
                                     {activeNavTab === 'general' && (
                                         <div className="space-y-1">
-                                            <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <Link href="/portfolio" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <TrendingUp className="w-5 h-5 text-neon-purple opacity-70 group-hover:opacity-100" />
                                                     Portfolio
                                                 </div>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
                                             </Link>
-                                            <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <Link href="/leaderboard" onClick={() => setActiveNavTab(null)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
                                                     Leaderboard
@@ -390,7 +390,7 @@ export function Navbar() {
                                                             key={bm.id}
                                                             href={`/assets/${bm.id}`}
                                                             onClick={() => setActiveNavTab(null)}
-                                                            className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.08] hover:border-white/10 transition-all group"
+                                                            className="flex items-center justify-between p-3 rounded-2xl bg-surface border border-border/5 hover:bg-active hover:border-white/10 transition-all group"
                                                         >
                                                             <div className="flex items-center gap-3">
                                                                 <SearchItemImage src={bm.imageUrl} alt={bm.name} />
@@ -617,10 +617,10 @@ export function Navbar() {
                                     animate={{ x: 0 }}
                                     exit={{ x: "100%" }}
                                     transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
-                                    className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-obsidian-950 border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
+                                    className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-base border-l border-border-subtle shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
                                 >
                                     {/* Drawer Header */}
-                                    <div className="h-20 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/5 bg-white/[0.02]">
+                                    <div className="h-20 flex-shrink-0 flex items-center justify-between px-6 border-b border-border-subtle bg-surface">
                                         <div className="flex items-center gap-3">
                                             <div className="relative w-8 h-8">
                                                 <Image
@@ -636,7 +636,7 @@ export function Navbar() {
                                         </div>
                                         <button
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="p-2 -mr-2 text-zinc-400 hover:text-white transition-colors bg-white/5 rounded-full"
+                                            className="p-2 -mr-2 text-zinc-400 hover:text-white transition-colors bg-active rounded-full"
                                         >
                                             <X className="w-5 h-5" />
                                         </button>
@@ -650,7 +650,7 @@ export function Navbar() {
                                                 <Link
                                                     href="/login"
                                                     onClick={() => setIsMobileMenuOpen(false)}
-                                                    className="flex items-center justify-center py-4 rounded-xl border border-white/10 font-bold text-xs text-white hover:bg-white/5 active:scale-95 transition-all text-center"
+                                                    className="flex items-center justify-center py-4 rounded-xl border border-border-subtle font-bold text-xs text-white hover:bg-active active:scale-95 transition-all text-center"
                                                 >
                                                     LOGIN
                                                 </Link>
@@ -675,7 +675,7 @@ export function Navbar() {
                                                         value={mobileSearchQuery}
                                                         onChange={(e) => setMobileSearchQuery(e.target.value)}
                                                         placeholder="Search markets..."
-                                                        className="w-full pl-11 pr-4 py-3.5 bg-secondary/30 border border-border/50 rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-secondary/50 transition-all"
+                                                        className="w-full pl-11 pr-4 py-3.5 bg-surface border border-border-subtle rounded-xl text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-active transition-all"
                                                     />
                                                 </form>
 
@@ -693,7 +693,7 @@ export function Navbar() {
                                                                     key={asset.id}
                                                                     href={`/assets/${asset.id}`}
                                                                     onClick={() => setIsMobileMenuOpen(false)}
-                                                                    className="flex items-center justify-between p-3 rounded-xl bg-white/[0.05] border border-white/10 active:scale-[0.98] transition-all"
+                                                                    className="flex items-center justify-between p-3 rounded-xl bg-surface border border-border-subtle active:scale-[0.98] transition-all"
                                                                 >
                                                                     <div className="flex items-center gap-3">
                                                                         <SearchItemImage src={asset.imageUrl} alt={asset.name} />
@@ -722,34 +722,34 @@ export function Navbar() {
 
                                         {/* 3. Grouped Links */}
                                         <div className="space-y-1">
-                                            <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <Link href="/portfolio" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <TrendingUp className="w-5 h-5 text-neon-purple opacity-70 group-hover:opacity-100" />
                                                     Portfolio
                                                 </div>
-                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-border-subtle group-hover:bg-primary transition-colors" />
                                             </Link>
-                                            <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <Link href="/leaderboard" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <Users className="w-5 h-5 text-amber-400 opacity-70 group-hover:opacity-100" />
                                                     Leaderboard
                                                 </div>
-                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-border-subtle group-hover:bg-primary transition-colors" />
                                             </Link>
-                                            <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                            <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                 <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                     <Palette className="w-5 h-5 text-zinc-500 opacity-70 group-hover:opacity-100" />
                                                     Themes and Colors
                                                 </div>
-                                                <div className="w-1.5 h-1.5 rounded-full bg-white/10 group-hover:bg-primary transition-colors" />
+                                                <div className="w-1.5 h-1.5 rounded-full bg-border-subtle group-hover:bg-primary transition-colors" />
                                             </Link>
                                             {status === 'authenticated' && (
-                                                <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-white/5 transition-all">
+                                                <Link href="/bookmarks" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-between group w-full p-4 rounded-xl hover:bg-active transition-all">
                                                     <div className="flex items-center gap-3 font-semibold text-zinc-300 group-hover:text-white transition-colors">
                                                         <Bookmark className="w-5 h-5 text-neon-blue opacity-70 group-hover:opacity-100" />
                                                         Watchlist
                                                     </div>
-                                                    <div className="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] text-primary font-bold">
+                                                    <div className="px-2 py-0.5 rounded-full bg-primary-muted text-[10px] text-primary font-bold">
                                                         {bookmarks.length}
                                                     </div>
                                                 </Link>
@@ -758,7 +758,7 @@ export function Navbar() {
 
                                         {/* 4. Bottom Actions */}
                                         {status === 'authenticated' && (
-                                            <div className="pt-6 border-t border-white/5">
+                                            <div className="pt-6 border-t border-border-subtle">
                                                 <Link
                                                     href="/api/auth/signout"
                                                     className="flex items-center gap-3 w-full p-4 rounded-xl text-sm font-bold text-neon-rose hover:bg-neon-rose/10 transition-colors"
@@ -771,7 +771,7 @@ export function Navbar() {
                                     </div>
 
                                     {/* Sidebar Footer */}
-                                    <div className="p-6 bg-white/[0.01] border-t border-white/5 flex-shrink-0">
+                                    <div className="p-6 bg-surface border-t border-border-subtle flex-shrink-0">
                                         <p className="text-[10px] text-zinc-600 font-mono text-center tracking-tighter">
                                             FARADAY v1.4.2 // NEURAL ENGINE ACTIVE
                                         </p>
