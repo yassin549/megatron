@@ -103,7 +103,7 @@ export function SubNavbar() {
                     {/* Categories - scrollable on mobile */}
                     <div
                         ref={scrollRef}
-                        className="flex items-center gap-3 md:gap-8 overflow-x-auto no-scrollbar py-0 mask-fade-right flex-1 px-2 md:px-0 scroll-smooth"
+                        className="flex items-center gap-2 md:gap-4 overflow-x-auto no-scrollbar py-0 mask-fade-right flex-1 px-2 md:px-0 scroll-smooth"
                     >
                         {categories.map((category, index) => {
                             const isActive = currentCategory === category.id;
@@ -117,7 +117,7 @@ export function SubNavbar() {
                                     <Link
                                         href={`/?category=${category.id}`}
                                         data-active={isActive}
-                                        className={`group flex items-center px-4 py-2.5 md:px-6 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
+                                        className={`group flex items-center px-3 py-2.5 md:px-4 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
                                             ? 'border-brand-primary text-text-main shadow-[0_4px_12px_-2px_rgba(var(--brand-primary),0.3)]'
                                             : 'border-transparent text-text-muted hover:text-text-main'
                                             }`}
@@ -129,7 +129,7 @@ export function SubNavbar() {
 
                                         {/* Animated underline for non-active items */}
                                         {!isActive && (
-                                            <div className="absolute inset-x-4 bottom-0 h-[2px] bg-brand-primary/0 group-hover:bg-brand-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                            <div className="absolute inset-x-2 bottom-0 h-[2px] bg-brand-primary/0 group-hover:bg-brand-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
                                         )}
 
                                         {/* Active Glow Effect */}
