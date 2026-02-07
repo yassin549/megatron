@@ -204,7 +204,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                                                 }}
                                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${(activeCategory === cat.toLowerCase() || (cat === 'All' && activeCategory === 'all'))
                                                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                                    : 'bg-zinc-800/50 text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-200'
+                                                    : 'bg-surface text-text-muted border-border-subtle hover:bg-active hover:text-text-main'
                                                     }`}
                                             >
                                                 {cat}
@@ -222,7 +222,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                                         step="100"
                                         value={filters.minHolders}
                                         onChange={(e) => setFilters(prev => ({ ...prev, minHolders: parseInt(e.target.value) }))}
-                                        className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        className="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary"
                                     />
                                     <div className="flex justify-between text-xs text-zinc-500 mt-2 font-mono">
                                         <span>0</span>

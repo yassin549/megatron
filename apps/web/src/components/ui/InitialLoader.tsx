@@ -61,14 +61,14 @@ export function InitialLoader() {
                 </div>
 
                 {/* Tagline */}
-                <p className="text-lg md:text-xl text-gray-400 font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-300 delay-500">
+                <p className="text-lg md:text-xl text-text-muted font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-300 delay-500">
                     When world variables become stocks
                 </p>
 
                 {/* Progress Group */}
                 <div className="space-y-4">
                     {/* Progress Bar Container */}
-                    <div className="w-64 h-1 bg-white/5 rounded-full mx-auto overflow-hidden">
+                    <div className="w-64 h-1 bg-surface rounded-full mx-auto overflow-hidden">
                         {/* Progress Bar Fill */}
                         <div
                             className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_8px_rgba(255,255,255,0.5)]"
