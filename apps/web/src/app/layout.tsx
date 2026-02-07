@@ -30,7 +30,7 @@ export default function RootLayout({
                 <Providers>
                     <InitialLoader />
 
-                    <div className="min-h-screen bg-background text-foreground flex flex-col relative z-10">
+                    <div className="min-h-screen bg-transparent text-foreground flex flex-col relative z-10">
                         <Navbar />
                         <div className="flex-1 pb-28 md:pb-0">
                             {children}
