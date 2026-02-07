@@ -78,8 +78,8 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
     const range = (max - min) || 1;
     // Dimensions
     const isList = viewMode === 'list';
-    const height = isList ? 60 : 70; // Grid height 32 -> 70
-    const width = isList ? 200 : 160; // Grid width 80 -> 160
+    const height = isList ? 60 : 50; // Grid height 70 -> 50
+    const width = isList ? 200 : 140; // Grid width 160 -> 140
 
     const points = data.map((val, i) => {
         const x = (i / (data.length - 1)) * width;
@@ -297,9 +297,9 @@ export function AssetCard({
                 {/* Pressure Gauge - Moved to bottom footer */}
 
                 {/* Header Section */}
-                <div className={`flex items-center gap-6 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-6'} relative z-10`}>
+                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-lg bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-20 md:h-20'
+                        <div className={`relative overflow-hidden rounded-lg bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
@@ -336,7 +336,7 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0 pr-4">
-                        <h3 className={`font-black text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-2xl tracking-tight leading-tight'
+                        <h3 className={`font-black text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
                             }`}>
                             {name}
                         </h3>
@@ -352,10 +352,10 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-xl md:text-4xl font-black text-foreground font-mono tracking-tighter">
+                        <div className="text-xl md:text-3xl font-black text-foreground font-mono tracking-tighter">
                             ${livePrice.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-sm md:text-lg font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                        <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
@@ -388,23 +388,23 @@ export function AssetCard({
 
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
+                    <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
                         <div className="flex-1 mr-4 flex items-center gap-4">
                             <PressureGauge value={livePressure} size="sm" />
 
                             {/* Desktop Metadata Block */}
-                            <div className="hidden md:flex items-center gap-8 text-sm font-mono whitespace-nowrap border-l border-border/40 pl-6">
+                            <div className="hidden md:flex items-center gap-6 text-sm font-mono whitespace-nowrap border-l border-border/40 pl-5">
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Vol 24h</span>
-                                    <span className="text-white font-black text-lg">{formatVolume(volume24h)}</span>
+                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Vol 24h</span>
+                                    <span className="text-white font-black text-base">{formatVolume(volume24h)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Holders</span>
-                                    <span className="text-white font-black text-lg">{holders.toLocaleString()}</span>
+                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Holders</span>
+                                    <span className="text-white font-black text-base">{holders.toLocaleString()}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[10px] font-bold">Mkt Cap</span>
-                                    <span className="text-white font-black text-lg">{formatVolume(marketCap)}</span>
+                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Mkt Cap</span>
+                                    <span className="text-white font-black text-base">{formatVolume(marketCap)}</span>
                                 </div>
                             </div>
                         </div>
