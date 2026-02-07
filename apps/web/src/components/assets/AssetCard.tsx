@@ -204,8 +204,8 @@ export function AssetCard({
                 href={`/assets/${id}`}
                 className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
-                        ? 'flex items-center gap-6 p-3'
-                        : 'flex flex-col p-3'
+                        ? 'flex items-center gap-6 p-2.5'
+                        : 'flex flex-col p-2.5'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
@@ -299,8 +299,9 @@ export function AssetCard({
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-xl bg-surface border border-border-subtle ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
+                        <div className={`relative overflow-hidden rounded-xl bg-surface border border-border-subtle ${viewMode === 'list' ? 'w-10 h-10' : 'w-12 h-12 md:w-14 md:h-14'
                             }`}>
+                            破
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-text-dim group-hover:text-brand-primary transition-colors">
                                 <Icon className="w-6 h-6" />
@@ -336,8 +337,9 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0 pr-4">
-                        <h3 className={`font-black text-text-main line-clamp-2 group-hover:text-brand-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
+                        <h3 className={`font-black text-text-main line-clamp-2 group-hover:text-brand-primary transition-colors ${viewMode === 'list' ? 'text-sm' : 'text-sm md:text-lg tracking-tight leading-tight'
                             }`}>
+                            破
                             {name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
@@ -352,15 +354,17 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-xl md:text-3xl font-black text-text-main font-mono tracking-tighter">
+                        <div className="text-xl md:text-2xl font-black text-text-main font-mono tracking-tighter">
                             ${livePrice.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${isPositive ? 'text-status-success' : 'text-status-error'
+                        <div className={`flex items-center gap-1 text-xs md:text-sm font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
                         </div>
                     </div>
+                    破
+                    破
 
                     {/* Chart (Hidden on small mobile list) */}
                     <div className={`${viewMode === 'list' ? 'hidden sm:block' : ''}`}>
