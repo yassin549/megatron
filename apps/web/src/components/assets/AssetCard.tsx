@@ -78,8 +78,8 @@ function AssetMiniChart({ data, positive, viewMode }: { data: number[]; positive
     const range = (max - min) || 1;
     // Dimensions
     const isList = viewMode === 'list';
-    const height = isList ? 60 : 50; // Grid height 70 -> 50
-    const width = isList ? 200 : 140; // Grid width 160 -> 140
+    const height = isList ? 60 : 40; // Grid height 50 -> 40
+    const width = isList ? 200 : 140;
 
     const points = data.map((val, i) => {
         const x = (i / (data.length - 1)) * width;
@@ -205,7 +205,7 @@ export function AssetCard({
                 className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
-                        : 'flex flex-col p-3'
+                        : 'flex flex-col p-2.5'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
@@ -297,9 +297,9 @@ export function AssetCard({
                 {/* Pressure Gauge - Moved to bottom footer */}
 
                 {/* Header Section */}
-                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
+                <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-3'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-xl bg-surface border border-border-subtle ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
+                        <div className={`relative overflow-hidden rounded-xl bg-surface border border-border-subtle ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-14 md:h-14'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-text-dim group-hover:text-brand-primary transition-colors">
@@ -352,10 +352,10 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-xl md:text-3xl font-black text-text-main font-mono tracking-tighter">
+                        <div className="text-xl md:text-2xl font-black text-text-main font-mono tracking-tighter">
                             ${livePrice.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${isPositive ? 'text-status-success' : 'text-status-error'
+                        <div className={`flex items-center gap-1 text-sm md:text-sm font-bold ${isPositive ? 'text-status-success' : 'text-status-error'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
@@ -388,23 +388,23 @@ export function AssetCard({
 
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between">
+                    <div className="mt-2.5 pt-1.5 border-t border-border-subtle flex items-center justify-between">
                         <div className="flex-1 mr-4 flex items-center gap-4">
                             <PressureGauge value={livePressure} size="sm" />
 
                             {/* Desktop Metadata Block */}
                             <div className="hidden md:flex items-center gap-6 text-sm font-mono whitespace-nowrap border-l border-border-subtle pl-5">
                                 <div className="flex flex-col">
-                                    <span className="text-text-dim uppercase text-[9px] font-bold">Vol 24h</span>
-                                    <span className="text-text-main font-black text-base">{formatVolume(volume24h)}</span>
+                                    <span className="text-text-dim uppercase text-[8.5px] font-bold">Vol 24h</span>
+                                    <span className="text-text-main font-black text-sm">{formatVolume(volume24h)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-text-dim uppercase text-[9px] font-bold">Holders</span>
-                                    <span className="text-text-main font-black text-base">{holders.toLocaleString()}</span>
+                                    <span className="text-text-dim uppercase text-[8.5px] font-bold">Holders</span>
+                                    <span className="text-text-main font-black text-sm">{holders.toLocaleString()}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-text-dim uppercase text-[9px] font-bold">Mkt Cap</span>
-                                    <span className="text-text-main font-black text-base">{formatVolume(marketCap)}</span>
+                                    <span className="text-text-dim uppercase text-[8.5px] font-bold">Mkt Cap</span>
+                                    <span className="text-text-main font-black text-sm">{formatVolume(marketCap)}</span>
                                 </div>
                             </div>
                         </div>
