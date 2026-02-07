@@ -265,7 +265,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                                         {...asset}
                                         isAuthenticated={isAuthenticated}
                                         viewMode={viewMode}
-                                        activeTimeframe={null} // Assuming activeTimeframe is not available or can be null
+                                        activeTimeframe={undefined}
                                     />
                                 ))}
                             </motion.div>
