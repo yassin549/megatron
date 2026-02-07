@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* 1. Base Shell Colors */
-    --bg-base: 222 47% 12%;
+    --bg-base: 222 67% 6%;
     /* Deepest layer */
     --bg-surface: 222 47% 14%;
     /* Standard sections */
@@ -63,14 +63,8 @@
   }
 
   body {
-    @apply bg-base text-text-main antialiased selection:bg-brand-primary/30 selection:text-text-main;
-    /* Mesh Gradient Background - Dynamic Multi-color */
-    background-image:
-      radial-gradient(at 0% 0%, hsla(var(--brand-primary) / 0.15) 0%, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(var(--brand-accent) / 0.1) 0%, transparent 50%),
-      radial-gradient(at 50% 100%, hsla(var(--brand-primary) / 0.05) 0%, transparent 50%);
+    @apply bg-transparent text-text-main antialiased selection:bg-brand-primary/30 selection:text-text-main;
     background-attachment: fixed;
-    background-color: hsl(var(--bg-base));
   }
 
   /* Custom Scrollbar */

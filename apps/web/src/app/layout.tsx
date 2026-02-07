@@ -27,12 +27,14 @@ export default function RootLayout({
     return (
         <html lang="en" className="dark">
             <body className={inter.className}>
+                import {Background} from "@/components/layout/Background";
+
+                // ... inside RootLayout return ...
                 <Providers>
                     <InitialLoader />
-                    {/* Global Background Effects */}
-                    <div className="fixed inset-0 bg-[radial-gradient(circle_800px_at_50%_-20%,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none z-0" />
+                    <Background />
 
-                    <div className="min-h-screen bg-background text-foreground flex flex-col relative z-10">
+                    <div className="min-h-screen bg-transparent text-foreground flex flex-col relative z-10">
                         <Navbar />
                         <div className="flex-1 pb-28 md:pb-0">
                             {children}
