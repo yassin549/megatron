@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { InitialLoader } from "@/components/ui/InitialLoader";
 import { RequestMarketButton } from "@/components/RequestMarketButton";
+import { Background } from "@/components/layout/Background";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,9 +28,6 @@ export default function RootLayout({
     return (
         <html lang="en" className="dark">
             <body className={inter.className}>
-                import {Background} from "@/components/layout/Background";
-
-                // ... inside RootLayout return ...
                 <Providers>
                     <InitialLoader />
                     <Background />
