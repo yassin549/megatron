@@ -98,7 +98,7 @@
   }
 
   .glass-nav {
-    @apply bg-background border-b border-white/5 shadow-lg;
+    @apply bg-background/70 border-b border-white/5;
   }
 
   /* Text Effects */
