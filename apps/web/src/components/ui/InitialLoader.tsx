@@ -38,7 +38,7 @@ export function InitialLoader() {
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] bg-background/95 flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[9999] bg-[#000] flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
         >
             <div className="text-center space-y-8 relative z-10">

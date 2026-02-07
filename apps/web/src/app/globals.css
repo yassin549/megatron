@@ -57,13 +57,12 @@
 
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
-    background-attachment: fixed;
-    /* Theme-aware Global Background */
+    /* Cosmic Grid Background - Lightened */
     background-image:
-      radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 100% 0%, hsl(var(--secondary) / 0.05) 0%, transparent 30%),
-      linear-gradient(to right, hsla(var(--foreground) / 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, hsla(var(--foreground) / 0.03) 1px, transparent 1px);
+      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 25%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-position: center top;
   }
@@ -98,7 +97,7 @@
   }
 
   .glass-nav {
-    @apply bg-background/70 border-b border-white/5;
+    @apply bg-background border-b border-white/5 shadow-lg;
   }
 
   /* Text Effects */
