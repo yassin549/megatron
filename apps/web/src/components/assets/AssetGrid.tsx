@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AssetCard } from '@/components/assets';
 import Link from 'next/link';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Asset {
