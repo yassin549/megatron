@@ -222,10 +222,10 @@ export function Navbar() {
                         />
                     </div>
                     <div className="flex items-center">
-                        <span className="font-bold text-xl md:text-2xl text-white tracking-tighter group-hover:text-primary transition-colors duration-200">
+                        <span className="font-bold text-xl md:text-2xl text-text-main tracking-tighter group-hover:text-brand-primary transition-colors duration-200">
                             MEGATRON
                         </span>
-                        <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                        <span className="hidden sm:inline-block ml-2 px-1.5 py-0.5 rounded-sm text-[10px] font-mono bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                             BETA
                         </span>
                     </div>
@@ -467,7 +467,7 @@ export function Navbar() {
                                     {activeNavTab === 'general' && (
                                         <motion.div
                                             layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary shadow-[0_0_10px_hsla(var(--brand-primary)/0.5)] mx-2 rounded-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
@@ -486,7 +486,7 @@ export function Navbar() {
                                     {activeNavTab === 'bookmarks' && (
                                         <motion.div
                                             layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary shadow-[0_0_10px_hsla(var(--brand-primary)/0.5)] mx-2 rounded-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
@@ -503,12 +503,12 @@ export function Navbar() {
                                 >
                                     <Activity className="relative z-10 w-5 h-5" />
                                     {/* Status Dot */}
-                                    <span className={`absolute top-2 right-2.5 w-1.5 h-1.5 bg-neon-emerald rounded-full transition-opacity duration-300 ${activeNavTab === 'activity' ? 'opacity-0' : 'opacity-100'} animate-pulse`} />
+                                    <span className={`absolute top-2 right-2.5 w-1.5 h-1.5 bg-status-success rounded-full transition-opacity duration-300 ${activeNavTab === 'activity' ? 'opacity-0' : 'opacity-100'} animate-pulse`} />
 
                                     {activeNavTab === 'activity' && (
                                         <motion.div
                                             layoutId="navbar-tab-indicator"
-                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary shadow-[0_0_10px_hsla(var(--brand-primary)/0.5)] mx-2 rounded-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
@@ -542,7 +542,7 @@ export function Navbar() {
                                     {activeNavTab === 'profile' && (
                                         <motion.div
                                             layoutId="navbar-tab-indicator"
-                                            className="absolute -bottom-2 left-0 right-0 h-0.5 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)] mx-2 rounded-full"
+                                            className="absolute -bottom-2 left-0 right-0 h-0.5 bg-brand-primary shadow-[0_0_10px_hsla(var(--brand-primary)/0.5)] mx-2 rounded-full"
                                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                         />
                                     )}
@@ -551,10 +551,10 @@ export function Navbar() {
                         </>
                     ) : (
                         <div className="flex items-center gap-3">
-                            <Link href="/login" className="text-sm font-medium text-muted-foreground hover:text-white transition-colors">
+                            <Link href="/login" className="text-sm font-medium text-text-muted hover:text-text-main transition-colors">
                                 Log In
                             </Link>
-                            <Link href="/signup" className="group relative px-5 py-2 rounded-lg bg-primary text-white text-sm font-bold overflow-hidden">
+                            <Link href="/signup" className="group relative px-5 py-2 rounded-lg bg-brand-primary text-text-main text-sm font-bold overflow-hidden">
                                 <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
                                 <span className="relative">Get Started</span>
                             </Link>

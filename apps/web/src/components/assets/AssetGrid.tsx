@@ -243,47 +243,52 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                 )}
             </AnimatePresence>
 
-            {/* Assets Grid / List */}
-            {filteredAssets.length > 0 ? (
-                <motion.div
-                    layout
-                    className={viewMode === 'grid'
-                        ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 md:gap-3.5"
-                        : "flex flex-col gap-2"
-                    }
-                >
-                    {filteredAssets.map((asset, index) => (
-                        <motion.div
-                            layout
-                            key={asset.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                            className="fill-mode-backwards"
-                        >
-                            <AssetCard
-                                {...asset}
-                                isAuthenticated={isAuthenticated}
-                                viewMode={viewMode}
-                            />
-                        </motion.div>
-                    ))}
-                </motion.div>
-            ) : (
-                <div className="flex flex-col items-center justify-center py-32 border border-dashed border-white/10 rounded-2xl bg-white/5">
-                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                        <Search className="w-8 h-8 text-zinc-500" />
-                    </div>
-                    <h3 className="text-white text-lg font-medium mb-2">No markets found</h3>
-                    <p className="text-zinc-500 text-sm mb-6 max-w-sm text-center">We couldn't find any assets matching your criteria.</p>
-                    <Link
-                        href="/assets/request"
-                        className="text-primary hover:text-primary/80 transition-colors text-sm font-bold flex items-center gap-2"
-                    >
-                        Request a new market <span aria-hidden="true">&rarr;</span>
-                    </Link>
+            {/* Active Content Grid */}
+            <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 md:py-8 lg:py-12 relative z-10">
+                {/* Floating Navigation / Stats Bar could go here */}
+
+                <div className="flex flex-col gap-6 md:gap-10">
+                    <AnimatePresence mode="popLayout">
+                        {filteredAssets.length > 0 ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                className={viewMode === 'grid'
+                                    ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 md:gap-3.5 lg:gap-4 md:auto-rows-fr"
+                                    : "flex flex-col gap-2 md:gap-3"
+                                }
+                            >
+                                {filteredAssets.map((asset) => (
+                                    <AssetCard
+                                        key={asset.id}
+                                        {...asset}
+                                        isAuthenticated={isAuthenticated}
+                                        viewMode={viewMode}
+                                        activeTimeframe={null} // Assuming activeTimeframe is not available or can be null
+                                    />
+                                ))}
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="flex flex-col items-center justify-center py-20 md:py-40 text-center"
+                            >
+                                <div className="w-20 h-20 md:w-32 md:h-32 bg-surface rounded-full flex items-center justify-center mb-6 md:mb-8 border border-border-subtle shadow-xl">
+                                    <Activity className="w-10 h-10 md:w-16 md:h-16 text-text-dim" />
+                                </div>
+                                <h3 className="text-xl md:text-3xl font-black text-text-main mb-2 md:mb-4 tracking-tight">
+                                    No Assets Found
+                                </h3>
+                                <p className="text-sm md:text-lg text-text-muted max-w-md font-medium px-6">
+                                    We couldn't find any assets matching your filters. Try adjusting your search or category.
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-            )}
+            </main>
         </>
     );
 }

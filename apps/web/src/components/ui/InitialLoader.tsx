@@ -66,20 +66,25 @@ export function InitialLoader() {
                 </p>
 
                 {/* Progress Group */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                     {/* Progress Bar Container */}
-                    <div className="w-64 h-1 bg-gray-900 rounded-full mx-auto overflow-hidden">
+                    <div className="w-64 h-1 bg-white/5 rounded-full mx-auto overflow-hidden">
                         {/* Progress Bar Fill */}
                         <div
-                            className="h-full bg-white transition-all duration-200 ease-out"
+                            className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
 
                     {/* Percentage Indicator */}
-                    <p className="text-sm font-mono text-muted-foreground animate-in fade-in duration-300">
-                        {Math.round(progress)}%
-                    </p>
+                    <div className="flex flex-col items-center gap-1">
+                        <p className="text-xs font-mono text-white/40 uppercase tracking-[0.2em] animate-pulse">
+                            Initializing Systems
+                        </p>
+                        <p className="text-sm font-mono text-white/60">
+                            {Math.round(progress)}%
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

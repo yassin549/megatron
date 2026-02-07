@@ -4,49 +4,56 @@
 
 @layer base {
   :root {
-    /* Deep Obsidian Theme - Base Variables */
+    /* 1. Base Shell Colors */
+    --bg-base: 222 47% 12%;
+    /* Deepest layer */
+    --bg-surface: 222 47% 14%;
+    /* Standard sections */
+    --bg-elevated: 222 47% 18%;
+    /* Cards/Modals */
+    --bg-active: 222 47% 24%;
+    /* Hover states */
 
-    /* Background: Lightened for better visibility (+10% from original) */
-    --background: 222 47% 24%;
+    /* 2. Text Content */
+    --text-main: 210 40% 98%;
+    /* Primary readability */
+    --text-muted: 215 20% 65%;
+    /* Subtle/Descriptive */
+    --text-dim: 215 15% 45%;
+    /* Disabled/Placeholder */
 
-    /* Foreground: Off-white/Silver */
-    --foreground: 210 40% 98%;
+    /* 3. Brand & Accent */
+    --brand-primary: 217 91% 60%;
+    /* Dynamic color */
+    --brand-accent: 270 100% 60%;
 
-    /* Card: Lightened for better visibility (+10% from original) */
-    --card: 222 47% 23%;
-    --card-foreground: 210 40% 98%;
+    /* 4. Semantic Status */
+    --status-success: 160 84% 39%;
+    /* Emerald */
+    --status-error: 345 80% 50%;
+    /* Rose */
+    --status-warning: 45 93% 47%;
+    /* Amber */
+    --status-info: 199 89% 48%;
+    /* Cyan */
 
-    /* Popover */
-    --popover: 222 47% 15%;
-    --popover-foreground: 210 40% 98%;
+    /* 5. Borders & Structure */
+    --border-subtle: 217 33% 18% / 0.5;
+    --border-bright: 217 33% 25%;
 
-    /* Primary: Electric Blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 4%;
+    /* Legacy Mapping (Keeping for backward compatibility during transition) */
+    --background: var(--bg-surface);
+    --foreground: var(--text-main);
+    --card: var(--bg-elevated);
+    --card-foreground: var(--text-main);
+    --primary: var(--brand-primary);
+    --accent: var(--brand-accent);
+    --destructive: var(--status-error);
+    --border: var(--border-bright);
+    --muted: var(--bg-surface);
+    --muted-foreground: var(--text-muted);
 
-    /* Secondary: Deep Purple/Slate */
-    --secondary: 217 33% 25%;
-    --secondary-foreground: 210 40% 98%;
-
-    /* Muted: Subtle background elements */
-    --muted: 217 33% 22%;
-    --muted-foreground: 215 20% 65%;
-
-    /* Accent: Neon Purple */
-    --accent: 270 100% 60%;
-    --accent-foreground: 210 40% 98%;
-
-    /* Destructive: Neon Rose */
-    --destructive: 345 80% 50%;
-    --destructive-foreground: 210 40% 98%;
-
-    /* Borders & Inputs */
-    --border: 217 33% 25%;
-    --input: 217 33% 25%;
-    --ring: 224 76% 48%;
-
-    --radius: 4px;
-    /* 12px */
+    --radius: 12px;
   }
 }
 
@@ -56,13 +63,13 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-white;
-    /* Cosmic Grid Background - Lightened */
+    @apply bg-surface text-text-main antialiased selection:bg-brand-primary/30 selection:text-text-main;
+    /* Cosmic Grid Background - Derived from tokens */
     background-image:
-      radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.25) 0%, transparent 40%),
-      radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.18) 0%, transparent 25%),
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      radial-gradient(circle at 50% 0%, hsla(var(--brand-primary), 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 85% 30%, hsla(var(--brand-accent), 0.1) 0%, transparent 25%),
+      linear-gradient(hsla(var(--text-main), 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, hsla(var(--text-main), 0.02) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-position: center top;
   }
@@ -78,7 +85,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-secondary rounded-md hover:bg-primary/50 transition-colors;
+    @apply bg-bg-elevated rounded-md hover:bg-brand-primary/50 transition-colors;
   }
 }
 
@@ -87,17 +94,17 @@
     text-wrap: balance;
   }
 
-  /* Glassmorphism Classes */
+  /* Glassmorphism Classes - Standardized on Semantic Tokens */
   .glass-panel {
-    @apply bg-card border border-white/5 shadow-2xl;
+    @apply bg-elevated/80 backdrop-blur-md border border-border-subtle shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-card border border-white/5 shadow-lg transition-all duration-150 hover:bg-card/70 hover:border-white/10 hover:shadow-primary/5;
+    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-300 hover:bg-active/70 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
   }
 
   .glass-nav {
-    @apply bg-background border-b border-white/5 shadow-lg;
+    @apply bg-surface/80 backdrop-blur-lg border-b border-border-subtle shadow-lg;
   }
 
   /* Text Effects */

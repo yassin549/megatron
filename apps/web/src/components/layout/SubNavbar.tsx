@@ -117,23 +117,23 @@ export function SubNavbar() {
                                         href={`/?category=${category.id}`}
                                         data-active={isActive}
                                         className={`group flex items-center px-4 py-2.5 md:px-6 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
-                                            ? 'border-primary text-white shadow-[0_4px_12px_-2px_rgba(59,130,246,0.3)]'
-                                            : 'border-transparent text-muted-foreground hover:text-white'
+                                            ? 'border-brand-primary text-text-main shadow-[0_4px_12px_-2px_rgba(var(--brand-primary),0.3)]'
+                                            : 'border-transparent text-text-muted hover:text-text-main'
                                             }`}
                                     >
                                         <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-105 flex items-center gap-2 pointer-events-none">
-                                            {category.id === 'all' && <TrendingUp className="w-4 h-4 text-neon-emerald" />}
+                                            {category.id === 'all' && <TrendingUp className="w-4 h-4 text-status-success" />}
                                             {category.name}
                                         </span>
 
                                         {/* Animated underline for non-active items */}
                                         {!isActive && (
-                                            <div className="absolute inset-x-4 bottom-0 h-[2px] bg-primary/0 group-hover:bg-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                            <div className="absolute inset-x-4 bottom-0 h-[2px] bg-brand-primary/0 group-hover:bg-brand-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
                                         )}
 
                                         {/* Active Glow Effect */}
                                         {isActive && (
-                                            <div className="absolute inset-0 bg-primary/5 blur-md -z-10 rounded-md"></div>
+                                            <div className="absolute inset-0 bg-brand-primary/5 blur-md -z-10 rounded-md"></div>
                                         )}
                                     </Link>
                                 </motion.div>
@@ -142,17 +142,17 @@ export function SubNavbar() {
                     </div>
 
                     {/* View Toggle - Hidden on Mobile */}
-                    <div className="hidden md:flex items-center bg-obsidian-900 rounded-lg p-1 border border-white/10 shadow-sm ml-4 shrink-0">
+                    <div className="hidden md:flex items-center bg-surface rounded-lg p-1 border border-border-subtle shadow-sm ml-4 shrink-0">
                         <button
                             onClick={() => toggleView('grid')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'grid' ? 'bg-brand-primary text-text-main shadow-md' : 'text-text-dim hover:text-text-main hover:bg-white/5'}`}
                             title="Grid View"
                         >
                             <LayoutGrid className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => toggleView('list')}
-                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-primary text-white shadow-md' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'}`}
+                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-brand-primary text-text-main shadow-md' : 'text-text-dim hover:text-text-main hover:bg-white/5'}`}
                             title="List View"
                         >
                             <List className="w-4 h-4" />

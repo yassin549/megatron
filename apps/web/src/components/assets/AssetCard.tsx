@@ -202,7 +202,7 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-card backdrop-blur-md border border-border/60 rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/50 shadow-[0_0_25px_rgba(59,130,246,0.3)]' : 'hover:border-border/80'
+                className={`block h-full bg-elevated backdrop-blur-md border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'
@@ -210,7 +210,7 @@ export function AssetCard({
             >
                 {/* Border Beam Effect on Hover */}
                 <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
                 {/* Hover Description Overlay */}
@@ -261,8 +261,8 @@ export function AssetCard({
                                     animate={{ opacity: 1, scale: 1 }}
                                     onClick={handleToggleBookmark}
                                     className={`absolute -top-10 right-0 p-2 rounded-full transition-all border ${isBookmarked
-                                        ? 'text-primary bg-primary/10 border-primary/20'
-                                        : 'text-zinc-400 hover:text-white hover:bg-white/10 border-white/10'
+                                        ? 'text-brand-primary bg-brand-primary/10 border-brand-primary/20'
+                                        : 'text-text-muted hover:text-text-main hover:bg-white/10 border-border-subtle'
                                         }`}
                                 >
                                     <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
@@ -273,7 +273,7 @@ export function AssetCard({
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.05 }}
-                                    className="text-xl font-bold text-foreground mb-3 leading-tight"
+                                    className="text-xl font-bold text-text-main mb-3 leading-tight"
                                 >
                                     {name}
                                 </motion.h3>
@@ -284,7 +284,7 @@ export function AssetCard({
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ delay: 0.15 }}
-                                        className="text-xs text-zinc-100 font-semibold leading-relaxed line-clamp-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                                        className="text-xs text-text-main font-semibold leading-relaxed line-clamp-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                                     >
                                         {description}
                                     </motion.p>
@@ -299,10 +299,10 @@ export function AssetCard({
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-xl bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
+                        <div className={`relative overflow-hidden rounded-xl bg-surface border border-border-subtle ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
-                            <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
+                            <div className="absolute inset-0 flex items-center justify-center text-text-dim group-hover:text-brand-primary transition-colors">
                                 <Icon className="w-6 h-6" />
                             </div>
 
@@ -336,12 +336,12 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0 pr-4">
-                        <h3 className={`font-black text-white line-clamp-2 group-hover:text-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
+                        <h3 className={`font-black text-text-main line-clamp-2 group-hover:text-brand-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
                             }`}>
                             {name}
                         </h3>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-muted-foreground font-black bg-secondary/40 px-2 py-0.5 rounded">
+                            <span className="text-[10px] md:text-xs uppercase tracking-widest text-text-muted font-black bg-surface px-2 py-0.5 rounded">
                                 {type}
                             </span>
                         </div>
@@ -352,10 +352,10 @@ export function AssetCard({
                 <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
-                        <div className="text-xl md:text-3xl font-black text-foreground font-mono tracking-tighter">
+                        <div className="text-xl md:text-3xl font-black text-text-main font-mono tracking-tighter">
                             ${livePrice.toFixed(2)}
                         </div>
-                        <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${isPositive ? 'text-neon-emerald' : 'text-neon-rose'
+                        <div className={`flex items-center gap-1 text-sm md:text-base font-bold ${isPositive ? 'text-status-success' : 'text-status-error'
                             } ${viewMode === 'list' ? 'justify-end' : ''}`}>
                             {isPositive ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                             {Math.abs(change24h).toFixed(2)}%
@@ -388,23 +388,23 @@ export function AssetCard({
 
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between">
+                    <div className="mt-3 pt-2 border-t border-border-subtle flex items-center justify-between">
                         <div className="flex-1 mr-4 flex items-center gap-4">
                             <PressureGauge value={livePressure} size="sm" />
 
                             {/* Desktop Metadata Block */}
-                            <div className="hidden md:flex items-center gap-6 text-sm font-mono whitespace-nowrap border-l border-border/40 pl-5">
+                            <div className="hidden md:flex items-center gap-6 text-sm font-mono whitespace-nowrap border-l border-border-subtle pl-5">
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Vol 24h</span>
-                                    <span className="text-white font-black text-base">{formatVolume(volume24h)}</span>
+                                    <span className="text-text-dim uppercase text-[9px] font-bold">Vol 24h</span>
+                                    <span className="text-text-main font-black text-base">{formatVolume(volume24h)}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Holders</span>
-                                    <span className="text-white font-black text-base">{holders.toLocaleString()}</span>
+                                    <span className="text-text-dim uppercase text-[9px] font-bold">Holders</span>
+                                    <span className="text-text-main font-black text-base">{holders.toLocaleString()}</span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <span className="text-zinc-500 uppercase text-[9px] font-bold">Mkt Cap</span>
-                                    <span className="text-white font-black text-base">{formatVolume(marketCap)}</span>
+                                    <span className="text-text-dim uppercase text-[9px] font-bold">Mkt Cap</span>
+                                    <span className="text-text-main font-black text-base">{formatVolume(marketCap)}</span>
                                 </div>
                             </div>
                         </div>
@@ -412,8 +412,8 @@ export function AssetCard({
                         <button
                             onClick={handleToggleBookmark}
                             className={`p-1.5 rounded-lg transition-all ${isBookmarked
-                                ? 'text-neon-blue bg-blue-500/10'
-                                : 'text-zinc-600 hover:text-white hover:bg-white/5'
+                                ? 'text-brand-primary bg-brand-primary/10'
+                                : 'text-text-dim hover:text-text-main hover:bg-surface'
                                 }`}
                         >
                             <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />

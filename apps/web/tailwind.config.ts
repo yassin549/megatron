@@ -12,60 +12,57 @@ const config: Config = {
                 'xs': '475px',
             },
             colors: {
-                // Base
-                background: "hsl(var(--background))",
-                foreground: "hsl(var(--foreground))",
+                // Semantic Tokens
+                background: "hsl(var(--bg-base))",
+                surface: "hsl(var(--bg-surface))",
+                elevated: "hsl(var(--bg-elevated))",
+                active: "hsl(var(--bg-active))",
 
-                // Functional
-                card: {
-                    DEFAULT: "hsl(var(--card))",
-                    foreground: "hsl(var(--card-foreground))",
+                text: {
+                    main: "hsl(var(--text-main))",
+                    muted: "hsl(var(--text-muted))",
+                    dim: "hsl(var(--text-dim))",
                 },
-                popover: {
-                    DEFAULT: "hsl(var(--popover))",
-                    foreground: "hsl(var(--popover-foreground))",
+
+                brand: {
+                    primary: "hsl(var(--brand-primary))",
+                    accent: "hsl(var(--brand-accent))",
                 },
+
+                status: {
+                    success: "hsl(var(--status-success))",
+                    error: "hsl(var(--status-error))",
+                    warning: "hsl(var(--status-warning))",
+                    info: "hsl(var(--status-info))",
+                },
+
+                // Functional mappings for Shadcn/UI compatibility
                 primary: {
-                    DEFAULT: "hsl(var(--primary))",
-                    foreground: "hsl(var(--primary-foreground))",
+                    DEFAULT: "hsl(var(--brand-primary))",
+                    foreground: "hsl(var(--bg-base))",
                 },
                 secondary: {
-                    DEFAULT: "hsl(var(--secondary))",
-                    foreground: "hsl(var(--secondary-foreground))",
-                },
-                muted: {
-                    DEFAULT: "hsl(var(--muted))",
-                    foreground: "hsl(var(--muted-foreground))",
+                    DEFAULT: "hsl(var(--bg-elevated))",
+                    foreground: "hsl(var(--text-main))",
                 },
                 accent: {
-                    DEFAULT: "hsl(var(--accent))",
-                    foreground: "hsl(var(--accent-foreground))",
+                    DEFAULT: "hsl(var(--brand-accent))",
+                    foreground: "hsl(var(--text-main))",
                 },
                 destructive: {
-                    DEFAULT: "hsl(var(--destructive))",
-                    foreground: "hsl(var(--destructive-foreground))",
+                    DEFAULT: "hsl(var(--status-error))",
+                    foreground: "hsl(var(--text-main))",
                 },
-
-                // Border/Input
-                border: "hsl(var(--border))",
-                input: "hsl(var(--input))",
-                ring: "hsl(var(--ring))",
-
-                // Custom "Deep Obsidian" Palette (lightened foundation)
-                obsidian: {
-                    950: "#131B29", // Main background (14% lightness)
-                    900: "#172132", // Secondary background (17% lightness)
-                    800: "#1E293B", // Card background (23% lightness)
-                    700: "#334155", // Hover state (40% lightness)
-                    600: "#475569", // Border (60% lightness)
+                muted: {
+                    DEFAULT: "hsl(var(--bg-surface))",
+                    foreground: "hsl(var(--text-muted))",
                 },
-                neon: {
-                    blue: "#3B82F6",    // Core Brand
-                    purple: "#8B5CF6",  // Secondary Brand
-                    cyan: "#06B6D4",    // Highlights
-                    emerald: "#10B981", // Success
-                    rose: "#F43F5E",    // Error/Short
-                }
+                card: {
+                    DEFAULT: "hsl(var(--bg-elevated))",
+                    foreground: "hsl(var(--text-main))",
+                },
+                border: "hsl(var(--border-bright))",
+                "border-subtle": "hsla(var(--border-subtle))",
             },
             borderRadius: {
                 lg: "var(--radius)",
