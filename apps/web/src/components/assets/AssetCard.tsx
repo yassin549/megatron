@@ -202,7 +202,7 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-card backdrop-blur-md border border-border/40 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/30 shadow-[0_0_20px_rgba(59,130,246,0.15)]' : 'hover:border-border/80'
+                className={`block h-full bg-card backdrop-blur-md border border-border/60 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/50 shadow-[0_0_25px_rgba(59,130,246,0.3)]' : 'hover:border-border/80'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'
@@ -388,7 +388,7 @@ export function AssetCard({
 
                 {/* Footer Stats (Grid View Only) */}
                 {viewMode === 'grid' && (
-                    <div className="mt-3 pt-2 border-t border-border/40 flex items-center justify-between">
+                    <div className="mt-3 pt-2 border-t border-border/60 flex items-center justify-between">
                         <div className="flex-1 mr-4 flex items-center gap-4">
                             <PressureGauge value={livePressure} size="sm" />
 
