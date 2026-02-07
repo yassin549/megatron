@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 
 export function AssetSkeleton() {
     return (
-        <div className="bg-elevated/50 backdrop-blur-md border border-border-subtle rounded-xl p-3 h-full animate-pulse">
+        <div className="bg-elevated border border-border-subtle rounded-xl p-3 h-full animate-pulse">
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl bg-surface/50" />

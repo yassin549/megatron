@@ -202,7 +202,7 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-elevated backdrop-blur-md border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
+                className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'

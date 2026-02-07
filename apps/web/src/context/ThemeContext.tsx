@@ -156,6 +156,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         root.style.setProperty('--accent', colors.brandAccent);
         root.style.setProperty('--card', colors.bgElevated);
         root.style.setProperty('--border', colors.borderBright);
+
+        // Update body background explicitly for smooth transition
+        document.body.style.backgroundImage = `
+            radial-gradient(at 0% 0%, hsla(${colors.brandPrimary} / 0.15) 0%, transparent 50%),
+            radial-gradient(at 100% 0%, hsla(${colors.brandAccent} / 0.1) 0%, transparent 50%),
+            radial-gradient(at 50% 100%, hsla(${colors.brandPrimary} / 0.05) 0%, transparent 50%)
+        `;
     };
 
     const setTheme = (newTheme: ThemePreset) => {

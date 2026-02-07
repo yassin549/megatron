@@ -53,7 +53,7 @@
     --muted: var(--bg-surface);
     --muted-foreground: var(--text-muted);
 
-    --radius: 12px;
+    --radius: 4px;
   }
 }
 
@@ -63,15 +63,14 @@
   }
 
   body {
-    @apply bg-surface text-text-main antialiased selection:bg-brand-primary/30 selection:text-text-main;
-    /* Cosmic Grid Background - Derived from tokens */
+    @apply bg-base text-text-main antialiased selection:bg-brand-primary/30 selection:text-text-main;
+    /* Mesh Gradient Background - Dynamic Multi-color */
     background-image:
-      radial-gradient(circle at 50% 0%, hsla(var(--brand-primary), 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 85% 30%, hsla(var(--brand-accent), 0.1) 0%, transparent 25%),
-      linear-gradient(hsla(var(--text-main), 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, hsla(var(--text-main), 0.02) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
-    background-position: center top;
+      radial-gradient(at 0% 0%, hsla(var(--brand-primary) / 0.15) 0%, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(var(--brand-accent) / 0.1) 0%, transparent 50%),
+      radial-gradient(at 50% 100%, hsla(var(--brand-primary) / 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+    background-color: hsl(var(--bg-base));
   }
 
   /* Custom Scrollbar */
@@ -94,17 +93,17 @@
     text-wrap: balance;
   }
 
-  /* Glassmorphism Classes - Standardized on Semantic Tokens */
+  /* Solid Surfaces - Removed transparency/blur for sharper structure */
   .glass-panel {
-    @apply bg-elevated/80 backdrop-blur-md border border-border-subtle shadow-2xl;
+    @apply bg-elevated border border-border-subtle shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-300 hover:bg-active/70 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
+    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-300 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
   }
 
   .glass-nav {
-    @apply bg-surface/80 backdrop-blur-lg border-b border-border-subtle shadow-lg;
+    @apply bg-surface border-b border-border-subtle shadow-lg;
   }
 
   /* Text Effects */
