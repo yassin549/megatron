@@ -202,14 +202,14 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-card backdrop-blur-md border border-border/60 rounded-md transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/50 shadow-[0_0_25px_rgba(59,130,246,0.3)]' : 'hover:border-border/80'
+                className={`block h-full bg-card backdrop-blur-md border border-border/60 rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'border-primary/50 shadow-[0_0_25px_rgba(59,130,246,0.3)]' : 'hover:border-border/80'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-3'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
-                <div className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
@@ -221,7 +221,7 @@ export function AssetCard({
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.3 }}
-                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-md overflow-hidden"
+                            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl overflow-hidden"
                         >
                             {/* Background Layers */}
                             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-300">
@@ -299,7 +299,7 @@ export function AssetCard({
                 {/* Header Section */}
                 <div className={`flex items-center gap-4 ${viewMode === 'list' ? 'flex-1 min-w-0' : 'mb-4'} relative z-10`}>
                     <div className="relative">
-                        <div className={`relative overflow-hidden rounded-lg bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
+                        <div className={`relative overflow-hidden rounded-xl bg-secondary/20 border border-border/50 ${viewMode === 'list' ? 'w-12 h-12' : 'w-12 h-12 md:w-16 md:h-16'
                             }`}>
                             {/* Fallback Icon (Always rendered underneath) */}
                             <div className="absolute inset-0 flex items-center justify-center text-zinc-600 group-hover:text-primary transition-colors">
