@@ -273,7 +273,7 @@ export function AssetCard({
                                     initial={{ opacity: 0, y: 5 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.05 }}
-                                    className="text-xl font-bold text-text-main mb-3 leading-tight"
+                                    className="text-xl font-semibold text-text-main mb-3 leading-tight"
                                 >
                                     {name}
                                 </motion.h3>
@@ -336,7 +336,7 @@ export function AssetCard({
                     </div>
 
                     <div className="flex-1 min-w-0 pr-4">
-                        <h3 className={`font-black text-text-main line-clamp-2 group-hover:text-brand-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
+                        <h3 className={`font-semibold text-text-main line-clamp-2 group-hover:text-brand-primary transition-colors ${viewMode === 'list' ? 'text-base' : 'text-sm md:text-xl tracking-tight leading-tight'
                             }`}>
                             {name}
                         </h3>
