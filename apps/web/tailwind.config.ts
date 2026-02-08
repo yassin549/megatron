@@ -80,6 +80,7 @@ const config: Config = {
                 "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
                 "glow": "glow 2s ease-in-out infinite alternate",
                 "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+                "shimmer": "shimmer 2s linear infinite",
             },
             keyframes: {
                 "accordion-down": {
@@ -98,6 +99,10 @@ const config: Config = {
                     "100%": {
                         "offset-distance": "100%",
                     },
+                },
+                shimmer: {
+                    "0%": { backgroundPosition: "-200% 0" },
+                    "100%": { backgroundPosition: "200% 0" },
                 },
             },
         },
