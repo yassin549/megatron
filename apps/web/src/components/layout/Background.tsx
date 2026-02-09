@@ -135,14 +135,7 @@ export function Background() {
                 </div>
             </div>
 
-            {/* 5. Delicate Micro-Particles Overlay */}
-            <div
-                className="absolute inset-0 z-30 opacity-40 pointer-events-none"
-                style={{
-                    backgroundImage: `radial-gradient(circle at 2px 2px, ${primary.hsla(0.3)} 1px, transparent 0)`,
-                    backgroundSize: '32px 32px'
-                }}
-            />
+            {/* 5. Delicate Micro-Particles Overlay - REMOVED for clean solid look */}
         </div>
     );
 }
