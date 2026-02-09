@@ -89,7 +89,7 @@ export default function LPDashboardPage() {
     );
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-transparent">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
                ========================================= */}

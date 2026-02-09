@@ -139,7 +139,7 @@ export default function PortfolioPage() {
 
     if (status === 'loading' || loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                     <div className="font-mono text-sm text-muted-foreground animate-pulse">LOADING_PORTFOLIO...</div>
@@ -150,7 +150,7 @@ export default function PortfolioPage() {
 
     if (status === 'unauthenticated') {
         return (
-            <div className="min-h-screen bg-background text-foreground">
+            <div className="min-h-screen bg-transparent text-foreground">
                 <div className="flex flex-col items-center justify-center h-[calc(100vh-160px)] text-center px-4">
                     <div className="w-16 h-16 bg-secondary rounded-2xl flex items-center justify-center mb-6 border border-border">
                         <Wallet className="w-8 h-8 text-muted-foreground" />
@@ -172,7 +172,7 @@ export default function PortfolioPage() {
     const cashBalance = data?.cashBalance || 0;
 
     return (
-        <div className="min-h-screen bg-background text-foreground animate-in fade-in duration-500">
+        <div className="min-h-screen bg-transparent text-foreground animate-in fade-in duration-500">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
                ========================================= */}

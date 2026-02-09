@@ -116,7 +116,7 @@ export default function DashboardPage() {
 
     if (status === 'loading' || (loading && !userData)) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
                     <div className="text-muted-foreground font-medium animate-pulse">Syncing Megatron Node...</div>
@@ -127,7 +127,7 @@ export default function DashboardPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
                 <div className="glass-card p-8 rounded-2xl text-center max-w-md">
                     <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg className="w-8 h-8 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,7 +148,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-transparent">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
                ========================================= */}

@@ -183,7 +183,7 @@ export default function WalletPage() {
 
     if (status === 'loading' || (walletData.loading && status === 'authenticated')) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="min-h-screen bg-transparent flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
                     <div className="text-foreground font-medium">Loading Wallet...</div>
@@ -193,7 +193,7 @@ export default function WalletPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-transparent">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
                ========================================= */}
