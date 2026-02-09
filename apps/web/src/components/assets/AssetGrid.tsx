@@ -244,7 +244,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
             </AnimatePresence>
 
             {/* Active Content Grid */}
-            <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 md:py-8 lg:py-12 relative z-10">
+            <main className="max-w-[1400px] mx-auto px-3 sm:px-6 py-6 md:py-8 lg:py-12 relative z-10">
                 {/* Floating Navigation / Stats Bar could go here */}
 
                 <div className="flex flex-col gap-6 md:gap-10">
