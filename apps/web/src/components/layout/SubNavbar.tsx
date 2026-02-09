@@ -2,13 +2,12 @@
 
 import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { TrendingUp, LayoutGrid, List } from 'lucide-react';
 
 export function SubNavbar() {
     const searchParams = useSearchParams();
-    const pathname = usePathname();
     const currentCategory = searchParams.get('category') || 'all';
     const scrollRef = useRef<HTMLDivElement>(null);
     const [categories, setCategories] = useState<{ id: string, name: string }[]>([
@@ -97,7 +96,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className={`sticky top-16 z-40 transition-all duration-300 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} ${pathname === '/' ? 'bg-background' : 'glass-nav'}`}>
+        <div className={`sticky top-16 z-40 transition-all duration-300 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav`}>
             <div className="max-w-[1400px] mx-auto px-4">
                 <div className="flex items-center justify-between h-12 md:h-14">
                     {/* Categories - scrollable on mobile */}

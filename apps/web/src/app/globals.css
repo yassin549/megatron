@@ -97,7 +97,7 @@
   }
 
   .glass-nav {
-    @apply bg-surface border-b border-border-subtle shadow-lg;
+    @apply bg-surface/70 backdrop-blur-md border-b border-border-subtle shadow-lg;
   }
 
   /* Text Effects */
