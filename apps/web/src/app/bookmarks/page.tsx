@@ -176,7 +176,7 @@ export default function BookmarksPage() {
                             className="flex flex-col items-center justify-center py-32 border border-dashed border-white/10 rounded-[32px] bg-white/[0.02] backdrop-blur-sm"
                         >
                             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 relative group">
-                                <Bookmark className="w-10 h-10 text-primary opacity-50 group-hover:scale-110 transition-transform duration-500" />
+                                <Bookmark className="w-10 h-10 text-primary opacity-50 group-hover:scale-110 transition-transform duration-200" />
                                 <div className="absolute inset-0 rounded-full border border-primary/20 animate-ping" />
                             </div>
                             <h3 className="text-white text-xl font-bold mb-2">Watchlist Empty</h3>

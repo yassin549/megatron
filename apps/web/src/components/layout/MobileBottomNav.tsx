@@ -31,7 +31,7 @@ export function MobileBottomNav() {
                         <Link
                             key={tab.name}
                             href={tab.href}
-                            className={`relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-300 w-16 group ${isActive ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'
+                            className={`relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-200 w-16 group ${isActive ? 'text-primary' : 'text-zinc-500 hover:text-zinc-300'
                                 }`}
                         >
                             {isActive && (
@@ -41,7 +41,7 @@ export function MobileBottomNav() {
                                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                                 />
                             )}
-                            <Icon className={`w-5 h-5 mb-1.5 z-10 transition-transform duration-300 ${isActive ? 'scale-110 stroke-[2.5px] drop-shadow-[0_0_12px_rgba(59,130,246,0.8)]' : 'stroke-2 group-hover:scale-110'}`} />
+                            <Icon className={`w-5 h-5 mb-1.5 z-10 transition-transform duration-200 ${isActive ? 'scale-110 stroke-[2.5px] drop-shadow-[0_0_12px_rgba(59,130,246,0.8)]' : 'stroke-2 group-hover:scale-110'}`} />
                             <span className="text-[9px] font-black uppercase tracking-wider z-10 leading-none">{tab.name}</span>
                         </Link>
                     );

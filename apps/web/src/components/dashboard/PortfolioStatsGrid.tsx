@@ -85,7 +85,7 @@ export function PortfolioStatsGrid({ stats, loading }: PortfolioStatsGridProps) 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.1 }}
-                    className="glass-card p-3 md:p-6 rounded-xl relative overflow-hidden group hover:border-white/20 transition-all duration-300"
+                    className="glass-card p-3 md:p-6 rounded-xl relative overflow-hidden group hover:border-white/20 transition-all duration-200"
                 >
                     <div className={`absolute top-0 right-0 w-16 md:w-24 h-16 md:h-24 bg-${card.color}-500/5 blur-2xl md:blur-3xl rounded-full -mr-4 md:-mr-8 -mt-4 md:-mt-8`} />
 

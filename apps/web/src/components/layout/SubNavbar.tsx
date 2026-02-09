@@ -96,7 +96,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className={`sticky top-16 z-40 transition-all duration-300 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav`}>
+        <div className={`sticky top-16 z-40 transition-all duration-200 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav`}>
             <div className="max-w-[1400px] mx-auto px-4">
                 <div className="flex items-center justify-between h-12 md:h-14">
                     {/* Categories - scrollable on mobile */}
@@ -116,19 +116,19 @@ export function SubNavbar() {
                                     <Link
                                         href={`/?category=${category.id}`}
                                         data-active={isActive}
-                                        className={`group flex items-center px-3 py-2.5 md:px-4 md:py-4 border-b-2 transition-all duration-300 text-sm font-medium whitespace-nowrap relative ${isActive
+                                        className={`group flex items-center px-3 py-2.5 md:px-4 md:py-4 border-b-2 transition-all duration-200 text-sm font-medium whitespace-nowrap relative ${isActive
                                             ? 'border-brand-primary text-text-main shadow-[0_4px_12px_-2px_rgba(var(--brand-primary),0.3)]'
                                             : 'border-transparent text-text-muted hover:text-text-main'
                                             }`}
                                     >
-                                        <span className="relative z-10 transition-transform duration-300 transform group-hover:scale-105 flex items-center gap-2 pointer-events-none">
+                                        <span className="relative z-10 transition-transform duration-200 transform group-hover:scale-105 flex items-center gap-2 pointer-events-none">
                                             {category.id === 'all' && <TrendingUp className="w-4 h-4 text-status-success" />}
                                             {category.name}
                                         </span>
 
                                         {/* Animated underline for non-active items */}
                                         {!isActive && (
-                                            <div className="absolute inset-x-2 bottom-0 h-[2px] bg-brand-primary/0 group-hover:bg-brand-primary/50 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                                            <div className="absolute inset-x-2 bottom-0 h-[2px] bg-brand-primary/0 group-hover:bg-brand-primary/50 transition-all duration-200 transform scale-x-0 group-hover:scale-x-100" />
                                         )}
 
                                         {/* Active Glow Effect */}

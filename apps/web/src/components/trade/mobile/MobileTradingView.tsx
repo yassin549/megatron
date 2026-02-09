@@ -324,7 +324,7 @@ export function MobileTradingView({
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`relative p-3 rounded-lg transition-all duration-300 ${isActive
+                                className={`relative p-3 rounded-lg transition-all duration-200 ${isActive
                                     ? activeColor
                                     : 'text-zinc-600 hover:text-zinc-400'
                                     }`}

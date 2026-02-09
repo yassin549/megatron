@@ -38,17 +38,17 @@ export function InitialLoader() {
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] bg-[#000] flex flex-col items-center justify-center transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            className={`fixed inset-0 z-[9999] bg-[#000] flex flex-col items-center justify-center transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 }`}
         >
             <div className="text-center space-y-8 relative z-10">
                 {/* Logo */}
                 <div className="flex justify-center mb-2 overflow-visible">
-                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-500">
+                    <div className="relative w-24 h-24 md:w-32 md:h-32 animate-in fade-in zoom-in duration-200">
                         <img
                             src="/images/megatron-logo.jpg"
                             alt="Megatron Logo"
-                            className="w-full h-full object-contain filter brightness-110 contrast-125 transition-all duration-300"
+                            className="w-full h-full object-contain filter brightness-110 contrast-125 transition-all duration-200"
                         />
                     </div>
                 </div>
@@ -61,7 +61,7 @@ export function InitialLoader() {
                 </div>
 
                 {/* Tagline */}
-                <p className="text-lg md:text-xl text-text-muted font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-300 delay-500">
+                <p className="text-lg md:text-xl text-text-muted font-medium tracking-wide animate-in fade-in slide-in-from-bottom-4 duration-200 delay-150">
                     When world variables become stocks
                 </p>
 
@@ -71,7 +71,7 @@ export function InitialLoader() {
                     <div className="w-64 h-1 bg-surface rounded-full mx-auto overflow-hidden">
                         {/* Progress Bar Fill */}
                         <div
-                            className="h-full bg-white transition-all duration-300 ease-out shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                            className="h-full bg-white transition-all duration-200 ease-out shadow-[0_0_8px_rgba(255,255,255,0.5)]"
                             style={{ width: `${progress}%` }}
                         />
                     </div>

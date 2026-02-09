@@ -191,7 +191,7 @@ export function RequestMarketButton() {
                 onClick={() => setIsOpen(!isOpen)}
                 className={`fixed bottom-32 right-4 md:bottom-8 md:right-8 z-[60] group ${isAssetPage ? 'hidden md:block' : ''}`}
             >
-                <div className={`relative flex items-center justify-center p-4 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.3)] backdrop-blur-xl border border-white/20 transition-all duration-300 ${isOpen
+                <div className={`relative flex items-center justify-center p-4 rounded-full shadow-[0_0_40px_rgba(16,185,129,0.3)] backdrop-blur-xl border border-white/20 transition-all duration-200 ${isOpen
                     ? 'bg-zinc-900 text-white'
                     : 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white hover:from-emerald-400 hover:to-emerald-600'
                     }`}>
@@ -261,7 +261,7 @@ export function RequestMarketButton() {
                                         </div>
                                         <button
                                             onClick={() => setIsOpen(false)}
-                                            className="p-2 -mr-2 rounded-full hover:bg-white/5 text-zinc-500 hover:text-white transition-all transform hover:rotate-90 duration-300"
+                                            className="p-2 -mr-2 rounded-full hover:bg-white/5 text-zinc-500 hover:text-white transition-all transform hover:rotate-90 duration-200"
                                         >
                                             <X className="w-5 h-5" />
                                         </button>
@@ -295,10 +295,10 @@ export function RequestMarketButton() {
                                                 >
                                                     <button
                                                         onClick={() => setMode('market')}
-                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-emerald-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-emerald-500/30 rounded-2xl text-left transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] hover:-translate-y-1"
+                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-emerald-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-emerald-500/30 rounded-2xl text-left transition-all duration-200 shadow-lg hover:shadow-[0_0_30px_rgba(16,185,129,0.1)] hover:-translate-y-1"
                                                     >
                                                         <div className="flex items-start gap-4">
-                                                            <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300 group-hover:bg-emerald-500/20">
+                                                            <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform duration-200 group-hover:bg-emerald-500/20">
                                                                 <TrendingUp className="w-6 h-6 text-emerald-400 group-hover:text-emerald-300" />
                                                             </div>
                                                             <div>
@@ -306,17 +306,17 @@ export function RequestMarketButton() {
                                                                 <p className="text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors line-clamp-2">Propose a new market or asset to be added.</p>
                                                             </div>
                                                         </div>
-                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-4 group-hover:translate-x-0">
                                                             <ChevronLeft className="w-5 h-5 text-emerald-500 rotate-180" />
                                                         </div>
                                                     </button>
 
                                                     <button
                                                         onClick={() => setMode('feature')}
-                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-purple-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-purple-500/30 rounded-2xl text-left transition-all duration-300 shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:-translate-y-1"
+                                                        className="group relative w-full p-5 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 hover:from-purple-900/20 hover:to-zinc-900/50 border border-white/5 hover:border-purple-500/30 rounded-2xl text-left transition-all duration-200 shadow-lg hover:shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:-translate-y-1"
                                                     >
                                                         <div className="flex items-start gap-4">
-                                                            <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform duration-300 group-hover:bg-purple-500/20">
+                                                            <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform duration-200 group-hover:bg-purple-500/20">
                                                                 <Lightbulb className="w-6 h-6 text-purple-400 group-hover:text-purple-300" />
                                                             </div>
                                                             <div>
@@ -324,7 +324,7 @@ export function RequestMarketButton() {
                                                                 <p className="text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors line-clamp-2">Ideas to make the platform better.</p>
                                                             </div>
                                                         </div>
-                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+                                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-x-4 group-hover:translate-x-0">
                                                             <ChevronLeft className="w-5 h-5 text-purple-500 rotate-180" />
                                                         </div>
                                                     </button>
@@ -371,7 +371,7 @@ export function RequestMarketButton() {
                                                         {mode === 'market' && (
                                                             <div className="space-y-2">
                                                                 <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Icon (Optional)</label>
-                                                                <div className={`relative border-2 border-dashed rounded-xl p-4 transition-all duration-300 group ${imagePreview ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/5 hover:border-white/20 hover:bg-white/5'}`}>
+                                                                <div className={`relative border-2 border-dashed rounded-xl p-4 transition-all duration-200 group ${imagePreview ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-white/5 hover:border-white/20 hover:bg-white/5'}`}>
                                                                     <input
                                                                         type="file"
                                                                         accept="image/*"

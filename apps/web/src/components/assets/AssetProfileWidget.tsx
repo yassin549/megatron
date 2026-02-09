@@ -45,17 +45,17 @@ export function AssetInfoWidget({ name, imageUrl, type, oracleLogs = [] }: Asset
                 transition={{ duration: 0.2 }}
             >
                 {/* Background Accent */}
-                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-[40px] -mr-12 -mt-12 transition-all duration-500 ${isHovered && hasLogs ? 'bg-primary/20' : 'bg-primary/5'
+                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-[40px] -mr-12 -mt-12 transition-all duration-200 ${isHovered && hasLogs ? 'bg-primary/20' : 'bg-primary/5'
                     }`} />
 
                 <div className="flex items-center gap-4 relative z-10">
                     {/* Image / Icon container */}
-                    <div className={`w-12 h-12 rounded-sm bg-white/[0.03] border flex items-center justify-center overflow-hidden shrink-0 transition-all duration-300 ${isHovered && hasLogs ? 'border-primary/50' : 'border-white/10'
+                    <div className={`w-12 h-12 rounded-sm bg-white/[0.03] border flex items-center justify-center overflow-hidden shrink-0 transition-all duration-200 ${isHovered && hasLogs ? 'border-primary/50' : 'border-white/10'
                         }`}>
                         {imageUrl ? (
                             <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
                         ) : (
-                            <Zap className={`w-6 h-6 transition-all duration-300 ${isHovered && hasLogs ? 'text-primary' : 'text-primary/40'
+                            <Zap className={`w-6 h-6 transition-all duration-200 ${isHovered && hasLogs ? 'text-primary' : 'text-primary/40'
                                 }`} />
                         )}
                     </div>
@@ -76,9 +76,9 @@ export function AssetInfoWidget({ name, imageUrl, type, oracleLogs = [] }: Asset
                             animate={{ rotate: isTerminalOpen ? 180 : 0 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <div className={`p-2 rounded-lg transition-all duration-300 ${isHovered ? 'bg-primary/20 border-primary/30' : 'bg-white/5 border-white/10'
+                            <div className={`p-2 rounded-lg transition-all duration-200 ${isHovered ? 'bg-primary/20 border-primary/30' : 'bg-white/5 border-white/10'
                                 } border`}>
-                                <Terminal className={`w-3.5 h-3.5 transition-colors duration-300 ${isHovered ? 'text-primary' : 'text-zinc-500'
+                                <Terminal className={`w-3.5 h-3.5 transition-colors duration-200 ${isHovered ? 'text-primary' : 'text-zinc-500'
                                     }`} />
                             </div>
                         </motion.div>
@@ -90,9 +90,9 @@ export function AssetInfoWidget({ name, imageUrl, type, oracleLogs = [] }: Asset
                     <div className="h-[1px] flex-1 bg-gradient-to-r from-white/10 to-transparent" />
                     {hasLogs ? (
                         <div className="flex items-center gap-1.5">
-                            <div className={`w-1 h-1 rounded-full transition-all duration-300 ${isHovered ? 'bg-primary animate-pulse' : 'bg-emerald-500 animate-pulse'
+                            <div className={`w-1 h-1 rounded-full transition-all duration-200 ${isHovered ? 'bg-primary animate-pulse' : 'bg-emerald-500 animate-pulse'
                                 }`} />
-                            <span className={`text-[7px] font-mono uppercase tracking-widest whitespace-nowrap transition-colors duration-300 ${isHovered ? 'text-primary opacity-100' : 'text-zinc-600 opacity-40'
+                            <span className={`text-[7px] font-mono uppercase tracking-widest whitespace-nowrap transition-colors duration-200 ${isHovered ? 'text-primary opacity-100' : 'text-zinc-600 opacity-40'
                                 }`}>
                                 Neural_Active
                             </span>

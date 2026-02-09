@@ -93,7 +93,7 @@
   }
 
   .glass-card {
-    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-300 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
+    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-200 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
   }
 
   .glass-nav {
@@ -111,13 +111,13 @@
 
   /* Animation Utilities */
   .animate-in {
-    animation: animate-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: animate-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes animate-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(5px);
     }
 
     to {
@@ -146,7 +146,7 @@
   }
 
   .btn-animated-overlay {
-    @apply absolute inset-0 translate-y-full transition-transform duration-300;
+    @apply absolute inset-0 translate-y-full transition-transform duration-200;
   }
 
   .btn-animated:hover .btn-animated-overlay {

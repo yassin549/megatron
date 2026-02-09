@@ -54,9 +54,9 @@ export function ProfileHoverCard({ isOpen: controlledIsOpen, onToggle }: Profile
                     {/* Hamburger / Close Icon */}
                     <div className="text-zinc-400 group-hover:text-white transition-colors">
                         {isOpen ? (
-                            <X className="w-4 h-4 animate-in spin-in-90 duration-300" />
+                            <X className="w-4 h-4 animate-in spin-in-90 duration-200" />
                         ) : (
-                            <Menu className="w-4 h-4 transition-transform duration-300 group-hover:rotate-180" />
+                            <Menu className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
                         )}
                     </div>
                 </div>

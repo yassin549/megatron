@@ -189,7 +189,7 @@ export function OrderForm({
                 <div className="bg-black/40 border border-white/5 p-1 rounded-xl flex relative isolate overflow-hidden">
                     <button
                         onClick={() => setSide('buy')}
-                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'buy' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-200 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'buy' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
                             }`}
                     >
                         Buy
@@ -203,7 +203,7 @@ export function OrderForm({
                     </button>
                     <button
                         onClick={() => setSide('sell')}
-                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-300 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'sell' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+                        className={`flex-1 py-2.5 relative z-10 transition-colors duration-200 font-black uppercase tracking-[0.1em] text-[10px] flex items-center justify-center gap-2 ${side === 'sell' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
                             }`}
                     >
                         Sell
@@ -412,7 +412,7 @@ export function OrderForm({
                     disabled={isSubmitting || (side === 'buy' && !amount)}
                     className={`w-full relative group h-12 rounded-xl overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg active:scale-[0.98] transition-all bg-gradient-to-r ${btnGradient}`}
                 >
-                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
 
                     <div className="relative h-full flex items-center justify-center gap-2">
                         {isSubmitting ? (

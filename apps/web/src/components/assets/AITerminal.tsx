@@ -59,7 +59,7 @@ export function AITerminal({ logs }: AITerminalProps) {
                         const safeConf = isNaN(conf) ? 0 : conf;
 
                         return (
-                            <div key={log.id} className="border-l border-white/10 pl-6 py-2 animate-in slide-in-from-left-2 fade-in duration-300">
+                            <div key={log.id} className="border-l border-white/10 pl-6 py-2 animate-in slide-in-from-left-2 fade-in duration-200">
                                 {/* Metadata - Robustified labels */}
                                 <div className="flex items-center gap-4 mb-2 text-xs">
                                     <span className="text-zinc-600 font-bold">[{dateStr}]</span>

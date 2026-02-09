@@ -133,7 +133,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             className="relative group hover:bg-white/[0.02] cursor-pointer h-[18px] flex items-center"
                         >
                             <div
-                                className="absolute right-0 inset-y-0 bg-rose-500/10 transition-all duration-300"
+                                className="absolute right-0 inset-y-0 bg-rose-500/10 transition-all duration-200"
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">
@@ -172,7 +172,7 @@ export function OrderBook({ assetId, assetPrice }: OrderBookProps) {
                             className="relative group hover:bg-white/[0.02] cursor-pointer h-[18px] flex items-center"
                         >
                             <div
-                                className="absolute right-0 inset-y-0 bg-emerald-500/10 transition-all duration-300"
+                                className="absolute right-0 inset-y-0 bg-emerald-500/10 transition-all duration-200"
                                 style={{ width: `${(order.total / maxTotal) * 100}%` }}
                             />
                             <div className="grid grid-cols-3 w-full px-3 relative z-10">

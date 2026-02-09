@@ -169,13 +169,13 @@ export function LPFundingPanel({
                 />
                 <button
                     onClick={() => setType('buy')}
-                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-300 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-200 uppercase ${isBuy ? 'text-blue-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     Buy LP Shares
                 </button>
                 <button
                     onClick={() => setType('sell')}
-                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-300 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-semibold tracking-wide relative z-10 transition-colors duration-200 uppercase ${!isBuy ? 'text-rose-400' : 'text-zinc-500 hover:text-zinc-300'}`}
                 >
                     Sell My Shares
                 </button>

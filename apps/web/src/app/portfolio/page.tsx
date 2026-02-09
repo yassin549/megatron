@@ -172,7 +172,7 @@ export default function PortfolioPage() {
     const cashBalance = data?.cashBalance || 0;
 
     return (
-        <div className="min-h-screen bg-transparent text-foreground animate-in fade-in duration-500">
+        <div className="min-h-screen bg-transparent text-foreground animate-in fade-in duration-200">
             {/* =========================================
                 DESKTOP VIEW (Hidden on Mobile)
                ========================================= */}

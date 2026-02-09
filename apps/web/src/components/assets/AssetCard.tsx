@@ -202,14 +202,14 @@ export function AssetCard({
         >
             <Link
                 href={`/assets/${id}`}
-                className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-300 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
+                className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-200 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
                         : 'flex flex-col p-2.5'
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-brand-primary/10 to-transparent translate-x-[-100%] group-hover:animate-shimmer" />
                 </div>
 
@@ -224,14 +224,14 @@ export function AssetCard({
                             className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 text-center rounded-xl overflow-hidden"
                         >
                             {/* Background Layers */}
-                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-300">
+                            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden transition-opacity duration-200">
                                 {imageUrl && !imageError ? (
                                     <div className="absolute inset-0">
                                         <Image
                                             src={imageUrl}
                                             alt={name}
                                             fill
-                                            className="object-cover opacity-100 transition-transform duration-700 group-hover:scale-[1.1]"
+                                            className="object-cover opacity-100 transition-transform duration-300 group-hover:scale-[1.1]"
                                             onError={() => setImageError(true)}
                                             unoptimized={imageUrl.startsWith('/uploads')}
                                         />
@@ -243,13 +243,13 @@ export function AssetCard({
                                         <img
                                             src={imageUrl}
                                             alt={name}
-                                            className="absolute inset-0 w-full h-full object-cover opacity-100 transition-transform duration-700 group-hover:scale-[1.1]"
+                                            className="absolute inset-0 w-full h-full object-cover opacity-100 transition-transform duration-300 group-hover:scale-[1.1]"
                                         />
                                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(0,0,0,0.85)_0%,_rgba(0,0,0,0.6)_100%)]" />
                                     </div>
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(12,12,12,0.9)_0%,_rgba(12,12,12,0.7)_100%)] transition-colors duration-500">
-                                        <Icon className="w-48 h-48 text-primary opacity-10 blur-[1px] transition-all duration-500 group-hover:opacity-20 group-hover:scale-110" />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,_rgba(12,12,12,0.9)_0%,_rgba(12,12,12,0.7)_100%)] transition-colors duration-200">
+                                        <Icon className="w-48 h-48 text-primary opacity-10 blur-[1px] transition-all duration-200 group-hover:opacity-20 group-hover:scale-110" />
                                     </div>
                                 )}
                             </div>
@@ -313,7 +313,7 @@ export function AssetCard({
                                     alt={name}
                                     width={48}
                                     height={48}
-                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-200"
                                     onError={() => setImageError(true)}
                                     unoptimized={imageUrl.startsWith('/uploads')}
                                 />
@@ -323,7 +323,7 @@ export function AssetCard({
                                 <img
                                     src={imageUrl}
                                     alt={name}
-                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-300"
+                                    className="object-cover w-full h-full relative z-10 group-hover:scale-110 transition-transform duration-200"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                     }}

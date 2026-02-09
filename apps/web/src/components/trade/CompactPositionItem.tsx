@@ -215,7 +215,7 @@ export function CompactPositionItem({
 
     return (
         <div
-            className={`group relative overflow-hidden rounded-[4px] border transition-all duration-300 ${isSelected
+            className={`group relative overflow-hidden rounded-[4px] border transition-all duration-200 ${isSelected
                 ? 'border-primary/50 bg-primary/5 shadow-[0_0_20px_rgba(59,130,246,0.1)]'
                 : 'border-white/5 bg-zinc-900/40 hover:bg-zinc-900/60 hover:border-white/10'
                 }`}

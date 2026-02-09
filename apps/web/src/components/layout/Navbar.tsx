@@ -133,7 +133,7 @@ export function Navbar() {
     const closePanel = () => setActiveNavTab(null);
 
     return (
-        <nav className={`sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav ${pathname === '/' ? 'border-b-0 shadow-none' : ''}`}>
+        <nav className={`sticky top-0 z-50 h-16 transition-all duration-200 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav ${pathname === '/' ? 'border-b-0 shadow-none' : ''}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">
@@ -237,7 +237,7 @@ export function Navbar() {
                                 Log In
                             </Link>
                             <Link href="/signup" className="group relative px-5 py-2 rounded-lg bg-brand-primary text-text-main text-sm font-bold overflow-hidden">
-                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-200" />
                                 <span className="relative">Get Started</span>
                             </Link>
                         </div>

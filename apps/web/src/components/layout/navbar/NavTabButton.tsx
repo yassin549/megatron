@@ -35,7 +35,7 @@ export function NavTabButton({
     if (avatar) {
         return (
             <button
-                className={`nav-popover-trigger relative p-0.5 rounded-full transition-all duration-300 group ${isActive
+                className={`nav-popover-trigger relative p-0.5 rounded-full transition-all duration-200 group ${isActive
                     ? 'ring-2 ring-primary/20 scale-105'
                     : 'hover:ring-2 hover:ring-white/10'
                     } ${className}`}
@@ -56,7 +56,7 @@ export function NavTabButton({
     // Standard icon variant
     return (
         <button
-            className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-300 ${isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+            className={`nav-popover-trigger relative p-2.5 rounded-lg transition-all duration-200 ${isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
                 } ${className}`}
             onClick={handleClick}
         >

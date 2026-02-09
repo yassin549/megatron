@@ -53,7 +53,7 @@ export function TradingSidebar({
                 <div className="flex gap-10 h-full px-6">
                     <button
                         onClick={() => setView('trade')}
-                        className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'trade'
+                        className={`group relative flex items-center h-full transition-all duration-200 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'trade'
                             ? 'text-white'
                             : 'text-zinc-600 hover:text-zinc-400'
                             }`}
@@ -68,12 +68,12 @@ export function TradingSidebar({
                                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_15px_rgba(59,130,246,0.6)]"
                             />
                         ) : (
-                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-primary/0 group-hover:bg-primary/30 transition-all duration-200 transform scale-x-0 group-hover:scale-x-100" />
                         )}
                     </button>
                     <button
                         onClick={() => setView('positions')}
-                        className={`group relative flex items-center h-full transition-all duration-300 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'positions'
+                        className={`group relative flex items-center h-full transition-all duration-200 text-[10px] font-black tracking-[0.2em] uppercase whitespace-nowrap px-1 ${view === 'positions'
                             ? 'text-white'
                             : 'text-zinc-600 hover:text-zinc-400'
                             }`}
@@ -88,7 +88,7 @@ export function TradingSidebar({
                                 className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]"
                             />
                         ) : (
-                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-emerald-500/0 group-hover:bg-emerald-500/30 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100" />
+                            <div className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-emerald-500/0 group-hover:bg-emerald-500/30 transition-all duration-200 transform scale-x-0 group-hover:scale-x-100" />
                         )}
                     </button>
                 </div>

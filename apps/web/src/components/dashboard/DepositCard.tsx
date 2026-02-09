@@ -22,7 +22,7 @@ export function DepositCard({ depositAddress }: DepositCardProps) {
     };
 
     return (
-        <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 ease-in-out">
+        <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 ease-in-out">
             {/* Header - Always visible */}
             <div
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -56,7 +56,7 @@ export function DepositCard({ depositAddress }: DepositCardProps) {
                     </div>
                     <div className="w-8 h-8 rounded-lg bg-secondary/50 flex items-center justify-center">
                         <svg
-                            className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''
+                            className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''
                                 }`}
                             fill="none"
                             viewBox="0 0 24 24"
@@ -75,7 +75,7 @@ export function DepositCard({ depositAddress }: DepositCardProps) {
 
             {/* Expanded Content */}
             <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                className={`overflow-hidden transition-all duration-200 ease-in-out ${isExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
                     }`}
             >
                 <div className="px-6 pb-6 border-t border-border">

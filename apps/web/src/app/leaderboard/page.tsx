@@ -57,7 +57,7 @@ export default function LeaderboardPage() {
                ========================================= */}
             <div className="hidden md:block">
                 <main className="max-w-5xl mx-auto px-4 py-12">
-                    <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div className="text-center mb-12 animate-in fade-in slide-in-from-top-4 duration-300">
                         <h1 className="text-2xl md:text-4xl font-bold text-white mb-3 tracking-tight flex items-center justify-center gap-2 md:gap-3">
                             <Trophy className="w-6 h-6 md:w-8 md:h-8 text-yellow-500" />
                             Hall of Fame
@@ -71,7 +71,7 @@ export default function LeaderboardPage() {
                     {data.length >= 3 && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12">
                             {/* Gold (1st) - First on mobile */}
-                            <div className="order-1 md:order-2 bg-gradient-to-b from-yellow-900/40 to-black border border-yellow-500 rounded-xl p-6 md:p-8 text-center md:-translate-y-4 hover:scale-105 transition-transform duration-300 shadow-2xl shadow-yellow-500/20 relative overflow-hidden">
+                            <div className="order-1 md:order-2 bg-gradient-to-b from-yellow-900/40 to-black border border-yellow-500 rounded-xl p-6 md:p-8 text-center md:-translate-y-4 hover:scale-105 transition-transform duration-200 shadow-2xl shadow-yellow-500/20 relative overflow-hidden">
                                 <div className="absolute inset-0 bg-yellow-500/10 blur-xl"></div>
                                 <div className="relative z-10">
                                     <div className="w-16 h-16 md:w-20 md:h-20 bg-yellow-600/20 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-yellow-500">
@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
                             </div>
 
                             {/* Silver (2nd) */}
-                            <div className="order-2 md:order-1 bg-gradient-to-b from-gray-800 to-black border border-gray-600 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-300 shadow-xl shadow-gray-500/10">
+                            <div className="order-2 md:order-1 bg-gradient-to-b from-gray-800 to-black border border-gray-600 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-200 shadow-xl shadow-gray-500/10">
                                 <div className="w-12 h-12 md:w-16 md:h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-gray-400">
                                     <span className="text-xl md:text-2xl font-bold text-gray-300">2</span>
                                 </div>
@@ -102,7 +102,7 @@ export default function LeaderboardPage() {
                             </div>
 
                             {/* Bronze (3rd) */}
-                            <div className="order-3 bg-gradient-to-b from-orange-900/20 to-black border border-orange-700 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-300 shadow-xl shadow-orange-500/10">
+                            <div className="order-3 bg-gradient-to-b from-orange-900/20 to-black border border-orange-700 rounded-xl p-4 md:p-6 text-center hover:scale-105 transition-transform duration-200 shadow-xl shadow-orange-500/10">
                                 <div className="w-12 h-12 md:w-16 md:h-16 bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4 border-2 border-orange-600">
                                     <span className="text-xl md:text-2xl font-bold text-orange-400">3</span>
                                 </div>

@@ -75,7 +75,7 @@ export default async function HomePage({ searchParams }: { searchParams: { q?: s
             <main className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-2 pb-8 relative z-10">
                 {/* Guest Welcome Banner - Server Rendered */}
                 {showHero && (
-                    <div className="mb-8 md:mb-16 relative overflow-hidden rounded-3xl border border-white/10 group animate-in slide-in-from-bottom-4 duration-700">
+                    <div className="mb-8 md:mb-16 relative overflow-hidden rounded-3xl border border-white/10 group animate-in slide-in-from-bottom-4 duration-300">
                         <div className="absolute inset-0 bg-gradient-to-br from-obsidian-800 to-obsidian-950/50 backdrop-blur-xl" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-50" />
 
