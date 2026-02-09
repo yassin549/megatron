@@ -205,7 +205,7 @@ export function AssetCard({
                 className={`block h-full bg-elevated border border-border-subtle rounded-xl transition-all duration-200 overflow-hidden relative ${isHovering ? 'bg-active border-brand-primary/50 shadow-[0_0_25px_hsla(var(--brand-primary)/0.3)]' : 'hover:border-border-bright/50'
                     } ${viewMode === 'list'
                         ? 'flex items-center gap-6 p-3'
-                        : 'flex flex-col p-4 min-h-[220px]' // Increased padding and added min-height
+                        : 'flex flex-col p-3 min-h-[180px]' // Reduced padding and min-height
                     }`}
             >
                 {/* Border Beam Effect on Hover */}
@@ -349,7 +349,7 @@ export function AssetCard({
                 </div>
 
                 {/* Metrics Section */}
-                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto pt-4'} relative z-10`}>
+                <div className={`flex items-end justify-between ${viewMode === 'list' ? 'gap-8' : 'mt-auto pt-2'} relative z-10`}>
                     {/* Price Block */}
                     <div className={viewMode === 'list' ? 'text-right min-w-[100px]' : ''}>
                         <div className="text-xl md:text-2xl font-black text-text-main font-mono tracking-tighter">
