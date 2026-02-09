@@ -145,7 +145,7 @@ export function TradingSidebar({
                                             assetId={assetId}
                                             assetPrice={assetPrice}
                                             marketPrice={marketPrice}
-                                            assetSymbol={assetName}
+                                            assetName={assetName}
                                             onTradeSuccess={onTradeSuccess}
                                             onExecutionPriceChange={onExecutionPriceChange}
                                             totalSupply={totalSupply}

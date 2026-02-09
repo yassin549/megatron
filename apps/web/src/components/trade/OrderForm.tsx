@@ -10,7 +10,7 @@ interface OrderFormProps {
     assetId: string;
     assetPrice: number;
     marketPrice: number;
-    assetSymbol: string;
+    assetName: string;
     onTradeSuccess?: () => void;
     onExecutionPriceChange?: (price: number) => void;
     totalSupply?: number;
@@ -21,7 +21,7 @@ export function OrderForm({
     assetId,
     assetPrice,
     marketPrice,
-    assetSymbol,
+    assetName,
     onTradeSuccess,
     onExecutionPriceChange,
     totalSupply,
@@ -394,7 +394,7 @@ export function OrderForm({
                                                 : estimation ? `$${estimation.total.toFixed(2)}` : '$0.00'
                                             }
                                             <span className="text-[9px] text-zinc-500 ml-1 font-bold">
-                                                {side === 'buy' ? assetSymbol : 'USD'}
+                                                {side === 'buy' ? assetName : 'USD'}
                                             </span>
                                         </div>
                                     </div>
