@@ -96,7 +96,7 @@ export function SubNavbar() {
     }, [currentCategory, categories]);
 
     return (
-        <div className={`sticky top-16 z-40 transition-all duration-200 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav`}>
+        <div className={`sticky top-16 z-40 transition-all duration-200 ${!isVisible ? '-translate-y-[8rem] md:translate-y-0 pointer-events-none' : 'translate-y-0 pointer-events-auto'} bg-surface/70 backdrop-blur-md border-b border-border-subtle shadow-lg`}>
             <div className="max-w-[1400px] mx-auto px-4">
                 <div className="flex items-center justify-between h-12 md:h-14">
                     {/* Categories - scrollable on mobile */}
