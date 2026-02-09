@@ -29,24 +29,8 @@ export function Background() {
 
     return (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" style={{ backgroundColor: base.hsl }}>
-            {/* 1. Base Vibrant Gradient */}
-            <div
-                className="absolute inset-0 opacity-100"
-                style={{
-                    backgroundImage: `linear-gradient(to bottom right, ${baseDark1}, ${baseDark2}, ${baseDark3})`
-                }}
-            />
-
-            {/* 2. Top-Center/Right Primary Light Source */}
-            <div
-                className="absolute top-[-20%] left-[20%] w-[80%] h-[80%] rounded-full opacity-60 blur-[120px]"
-                style={{ backgroundColor: primary.hsla(0.4) }}
-            />
-
-            <div
-                className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full opacity-50 blur-[100px]"
-                style={{ backgroundColor: accent.hsla(0.4) }}
-            />
+            {/* 1. Base Vibrant Gradient - REMOVED for solid look */}
+            {/* 2. Top-Center/Right Primary Light Source - REMOVED for solid look */}
 
             {/* 3. Neural Waves (SVG based) */}
             <div className="absolute inset-0 z-10 opacity-60">
