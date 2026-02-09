@@ -131,15 +131,15 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             placeholder="Search markets..."
-                            className="w-full h-full pl-11 pr-4 py-4 bg-obsidian-900 border border-white/10 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all shadow-sm"
+                            className="w-full h-full pl-11 pr-4 py-4 bg-surface border border-border-subtle rounded-xl text-sm text-text-main placeholder-text-muted focus:outline-none focus:ring-1 focus:ring-brand-primary/50 transition-all shadow-sm"
                         />
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-text-muted group-focus-within:text-brand-primary transition-colors" />
                     </form>
                 </div>
 
                 <button
                     onClick={() => setShowFilters(true)}
-                    className={`w-[20%] flex items-center justify-center bg-obsidian-900 border border-white/10 rounded-xl text-zinc-400 hover:text-white hover:border-white/20 transition-all ${showFilters ? 'text-primary border-primary/30 bg-primary/10' : ''
+                    className={`w-[20%] flex items-center justify-center bg-surface border border-border-subtle rounded-xl text-text-muted hover:text-text-main hover:border-border-bright transition-all ${showFilters ? 'text-brand-primary border-brand-primary/30 bg-brand-primary/10' : ''
                         }`}
                 >
                     <SlidersHorizontal className="w-6 h-6" />
