@@ -255,7 +255,7 @@ export function AssetGrid({ initialAssets, isAuthenticated }: AssetGridProps) {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
                                 className={viewMode === 'grid'
-                                    ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 md:gap-3.5 lg:gap-4 md:auto-rows-fr"
+                                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-3.5 lg:gap-4 md:auto-rows-fr"
                                     : "flex flex-col gap-2 md:gap-3"
                                 }
                             >
