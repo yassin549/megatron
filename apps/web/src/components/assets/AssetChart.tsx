@@ -211,7 +211,8 @@ export function AssetChart({
                     type: 'area' as any,
                     tooltip: {
                         showRule: hideTools ? 'none' : 'always',
-                        showType: 'standard'
+                        showType: 'standard',
+                        title: '{name}'
                     },
                     area: {
                         lineColor: colors?.lineColor || '#34d399',
@@ -232,7 +233,8 @@ export function AssetChart({
                 indicator: {
                     tooltip: {
                         showRule: hideTools ? 'none' : 'always',
-                        showType: 'standard'
+                        showType: 'standard',
+                        title: '{name}'
                     }
                 },
                 xAxis: {
@@ -278,7 +280,10 @@ export function AssetChart({
             });
 
             // Set initial symbol to trigger load
-            chart.setSymbol({ name: watermarkText || 'ASSET' });
+            chart.setSymbol({
+                name: watermarkText || 'ASSET',
+                ticker: watermarkText || 'ASSET'
+            });
         }
 
         const handleResize = () => {
@@ -306,6 +311,11 @@ export function AssetChart({
         chart.setStyles({
             candle: {
                 type: 'area' as any,
+                tooltip: {
+                    showRule: hideTools ? 'none' : 'always',
+                    showType: 'standard',
+                    title: '{name}'
+                },
                 area: {
                     lineColor: colors?.lineColor || '#34d399',
                     backgroundColor: [
