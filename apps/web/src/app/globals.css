@@ -87,17 +87,17 @@
     text-wrap: balance;
   }
 
-  /* Solid Surfaces - Removed transparency/blur for sharper structure */
+  /* Solid Surfaces - Re-introduced transparency/blur for glassmorphic structure */
   .glass-panel {
-    @apply bg-elevated border border-border-subtle shadow-2xl;
+    @apply bg-elevated/40 backdrop-blur-xl border border-border-subtle shadow-2xl;
   }
 
   .glass-card {
-    @apply bg-elevated border border-border-subtle shadow-lg transition-all duration-200 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
+    @apply bg-elevated/20 backdrop-blur-md border border-border-subtle shadow-lg transition-all duration-200 hover:border-brand-primary/30 hover:shadow-brand-primary/10;
   }
 
   .glass-nav {
-    @apply bg-surface/70 backdrop-blur-md border-b border-border-subtle shadow-lg;
+    @apply bg-surface/40 backdrop-blur-xl border-b border-border-subtle shadow-lg;
   }
 
   /* Text Effects */

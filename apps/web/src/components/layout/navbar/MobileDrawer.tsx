@@ -81,7 +81,7 @@ export function MobileDrawer({
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                         onClick={onClose}
-                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        className="absolute inset-0 bg-black/60 backdrop-blur-[8px]"
                     />
 
                     {/* Drawer */}
@@ -90,7 +90,7 @@ export function MobileDrawer({
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
-                        className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-base border-l border-border-subtle shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
+                        className="absolute inset-y-0 right-0 w-[85%] max-w-[360px] h-[100dvh] bg-base/60 backdrop-blur-2xl border-l border-white/10 shadow-[-20px_0_50px_rgba(0,0,0,0.9)] flex flex-col"
                     >
                         {/* Header */}
                         <div className="h-20 flex-shrink-0 flex items-center justify-between px-6 border-b border-border-subtle bg-surface">
