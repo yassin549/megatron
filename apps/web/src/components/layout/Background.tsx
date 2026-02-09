@@ -21,6 +21,7 @@ export function Background() {
     const primary = hslToColors(activeColors.brandPrimary);
     const accent = hslToColors(activeColors.brandAccent);
     const base = hslToColors(activeColors.bgBase);
+    const surface = hslToColors(activeColors.bgSurface);
 
     // Create darker variants for base gradient
     const baseDark1 = `hsl(${base.raw.h}, ${base.raw.s}%, ${Math.max(base.raw.l - 2, 2)}%)`;
@@ -28,7 +29,7 @@ export function Background() {
     const baseDark3 = `hsl(${base.raw.h}, ${base.raw.s}%, ${Math.max(base.raw.l - 6, 0)}%)`;
 
     return (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" style={{ backgroundColor: base.hsl }}>
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" style={{ backgroundColor: surface.hsl }}>
             {/* 1. Base Vibrant Gradient - REMOVED for solid look */}
             {/* 2. Top-Center/Right Primary Light Source - REMOVED for solid look */}
 
