@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Menu, Activity, Bookmark } from 'lucide-react';
 import { NavbarSearch } from '@/components/layout/NavbarSearch';
 import { UserStats } from '@/components/layout/UserStats';
@@ -23,6 +23,7 @@ type NavTab = 'general' | 'activity' | 'bookmarks' | 'profile' | null;
 export function Navbar() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const pathname = usePathname();
 
     // Scroll behavior
     const [isVisible, setIsVisible] = useState(true);
@@ -132,7 +133,7 @@ export function Navbar() {
     const closePanel = () => setActiveNavTab(null);
 
     return (
-        <nav className={`sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav`}>
+        <nav className={`sticky top-0 z-50 h-16 transition-all duration-300 ${!isVisible ? '-translate-y-full pointer-events-none' : 'translate-y-0 pointer-events-auto'} glass-nav ${pathname === '/' ? 'border-b-0 shadow-none' : ''}`}>
             <div className="max-w-[1400px] mx-auto px-4 h-full flex items-center justify-between gap-4">
                 {/* Logo */}
                 <Link href="/" className="flex items-center flex-shrink-0 group gap-3">

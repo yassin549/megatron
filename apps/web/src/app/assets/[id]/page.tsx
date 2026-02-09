@@ -33,7 +33,7 @@ export default async function AssetDetailPage({ params }: { params: { id: string
     }
 
     return (
-        <div className="h-full bg-background text-gray-200 selection:bg-blue-500/30 overflow-hidden">
+        <div className="h-full bg-transparent text-gray-200 selection:bg-blue-500/30 overflow-hidden">
             <main className="w-full h-full">
                 <Suspense fallback={
                     <div className="flex items-center justify-center py-20 font-mono text-zinc-500 animate-pulse uppercase tracking-widest text-xs">
