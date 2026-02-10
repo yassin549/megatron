@@ -1,7 +1,7 @@
 import { db } from '@megatron/database';
 import { DEFAULT_CONFIG, type LLMOutput, type OracleEvent } from '@megatron/lib-common';
-import { querySerper, analyzeLLM } from '@megatron/lib-integrations';
-import { LocalSentinel } from '@megatron/lib-integrations/src/local-sentinel';
+import { querySerper } from '@megatron/lib-integrations';
+import { LocalSentinel } from '@megatron/lib-ai';
 import { Prisma } from '@megatron/database';
 import { publishOracleEvent } from '../lib/redis';
 

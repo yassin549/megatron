@@ -41,17 +41,20 @@ RUN pnpm run build --filter=@megatron/worker...
 FROM base AS runner
 WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
+# Install pnpm in the runner stage as well
+RUN npm install -g pnpm
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 megatron
+RUN chown -R megatron:nodejs /app
 USER megatron
 
-COPY --from=installer /app .
+COPY --from=installer --chown=megatron:nodejs /app .
 
 # Set environment variables if needed (can be overridden at runtime)
 ENV NODE_ENV=production
 
 # Command to run the worker
 # Using pnpm start ensures we pick up the workspace context correctly
-CMD ["pnpm", "--filter", "@megatron/worker", "start"]
+CMD ["pnpm", "run", "start", "--filter", "@megatron/worker"]

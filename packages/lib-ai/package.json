@@ -1,0 +1,19 @@
+{
+    "name": "@megatron/lib-ai",
+    "version": "1.0.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@huggingface/transformers": "^3.8.1",
+        "@megatron/lib-common": "workspace:*",
+        "onnxruntime-node": "^1.24.1",
+        "sharp": "^0.34.5"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.0"
+    }
+}

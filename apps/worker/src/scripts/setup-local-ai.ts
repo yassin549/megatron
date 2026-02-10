@@ -1,4 +1,4 @@
-import { LocalSentinel } from '../../../../packages/lib-integrations/src/local-sentinel';
+import { LocalSentinel } from '@megatron/lib-ai';
 import * as fs from 'fs';
 import * as path from 'path';
 

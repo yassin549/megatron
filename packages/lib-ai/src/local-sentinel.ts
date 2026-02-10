@@ -1,7 +1,5 @@
-
-import type { SearchResult } from './serper';
+import type { SearchResult, LLMOutput } from '@megatron/lib-integrations';
 import { env, pipeline } from '@huggingface/transformers';
-import { type LLMOutput } from './huggingface';
 
 // Configure transformers to use local cache
 env.cacheDir = './.cache';

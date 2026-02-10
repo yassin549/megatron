@@ -1,5 +1,5 @@
 
-import { LocalSentinel } from '../../../../packages/lib-integrations/src/local-sentinel';
+import { LocalSentinel } from '@megatron/lib-ai';
 
 async function test() {
     console.log('--- Testing Local Sentinel ---');
