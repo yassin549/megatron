@@ -53,5 +53,5 @@ COPY --from=installer /app .
 ENV NODE_ENV=production
 
 # Command to run the worker
-# Adjust the path if the structure is different, but turbo prune usually preserves apps/worker
-CMD ["node", "apps/worker/dist/index.js"]
+# Using pnpm start ensures we pick up the workspace context correctly
+CMD ["pnpm", "--filter", "@megatron/worker", "start"]

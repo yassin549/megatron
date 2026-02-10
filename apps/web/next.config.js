@@ -34,6 +34,13 @@ const nextConfig = {
     },
     experimental: {
         serverComponentsExternalPackages: ['onnxruntime-node', '@huggingface/transformers', 'sharp'],
+        outputFileTracingExcludes: {
+            '*': [
+                'node_modules/@huggingface/transformers/**/*',
+                'node_modules/onnxruntime-node/**/*',
+                'node_modules/sharp/**/*',
+            ],
+        },
     },
 };
 
