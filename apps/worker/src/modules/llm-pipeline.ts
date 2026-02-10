@@ -1,6 +1,6 @@
 import { db } from '@megatron/database';
 import { DEFAULT_CONFIG, type LLMOutput, type OracleEvent } from '@megatron/lib-common';
-import { querySerper, analyzeLLM } from '@megatron/lib-integrations';
+import { querySerper, analyzeLLM, LocalSentinel } from '@megatron/lib-integrations';
 import { Prisma } from '@megatron/database';
 import { publishOracleEvent } from '../lib/redis';
 
@@ -77,7 +77,7 @@ export async function runLlmCycleForAsset(assetId: string): Promise<void> {
     const searchResults = await querySerper(queriesWithSuffix);
     if (!searchResults.length) return;
 
-    const output = await analyzeLLM(searchResults);
+    const output = await LocalSentinel.analyze(searchResults);
     if (!validateSignal(output)) return;
 
     const delta = new Prisma.Decimal(output.delta_percent);

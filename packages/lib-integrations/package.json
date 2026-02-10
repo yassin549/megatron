@@ -8,9 +8,11 @@
         "build": "tsc"
     },
     "dependencies": {
+        "@huggingface/transformers": "^3.8.1",
+        "@megatron/lib-common": "workspace:*",
         "ably": "^1.2.48",
         "ioredis": "^5.3.2",
-        "@megatron/lib-common": "workspace:*"
+        "onnxruntime-node": "^1.24.1"
     },
     "devDependencies": {
         "typescript": "^5.3.0"

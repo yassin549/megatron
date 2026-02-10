@@ -7,7 +7,8 @@
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
         "start": "node dist/index.js",
-        "test": "jest"
+        "test": "jest",
+        "setup-local-ai": "tsx src/scripts/setup-local-ai.ts"
     },
     "dependencies": {
         "@megatron/database": "workspace:*",
