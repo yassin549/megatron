@@ -16,7 +16,7 @@ import {
     BookmarksPanel,
     ActivityPanel,
     GeneralPanel
-} from './navbar';
+} from './navbar/index';
 
 type NavTab = 'general' | 'activity' | 'bookmarks' | 'profile' | null;
 
