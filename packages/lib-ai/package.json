@@ -10,6 +10,7 @@
     "dependencies": {
         "@huggingface/transformers": "^3.8.1",
         "@megatron/lib-common": "workspace:*",
+        "@megatron/lib-integrations": "workspace:*",
         "onnxruntime-node": "^1.24.1",
         "sharp": "^0.34.5"
     },
