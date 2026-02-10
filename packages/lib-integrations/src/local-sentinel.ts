@@ -1,23 +1,16 @@
 
 import type { SearchResult } from './serper';
-import { env, pipeline, type TextClassificationOutput, type Pipeline } from '@huggingface/transformers';
+import { env, pipeline } from '@huggingface/transformers';
+import { type LLMOutput } from './huggingface';
 
 // Configure transformers to use local cache
 env.cacheDir = './.cache';
 
-export interface LLMOutput {
-    delta_percent: number;
-    confidence: number;
-    summary: string;
-    reasoning: string;
-    source_urls: string[];
-}
-
 export type LocalModelSize = 'standard' | 'small' | 'tiny';
 
 export class LocalSentinel {
-    private static sentimentPipeline: Pipeline | null = null;
-    private static analysisPipeline: Pipeline | null = null;
+    private static sentimentPipeline: any = null;
+    private static analysisPipeline: any = null;
     private static modelSize: LocalModelSize = 'tiny'; // Default to safest for free tier
 
     /**
@@ -44,7 +37,7 @@ export class LocalSentinel {
 
             this.analysisPipeline = await pipeline(task, modelId, {
                 quantized: true,
-            });
+            } as any);
         }
     }
 
@@ -86,7 +79,7 @@ export class LocalSentinel {
         let negativeCount = 0;
 
         for (const snippet of toAnalyze) {
-            const result = await (this.sentimentPipeline as any)(snippet) as TextClassificationOutput;
+            const result = await (this.sentimentPipeline as any)(snippet) as any;
             // Xenova/distilbert-sst-2 returns [{ label: 'POSITIVE', score: 0.99 }]
             const label = result[0].label;
             const score = result[0].score;
