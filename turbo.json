@@ -26,7 +26,9 @@
     "RESEND_API_KEY",
     "HF_ACCESS_TOKEN",
     "NODE_ENV",
-    "LOG_LEVEL"
+    "LOG_LEVEL",
+    "LOCAL_MODEL_SIZE",
+    "LLM_MODE"
   ],
   "tasks": {
     "build": {

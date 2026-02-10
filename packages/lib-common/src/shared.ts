@@ -37,6 +37,7 @@ export interface LLMOutput {
     delta_percent: number;
     confidence: number;
     summary: string;
+    reasoning: string;
     source_urls: string[];
 }
 

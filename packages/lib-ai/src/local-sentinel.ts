@@ -1,4 +1,5 @@
-import type { SearchResult, LLMOutput } from '@megatron/lib-integrations';
+import type { SearchResult } from '@megatron/lib-integrations';
+import type { LLMOutput } from '@megatron/lib-common';
 import { env, pipeline } from '@huggingface/transformers';
 
 // Configure transformers to use local cache

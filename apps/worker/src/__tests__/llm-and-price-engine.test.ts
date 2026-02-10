@@ -8,6 +8,11 @@ jest.mock('@megatron/database', () => {
   const oracleLogs: any[] = [];
 
   return {
+    Prisma: {
+      Decimal: class {
+        constructor(val: any) { return val; }
+      },
+    },
     db: {
       __priceTicks: priceTicks,
       __oracleLogs: oracleLogs,
@@ -18,6 +23,9 @@ jest.mock('@megatron/database', () => {
       },
       trade: {
         findMany: jest.fn(),
+      },
+      target: {
+        findMany: jest.fn().mockResolvedValue([]),
       },
       oracleLog: {
         create: jest.fn(async ({ data }: any) => {
@@ -41,21 +49,28 @@ jest.mock('@megatron/database', () => {
   };
 });
 
+jest.mock('@megatron/lib-ai', () => ({
+  LocalSentinel: {
+    analyze: jest.fn(async () => ({
+      delta_percent: 10,
+      confidence: DEFAULT_CONFIG.LLM_CONFIDENCE_MIN + 0.1,
+      summary: 'Bullish',
+      reasoning: 'Test reasoning',
+      source_urls: ['https://example.com'],
+    })),
+    init: jest.fn(),
+  },
+}));
+
 jest.mock('@megatron/lib-integrations', () => ({
   querySerper: jest.fn(async () => [
     { title: 'Test', snippet: 'Snippet', link: 'https://example.com' },
   ]),
-  analyzeLLM: jest.fn(async () => ({
-    delta_percent: 10,
-    confidence: DEFAULT_CONFIG.LLM_CONFIDENCE_MIN + 0.1,
-    summary: 'Bullish',
-    source_urls: ['https://example.com'],
-  })),
-  publishEvent: jest.fn(async () => {}),
+  publishEvent: jest.fn(async () => { }),
 }));
 
 jest.mock('../lib/redis', () => ({
-  publishOracleEvent: jest.fn(async () => {}),
+  publishOracleEvent: jest.fn(async () => { }),
   CHANNELS: { EVENTS: 'megatron:events' },
 }));
 
