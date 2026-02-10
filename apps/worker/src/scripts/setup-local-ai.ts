@@ -1,5 +1,4 @@
-
-import { LocalSentinel } from '../../../../packages/lib-integrations/src/index';
+import { LocalSentinel } from '../../../../packages/lib-integrations/src/local-sentinel';
 import * as fs from 'fs';
 import * as path from 'path';
 

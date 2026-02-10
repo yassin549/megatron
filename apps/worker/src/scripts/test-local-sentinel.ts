@@ -1,5 +1,5 @@
 
-import { LocalSentinel } from '../../../../packages/lib-integrations/src/index';
+import { LocalSentinel } from '../../../../packages/lib-integrations/src/local-sentinel';
 
 async function test() {
     console.log('--- Testing Local Sentinel ---');
