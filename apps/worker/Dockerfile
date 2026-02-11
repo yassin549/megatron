@@ -57,4 +57,6 @@ ENV NODE_ENV=production
 
 # Command to run the worker
 # using direct node execution to avoid pnpm workspace resolution issues in runner
-CMD ["node", "apps/worker/dist/index.js"]
+# Command to run the worker
+# using direct node execution to avoid pnpm workspace resolution issues in runner
+CMD ["node", "./apps/worker/dist/index.js"]
