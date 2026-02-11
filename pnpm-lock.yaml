@@ -231,6 +231,9 @@ importers:
       '@megatron/lib-common':
         specifier: workspace:*
         version: link:../lib-common
+      '@megatron/lib-integrations':
+        specifier: workspace:*
+        version: link:../lib-integrations
       onnxruntime-node:
         specifier: ^1.24.1
         version: 1.24.1
