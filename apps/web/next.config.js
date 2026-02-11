@@ -36,9 +36,14 @@ const nextConfig = {
                 'node_modules/@esbuild/linux-x64',
                 'node_modules/webpack',
                 'node_modules/terser',
-                '**/node_modules/.cache',
-                '**/*.map',
-                '**/*.d.ts'
+                'node_modules/.pnpm',
+                '../../node_modules/**'
+            ],
+        },
+        outputFileTracingIncludes: {
+            '*': [
+                './node_modules/styled-jsx/**/*',
+                '../../node_modules/styled-jsx/**/*'
             ],
         },
     },
