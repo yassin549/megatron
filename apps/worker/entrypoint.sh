@@ -26,9 +26,9 @@ echo "=== END DEBUG ==="
 echo ""
 
 # Try to run the app
-if [ -f "dist/index.js" ]; then
-    exec node dist/index.js
+if [ -f "dist/apps/worker/src/index.js" ]; then
+    exec node dist/apps/worker/src/index.js
 else
-    echo "ERROR: Cannot find dist/index.js"
+    echo "ERROR: Cannot find dist/apps/worker/src/index.js"
     exit 1
 fi
