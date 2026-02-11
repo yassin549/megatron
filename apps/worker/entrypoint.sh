@@ -25,6 +25,19 @@ fi
 echo "=== END DEBUG ==="
 echo ""
 
+# Check if workspace packages are properly linked
+echo "=== Checking workspace package symlinks ==="
+if [ -L "/app/node_modules/@megatron/lib-ai" ]; then
+    echo "✓ @megatron/lib-ai symlink exists"
+    ls -la /app/node_modules/@megatron/lib-ai
+    echo "Target: $(readlink /app/node_modules/@megatron/lib-ai)"
+else
+    echo "✗ @megatron/lib-ai symlink MISSING"
+    echo "Checking if package exists elsewhere:"
+    find /app/packages -name "lib-ai" -type d 2>/dev/null || echo "Not found"
+fi
+echo ""
+
 # Run from /app root so Node.js can resolve workspace packages
 if [ -f "/app/apps/worker/dist/apps/worker/src/index.js" ]; then
     exec node /app/apps/worker/dist/apps/worker/src/index.js
