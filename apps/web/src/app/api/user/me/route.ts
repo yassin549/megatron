@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     try {
         console.log('[API/user/me] Getting session...');

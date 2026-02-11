@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
 import { MONETARY_CONFIG } from '@megatron/lib-common';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(): Promise<NextResponse> {
     try {
         const session = await getServerSession(authOptions);
