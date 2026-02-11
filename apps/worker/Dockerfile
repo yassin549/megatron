@@ -50,6 +50,9 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
+# Verify dist exists (debug step)
+RUN ls -la apps/worker/dist/ || echo "WARNING: dist folder not found"
+
 USER megatron
 
 # Set environment variables
