@@ -17,7 +17,12 @@
       "node",
       "jest"
     ],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@megatron/lib-ai": [
+        "../../packages/lib-ai/src/index.ts"
+      ]
+    }
   },
   "include": [
     "src/**/*"
