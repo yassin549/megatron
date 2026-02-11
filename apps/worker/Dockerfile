@@ -50,13 +50,20 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
-# Verify dist exists (debug step)
-RUN ls -la apps/worker/dist/ || echo "WARNING: dist folder not found"
+# Debug: Show directory structure
+RUN echo "=== Listing /app ===" && ls -la /app
+RUN echo "=== Listing /app/apps ===" && ls -la /app/apps || echo "apps folder not found"
+RUN echo "=== Listing /app/apps/worker ===" && ls -la /app/apps/worker || echo "worker folder not found"  
+RUN echo "=== Finding all dist folders ===" && find /app -name "dist" -type d || echo "no dist folders found"
+RUN echo "=== Finding index.js files ===" && find /app -name "index.js" || echo "no index.js found"
 
 USER megatron
 
 # Set environment variables
 ENV NODE_ENV=production
 
-# Command to run the worker
-CMD ["node", "apps/worker/dist/index.js"]
+# Change to worker directory
+WORKDIR /app/apps/worker
+
+# Command to run the worker (now from worker directory)
+CMD ["node", "dist/index.js"]
