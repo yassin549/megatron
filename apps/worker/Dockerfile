@@ -52,6 +52,9 @@ USER megatron
 
 COPY --from=installer --chown=megatron:nodejs /app .
 
+# DEBUG: List files to debug missing module
+RUN find . -maxdepth 4 -not -path '*/.*'
+
 # Set environment variables if needed (can be overridden at runtime)
 ENV NODE_ENV=production
 
