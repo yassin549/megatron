@@ -38,6 +38,12 @@ RUN cd packages/database && pnpm run generate
 # Ensure we are at the root and build all dependencies
 RUN pnpm run build --filter=@megatron/worker
 
+# Verify the build created dist in the right place
+RUN echo "=== Verifying build output ===" && \
+    ls -la apps/worker/ && \
+    ls -la apps/worker/dist/ && \
+    echo "=== Build verification complete ==="
+
 # Runner stage
 FROM base AS runner
 WORKDIR /app
@@ -50,12 +56,11 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
-# Debug: Show directory structure
-RUN echo "=== Listing /app ===" && ls -la /app
-RUN echo "=== Listing /app/apps ===" && ls -la /app/apps || echo "apps folder not found"
-RUN echo "=== Listing /app/apps/worker ===" && ls -la /app/apps/worker || echo "worker folder not found"  
-RUN echo "=== Finding all dist folders ===" && find /app -name "dist" -type d || echo "no dist folders found"
-RUN echo "=== Finding index.js files ===" && find /app -name "index.js" || echo "no index.js found"
+# Simple verification that files were copied
+RUN echo "=== Files in runner stage ===" && \
+    ls -la /app/apps/worker/ && \
+    echo "=== Checking for dist ===" && \
+    ls -la /app/apps/worker/dist/ || echo "ERROR: dist not found after COPY"
 
 USER megatron
 
