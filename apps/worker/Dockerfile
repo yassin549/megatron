@@ -35,7 +35,8 @@ RUN cat packages/database/package.json
 RUN cd packages/database && pnpm run generate
 
 # Build the project
-RUN pnpm run build --filter=@megatron/worker...
+# Using direct build for worker to ensure dist is created in the correct workspace
+RUN cd apps/worker && pnpm build && ls -l dist/index.js && rm -rf node_modules
 
 # Runner stage
 FROM base AS runner
