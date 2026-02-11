@@ -25,6 +25,9 @@ fi
 echo "=== END DEBUG ==="
 echo ""
 
+# Change to worker directory for correct relative paths
+cd /app/apps/worker || exit 1
+
 # Try to run the app
 if [ -f "dist/apps/worker/src/index.js" ]; then
     exec node dist/apps/worker/src/index.js

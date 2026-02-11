@@ -65,8 +65,8 @@ USER megatron
 # Set environment variables
 ENV NODE_ENV=production
 
-# Change to worker directory
-WORKDIR /app/apps/worker
+# Stay at monorepo root for proper module resolution
+WORKDIR /app
 
 # Use entrypoint script for debugging
 CMD ["/app/apps/worker/entrypoint.sh"]
