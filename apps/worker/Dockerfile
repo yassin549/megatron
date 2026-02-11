@@ -35,32 +35,23 @@ RUN cat packages/database/package.json
 RUN cd packages/database && pnpm run generate
 
 # Build the project
-# Using direct build for worker to ensure dist is created in the correct workspace
-RUN cd apps/worker && pnpm build && ls -l dist/index.js && rm -rf node_modules
+# Ensure we are at the root and build all dependencies
+RUN pnpm run build --filter=@megatron/worker
 
 # Runner stage
 FROM base AS runner
 WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
-# Install pnpm in the runner stage as well
-RUN npm install -g pnpm
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 megatron
-RUN chown -R megatron:nodejs /app
-USER megatron
 
+# Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
-# DEBUG: List files to debug missing module
-RUN find . -maxdepth 4 -not -path '*/.*'
-
-# Set environment variables if needed (can be overridden at runtime)
+# Set environment variables
 ENV NODE_ENV=production
 
 # Command to run the worker
-# using direct node execution to avoid pnpm workspace resolution issues in runner
-# Command to run the worker
-# using direct node execution to avoid pnpm workspace resolution issues in runner
-CMD ["node", "./apps/worker/dist/index.js"]
+CMD ["node", "apps/worker/dist/index.js"]

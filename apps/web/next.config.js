@@ -27,25 +27,23 @@ const nextConfig = {
         });
         return config;
     },
-    experimental: {
-        serverComponentsExternalPackages: ['sharp'],
-        outputFileTracingRoot: path.join(__dirname, '../../'),
-        outputFileTracingExcludes: {
-            '*': [
-                '**/node_modules/@swc/core-*',
-                '**/node_modules/@esbuild/*',
-                '**/node_modules/webpack/**/*',
-                '**/node_modules/terser/**/*',
-                '**/.cache/**/*'
-            ],
-        },
-        outputFileTracingIncludes: {
-            '*': [
-                './node_modules/styled-jsx/**/*',
-                '../../node_modules/styled-jsx/**/*'
-            ],
-        },
+    outputFileTracingExcludes: {
+        '*': [
+            'node_modules/@swc/core-*',
+            'node_modules/@esbuild/*',
+            'node_modules/webpack/**/*',
+            'node_modules/terser/**/*',
+            '.cache/**/*'
+        ],
     },
+    outputFileTracingIncludes: {
+        '*': [
+            './node_modules/styled-jsx/**/*',
+            '../../node_modules/styled-jsx/**/*'
+        ],
+    },
+},
+    output: 'standalone',
 };
 
 module.exports = nextConfig;
