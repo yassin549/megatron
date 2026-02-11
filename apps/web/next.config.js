@@ -36,8 +36,6 @@ const nextConfig = {
                 'node_modules/@esbuild/linux-x64',
                 'node_modules/webpack',
                 'node_modules/terser',
-                'node_modules/.pnpm',
-                '../../node_modules/**'
             ],
         },
     },
