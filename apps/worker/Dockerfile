@@ -56,5 +56,5 @@ COPY --from=installer --chown=megatron:nodejs /app .
 ENV NODE_ENV=production
 
 # Command to run the worker
-# Using pnpm start ensures we pick up the workspace context correctly
-CMD ["pnpm", "run", "start", "--filter", "@megatron/worker"]
+# using direct node execution to avoid pnpm workspace resolution issues in runner
+CMD ["node", "apps/worker/dist/index.js"]
