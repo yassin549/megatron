@@ -25,16 +25,23 @@ fi
 echo "=== END DEBUG ==="
 echo ""
 
-# Check if workspace packages are properly linked
-echo "=== Checking workspace package symlinks ==="
+# Manually recreate workspace package symlinks (Docker COPY doesn't preserve them)
+echo "=== Creating workspace package symlinks ==="
+mkdir -p /app/node_modules/@megatron
+
+# Create symlinks for all workspace packages
+ln -sf /app/packages/lib-ai /app/node_modules/@megatron/lib-ai
+ln -sf /app/packages/lib-common /app/node_modules/@megatron/lib-common
+ln -sf /app/packages/lib-crypto /app/node_modules/@megatron/lib-crypto
+ln -sf /app/packages/lib-integrations /app/node_modules/@megatron/lib-integrations
+ln -sf /app/packages/database /app/node_modules/@megatron/database
+
+# Verify symlinks were created
 if [ -L "/app/node_modules/@megatron/lib-ai" ]; then
-    echo "✓ @megatron/lib-ai symlink exists"
-    ls -la /app/node_modules/@megatron/lib-ai
-    echo "Target: $(readlink /app/node_modules/@megatron/lib-ai)"
+    echo "✓ Workspace symlinks created successfully"
 else
-    echo "✗ @megatron/lib-ai symlink MISSING"
-    echo "Checking if package exists elsewhere:"
-    find /app/packages -name "lib-ai" -type d 2>/dev/null || echo "Not found"
+    echo "✗ Failed to create symlinks"
+    exit 1
 fi
 echo ""
 

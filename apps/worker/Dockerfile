@@ -56,9 +56,6 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
-# Recreate pnpm workspace symlinks (they're not preserved by COPY)
-RUN pnpm install --frozen-lockfile --offline --prefer-offline || echo "Symlinks recreated"
-
 # Copy entrypoint script
 COPY --chown=megatron:nodejs apps/worker/entrypoint.sh /app/apps/worker/entrypoint.sh
 RUN chmod +x /app/apps/worker/entrypoint.sh
