@@ -50,6 +50,8 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
+USER megatron
+
 # Set environment variables
 ENV NODE_ENV=production
 
