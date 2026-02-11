@@ -56,11 +56,9 @@ RUN adduser --system --uid 1001 megatron
 # Copy the entire workspace from installer
 COPY --from=installer --chown=megatron:nodejs /app .
 
-# Simple verification that files were copied
-RUN echo "=== Files in runner stage ===" && \
-    ls -la /app/apps/worker/ && \
-    echo "=== Checking for dist ===" && \
-    ls -la /app/apps/worker/dist/ || echo "ERROR: dist not found after COPY"
+# Copy entrypoint script
+COPY --chown=megatron:nodejs apps/worker/entrypoint.sh /app/apps/worker/entrypoint.sh
+RUN chmod +x /app/apps/worker/entrypoint.sh
 
 USER megatron
 
@@ -70,5 +68,5 @@ ENV NODE_ENV=production
 # Change to worker directory
 WORKDIR /app/apps/worker
 
-# Command to run the worker (now from worker directory)
-CMD ["node", "dist/index.js"]
+# Use entrypoint script for debugging
+CMD ["/app/apps/worker/entrypoint.sh"]
