@@ -25,13 +25,10 @@ fi
 echo "=== END DEBUG ==="
 echo ""
 
-# Change to worker directory for correct relative paths
-cd /app/apps/worker || exit 1
-
-# Try to run the app
-if [ -f "dist/apps/worker/src/index.js" ]; then
-    exec node dist/apps/worker/src/index.js
+# Run from /app root so Node.js can resolve workspace packages
+if [ -f "/app/apps/worker/dist/apps/worker/src/index.js" ]; then
+    exec node /app/apps/worker/dist/apps/worker/src/index.js
 else
-    echo "ERROR: Cannot find dist/apps/worker/src/index.js"
+    echo "ERROR: Cannot find /app/apps/worker/dist/apps/worker/src/index.js"
     exit 1
 fi
