@@ -28,6 +28,25 @@ echo ""
 # Manually recreate workspace package symlinks (Docker COPY doesn't preserve them)
 echo "=== Creating workspace package symlinks ==="
 
+# Debug: List packages directory contents
+echo "Contents of /app/packages:"
+ls -la /app/packages
+
+for pkg in lib-ai lib-common lib-crypto lib-integrations database; do
+    echo "Checking /app/packages/$pkg:"
+    if [ -d "/app/packages/$pkg" ]; then
+        ls -la "/app/packages/$pkg"
+        if [ -d "/app/packages/$pkg/dist" ]; then
+            echo "Found dist/ in $pkg:"
+            ls -la "/app/packages/$pkg/dist"
+        else
+            echo "✗ dist/ MISSING in $pkg"
+        fi
+    else
+        echo "✗ /app/packages/$pkg does NOT exist"
+    fi
+done
+
 # Create symlinks at root level
 mkdir -p /app/node_modules/@megatron
 ln -sf /app/packages/lib-ai /app/node_modules/@megatron/lib-ai
@@ -36,7 +55,7 @@ ln -sf /app/packages/lib-crypto /app/node_modules/@megatron/lib-crypto
 ln -sf /app/packages/lib-integrations /app/node_modules/@megatron/lib-integrations
 ln -sf /app/packages/database /app/node_modules/@megatron/database
 
-# Also create symlinks in worker's node_modules (Node.js checks here too)
+# Also create symlinks in worker's node_modules
 mkdir -p /app/apps/worker/node_modules/@megatron
 ln -sf /app/packages/lib-ai /app/apps/worker/node_modules/@megatron/lib-ai
 ln -sf /app/packages/lib-common /app/apps/worker/node_modules/@megatron/lib-common
