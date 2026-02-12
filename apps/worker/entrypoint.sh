@@ -49,18 +49,28 @@ done
 
 # Create symlinks at root level
 mkdir -p /app/node_modules/@megatron
+rm -rf /app/node_modules/@megatron/lib-ai
 ln -sf /app/packages/lib-ai /app/node_modules/@megatron/lib-ai
+rm -rf /app/node_modules/@megatron/lib-common
 ln -sf /app/packages/lib-common /app/node_modules/@megatron/lib-common
+rm -rf /app/node_modules/@megatron/lib-crypto
 ln -sf /app/packages/lib-crypto /app/node_modules/@megatron/lib-crypto
+rm -rf /app/node_modules/@megatron/lib-integrations
 ln -sf /app/packages/lib-integrations /app/node_modules/@megatron/lib-integrations
+rm -rf /app/node_modules/@megatron/database
 ln -sf /app/packages/database /app/node_modules/@megatron/database
 
 # Also create symlinks in worker's node_modules
 mkdir -p /app/apps/worker/node_modules/@megatron
+rm -rf /app/apps/worker/node_modules/@megatron/lib-ai
 ln -sf /app/packages/lib-ai /app/apps/worker/node_modules/@megatron/lib-ai
+rm -rf /app/apps/worker/node_modules/@megatron/lib-common
 ln -sf /app/packages/lib-common /app/apps/worker/node_modules/@megatron/lib-common
+rm -rf /app/apps/worker/node_modules/@megatron/lib-crypto
 ln -sf /app/packages/lib-crypto /app/apps/worker/node_modules/@megatron/lib-crypto
+rm -rf /app/apps/worker/node_modules/@megatron/lib-integrations
 ln -sf /app/packages/lib-integrations /app/apps/worker/node_modules/@megatron/lib-integrations
+rm -rf /app/apps/worker/node_modules/@megatron/database
 ln -sf /app/packages/database /app/apps/worker/node_modules/@megatron/database
 
 # Verify symlinks were created
