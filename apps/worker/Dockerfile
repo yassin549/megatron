@@ -75,8 +75,10 @@ RUN mkdir -p node_modules/@megatron/lib-ai && \
 COPY apps/worker/package.json apps/worker/package.json
 COPY apps/worker/tsconfig.build.json apps/worker/tsconfig.build.json
 
-# Debug: Check if package.json actually updated
-RUN cat apps/worker/package.json
+# Debug: Check if package.json actually updated AND verify lib-ai contents
+RUN cat apps/worker/package.json && \
+    echo "=== Listing node_modules/@megatron/lib-ai ===" && \
+    ls -laR node_modules/@megatron/lib-ai
 
 # Finally build worker - execute tsc directly to bypass pnpm script caching issues
 RUN ./node_modules/.bin/tsc --project apps/worker/tsconfig.build.json
