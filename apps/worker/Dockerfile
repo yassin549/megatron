@@ -1,10 +1,10 @@
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 
 # This Dockerfile is designed to be built from the monorepo root
 # Command: docker build -f apps/worker/Dockerfile .
 
 FROM base AS builder
-RUN apk add --no-cache libc6-compat openssl
+RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 # Install turbo globally
 RUN npm install turbo --global
@@ -14,7 +14,7 @@ RUN turbo prune --scope=@megatron/worker --docker
 
 # Installer stage
 FROM base AS installer
-RUN apk add --no-cache libc6-compat openssl
+RUN apt-get update && apt-get install -y openssl
 WORKDIR /app
 
 # Install dependencies based on the pruned lockfile
@@ -100,7 +100,7 @@ RUN echo "=== Verifying build output ===" && \
 # Runner stage
 FROM base AS runner
 WORKDIR /app
-RUN apk add --no-cache libc6-compat openssl
+RUN apt-get update && apt-get install -y openssl
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
