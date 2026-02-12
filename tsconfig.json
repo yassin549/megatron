@@ -27,6 +27,9 @@
             ],
             "@megatron/lib-integrations": [
                 "./packages/lib-integrations/dist"
+            ],
+            "@megatron/lib-ai": [
+                "./packages/lib-ai/dist"
             ]
         }
     },
