@@ -7,7 +7,24 @@
       "node",
       "jest"
     ],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@megatron/lib-ai": [
+        "../../packages/lib-ai/src"
+      ],
+      "@megatron/lib-common": [
+        "../../packages/lib-common/src"
+      ],
+      "@megatron/lib-crypto": [
+        "../../packages/lib-crypto/src"
+      ],
+      "@megatron/lib-integrations": [
+        "../../packages/lib-integrations/src"
+      ],
+      "@megatron/database": [
+        "../../packages/database/src"
+      ]
+    }
   },
   "include": [
     "src/**/*"
