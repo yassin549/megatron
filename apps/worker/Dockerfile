@@ -35,7 +35,14 @@ RUN cat packages/database/package.json
 RUN cd packages/database && pnpm run generate
 
 # Build the project
+# Build the project
 # Ensure we are at the root and build all dependencies
+RUN pnpm run build --filter=@megatron/lib-ai
+# Manually copy built lib-ai to node_modules to ensure worker can find it
+RUN mkdir -p node_modules/@megatron/lib-ai && \
+    cp -r packages/lib-ai/dist node_modules/@megatron/lib-ai/ && \
+    cp packages/lib-ai/package.json node_modules/@megatron/lib-ai/
+
 RUN pnpm run build --filter=@megatron/worker
 
 # Verify the build created dist in the right place
