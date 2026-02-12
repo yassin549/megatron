@@ -37,6 +37,10 @@ RUN cd packages/database && pnpm run generate
 # Build the project
 # Build the project
 # Build and copy all workspace dependencies manually to ensure resolution works
+# Clean up potential conflicting symlinks first
+RUN rm -rf node_modules/@megatron && \
+    rm -rf apps/worker/node_modules/@megatron
+
 # 1. lib-common
 RUN pnpm run build --filter=@megatron/lib-common
 RUN mkdir -p node_modules/@megatron/lib-common && \
@@ -68,7 +72,7 @@ RUN mkdir -p node_modules/@megatron/lib-ai && \
     cp packages/lib-ai/package.json node_modules/@megatron/lib-ai/
 
 # Finally build worker
-RUN pnpm run build --filter=@megatron/worker
+RUN pnpm run build:docker --filter=@megatron/worker
 
 # Verify the build created dist in the right place
 RUN echo "=== Verifying build output ===" && \

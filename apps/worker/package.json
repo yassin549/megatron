@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "tsx watch src/index.ts",
         "build": "tsc",
+        "build:docker": "tsc --project tsconfig.build.json",
         "start": "node dist/index.js",
         "test": "jest",
         "setup-local-ai": "tsx src/scripts/setup-local-ai.ts"
