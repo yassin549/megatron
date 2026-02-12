@@ -71,8 +71,15 @@ RUN mkdir -p node_modules/@megatron/lib-ai && \
     cp -r packages/lib-ai/dist node_modules/@megatron/lib-ai/ && \
     cp packages/lib-ai/package.json node_modules/@megatron/lib-ai/
 
-# Finally build worker
-RUN pnpm run build:docker --filter=@megatron/worker
+# Ensure valid package.json and tsconfig.build.json are present
+COPY apps/worker/package.json apps/worker/package.json
+COPY apps/worker/tsconfig.build.json apps/worker/tsconfig.build.json
+
+# Debug: Check if package.json actually updated
+RUN cat apps/worker/package.json
+
+# Finally build worker - execute tsc directly to bypass pnpm script caching issues
+RUN ./node_modules/.bin/tsc --project apps/worker/tsconfig.build.json
 
 # Verify the build created dist in the right place
 RUN echo "=== Verifying build output ===" && \
