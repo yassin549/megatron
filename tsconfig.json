@@ -14,24 +14,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "incremental": true,
-        "baseUrl": ".",
-        "paths": {
-            "@megatron/database": [
-                "./packages/database/dist"
-            ],
-            "@megatron/lib-common": [
-                "./packages/lib-common/dist"
-            ],
-            "@megatron/lib-crypto": [
-                "./packages/lib-crypto/dist"
-            ],
-            "@megatron/lib-integrations": [
-                "./packages/lib-integrations/dist"
-            ],
-            "@megatron/lib-ai": [
-                "./packages/lib-ai/dist"
-            ]
-        }
+        "baseUrl": "."
     },
     "exclude": [
         "node_modules",
