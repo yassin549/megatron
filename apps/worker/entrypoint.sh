@@ -73,9 +73,12 @@ fi
 echo ""
 
 # Run from /app root so Node.js can resolve workspace packages
-if [ -f "/app/apps/worker/dist/apps/worker/src/index.js" ]; then
+if [ -f "/app/apps/worker/dist/index.js" ]; then
+    exec node /app/apps/worker/dist/index.js
+elif [ -f "/app/apps/worker/dist/apps/worker/src/index.js" ]; then
+    echo "WARNING: Using nested path dist/apps/worker/src/index.js"
     exec node /app/apps/worker/dist/apps/worker/src/index.js
 else
-    echo "ERROR: Cannot find /app/apps/worker/dist/apps/worker/src/index.js"
+    echo "ERROR: Cannot find worker entry point in dist/ or dist/apps/worker/src/"
     exit 1
 fi

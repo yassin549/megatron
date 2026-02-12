@@ -6,6 +6,7 @@
       "ES2022"
     ],
     "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -17,12 +18,7 @@
       "node",
       "jest"
     ],
-    "moduleResolution": "node",
-    "paths": {
-      "@megatron/lib-ai": [
-        "../../packages/lib-ai/src/index.ts"
-      ]
-    }
+    "moduleResolution": "node"
   },
   "include": [
     "src/**/*"
