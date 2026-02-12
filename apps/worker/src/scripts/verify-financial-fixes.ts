@@ -37,7 +37,7 @@ async function main() {
     // Let's manually run the transaction logic to verify it works as expected.
 
     try {
-        await db.$transaction(async (tx) => {
+        await db.$transaction(async (tx: any) => {
             await tx.user.update({
                 where: { id: user.id },
                 data: { walletHotBalance: { decrement: cost } }
@@ -71,7 +71,7 @@ async function main() {
     // Cleanup (Cancel Order)
     const order = await db.limitOrder.findFirst({ where: { userId: user.id, status: 'open' } });
     if (order) {
-        await db.$transaction(async (tx) => {
+        await db.$transaction(async (tx: any) => {
             await tx.user.update({
                 where: { id: user.id },
                 data: { walletHotBalance: { increment: cost } }

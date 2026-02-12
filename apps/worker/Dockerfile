@@ -66,7 +66,14 @@ RUN mkdir -p node_modules/@megatron/database && \
     cp packages/database/package.json node_modules/@megatron/database/
 
 # 5. lib-ai (depends on above)
+# FORCE CLEAN BUILD: Remove existing dist to prevent caching issues
+RUN rm -rf packages/lib-ai/dist
 RUN pnpm run build --filter=@megatron/lib-ai
+
+# DEBUG: Verify lib-ai build output at source
+RUN echo "=== Source packages/lib-ai/dist content ===" && \
+    ls -laR packages/lib-ai/dist
+
 RUN mkdir -p node_modules/@megatron/lib-ai && \
     cp -r packages/lib-ai/dist node_modules/@megatron/lib-ai/ && \
     cp packages/lib-ai/package.json node_modules/@megatron/lib-ai/
