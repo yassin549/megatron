@@ -66,8 +66,9 @@ RUN mkdir -p node_modules/@megatron/database && \
     cp packages/database/package.json node_modules/@megatron/database/
 
 # 5. lib-ai (depends on above)
-# FORCE CLEAN BUILD: Remove existing dist to prevent caching issues
-RUN rm -rf packages/lib-ai/dist
+# FORCE CLEAN BUILD: Remove existing dist and build info to prevent caching issues
+RUN rm -rf packages/lib-ai/dist && \
+    rm -f packages/lib-ai/tsconfig.tsbuildinfo
 RUN pnpm run build --filter=@megatron/lib-ai
 
 # DEBUG: Verify lib-ai build output at source
