@@ -36,13 +36,38 @@ RUN cd packages/database && pnpm run generate
 
 # Build the project
 # Build the project
-# Ensure we are at the root and build all dependencies
+# Build and copy all workspace dependencies manually to ensure resolution works
+# 1. lib-common
+RUN pnpm run build --filter=@megatron/lib-common
+RUN mkdir -p node_modules/@megatron/lib-common && \
+    cp -r packages/lib-common/dist node_modules/@megatron/lib-common/ && \
+    cp packages/lib-common/package.json node_modules/@megatron/lib-common/
+
+# 2. lib-crypto
+RUN pnpm run build --filter=@megatron/lib-crypto
+RUN mkdir -p node_modules/@megatron/lib-crypto && \
+    cp -r packages/lib-crypto/dist node_modules/@megatron/lib-crypto/ && \
+    cp packages/lib-crypto/package.json node_modules/@megatron/lib-crypto/
+
+# 3. lib-integrations
+RUN pnpm run build --filter=@megatron/lib-integrations
+RUN mkdir -p node_modules/@megatron/lib-integrations && \
+    cp -r packages/lib-integrations/dist node_modules/@megatron/lib-integrations/ && \
+    cp packages/lib-integrations/package.json node_modules/@megatron/lib-integrations/
+
+# 4. database
+RUN pnpm run build --filter=@megatron/database
+RUN mkdir -p node_modules/@megatron/database && \
+    cp -r packages/database/dist node_modules/@megatron/database/ && \
+    cp packages/database/package.json node_modules/@megatron/database/
+
+# 5. lib-ai (depends on above)
 RUN pnpm run build --filter=@megatron/lib-ai
-# Manually copy built lib-ai to node_modules to ensure worker can find it
 RUN mkdir -p node_modules/@megatron/lib-ai && \
     cp -r packages/lib-ai/dist node_modules/@megatron/lib-ai/ && \
     cp packages/lib-ai/package.json node_modules/@megatron/lib-ai/
 
+# Finally build worker
 RUN pnpm run build --filter=@megatron/worker
 
 # Verify the build created dist in the right place
