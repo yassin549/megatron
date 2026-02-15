@@ -1,14 +1,41 @@
 import { NextResponse } from 'next/server';
 import { db } from '@megatron/database';
-import { TURNKEY_CONFIG } from '@/lib/turnkey';
 import crypto from 'crypto';
+
+function verifySignature(rawBody: string, signatureHeader: string | null, secret: string): boolean {
+    if (!signatureHeader) return false;
+
+    const normalized = signatureHeader.replace(/^sha256=/i, '').trim();
+    const hmac = crypto.createHmac('sha256', secret).update(rawBody).digest();
+    const hmacHex = hmac.toString('hex');
+    const hmacBase64 = hmac.toString('base64');
+
+    const compare = (a: string, b: string) => {
+        const aBuf = Buffer.from(a);
+        const bBuf = Buffer.from(b);
+        if (aBuf.length !== bBuf.length) return false;
+        return crypto.timingSafeEqual(aBuf, bBuf);
+    };
+
+    return compare(normalized, hmacHex) || compare(normalized, hmacBase64);
+}
 
 export async function POST(req: Request) {
     try {
-        const body = await req.json();
+        const rawBody = await req.text();
+        const secret = process.env.TURNKEY_WEBHOOK_SECRET;
 
-        // 1. Signature Verification (Simplified for MVP - ideally check X-Turnkey-Signature)
-        // In production, use crypto.verify with Turnkey's public key
+        if (!secret) {
+            console.error('Turnkey webhook secret is not configured');
+            return NextResponse.json({ error: 'Webhook misconfigured' }, { status: 500 });
+        }
+
+        const signatureHeader = req.headers.get('x-turnkey-signature');
+        if (!verifySignature(rawBody, signatureHeader, secret)) {
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+        }
+
+        const body = JSON.parse(rawBody);
 
         const { activity } = body;
         if (!activity || activity.type !== 'ACTIVITY_TYPE_CREATE_TRANSACTION') {

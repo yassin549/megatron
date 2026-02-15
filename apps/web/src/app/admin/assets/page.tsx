@@ -23,7 +23,6 @@ const mockAssets = [
 ];
 
 export default function AdminAssetsPage() {
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [assets, setAssets] = useState<any[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -33,19 +32,23 @@ export default function AdminAssetsPage() {
 
     useEffect(() => {
         const checkAdmin = async () => {
-            const adminSession = localStorage.getItem('megatron_admin');
-            if (adminSession !== 'true') {
-                router.push('/admin/login');
-                return;
-            }
-
             try {
+                const sessionRes = await fetch('/api/user/me');
+                if (!sessionRes.ok) {
+                    router.push('/login');
+                    return;
+                }
+                const sessionData = await sessionRes.json();
+                if (!sessionData?.isAdmin) {
+                    router.push('/login');
+                    return;
+                }
+
                 const res = await fetch('/api/assets');
                 if (res.ok) {
                     const data = await res.json();
                     setAssets(data.assets || []);
                 }
-                setIsAdmin(true);
             } catch (error) {
                 console.error('Failed to load assets:', error);
             } finally {
@@ -78,12 +81,8 @@ export default function AdminAssetsPage() {
             confirmText: 'Delete',
             onConfirm: async () => {
                 try {
-                    const adminPassword = localStorage.getItem('megatron_admin_password');
                     const res = await fetch(`/api/admin/assets?id=${id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-Admin-Password': adminPassword || ''
-                        }
+                        method: 'DELETE'
                     });
 
                     if (res.ok) {

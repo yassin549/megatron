@@ -19,14 +19,5 @@ export async function isAdmin(req?: Request) {
         }
     }
 
-    // 2. Check Password Header (Admin Dashboard Specific)
-    if (req) {
-        const adminPassword = process.env.ADMIN_PASSWORD;
-        const headerPassword = req.headers.get('X-Admin-Password');
-        if (adminPassword && headerPassword === adminPassword) {
-            return true;
-        }
-    }
-
     return false;
 }

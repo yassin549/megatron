@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import Ably from 'ably';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const ABLY_API_KEY = process.env.ABLY_API_KEY || process.env.REALTIME_PROVIDER_KEY;
 
         if (!ABLY_API_KEY || ABLY_API_KEY.includes('vercel_blob')) {
@@ -20,7 +27,7 @@ export async function GET() {
 
         // Ably Token Request
         const tokenRequestData = await client.auth.createTokenRequest({
-            clientId: 'megatron-user-' + Math.random().toString(36).substring(7)
+            clientId: `megatron-user-${session.user.id}`
         });
 
         return NextResponse.json(tokenRequestData);

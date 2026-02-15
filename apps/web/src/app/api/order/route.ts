@@ -112,34 +112,30 @@ export async function GET(req: Request) {
     }
 
     try {
-        // Fetch open orders and aggregate for the orderbook
-        const orders = await db.limitOrder.findMany({
-            where: { assetId, status: 'open' },
-            orderBy: [{ price: 'desc' }, { createdAt: 'asc' }]
-        });
+        const [bids, asks] = await Promise.all([
+            db.limitOrder.groupBy({
+                by: ['price'],
+                where: { assetId, status: 'open', side: 'buy' },
+                _sum: { remainingQuantity: true },
+                orderBy: { price: 'desc' }
+            }),
+            db.limitOrder.groupBy({
+                by: ['price'],
+                where: { assetId, status: 'open', side: 'sell' },
+                _sum: { remainingQuantity: true },
+                orderBy: { price: 'asc' }
+            })
+        ]);
 
-        // Separate and aggregate bids and asks
-        const bids: Record<number, number> = {};
-        const asks: Record<number, number> = {};
+        const bidsFormatted = bids.map((b: any) => ({
+            price: Number(b.price),
+            amount: Number(b._sum.remainingQuantity || 0)
+        }));
 
-        orders.forEach((o: any) => {
-            const price = o.price.toNumber();
-            const qty = o.remainingQuantity.toNumber();
-            if (o.side === 'buy') {
-                bids[price] = (bids[price] || 0) + qty;
-            } else {
-                asks[price] = (asks[price] || 0) + qty;
-            }
-        });
-
-        // Format for frontend
-        const bidsFormatted = Object.entries(bids)
-            .map(([price, amount]) => ({ price: parseFloat(price), amount }))
-            .sort((a, b) => b.price - a.price);
-
-        const asksFormatted = Object.entries(asks)
-            .map(([price, amount]) => ({ price: parseFloat(price), amount }))
-            .sort((a, b) => a.price - b.price);
+        const asksFormatted = asks.map((a: any) => ({
+            price: Number(a.price),
+            amount: Number(a._sum.remainingQuantity || 0)
+        }));
 
         return NextResponse.json({ bids: bidsFormatted, asks: asksFormatted });
     } catch (error: any) {

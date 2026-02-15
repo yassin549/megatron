@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@megatron/database';
+import { getRedisClient } from '@megatron/lib-integrations';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,12 +117,26 @@ export async function GET() {
         let onChainDepositBalance = 0;
         if (user.depositAddress) {
             try {
-                const { getUsdcBalance } = await import('@megatron/lib-crypto');
                 const rpc = process.env.ARBITRUM_RPC_URL;
                 const usdc = process.env.USDC_CONTRACT_ADDRESS;
                 if (rpc && usdc) {
-                    const balanceStr = await getUsdcBalance(user.depositAddress, rpc, usdc);
-                    onChainDepositBalance = parseFloat(balanceStr);
+                    const redis = getRedisClient();
+                    const cacheKey = `onchain_balance:${user.id}`;
+                    if (redis) {
+                        const cached = await redis.get(cacheKey);
+                        if (cached) {
+                            onChainDepositBalance = parseFloat(cached);
+                        } else {
+                            const { getUsdcBalance } = await import('@megatron/lib-crypto');
+                            const balanceStr = await getUsdcBalance(user.depositAddress, rpc, usdc);
+                            onChainDepositBalance = parseFloat(balanceStr);
+                            await redis.set(cacheKey, onChainDepositBalance.toString(), 'EX', 60);
+                        }
+                    } else {
+                        const { getUsdcBalance } = await import('@megatron/lib-crypto');
+                        const balanceStr = await getUsdcBalance(user.depositAddress, rpc, usdc);
+                        onChainDepositBalance = parseFloat(balanceStr);
+                    }
                 }
             } catch (err) {
                 console.warn('[API/user/me] Failed to fetch on-chain balance:', err);

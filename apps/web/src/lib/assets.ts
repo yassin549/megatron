@@ -1,70 +1,85 @@
 import { db } from '@megatron/database';
+import { Prisma } from '@prisma/client';
 
 export async function enrichAssets(assets: any[], userBookmarks: Set<string> = new Set()) {
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const assetIds = assets.map(a => a.id);
+
+    if (assetIds.length === 0) {
+        return [];
+    }
+
+    const [tradeVolumes, holders, oldPriceTicks, oldestPriceTicks] = await Promise.all([
+        db.$queryRaw<{ assetId: string; side: string; volume: number }[]>`
+            SELECT "assetId", "side",
+                   COALESCE(SUM(CAST(price AS DOUBLE PRECISION) * CAST(quantity AS DOUBLE PRECISION)), 0) AS volume
+            FROM "Trade"
+            WHERE "timestamp" >= ${oneDayAgo} AND "assetId" IN (${Prisma.join(assetIds)})
+            GROUP BY "assetId", "side"
+        `,
+        db.$queryRaw<{ assetId: string; holders: number }[]>`
+            SELECT "assetId", COUNT(*)::int AS holders
+            FROM "Position"
+            WHERE "shares" > 0 AND "assetId" IN (${Prisma.join(assetIds)})
+            GROUP BY "assetId"
+        `,
+        db.$queryRaw<{ assetId: string; priceDisplay: number }[]>`
+            SELECT DISTINCT ON ("assetId") "assetId", "priceDisplay"
+            FROM "PriceTick"
+            WHERE "timestamp" <= ${oneDayAgo} AND "assetId" IN (${Prisma.join(assetIds)})
+            ORDER BY "assetId", "timestamp" DESC
+        `,
+        db.$queryRaw<{ assetId: string; priceDisplay: number }[]>`
+            SELECT DISTINCT ON ("assetId") "assetId", "priceDisplay"
+            FROM "PriceTick"
+            WHERE "assetId" IN (${Prisma.join(assetIds)})
+            ORDER BY "assetId", "timestamp" ASC
+        `
+    ]);
+
+    const volumeMap = new Map<string, { buy: number; sell: number }>();
+    for (const row of tradeVolumes) {
+        const current = volumeMap.get(row.assetId) || { buy: 0, sell: 0 };
+        if (row.side === 'buy') current.buy += Number(row.volume || 0);
+        if (row.side === 'sell') current.sell += Number(row.volume || 0);
+        volumeMap.set(row.assetId, current);
+    }
+
+    const holdersMap = new Map<string, number>();
+    for (const row of holders) {
+        holdersMap.set(row.assetId, Number(row.holders || 0));
+    }
+
+    const oldPriceMap = new Map<string, number>();
+    for (const row of oldPriceTicks) {
+        if (row.priceDisplay !== null && row.priceDisplay !== undefined) {
+            oldPriceMap.set(row.assetId, Number(row.priceDisplay));
+        }
+    }
+    for (const row of oldestPriceTicks) {
+        if (!oldPriceMap.has(row.assetId) && row.priceDisplay !== null && row.priceDisplay !== undefined) {
+            oldPriceMap.set(row.assetId, Number(row.priceDisplay));
+        }
+    }
 
     return await Promise.all(
         assets.map(async (asset) => {
-            // Calculate 24h volume
-            const trades = await db.trade.findMany({
-                where: {
-                    assetId: asset.id,
-                    timestamp: { gte: oneDayAgo },
-                },
-                select: {
-                    price: true,
-                    quantity: true,
-                    side: true,
-                },
-            });
-
-            let buyVolume = 0;
-            let sellVolume = 0;
-            for (const t of trades) {
-                const vol = Number(t.price) * Number(t.quantity);
-                if (t.side === 'buy') buyVolume += vol;
-                else sellVolume += vol;
-            }
-
+            const volumes = volumeMap.get(asset.id) || { buy: 0, sell: 0 };
+            const buyVolume = volumes.buy;
+            const sellVolume = volumes.sell;
             const volume24h = buyVolume + sellVolume;
             const pressure = volume24h > 0 ? (buyVolume / volume24h) * 100 : 50;
 
-            // Get Holders Count
-            const holdersCount = await db.position.count({
-                where: {
-                    assetId: asset.id,
-                    shares: { gt: 0 }
-                }
-            });
-
-            // Get price 24h ago
-            const oldPriceTick = await db.priceTick.findFirst({
-                where: {
-                    assetId: asset.id,
-                    timestamp: { lte: oneDayAgo },
-                },
-                orderBy: { timestamp: 'desc' },
-                select: { priceDisplay: true },
-            });
+            const holdersCount = holdersMap.get(asset.id) || 0;
 
             const currentPrice = Number(asset.lastDisplayPrice || 0) ||
                 (asset.pricingParams as { P0?: number })?.P0 || 10;
 
             // Old price logic
-            let oldPrice = oldPriceTick?.priceDisplay ? Number(oldPriceTick.priceDisplay) : undefined;
-
+            let oldPrice = oldPriceMap.get(asset.id);
             if (oldPrice === undefined) {
                 oldPrice = (asset.pricingParams as { P0?: number })?.P0;
-            }
-
-            if (oldPrice === undefined) {
-                const oldestTick = await db.priceTick.findFirst({
-                    where: { assetId: asset.id },
-                    orderBy: { timestamp: 'asc' },
-                    select: { priceDisplay: true }
-                });
-                oldPrice = oldestTick?.priceDisplay ? Number(oldestTick.priceDisplay) : undefined;
             }
 
             const effectiveOldPrice = oldPrice ?? currentPrice;

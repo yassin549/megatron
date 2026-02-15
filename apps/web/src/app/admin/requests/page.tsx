@@ -12,7 +12,6 @@ import {
 import { useNotification } from '@/context/NotificationContext';
 
 export default function AdminRequestsPage() {
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -20,19 +19,23 @@ export default function AdminRequestsPage() {
 
     useEffect(() => {
         const checkAdmin = async () => {
-            const adminSession = localStorage.getItem('megatron_admin');
-            if (adminSession !== 'true') {
-                router.push('/admin/login');
-                return;
-            }
-
             try {
+                const sessionRes = await fetch('/api/user/me');
+                if (!sessionRes.ok) {
+                    router.push('/login');
+                    return;
+                }
+                const sessionData = await sessionRes.json();
+                if (!sessionData?.isAdmin) {
+                    router.push('/login');
+                    return;
+                }
+
                 const res = await fetch('/api/admin/requests');
                 if (res.ok) {
                     const data = await res.json();
                     setRequests(data.requests || []);
                 }
-                setIsAdmin(true);
             } catch (error) {
                 console.error('Failed to load requests:', error);
             } finally {

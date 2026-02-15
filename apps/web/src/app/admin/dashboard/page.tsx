@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -29,13 +28,26 @@ export default function AdminDashboardPage() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const adminSession = localStorage.getItem('megatron_admin');
-        if (adminSession !== 'true') {
-            router.push('/admin/login');
-            return;
-        }
-        setIsAdmin(true);
-        fetchDashboardData();
+        let active = true;
+        (async () => {
+            try {
+                const res = await fetch('/api/user/me');
+                if (!res.ok) {
+                    router.push('/login');
+                    return;
+                }
+                const data = await res.json();
+                if (!data?.isAdmin) {
+                    router.push('/login');
+                    return;
+                }
+                if (active) {
+                    fetchDashboardData();
+                }
+            } catch {
+                router.push('/login');
+            }
+        })();
 
         // Refresh every 30 seconds
         const interval = setInterval(fetchDashboardData, 30000);
@@ -45,12 +57,7 @@ export default function AdminDashboardPage() {
     const fetchDashboardData = async () => {
         try {
             setError(null);
-            const password = localStorage.getItem('megatron_admin_password');
-            const res = await fetch('/api/admin/stats', {
-                headers: {
-                    'X-Admin-Password': password || ''
-                }
-            });
+            const res = await fetch('/api/admin/stats');
 
             if (res.ok) {
                 const data = await res.json();
@@ -58,9 +65,7 @@ export default function AdminDashboardPage() {
                 setHealth(data.health);
             } else {
                 if (res.status === 401) {
-                    localStorage.removeItem('megatron_admin');
-                    localStorage.removeItem('megatron_admin_password');
-                    router.push('/admin/login');
+                    router.push('/login');
                 } else {
                     const data = await res.json().catch(() => ({}));
                     setError(data.error || `Server Error (${res.status})`);

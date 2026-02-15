@@ -15,7 +15,6 @@ interface User {
 }
 
 export default function AdminUsersPage() {
-    const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
     const [users, setUsers] = useState<User[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -31,24 +30,33 @@ export default function AdminUsersPage() {
     const router = useRouter();
 
     useEffect(() => {
-        const adminSession = localStorage.getItem('megatron_admin');
-        if (adminSession !== 'true') {
-            router.push('/admin/login');
-            return;
-        }
-        setIsAdmin(true);
-        fetchUsers();
+        let active = true;
+        (async () => {
+            try {
+                const res = await fetch('/api/user/me');
+                if (!res.ok) {
+                    router.push('/login');
+                    return;
+                }
+                const data = await res.json();
+                if (!data?.isAdmin) {
+                    router.push('/login');
+                    return;
+                }
+                if (active) {
+                    fetchUsers();
+                }
+            } catch {
+                router.push('/login');
+            }
+        })();
+        return () => { active = false; };
     }, [router]);
 
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const password = localStorage.getItem('megatron_admin_password');
-            const res = await fetch('/api/admin/users', {
-                headers: {
-                    'X-Admin-Password': password || ''
-                }
-            });
+            const res = await fetch('/api/admin/users');
             if (!res.ok) {
                 if (res.status === 401) {
                     setError('Unauthorized. Please ensure you are logged in as an admin.');
@@ -72,12 +80,10 @@ export default function AdminUsersPage() {
         setBroadcastStatus(null);
 
         try {
-            const password = localStorage.getItem('megatron_admin_password');
             const res = await fetch('/api/admin/broadcast', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-Admin-Password': password || ''
                 },
                 body: JSON.stringify({
                     subject: broadcastSubject,
@@ -119,12 +125,10 @@ export default function AdminUsersPage() {
             confirmText: action.charAt(0).toUpperCase() + action.slice(1),
             onConfirm: async () => {
                 try {
-                    const password = localStorage.getItem('megatron_admin_password');
                     const res = await fetch('/api/admin/users', {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Admin-Password': password || ''
                         },
                         body: JSON.stringify({ userId, isBlacklisted: !currentStatus }),
                     });

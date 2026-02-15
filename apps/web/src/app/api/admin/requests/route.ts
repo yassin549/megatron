@@ -16,18 +16,26 @@ async function isAdmin() {
     return user?.isAdmin === true;
 }
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
         if (!await isAdmin()) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const limitParam = Number(searchParams.get('limit') || 200);
+        const limit = Math.min(Math.max(limitParam, 1), 500);
+        const cursor = searchParams.get('cursor');
+
         const requests = await db.assetRequest.findMany({
             include: { user: { select: { email: true } } },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            ...(cursor ? { skip: 1, cursor: { id: cursor } } : {})
         });
 
-        return NextResponse.json({ requests });
+        const nextCursor = requests.length === limit ? requests[requests.length - 1]?.id : null;
+        return NextResponse.json({ requests, nextCursor });
     } catch (error) {
         console.error('Failed to fetch requests:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

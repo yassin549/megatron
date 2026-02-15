@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import { put } from '@vercel/blob';
+
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 export async function POST(request: NextRequest) {
     try {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
         const formData = await request.formData();
         const file = formData.get('file') as File;
 
@@ -11,8 +21,12 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate file type
-        if (!file.type.startsWith('image/')) {
+        if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
             return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
+        }
+
+        if (file.size > MAX_UPLOAD_BYTES) {
+            return NextResponse.json({ error: 'File too large' }, { status: 413 });
         }
 
         // Generate unique filename

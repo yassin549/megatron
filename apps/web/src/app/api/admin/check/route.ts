@@ -1,31 +1,27 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { db } from '@megatron/database';
 
-export async function POST(request: Request) {
+export async function POST() {
     try {
-        const { password } = await request.json();
-
-        const adminPassword = process.env.ADMIN_PASSWORD;
-
-        if (!adminPassword) {
-            return NextResponse.json(
-                { error: 'Admin password not configured' },
-                { status: 500 }
-            );
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        if (password !== adminPassword) {
-            return NextResponse.json(
-                { error: 'Invalid admin password' },
-                { status: 401 }
-            );
+        const user = await db.user.findUnique({
+            where: { id: session.user.id },
+            select: { isAdmin: true }
+        });
+
+        if (!user?.isAdmin) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error('Admin check error:', error);
-        return NextResponse.json(
-            { error: 'An error occurred' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'An error occurred' }, { status: 500 });
     }
 }

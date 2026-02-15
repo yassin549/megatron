@@ -11,6 +11,11 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const limitParam = Number(searchParams.get('limit') || 200);
+        const limit = Math.min(Math.max(limitParam, 1), 500);
+        const cursor = searchParams.get('cursor');
+
         const users = await db.user.findMany({
             select: {
                 id: true,
@@ -24,6 +29,8 @@ export async function GET(request: Request) {
             orderBy: {
                 createdAt: 'desc',
             },
+            take: limit,
+            ...(cursor ? { skip: 1, cursor: { id: cursor } } : {})
         });
 
         const formattedUsers = users.map(user => ({
@@ -32,7 +39,8 @@ export async function GET(request: Request) {
             createdAt: user.createdAt.toISOString().split('T')[0],
         }));
 
-        return NextResponse.json({ users: formattedUsers });
+        const nextCursor = users.length === limit ? users[users.length - 1]?.id : null;
+        return NextResponse.json({ users: formattedUsers, nextCursor });
     } catch (error) {
         console.error('Failed to fetch users:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

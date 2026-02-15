@@ -46,6 +46,29 @@ export async function GET() {
         const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         const startDate = user.createdAt > thirtyDaysAgo ? user.createdAt : thirtyDaysAgo;
 
+        const assetIds = Array.from(new Set(trades.map(t => t.assetId)));
+        const priceTicks = assetIds.length > 0
+            ? await db.priceTick.findMany({
+                where: {
+                    assetId: { in: assetIds },
+                    timestamp: { gte: startDate, lte: now }
+                },
+                orderBy: { timestamp: 'asc' },
+                select: {
+                    assetId: true,
+                    timestamp: true,
+                    priceDisplay: true
+                }
+            })
+            : [];
+
+        const priceTickMap = new Map<string, { ticks: { ts: number; price: number }[]; idx: number; lastPrice: number }>();
+        for (const t of priceTicks) {
+            const entry = priceTickMap.get(t.assetId) || { ticks: [], idx: 0, lastPrice: 0 };
+            entry.ticks.push({ ts: t.timestamp.getTime(), price: Number(t.priceDisplay) });
+            priceTickMap.set(t.assetId, entry);
+        }
+
         // 3. Calculate current LP value
         let currentLpValue = 0;
         for (const share of lpShares) {
@@ -63,6 +86,7 @@ export async function GET() {
         // Current state for simulation
         let currentCash = 0;
         let positions: Record<string, number> = {}; // assetId -> shares
+        let totalDeposited = 0;
 
         // Sort all events by time
         const events = [
@@ -81,6 +105,9 @@ export async function GET() {
                 if (event.type === 'ledger') {
                     const l = event.data as any;
                     currentCash += Number(l.deltaAmount);
+                    if (l.reason === 'deposit') {
+                        totalDeposited += Number(l.deltaAmount);
+                    }
                 } else if (event.type === 'trade') {
                     const t = event.data as any;
                     const side = t.side;
@@ -108,16 +135,15 @@ export async function GET() {
             for (const [assetId, shares] of Object.entries(positions)) {
                 if (shares <= 0) continue;
 
-                const tick = await db.priceTick.findFirst({
-                    where: {
-                        assetId,
-                        timestamp: { lte: snapshotDate }
-                    },
-                    orderBy: { timestamp: 'desc' },
-                    select: { priceDisplay: true }
-                });
-
-                const price = tick ? Number(tick.priceDisplay) : 0;
+                const entry = priceTickMap.get(assetId);
+                if (entry) {
+                    const targetTs = snapshotDate.getTime();
+                    while (entry.idx < entry.ticks.length && entry.ticks[entry.idx].ts <= targetTs) {
+                        entry.lastPrice = entry.ticks[entry.idx].price;
+                        entry.idx += 1;
+                    }
+                }
+                const price = entry?.lastPrice || 0;
                 portfolioValue += shares * price;
             }
 
@@ -127,10 +153,6 @@ export async function GET() {
             portfolioValue += lpValueAtSnapshot;
 
             // Calculate profit
-            const totalDeposited = ledgerEntries
-                .filter(l => l.createdAt <= snapshotDate && l.reason === 'deposit')
-                .reduce((sum, l) => sum + Number(l.deltaAmount), 0);
-
             const totalProfit = portfolioValue - totalDeposited;
 
             history.push({
